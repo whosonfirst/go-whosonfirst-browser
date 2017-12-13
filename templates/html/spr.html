@@ -23,11 +23,19 @@
 	  <meta property="twitter:title" content="{{ .Name }} is a {{ .Placetype }} in {{ .Country}}" />
 	  <meta property="twitter:description" content="Its Who's On First ID is {{ .Id }}" />
 	  <meta property="twitter:image" content="/images/wof-sq-pink.jpg" />
-	  
+
+ 	  <link rel="stylesheet" href="/css/mapzen.js.css">
+	  <script src="/javascript/mapzen.min.js"></script>
+		
+	 <script src="/javascript/slippymap.crosshairs.js"></script>
+		
+	 <link rel="stylesheet" href="/css/whosonfirst.spr.css">
+	 <script src="/javascript/whosonfirst.spr.js"></script>
+	 
   </head>
   <body>
     
-    <div class="whosonfirst" data-whosonfirst-id="whosonfirst-{{ .Id }}" data-whosonfirst-parent-id="{{ .ParentId }}">
+    <div class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .Id }}" data-whosonfirst-path="{{ .Path }}" data-whosonfirst-parent-id="{{ .ParentId }}">
       <div id="map"></div>
 
       <h2>{{ .Name }} <small>is a {{ .Placetype }} in <span>{{ .Country}}</span> parented by <span>{{ .ParentId}}</span></small></h2>
@@ -53,8 +61,20 @@
 	  <tr><td>IsSuperseding</td><td>{{ .IsSuperseding.StringFlag }}</td><td>{{ .IsSuperseding.IsTrue }}</td><td>{{ .IsSuperseding.IsKnown }}</tr>	 	  
 	</table>
       </div>
+
+      <div>
+	<h4>Properties</h4>
+
+	<div id="whosonfirst-properties">
+	  <div id="whosonfirst-properties-raw"></div>
+	  <div id="whosonfirst-properties-pretty"></div>	  
+	</div>
+      </div>
       
       <div>
+
+	<h4>Source data</h4>
+	
 	<ul>
 	  <li><a href="https://data.whosonfirst.org/{{ .Path }}">https://data.whosonfirst.org/{{ .Path }}</a></li>
 	  <li><a href="https://github.com/whosonfirst-data/{{ .Repo }}/blob/master/data/{{ .Path }}">https://github.com/whosonfirst-data/{{ .Repo }}/blob/master/data/{{ .Path }}</a></li>

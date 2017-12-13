@@ -23,8 +23,11 @@ deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/jteeuwen/go-bindata/"
 	@GOPATH=$(GOPATH) go get -u "github.com/elazarl/go-bindata-assetfs/"
 	# @GOPATH=$(GOPATH) go get -u "github.com/patrickmn/go-cache"
-	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-sanitize"
+	# @GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-sanitize"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-http-mapzenjs"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-http-rewrite"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-geojson-v2"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-uri"
 	rm -rf src/github.com/jteeuwen/go-bindata/testdata
 
 vendor-deps: rmdeps deps
@@ -44,13 +47,14 @@ assets: self
 static: self
 	@GOPATH=$(GOPATH) go build -o bin/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
 	@GOPATH=$(GOPATH) go build -o bin/go-bindata-assetfs vendor/github.com/elazarl/go-bindata-assetfs/go-bindata-assetfs/main.go
-	rm -f static/css/*~ static/javascript/*~
-	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -pkg static static/javascript static/css static/tangram
-	rm -rf assets/static
-	mkdir -p assets/static
-	mv bindata_assetfs.go assets/static/static.go
+	rm -f static/css/*~ static/javascript/*~ static/tangram/*~
+	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -pkg http static/javascript static/css static/tangram
+	rm http/static_fs.go
+	mv bindata_assetfs.go http/static_fs.go
 
-maps: mapzenjs tangram refill
+build: static assets bin
+
+maps: mapzenjs tangram refill crosshairs
 
 tangram:
 	if test ! -d static/tangram; then mkdir -p static/tangram; fi
@@ -75,7 +79,7 @@ crosshairs:
 fmt:
 	# go fmt cache/*.go
 	go fmt cmd/*.go
-	go fmt assets/*.go
+	go fmt assets/*/*.go
 	go fmt http/*.go
 	go fmt reader/*.go
 

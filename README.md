@@ -13,3 +13,9 @@ make bin
 ```
 
 All of this package's dependencies are bundled with the code in the `vendor` directory.
+
+## Known knowns and other things "to figure out"
+
+* This package is already starting to get littered with both rendering and delivering code, for example all of the static assets necessary to show a WOF document rendered as a HTML document. It is probably the case that we should have two packages with the "delivery" package modifying the rendered HTML with instance-specific CSS and the like. Or not.
+
+* The "reader" code (and by extension the caching layer) in this package should probably be moved in to its own package.

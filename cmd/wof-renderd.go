@@ -1,14 +1,16 @@
 package main
 
 import (
-       "errors"
+	"errors"
 	"flag"
 	"fmt"
+	"github.com/whosonfirst/go-http-mapzenjs"
+	// "github.com/whosonfirst/go-http-rewrite"
 	"github.com/whosonfirst/go-whosonfirst-render/http"
 	"github.com/whosonfirst/go-whosonfirst-render/reader"
 	"log"
 	gohttp "net/http"
-	"os"	       
+	"os"
 )
 
 func main() {
@@ -24,11 +26,13 @@ func main() {
 	var s3_region = flag.String("s3-region", "us-east-1", "...")
 	var s3_creds = flag.String("s3-credentials", "", "...")
 
+	// var api_key = flag.String("mapzen-api-key", "mapzen-xxxxxxx", "")
+
 	flag.Parse()
 
 	var r reader.Reader
 	var err error
-	
+
 	switch *source {
 	case "fs":
 		r, err = reader.NewFSReader(*root)
@@ -50,11 +54,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	handlers := make(map[string]gohttp.Handler)
+
 	html_handler, err := http.HTMLHandler(r)
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	handlers["/"] = html_handler
 
 	ping_handler, err := http.PingHandler()
 
@@ -62,11 +70,65 @@ func main() {
 		log.Fatal(err)
 	}
 
-	address := fmt.Sprintf("%s:%d", *host, *port)
+	handlers["/ping"] = ping_handler
+
+	static_handler, err := http.StaticHandler()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	mapzenjs_handler, err := mapzenjs.MapzenJSHandler()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// none of this works properly yet and points to some things that
+	// need to be updated in go-http-mapzenjs (20171213/thisisaaronland)
+
+	/*
+		apikey_handler, err := mapzenjs.MapzenAPIKeyHandler(html_handler, static_fs, *api_key)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		opts := rewrite.DefaultRewriteRuleOptions()
+
+		rewrite_path := ""
+
+		rule := rewrite.RemovePrefixRewriteRule(rewrite_path, opts)
+		rules := []rewrite.RewriteRule{rule}
+
+		debug_handler, err := rewrite.RewriteHandler(rules, apikey_handler)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		handlers["/"] = debug_handler
+	*/
+
+	handlers["/javascript/mapzen.min.js"] = mapzenjs_handler
+	handlers["/javascript/tangram.min.js"] = mapzenjs_handler
+	handlers["/javascript/mapzen.js"] = mapzenjs_handler
+	handlers["/javascript/tangram.js"] = mapzenjs_handler
+	handlers["/css/mapzen.js.css"] = mapzenjs_handler
+	handlers["/tangram/refill-style.zip"] = mapzenjs_handler
+
+	handlers["/javascript/slippymap.crosshairs.js"] = static_handler
+	handlers["/javascript/whosonfirst.spr.js"] = static_handler
+	handlers["/css/whosonfirst.spr.css"] = static_handler
 
 	mux := gohttp.NewServeMux()
-	mux.Handle("/", html_handler)
-	mux.Handle("/ping", ping_handler)
+
+	for uri, handler := range handlers {
+		mux.Handle(uri, handler)
+	}
+
+	address := fmt.Sprintf("%s:%d", *host, *port)
+	log.Printf("listening on %s\n", address)
 
 	err = gohttp.ListenAndServe(address, mux)
 

@@ -1,0 +1,15 @@
+/* whosonfirst.spr.css */
+
+body {
+    font-family: sans-serif;
+}
+
+#map {
+    height: 300px;
+    width: 100%;
+}
+
+#whosonfirst-properties-raw {
+    background-color: #ccc;
+    padding: 1em;
+}
