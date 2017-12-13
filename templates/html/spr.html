@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	  <title>{{ .Name }} | {{ .Id }} | Who's On First</title>
+	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	  <meta name="referrer" content="origin">
+	  <meta http-equiv="X-UA-Compatible" content="IE=9" />
+	  <meta name="apple-mobile-web-app-capable" content="yes" />
+	  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	  <meta name="HandheldFriendly" content="true" />
+	  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+
+	  <meta property="og:type" content="article" />
+	  <meta property="og:site_name" content="Who's On First" />
+	  <meta property="og:title" content="{{ .Name }} is a {{ .Placetype }} in {{ .Country}}" />
+	  <meta property="og:description" content="Its Who's On First ID is {{ .Id }}" />
+	  <meta property="og:image" content="/images/wof-sq-pink.jpg" />
+
+	  <meta property="twitter:card" value="summary" />
+	  <meta property="twitter:site" content="@alloftheplaces" />
+	  <meta property="twitter:creator" content="@alloftheplaces" />
+	  <meta property="twitter:url" content="/id/{{ .Id }}" />
+	  <meta property="twitter:title" content="{{ .Name }} is a {{ .Placetype }} in {{ .Country}}" />
+	  <meta property="twitter:description" content="Its Who's On First ID is {{ .Id }}" />
+	  <meta property="twitter:image" content="/images/wof-sq-pink.jpg" />
+	  
+  </head>
+  <body>
+    
+    <div class="whosonfirst" data-whosonfirst-id="whosonfirst-{{ .Id }}" data-whosonfirst-parent-id="{{ .ParentId }}">
+      <div id="map"></div>
+
+      <h2>{{ .Name }} <small>is a {{ .Placetype }} in <span>{{ .Country}}</span> parented by <span>{{ .ParentId}}</span></small></h2>
+      <h3>Its Who's On First ID is {{ .Id }} <small>and its relative URI is {{ .Path }}</small></h3>
+
+      <div id="whosonfirst-geom" data-latitude="{{ .Latitude }}" data-longitude="{{ .Longitude }}" data-min-latitude="{{ .MinLatitude}}" data-min-longitude="{{ .MinLongitude }}" data-max-latitude="{{ .MaxLatitude}}" data-max-longitude="{{ .MaxLongitude }}">
+
+	<h4>Geometry</h4>
+	
+	Its bounding box is <code>{{ .MinLatitude}}, {{ .MinLongitude }}, {{ .MaxLatitude}}, {{ .MaxLongitude }}</code> and its principal centroid is <code>{{ .Latitude }}, {{ .Longitude }}</code>.
+      </div>
+      
+      <div id="whosonfirst-status">
+
+	<h4>Status</h4>
+	
+	<table>
+	  <tr><th>Flag</th><th>Status</th><th>Value</th><th>Confidence</th></tr>
+	  <tr><td>Current</td><td>{{ .IsCurrent.StringFlag }}</td><td>{{ .IsCurrent.IsTrue }}</td><td>{{ .IsCurrent.IsKnown }}</tr>
+	  <tr><td>Ceased</td><td>{{ .IsCeased.StringFlag }}</td><td>{{ .IsCeased.IsTrue }}</td><td>{{ .IsCeased.IsKnown }}</tr>
+	  <tr><td>Deprecated</td><td>{{ .IsDeprecated.StringFlag }}</td><td>{{ .IsDeprecated.IsTrue }}</td><td>{{ .IsDeprecated.IsKnown }}</tr>
+	  <tr><td>IsSuperseded</td><td>{{ .IsSuperseded.StringFlag }}</td><td>{{ .IsSuperseded.IsTrue }}</td><td>{{ .IsSuperseded.IsKnown }}</tr>
+	  <tr><td>IsSuperseding</td><td>{{ .IsSuperseding.StringFlag }}</td><td>{{ .IsSuperseding.IsTrue }}</td><td>{{ .IsSuperseding.IsKnown }}</tr>	 	  
+	</table>
+      </div>
+      
+      <div>
+	<ul>
+	  <li><a href="https://data.whosonfirst.org/{{ .Path }}">https://id.whosonfirst.org/{{ .Id }}</a></li>
+	  <li><a href="https://github.com/whosonfirst-data/{{ .Repo }}/blob/master/data/{{ .Path }}">https://github.com/whosonfirst-data/{{ .Repo }}/blob/master/data/{{ .Path }}</a></li>
+	</ul>
+	
+      </div>
+    </div>
+    
+  </body>
+</html>
