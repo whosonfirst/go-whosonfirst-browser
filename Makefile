@@ -21,6 +21,7 @@ build:	fmt bin
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/aws/aws-sdk-go"
 	@GOPATH=$(GOPATH) go get -u "github.com/jteeuwen/go-bindata/"
+	@GOPATH=$(GOPATH) go get -u "github.com/elazarl/go-bindata-assetfs/"
 	# @GOPATH=$(GOPATH) go get -u "github.com/patrickmn/go-cache"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-sanitize"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-geojson-v2"
@@ -39,6 +40,37 @@ assets: self
 	rm -rf assets
 	mkdir -p assets/html
 	@GOPATH=$(GOPATH) bin/go-bindata -pkg html -o assets/html/html.go templates/html
+
+static: self
+	@GOPATH=$(GOPATH) go build -o bin/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
+	@GOPATH=$(GOPATH) go build -o bin/go-bindata-assetfs vendor/github.com/elazarl/go-bindata-assetfs/go-bindata-assetfs/main.go
+	rm -f static/css/*~ static/javascript/*~
+	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -pkg static static/javascript static/css static/tangram
+	rm -rf assets/static
+	mkdir -p assets/static
+	mv bindata_assetfs.go assets/static/static.go
+
+maps: mapzenjs tangram refill
+
+tangram:
+	if test ! -d static/tangram; then mkdir -p static/tangram; fi
+	curl -s -o static/javascript/tangram.js https://mapzen.com/tangram/tangram.debug.js
+	curl -s -o static/javascript/tangram.min.js https://mapzen.com/tangram/tangram.min.js
+
+refill:
+	if test ! -d static/tangram; then mkdir -p static/tangram; fi
+	curl -s -o static/tangram/refill-style.zip https://mapzen.com/carto/refill-style/refill-style.zip
+
+mapzenjs:
+	if test ! -d static/javascript; then mkdir -p static/javascript; fi
+	if test ! -d static/css; then mkdir -p static/css; fi
+	curl -s -o static/css/mapzen.js.css https://mapzen.com/js/mapzen.css
+	curl -s -o static/javascript/mapzen.js https://mapzen.com/js/mapzen.js
+	curl -s -o static/javascript/mapzen.min.js https://mapzen.com/js/mapzen.min.js
+
+crosshairs:
+	if test ! -d static/javascript; then mkdir -p static/javascript; fi
+	curl -s -o static/javascript/slippymap.crosshairs.js https://raw.githubusercontent.com/whosonfirst/js-slippymap-crosshairs/master/src/slippymap.crosshairs.js	
 
 fmt:
 	# go fmt cache/*.go
