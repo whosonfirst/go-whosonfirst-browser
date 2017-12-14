@@ -89,4 +89,4 @@ fmt:
 	go fmt utils/*.go
 
 bin: 	self
-	@GOPATH=$(GOPATH) go build -o bin/wof-renderd cmd/wof-renderd.go
+	@GOPATH=$(GOPATH) go build -o bin/wof-staticd cmd/wof-staticd.go
