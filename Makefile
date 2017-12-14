@@ -11,6 +11,7 @@ self:   prep rmdeps
 	cp -r assets src/github.com/whosonfirst/go-whosonfirst-render/
 	cp -r http src/github.com/whosonfirst/go-whosonfirst-render/
 	cp -r reader src/github.com/whosonfirst/go-whosonfirst-render/
+	cp -r utils src/github.com/whosonfirst/go-whosonfirst-render/
 	cp -r vendor/* src/
 
 rmdeps:
@@ -23,12 +24,15 @@ deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/jteeuwen/go-bindata/"
 	@GOPATH=$(GOPATH) go get -u "github.com/elazarl/go-bindata-assetfs/"
 	# @GOPATH=$(GOPATH) go get -u "github.com/patrickmn/go-cache"
-	# @GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-sanitize"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-http-mapzenjs"
-	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-http-rewrite"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-geojson-v2"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-spr"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-svg"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-uri"
 	rm -rf src/github.com/jteeuwen/go-bindata/testdata
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-geojson-v2
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-flags
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-spr
 
 vendor-deps: rmdeps deps
 	if test ! -d vendor; then mkdir vendor; fi
@@ -82,6 +86,7 @@ fmt:
 	go fmt assets/*/*.go
 	go fmt http/*.go
 	go fmt reader/*.go
+	go fmt utils/*.go
 
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-renderd cmd/wof-renderd.go
