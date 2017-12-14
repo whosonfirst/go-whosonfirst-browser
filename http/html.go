@@ -1,16 +1,35 @@
 package http
 
 import (
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-render/assets/html"
 	"github.com/whosonfirst/go-whosonfirst-render/reader"
-	_ "github.com/whosonfirst/go-whosonfirst-uri"
+	"github.com/whosonfirst/go-whosonfirst-render/utils"
+	"github.com/whosonfirst/go-whosonfirst-spr"
 	"html/template"
-	"log"
 	gohttp "net/http"
+	"time"
 )
 
-func HTMLHandler(r reader.Reader) (gohttp.Handler, error) {
+type HTMLOptions struct {
+	MapzenAPIKey string
+}
+
+type HTMLVars struct {
+	SPR          spr.StandardPlacesResult
+	LastModified string
+	MapzenAPIKey string
+}
+
+func NewDefaultHTMLOptions() HTMLOptions {
+
+	opts := HTMLOptions{
+		MapzenAPIKey: "mapzen-xxxxxx",
+	}
+
+	return opts
+}
+
+func HTMLHandler(r reader.Reader, opts HTMLOptions) (gohttp.Handler, error) {
 
 	tpl, err := html.Asset("templates/html/spr.html")
 
@@ -28,35 +47,33 @@ func HTMLHandler(r reader.Reader) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		path := req.URL.Path
-
-		log.Println("PATH", path)
-
-		fh, err := r.Read(path)
+		f, err, status := utils.FeatureFromRequest(req, r)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)
-			return
-		}
-
-		f, err := feature.LoadFeatureFromReader(fh)
-
-		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)
+			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
 
 		s, err := f.SPR()
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)
+			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
 			return
 		}
 
-		err = t.Execute(rsp, s)
+		now := time.Now()
+		lastmod := now.Format(time.RFC3339)
+
+		vars := HTMLVars{
+			SPR:          s,
+			LastModified: lastmod,
+			MapzenAPIKey: opts.MapzenAPIKey,
+		}
+
+		err = t.Execute(rsp, vars)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)
+			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
 			return
 		}
 

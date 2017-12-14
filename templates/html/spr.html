@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	  <title>{{ .Name }} | {{ .Id }} | Who's On First</title>
+	  <title>{{ .SPR.Name }} | {{ .SPR.Id }} | Who's On First</title>
 	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	  <meta name="referrer" content="origin">
 	  <meta http-equiv="X-UA-Compatible" content="IE=9" />
@@ -10,18 +10,20 @@
 	  <meta name="HandheldFriendly" content="true" />
 	  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 
+	  <meta property="html:lastmodified" content="{{ .LastModified }}" />
+	  
 	  <meta property="og:type" content="article" />
 	  <meta property="og:site_name" content="Who's On First" />
-	  <meta property="og:title" content="{{ .Name }} is a {{ .Placetype }} in {{ .Country}}" />
-	  <meta property="og:description" content="Its Who's On First ID is {{ .Id }}" />
+	  <meta property="og:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
+	  <meta property="og:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
 	  <meta property="og:image" content="/images/wof-sq-pink.jpg" />
 
 	  <meta property="twitter:card" value="summary" />
 	  <meta property="twitter:site" content="@alloftheplaces" />
 	  <meta property="twitter:creator" content="@alloftheplaces" />
-	  <meta property="twitter:url" content="/id/{{ .Id }}" />
-	  <meta property="twitter:title" content="{{ .Name }} is a {{ .Placetype }} in {{ .Country}}" />
-	  <meta property="twitter:description" content="Its Who's On First ID is {{ .Id }}" />
+	  <meta property="twitter:url" content="/id/{{ .SPR.Id }}" />
+	  <meta property="twitter:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
+	  <meta property="twitter:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
 	  <meta property="twitter:image" content="/images/wof-sq-pink.jpg" />
 
  	  <link rel="stylesheet" href="/css/mapzen.js.css">
@@ -33,19 +35,19 @@
 	 <script src="/javascript/whosonfirst.spr.js"></script>
 	 
   </head>
-  <body>
+  <body data-mapzen-apikey="{{ .MapzenAPIKey }}">
     
-    <div class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .Id }}" data-whosonfirst-path="{{ .Path }}" data-whosonfirst-parent-id="{{ .ParentId }}">
+    <div class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-path="{{ .SPR.Path }}" data-whosonfirst-parent-id="{{ .SPR.ParentId }}">
       <div id="map"></div>
 
-      <h2>{{ .Name }} <small>is a {{ .Placetype }} in <span>{{ .Country}}</span> parented by <span>{{ .ParentId}}</span></small></h2>
-      <h3>Its Who's On First ID is {{ .Id }} <small>and its relative URI is {{ .Path }}</small></h3>
+      <h2>{{ .SPR.Name }} <small>is a {{ .SPR.Placetype }} in <span>{{ .SPR.Country}}</span> parented by <span>{{ .SPR.ParentId}}</span></small></h2>
+      <h3>Its Who's On First ID is {{ .SPR.Id }} <small>and its relative URI is {{ .SPR.Path }}</small></h3>
 
-      <div id="whosonfirst-geom" data-latitude="{{ .Latitude }}" data-longitude="{{ .Longitude }}" data-min-latitude="{{ .MinLatitude}}" data-min-longitude="{{ .MinLongitude }}" data-max-latitude="{{ .MaxLatitude}}" data-max-longitude="{{ .MaxLongitude }}">
+      <div id="whosonfirst-geom" data-latitude="{{ .SPR.Latitude }}" data-longitude="{{ .SPR.Longitude }}" data-min-latitude="{{ .SPR.MinLatitude}}" data-min-longitude="{{ .SPR.MinLongitude }}" data-max-latitude="{{ .SPR.MaxLatitude}}" data-max-longitude="{{ .SPR.MaxLongitude }}">
 
 	<h4>Geometry</h4>
 	
-	Its bounding box is <code>{{ .MinLatitude}}, {{ .MinLongitude }}, {{ .MaxLatitude}}, {{ .MaxLongitude }}</code> and its principal centroid is <code>{{ .Latitude }}, {{ .Longitude }}</code>.
+	Its bounding box is <code>{{ .SPR.MinLatitude}}, {{ .SPR.MinLongitude }}, {{ .SPR.MaxLatitude}}, {{ .SPR.MaxLongitude }}</code> and its principal centroid is <code>{{ .SPR.Latitude }}, {{ .SPR.Longitude }}</code>.
       </div>
       
       <div id="whosonfirst-status">
@@ -54,11 +56,11 @@
 	
 	<table>
 	  <tr><th>Flag</th><th>Status</th><th>Value</th><th>Confidence</th></tr>
-	  <tr><td>Current</td><td>{{ .IsCurrent.StringFlag }}</td><td>{{ .IsCurrent.IsTrue }}</td><td>{{ .IsCurrent.IsKnown }}</tr>
-	  <tr><td>Ceased</td><td>{{ .IsCeased.StringFlag }}</td><td>{{ .IsCeased.IsTrue }}</td><td>{{ .IsCeased.IsKnown }}</tr>
-	  <tr><td>Deprecated</td><td>{{ .IsDeprecated.StringFlag }}</td><td>{{ .IsDeprecated.IsTrue }}</td><td>{{ .IsDeprecated.IsKnown }}</tr>
-	  <tr><td>IsSuperseded</td><td>{{ .IsSuperseded.StringFlag }}</td><td>{{ .IsSuperseded.IsTrue }}</td><td>{{ .IsSuperseded.IsKnown }}</tr>
-	  <tr><td>IsSuperseding</td><td>{{ .IsSuperseding.StringFlag }}</td><td>{{ .IsSuperseding.IsTrue }}</td><td>{{ .IsSuperseding.IsKnown }}</tr>	 	  
+	  <tr><td>Current</td><td>{{ .SPR.IsCurrent.StringFlag }}</td><td>{{ .SPR.IsCurrent.IsTrue }}</td><td>{{ .SPR.IsCurrent.IsKnown }}</tr>
+	  <tr><td>Ceased</td><td>{{ .SPR.IsCeased.StringFlag }}</td><td>{{ .SPR.IsCeased.IsTrue }}</td><td>{{ .SPR.IsCeased.IsKnown }}</tr>
+	  <tr><td>Deprecated</td><td>{{ .SPR.IsDeprecated.StringFlag }}</td><td>{{ .SPR.IsDeprecated.IsTrue }}</td><td>{{ .SPR.IsDeprecated.IsKnown }}</tr>
+	  <tr><td>IsSuperseded</td><td>{{ .SPR.IsSuperseded.StringFlag }}</td><td>{{ .SPR.IsSuperseded.IsTrue }}</td><td>{{ .SPR.IsSuperseded.IsKnown }}</tr>
+	  <tr><td>IsSuperseding</td><td>{{ .SPR.IsSuperseding.StringFlag }}</td><td>{{ .SPR.IsSuperseding.IsTrue }}</td><td>{{ .SPR.IsSuperseding.IsKnown }}</tr>	 	  
 	</table>
       </div>
 
@@ -76,8 +78,8 @@
 	<h4>Source data</h4>
 	
 	<ul>
-	  <li><a href="https://data.whosonfirst.org/{{ .Path }}">https://data.whosonfirst.org/{{ .Path }}</a></li>
-	  <li><a href="https://github.com/whosonfirst-data/{{ .Repo }}/blob/master/data/{{ .Path }}">https://github.com/whosonfirst-data/{{ .Repo }}/blob/master/data/{{ .Path }}</a></li>
+	  <li><a href="https://data.whosonfirst.org/{{ .SPR.Path }}">https://data.whosonfirst.org/{{ .SPR.Path }}</a></li>
+	  <li><a href="https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}">https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}</a></li>
 	</ul>
 	
       </div>
