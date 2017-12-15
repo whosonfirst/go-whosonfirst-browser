@@ -19,6 +19,9 @@ rmdeps:
 
 build:	fmt bin
 
+docker-build:
+	docker build -t wof-staticd .
+
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/aws/aws-sdk-go"
 	@GOPATH=$(GOPATH) go get -u "github.com/jteeuwen/go-bindata/"
