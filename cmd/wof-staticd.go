@@ -5,8 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/whosonfirst/go-http-mapzenjs"
+	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"	
 	"github.com/whosonfirst/go-whosonfirst-static/http"
-	"github.com/whosonfirst/go-whosonfirst-static/reader"
 	"log"
 	gohttp "net/http"
 	"os"
@@ -19,7 +19,8 @@ func main() {
 	var port = flag.Int("port", 8080, "The port number to listen for requests on")
 
 	var source = flag.String("source", "fs", "...")
-	var root = flag.String("fs-root", "", "...")
+	var fs_root = flag.String("fs-root", "", "...")
+	var http_root = flag.String("http-root", "", "...")
 
 	var s3_bucket = flag.String("s3-bucket", "whosonfirst.mapzen.com", "...")
 	var s3_prefix = flag.String("s3-prefix", "", "...")
@@ -30,25 +31,20 @@ func main() {
 
 	flag.Parse()
 
-	var r reader.Reader
-	var err error
+	var args []interface{}
 
 	switch *source {
 	case "fs":
-		r, err = reader.NewFSReader(*root)
+		args = []interface{}{*fs_root}
+	case "http":
+		args = []interface{}{*http_root}
 	case "s3":
-
-		cfg := reader.S3Config{
-			Bucket:      *s3_bucket,
-			Prefix:      *s3_prefix,
-			Region:      *s3_region,
-			Credentials: *s3_creds,
-		}
-
-		r, err = reader.NewS3Reader(cfg)
+		args = []interface{}{*s3_bucket, *s3_prefix, *s3_region, *s3_creds}
 	default:
-		err = errors.New("Unknown or invalid source")
+		// pass
 	}
+
+	r, err := reader.NewReaderFromSource(*source, args...)
 
 	if err != nil {
 		log.Fatal(err)

@@ -2,7 +2,7 @@ package http
 
 import (
 	"encoding/json"
-	"github.com/whosonfirst/go-whosonfirst-static/reader"
+	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-static/utils"
 	gohttp "net/http"
 )

@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/whosonfirst/go-whosonfirst-static/reader"
+	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-static/utils"
 	"github.com/whosonfirst/go-whosonfirst-svg"
 	gohttp "net/http"

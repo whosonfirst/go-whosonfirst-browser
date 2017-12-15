@@ -1,8 +1,8 @@
 package http
 
 import (
+	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-static/assets/html"
-	"github.com/whosonfirst/go-whosonfirst-static/reader"
 	"github.com/whosonfirst/go-whosonfirst-static/utils"
 	"github.com/whosonfirst/go-whosonfirst-spr"
 	"html/template"

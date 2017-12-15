@@ -10,7 +10,6 @@ self:   prep rmdeps
 	# cp -r cache src/github.com/whosonfirst/go-whosonfirst-static/
 	cp -r assets src/github.com/whosonfirst/go-whosonfirst-static/
 	cp -r http src/github.com/whosonfirst/go-whosonfirst-static/
-	cp -r reader src/github.com/whosonfirst/go-whosonfirst-static/
 	cp -r utils src/github.com/whosonfirst/go-whosonfirst-static/
 	cp -r vendor/* src/
 
@@ -23,12 +22,11 @@ docker-build:
 	docker build -t wof-staticd .
 
 deps:
-	@GOPATH=$(GOPATH) go get -u "github.com/aws/aws-sdk-go"
 	@GOPATH=$(GOPATH) go get -u "github.com/jteeuwen/go-bindata/"
 	@GOPATH=$(GOPATH) go get -u "github.com/elazarl/go-bindata-assetfs/"
-	# @GOPATH=$(GOPATH) go get -u "github.com/patrickmn/go-cache"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-http-mapzenjs"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-geojson-v2"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-readwrite/..."
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-spr"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-svg"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-uri"
@@ -88,7 +86,6 @@ fmt:
 	go fmt cmd/*.go
 	go fmt assets/*/*.go
 	go fmt http/*.go
-	go fmt reader/*.go
 	go fmt utils/*.go
 
 bin: 	self
