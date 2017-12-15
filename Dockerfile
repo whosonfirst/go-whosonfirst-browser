@@ -9,9 +9,9 @@
 
 FROM golang
 
-ADD . /go-whosonfirst-render
+ADD . /go-whosonfirst-static
 
-RUN cd /go-whosonfirst-render; make bin
+RUN cd /go-whosonfirst-static; make bin
 
 EXPOSE 8080
 
