@@ -1,4 +1,4 @@
-# go-whosonfirst-render
+# go-whosonfirst-static
 
 ## Important
 
