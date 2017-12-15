@@ -18,7 +18,7 @@ import (
 var re_wofid *regexp.Regexp
 
 func init() {
-	re_wofid = regexp.MustCompile(`^(\d+)(?:(?:\-alt\-.*)?\.geojson)?$`)
+	re_wofid = regexp.MustCompile(`^(\d+)(?:(?:\-alt\-.*)?\.[^\.]+)?$`)
 }
 
 func IdFromPath(path string) (int64, error) {
