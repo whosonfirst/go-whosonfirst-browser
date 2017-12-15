@@ -34,6 +34,7 @@ deps:
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-geojson-v2
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-flags
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-spr
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-geojson-v2/vendor/github.com/whosonfirst/go-whosonfirst-flags
 
 vendor-deps: rmdeps deps
 	if test ! -d vendor; then mkdir vendor; fi

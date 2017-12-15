@@ -1,24 +1,26 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"github.com/whosonfirst/go-http-mapzenjs"
-	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"	
+	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-static/http"
 	"log"
 	gohttp "net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
 
+	valid_sources := strings.Join(reader.Sources(), ", ")
+
 	var host = flag.String("host", "localhost", "The hostname to listen for requests on")
 	var port = flag.Int("port", 8080, "The port number to listen for requests on")
 
-	var source = flag.String("source", "fs", "...")
+	var source = flag.String("source", "fs", "Valid sources are "+valid_sources)
 	var fs_root = flag.String("fs-root", "", "...")
 	var http_root = flag.String("http-root", "", "...")
 
@@ -97,7 +99,7 @@ func main() {
 
 		path := req.URL.Path
 		ext := filepath.Ext(path)
-		
+
 		switch ext {
 		case ".svg":
 			svg_handler.ServeHTTP(rsp, req)

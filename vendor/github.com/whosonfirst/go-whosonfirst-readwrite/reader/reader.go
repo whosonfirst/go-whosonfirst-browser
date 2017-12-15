@@ -10,6 +10,10 @@ type Reader interface {
 	Read(string) (io.ReadCloser, error)
 }
 
+func Sources() []string {
+     return []string{ "fs", "http", "s3" }
+}
+
 func NewReaderFromSource(source string, args ...interface{}) (Reader, error) {
 
 	var r Reader
