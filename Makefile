@@ -6,12 +6,12 @@ prep:
 
 self:   prep rmdeps
 	if test -d src; then rm -rf src; fi
-	mkdir -p src/github.com/whosonfirst/go-whosonfirst-render
-	# cp -r cache src/github.com/whosonfirst/go-whosonfirst-render/
-	cp -r assets src/github.com/whosonfirst/go-whosonfirst-render/
-	cp -r http src/github.com/whosonfirst/go-whosonfirst-render/
-	cp -r reader src/github.com/whosonfirst/go-whosonfirst-render/
-	cp -r utils src/github.com/whosonfirst/go-whosonfirst-render/
+	mkdir -p src/github.com/whosonfirst/go-whosonfirst-static
+	# cp -r cache src/github.com/whosonfirst/go-whosonfirst-static/
+	cp -r assets src/github.com/whosonfirst/go-whosonfirst-static/
+	cp -r http src/github.com/whosonfirst/go-whosonfirst-static/
+	cp -r reader src/github.com/whosonfirst/go-whosonfirst-static/
+	cp -r utils src/github.com/whosonfirst/go-whosonfirst-static/
 	cp -r vendor/* src/
 
 rmdeps:

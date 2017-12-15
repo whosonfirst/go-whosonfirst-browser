@@ -7,7 +7,7 @@ import (
 	"errors"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
-	"github.com/whosonfirst/go-whosonfirst-render/reader"
+	"github.com/whosonfirst/go-whosonfirst-static/reader"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"net/http"
 	"path/filepath"

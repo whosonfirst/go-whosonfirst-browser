@@ -1,9 +1,9 @@
 package http
 
 import (
-	"github.com/whosonfirst/go-whosonfirst-render/assets/html"
-	"github.com/whosonfirst/go-whosonfirst-render/reader"
-	"github.com/whosonfirst/go-whosonfirst-render/utils"
+	"github.com/whosonfirst/go-whosonfirst-static/assets/html"
+	"github.com/whosonfirst/go-whosonfirst-static/reader"
+	"github.com/whosonfirst/go-whosonfirst-static/utils"
 	"github.com/whosonfirst/go-whosonfirst-spr"
 	"html/template"
 	gohttp "net/http"
