@@ -33,6 +33,11 @@ func main() {
 
 	flag.Parse()
 
+	flag.VisitAll(func(f *flag.Flag){
+		log.Printf("flag %s %v (%s)\n", f.Name, f.Value, f.DefValue)
+	})
+
+
 	var args []interface{}
 
 	switch *source {
@@ -134,7 +139,7 @@ func main() {
 	mux.Handle("/css/whosonfirst.spr.css", static_handler)
 
 	address := fmt.Sprintf("%s:%d", *host, *port)
-	log.Printf("listening on %s with reader %v\n", address, r)
+	log.Printf("listening on %s\n", address)
 
 	err = gohttp.ListenAndServe(address, mux)
 
