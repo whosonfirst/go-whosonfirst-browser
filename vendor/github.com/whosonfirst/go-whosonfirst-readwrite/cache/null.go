@@ -14,7 +14,7 @@ type NullCache struct {
 func NewNullCache() (Cache, error) {
 
 	lc := NullCache{
-		misses:  int64(0),
+		misses: int64(0),
 	}
 
 	return &lc, nil

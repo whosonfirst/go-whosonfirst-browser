@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"io"
-	"log"
+	_ "log"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -109,7 +109,7 @@ func (r *S3Reader) Read(key string) (io.ReadCloser, error) {
 
 	key = r.prepareKey(key)
 
-	log.Printf("FETCH s3://%s/%s\n", r.bucket, key)
+	// log.Printf("FETCH s3://%s/%s\n", r.bucket, key)
 
 	params := &s3.GetObjectInput{
 		Bucket: aws.String(r.bucket),
