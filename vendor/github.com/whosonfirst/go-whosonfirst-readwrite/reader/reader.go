@@ -11,7 +11,7 @@ type Reader interface {
 }
 
 func Sources() []string {
-     return []string{ "fs", "http", "s3" }
+	return []string{"fs", "http", "s3"}
 }
 
 func NewReaderFromSource(source string, args ...interface{}) (Reader, error) {

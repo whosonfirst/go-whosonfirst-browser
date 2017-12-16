@@ -7,6 +7,7 @@ prep:
 self:   prep rmdeps
 	if test -d src; then rm -rf src; fi
 	mkdir -p src/github.com/whosonfirst/go-whosonfirst-readwrite
+	cp -r cache src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r reader src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r vendor/* src/
 
@@ -20,6 +21,7 @@ docker-build:
 
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/aws/aws-sdk-go"
+	@GOPATH=$(GOPATH) go get -u "github.com/patrickmn/go-cache"
 
 vendor-deps: rmdeps deps
 	if test ! -d vendor; then mkdir vendor; fi
@@ -29,7 +31,7 @@ vendor-deps: rmdeps deps
 	rm -rf src
 
 fmt:
-	# go fmt cache/*.go
+	go fmt cache/*.go
 	go fmt cmd/*.go
 	go fmt reader/*.go
 

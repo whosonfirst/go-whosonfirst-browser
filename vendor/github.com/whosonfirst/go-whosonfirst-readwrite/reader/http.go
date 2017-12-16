@@ -2,9 +2,10 @@ package reader
 
 import (
 	"io"
-	_ "log"		
+	_ "log"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type HTTPReader struct {
@@ -24,8 +25,13 @@ func NewHTTPReader(root *url.URL) (Reader, error) {
 func (r *HTTPReader) Read(key string) (io.ReadCloser, error) {
 
 	url := r.root.String() + key
+
+	if !strings.HasSuffix(r.root.String(), "/") && !strings.HasPrefix(key, "/") {
+		url = r.root.String() + "/" + key
+	}
+
 	// log.Println("FETCH", url)
-	
+
 	rsp, err := http.Get(url)
 
 	if err != nil {
