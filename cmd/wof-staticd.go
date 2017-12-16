@@ -134,7 +134,7 @@ func main() {
 	mux.Handle("/css/whosonfirst.spr.css", static_handler)
 
 	address := fmt.Sprintf("%s:%d", *host, *port)
-	log.Printf("listening on %s\n", address)
+	log.Printf("listening on %s with reader %v\n", address, r)
 
 	err = gohttp.ListenAndServe(address, mux)
 
