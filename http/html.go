@@ -6,6 +6,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-static/assets/html"
 	"github.com/whosonfirst/go-whosonfirst-static/utils"
 	"html/template"
+	"log"
 	gohttp "net/http"
 	"time"
 )
@@ -46,6 +47,8 @@ func HTMLHandler(r reader.Reader, opts HTMLOptions) (gohttp.Handler, error) {
 	}
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+
+		log.Println("REQUEST", req.URL.Path)
 
 		f, err, status := utils.FeatureFromRequest(req, r)
 

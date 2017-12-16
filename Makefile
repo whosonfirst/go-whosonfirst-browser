@@ -19,7 +19,7 @@ rmdeps:
 build:	fmt bin
 
 docker-build:
-	docker build -t wof-staticd .
+	docker build -t wof-static .
 
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/jteeuwen/go-bindata/"

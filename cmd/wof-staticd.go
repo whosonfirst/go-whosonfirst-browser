@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/whosonfirst/go-http-mapzenjs"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
+	"github.com/whosonfirst/go-whosonfirst-readwrite/utils"
 	"github.com/whosonfirst/go-whosonfirst-static/http"
 	"log"
 	gohttp "net/http"
@@ -29,14 +30,17 @@ func main() {
 	var s3_region = flag.String("s3-region", "us-east-1", "...")
 	var s3_creds = flag.String("s3-credentials", "", "...")
 
+	var test = flag.String("test", "", "...")
+
 	var api_key = flag.String("mapzen-apikey", "mapzen-xxxxxxx", "")
 
 	flag.Parse()
 
-	flag.VisitAll(func(f *flag.Flag){
-		log.Printf("flag %s %v (%s)\n", f.Name, f.Value, f.DefValue)
-	})
-
+	/*
+		flag.VisitAll(func(f *flag.Flag){
+			log.Printf("flag %s %v (%s)\n", f.Name, f.Value, f.DefValue)
+		})
+	*/
 
 	var args []interface{}
 
@@ -55,6 +59,15 @@ func main() {
 
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if *test != "" {
+
+		_, err := utils.TestReader(r, *test)
+
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// my kingdom for a generic middleware handler that I can use

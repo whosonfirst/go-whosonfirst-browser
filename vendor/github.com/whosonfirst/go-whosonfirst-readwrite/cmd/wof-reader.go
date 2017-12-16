@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
+	"github.com/whosonfirst/go-whosonfirst-readwrite/utils"	
 	"io/ioutil"
 	"log"
 )
@@ -42,6 +43,12 @@ func main() {
 
 	for _, path := range flag.Args() {
 
+		_, err := utils.TestReader(r, path)
+
+		if err != nil {
+			log.Fatal("TEST", err)
+		}
+		
 		fh, err := r.Read(path)
 
 		if err != nil {

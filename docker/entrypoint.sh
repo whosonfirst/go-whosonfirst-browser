@@ -14,7 +14,12 @@ if [ "${MAPZEN_APIKEY}" != "" ]
 then
     ARGS="${ARGS} -mapzen-apikey ${MAPZEN_APIKEY}"
 fi
-    
+
+if [ "${TEST}" != "" ]
+then
+    ARGS="${ARGS} -test ${TEST}"
+fi
+
 if [ "${SOURCE}" = "http" ]
 then
 

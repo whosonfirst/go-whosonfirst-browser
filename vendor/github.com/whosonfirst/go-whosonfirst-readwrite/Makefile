@@ -9,6 +9,7 @@ self:   prep rmdeps
 	mkdir -p src/github.com/whosonfirst/go-whosonfirst-readwrite
 	cp -r cache src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r reader src/github.com/whosonfirst/go-whosonfirst-readwrite/
+	cp -r utils src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r vendor/* src/
 
 rmdeps:
@@ -34,6 +35,7 @@ fmt:
 	go fmt cache/*.go
 	go fmt cmd/*.go
 	go fmt reader/*.go
+	go fmt utils/*.go
 
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-reader cmd/wof-reader.go
