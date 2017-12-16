@@ -20,4 +20,4 @@ EXPOSE 8080
 # CMD /go-whosonfirst-render/bin/wof-staticd -host ${HOST} -source fs -fs-root "${FS_ROOT}" -mapzen-apikey "${MAPZEN_APIKEY}"
 # CMD /go-whosonfirst-render/bin/wof-staticd -host ${HOST} -source http -http-root "${HTTP_ROOT}" -mapzen-apikey "${MAPZEN_APIKEY}"
 
-CMD /go-whosonfirst-render/bin/wof-staticd -host ${HOST} -source s3 -s3-bucket "${S3_BUCKET}" -s3-prefix "${S3_PREFIX}" -s3-region "${S3_REGION}" -s3-credentials "${S3_CREDENTIALS}" -mapzen-apikey "${MAPZEN_APIKEY}"
+CMD /go-whosonfirst-static/bin/wof-staticd -host ${HOST} -source s3 -s3-bucket "${S3_BUCKET}" -s3-prefix "${S3_PREFIX}" -s3-region "${S3_REGION}" -s3-credentials "${S3_CREDENTIALS}" -mapzen-apikey "${MAPZEN_APIKEY}"
