@@ -58,7 +58,10 @@ static: self
 	rm http/static_fs.go
 	mv bindata_assetfs.go http/static_fs.go
 
-build: static assets bin
+build:
+	@make static
+	@make assets
+	@make bin
 
 wof: wof-fonts wof-css
 
@@ -70,7 +73,7 @@ wof-fonts:
 	curl -s -o static/fonts/Roboto-Light.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Roboto-Light.ttf
 	curl -s -o static/fonts/Roboto-LightItalic.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Roboto-LightItalic.ttf
 	curl -s -o static/fonts/Roboto-Regular.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Roboto-Regular.ttf
-	curl -s -o static/fonts/Roboto-Mono-Light.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Roboto-Mono-Light.ttf
+	curl -s -o static/fonts/RobotoMono-Light.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/RobotoMono-Light.ttf
 	curl -s -o static/fonts/glyphicons-halflings-regular.eot https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/glyphicons-halflings-regular.eot
 	curl -s -o static/fonts/glyphicons-halflings-regular.svg https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/glyphicons-halflings-regular.svg
 	curl -s -o static/fonts/glyphicons-halflings-regular.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/glyphicons-halflings-regular.ttf
@@ -81,6 +84,10 @@ wof-css:
 	curl -s -o static/css/whosonfirst.www.css https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/css/mapzen.whosonfirst.css
 
 maps: mapzenjs tangram refill crosshairs
+
+localforage:
+	curl -s -o static/javascript/localforage.js https://raw.githubusercontent.com/mozilla/localForage/master/dist/localforage.js
+	curl -s -o static/javascript/localforage.min.js https://raw.githubusercontent.com/mozilla/localForage/master/dist/localforage.min.js
 
 tangram:
 	if test ! -d static/tangram; then mkdir -p static/tangram; fi

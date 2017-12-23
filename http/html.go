@@ -32,7 +32,7 @@ func NewDefaultHTMLOptions() HTMLOptions {
 
 func HTMLHandler(r reader.Reader, opts HTMLOptions) (gohttp.Handler, error) {
 
-	tpl, err := html.Asset("templates/html/spr.html")
+	tpl, err := html.Asset("templates/html/id.html")
 
 	if err != nil {
 		return nil, err

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	  <title>{{ .SPR.Name }} | {{ .SPR.Id }} | Who's On First</title>
+	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	  <meta name="referrer" content="origin">
+	  <meta http-equiv="X-UA-Compatible" content="IE=9" />
+	  <meta name="apple-mobile-web-app-capable" content="yes" />
+	  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	  <meta name="HandheldFriendly" content="true" />
+	  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+
+	  <meta property="html:lastmodified" content="{{ .LastModified }}" />
+	  
+	  <meta property="og:type" content="article" />
+	  <meta property="og:site_name" content="Who's On First" />
+	  <meta property="og:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
+	  <meta property="og:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
+	  <meta property="og:image" content="/id/{{ .SPR.Id }}.svg" />
+
+	  <meta property="twitter:card" value="summary" />
+	  <meta property="twitter:site" content="@alloftheplaces" />
+	  <meta property="twitter:creator" content="@alloftheplaces" />
+	  <meta property="twitter:url" content="/id/{{ .SPR.Id }}" />
+	  <meta property="twitter:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
+	  <meta property="twitter:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
+	  <meta property="twitter:image" content="/id/{{ .SPR.Id }}.svg" />
+
+ 	  <link rel="stylesheet" href="/css/mapzen.js.css">
+	  <script src="/javascript/mapzen.min.js"></script>
+
+	 <script src="/javascript/localforage.min.js"></script>	  
+	 <script src="/javascript/slippymap.crosshairs.js"></script>
+
+ 	 <link rel="stylesheet" href="/css/whosonfirst.www.css">
+ 	 <link rel="stylesheet" href="/css/whosonfirst.common.css">	 
+	 
+	 <link rel="stylesheet" href="/css/whosonfirst.id.css">
+	 <script src="/javascript/whosonfirst.id.js"></script>
+	 
+  </head>
+  <body data-mapzen-apikey="{{ .MapzenAPIKey }}">
+    
+    <div class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-path="{{ .SPR.Path }}" data-whosonfirst-parent-id="{{ .SPR.ParentId }}" data-latitude="{{ .SPR.Latitude }}" data-longitude="{{ .SPR.Longitude }}" data-min-latitude="{{ .SPR.MinLatitude}}" data-min-longitude="{{ .SPR.MinLongitude }}" data-max-latitude="{{ .SPR.MaxLatitude}}" data-max-longitude="{{ .SPR.MaxLongitude }}">
+      <div id="map"></div>
+
+      <h2>
+	<span class="whosonfirst-name">
+	  {{ .SPR.Name }}</span> <span id="whosonfirst-place-dates"></span> is a <span class="whosonfirst-placetype">{{ .SPR.Placetype }}</span> in <span class="whosonfirst-namify iso-country">{{ .SPR.Country}}	  
+	</span>.
+
+	<small>
+	  {{ if eq .SPR.IsCurrent.StringFlag "1" }}
+	  <span class="whosonfirst-status-current">We believe this record to be current.</span>
+	  {{ else if eq .SPR.IsCurrent.StringFlag "0" }}
+	  <span class="whosonfirst-status-not-current">We no longer believe this record to be current.</span>
+	  {{ else }}
+	  {{ end }}	  
+	</small>	
+      </h2>
+
+      	<div id="whosonfirst-details">
+	  {{ if eq .SPR.IsDeprecated.StringFlag "1" }}
+	  <span class="whosonfirst-status-deprecated">This record has been marked as deprecated.</span>
+	  {{ end }}
+	
+	  {{ if eq .SPR.IsSuperseded.StringFlag "1" }}
+	  
+	  This record has been superseded by the following records:
+	    <ul class="whosonfirst-pointers">
+	      {{ range $i, $s := .SPR.SupersededBy }}
+	      <li><a href="/id/{{ $s }}" class="whosonfirst-id whosonfirst-namify">{{ $s }}</a></li>
+	      {{ end }}
+	    </ul>
+	    .
+	    
+	  {{ end }}
+
+	
+	{{ if eq .SPR.IsSuperseding.StringFlag "1" }}
+	
+	    This record supersedes the following records:
+	  <ul class="whosonfirst-pointers">
+	  {{ range $i, $s := .SPR.Supersedes }}
+	  <li><a href="/id/{{ $s }}" class="whosonfirst-id whosonfirst-namify">{{ $s }}</a></li>
+	  {{ end }}
+	  </ul>
+	  .
+	  
+	{{ end }}
+	</div>
+	
+      <ul id="whosonfirst-basics">
+	<li>Its Who's On First ID is <span class="whosonfirst-id">{{ .SPR.Id }}</span> and its relative URI is <a href="https://data.whosonfirst.org/{{ .SPR.Path }}" class="whosonfirst-relpath">{{ .SPR.Path }}</a>.</li>
+
+	{{ if eq .SPR.ParentId "-4" }}
+	<li>This record's parent ID is <code>-4</code> which indicates it has multiple parents because <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">it happens sometimes</a>.</li>
+	{{ else if eq .SPR.ParentId "-3" }}
+	<li>This record's parent ID is <code>-3</code> which means it might legitimately have multiple parents <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">because people argue about this sort of thing</a>.</li>
+	{{ else if eq .SPR.ParentId "-2" }}
+	<li>This record's parent ID is <code>-1</code> which means we haven't bothered trying to pin down this record's immediate parent because <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">life is complicated</a></li>
+	{{ else if eq .SPR.ParentId "-1" }}
+	<li>This record's parent ID Is <code>-1</code> meaning we are <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">uncertain</a> which record parents this one.</li>
+	{{ else }}
+	<li>It is parented by <a href="/id/{{ .SPR.ParentId}}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ .SPR.ParentId}}">Who's On First ID {{ .SPR.ParentId}}</a>.</li>
+	{{ end }}
+	
+	<li>Its bounding box is <a href="#" class="whosonfirst-geometry whosonfirst-geometry-boundingbox">{{ .SPR.MinLatitude}}, {{ .SPR.MinLongitude }}, {{ .SPR.MaxLatitude}}, {{ .SPR.MaxLongitude }}</a> and its principal centroid is <a href="#" class="whosonfirst-geometry whosonfirst-geometry-centroid">{{ .SPR.Latitude }}, {{ .SPR.Longitude }}</a>.</li>
+
+      </ul>
+      
+      <div id="whosonfirst-status">
+
+	<h4>Status</h4>
+	
+	<table>
+	  <tr>
+	    <th>&#160;</th>
+	    <th>Status</th>
+	    <th>Value</th>
+	    <th>Confidence</th>
+	  </tr>
+	  <tr>
+	    <th>Current</th>
+	    <td class="whosonfirst-status">{{ .SPR.IsCurrent.StringFlag }}</td>
+	    <td class="whosonfirst-status">{{ .SPR.IsCurrent.IsTrue }}</td>
+	    <td class="whosonfirst-status">{{ .SPR.IsCurrent.IsKnown }}</td>
+	  </tr>
+	  <tr>
+	    <th>Ceased</th>
+	    <td class="whosonfirst-status">{{ .SPR.IsCeased.StringFlag }}</td>
+	    <td class="whosonfirst-status">{{ .SPR.IsCeased.IsTrue }}</td>
+	    <td class="whosonfirst-status">{{ .SPR.IsCeased.IsKnown }}</td>
+	  </tr>
+	  <tr>
+	    <th>Deprecated</th>
+	    <td class="whosonfirst-status">{{ .SPR.IsDeprecated.StringFlag }}</td>
+	    <td class="whosonfirst-status">{{ .SPR.IsDeprecated.IsTrue }}</td>
+	    <td>{{ .SPR.IsDeprecated.IsKnown }}</td>
+	    </tr>
+	  <tr>
+	    <th>Superseded</th>
+	    <td class="whosonfirst-status">{{ .SPR.IsSuperseded.StringFlag }}</td>
+	    <td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsTrue }}</td>
+	    <td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsKnown }}</td>
+	    </tr>
+	  <tr>
+	    <th>Superseding</th>
+	    <td class="whosonfirst-status">{{ .SPR.IsSuperseding.StringFlag }}</td>
+	    <td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsTrue }}</td>
+	    <td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsKnown }}</td>
+	  </tr>	 	  
+	</table>
+      </div>
+
+      <div>
+	<h4>Properties</h4>
+
+	<div id="whosonfirst-properties">
+	  <div id="whosonfirst-properties-raw"></div>
+	  <div id="whosonfirst-properties-pretty"></div>	  
+	</div>
+      </div>
+      
+      <div>
+
+	<h4>Source data</h4>
+	
+	<ul>
+	  <li><a href="https://data.whosonfirst.org/{{ .SPR.Path }}">https://data.whosonfirst.org/{{ .SPR.Path }}</a></li>
+	  <li><a href="https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}">https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}</a></li>
+	</ul>
+	
+      </div>
+    </div>
+    
+  </body>
+</html>

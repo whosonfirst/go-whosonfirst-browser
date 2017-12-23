@@ -147,10 +147,13 @@ func main() {
 	mux.Handle("/css/mapzen.js.css", mapzenjs_handler)
 	mux.Handle("/tangram/refill-style.zip", mapzenjs_handler)
 
+	mux.Handle("/fonts/", static_handler)
+	mux.Handle("/javascript/localforage.min.js", static_handler)
 	mux.Handle("/javascript/slippymap.crosshairs.js", static_handler)
-	mux.Handle("/javascript/whosonfirst.spr.js", static_handler)
+	mux.Handle("/javascript/whosonfirst.id.js", static_handler)
 	mux.Handle("/css/whosonfirst.www.css", static_handler)
-	mux.Handle("/css/whosonfirst.spr.css", static_handler)
+	mux.Handle("/css/whosonfirst.common.css", static_handler)
+	mux.Handle("/css/whosonfirst.id.css", static_handler)
 
 	address := fmt.Sprintf("%s:%d", *host, *port)
 	log.Printf("listening on %s\n", address)
