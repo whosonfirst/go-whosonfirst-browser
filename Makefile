@@ -53,12 +53,32 @@ assets: self
 static: self
 	@GOPATH=$(GOPATH) go build -o bin/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
 	@GOPATH=$(GOPATH) go build -o bin/go-bindata-assetfs vendor/github.com/elazarl/go-bindata-assetfs/go-bindata-assetfs/main.go
-	rm -f static/css/*~ static/javascript/*~ static/tangram/*~
-	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -pkg http static/javascript static/css static/tangram
+	rm -f static/css/*~ static/javascript/*~ static/tangram/*~ static/fonts/*~
+	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -pkg http static/javascript static/css static/tangram static/fonts
 	rm http/static_fs.go
 	mv bindata_assetfs.go http/static_fs.go
 
 build: static assets bin
+
+wof: wof-fonts wof-css
+
+wof-fonts:
+	if test ! -d static/fonts; then mkdir -p static/fonts; fi
+	curl -s -o static/fonts/Poppins-Light.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Poppins-Light.ttf
+	curl -s -o static/fonts/Poppins-Medium.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Poppins-Medium.ttf
+	curl -s -o static/fonts/Poppins-SemiBold.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Poppins-SemiBold.ttf
+	curl -s -o static/fonts/Roboto-Light.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Roboto-Light.ttf
+	curl -s -o static/fonts/Roboto-LightItalic.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Roboto-LightItalic.ttf
+	curl -s -o static/fonts/Roboto-Regular.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Roboto-Regular.ttf
+	curl -s -o static/fonts/Roboto-Mono-Light.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/Roboto-Mono-Light.ttf
+	curl -s -o static/fonts/glyphicons-halflings-regular.eot https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/glyphicons-halflings-regular.eot
+	curl -s -o static/fonts/glyphicons-halflings-regular.svg https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/glyphicons-halflings-regular.svg
+	curl -s -o static/fonts/glyphicons-halflings-regular.ttf https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/glyphicons-halflings-regular.ttf
+	curl -s -o static/fonts/glyphicons-halflings-regular.woff https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/fonts/glyphicons-halflings-regular.woff
+
+wof-css:
+	if test ! -d static/css; then mkdir -p static/css; fi
+	curl -s -o static/css/whosonfirst.www.css https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/css/mapzen.whosonfirst.css
 
 maps: mapzenjs tangram refill crosshairs
 
@@ -91,3 +111,6 @@ fmt:
 
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-staticd cmd/wof-staticd.go
+
+debug: build
+	bin/wof-staticd -port 8080 -source http -http-root https://data.whosonfirst.org -mapzen-apikey ${MAPZEN_APIKEY}

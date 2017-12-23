@@ -149,6 +149,7 @@ func main() {
 
 	mux.Handle("/javascript/slippymap.crosshairs.js", static_handler)
 	mux.Handle("/javascript/whosonfirst.spr.js", static_handler)
+	mux.Handle("/css/whosonfirst.www.css", static_handler)
 	mux.Handle("/css/whosonfirst.spr.css", static_handler)
 
 	address := fmt.Sprintf("%s:%d", *host, *port)

@@ -4,11 +4,11 @@
 # docker build -t wof-staticd .
 
 # For example:
-# docker run -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e HTTP_ROOT='https://whosonfirst.mapzen.com/data/' -e MAPZEN_APIKEY='mapzen-****' wof-staticd
+# docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e HTTP_ROOT='https://whosonfirst.mapzen.com/data/' -e MAPZEN_APIKEY='mapzen-****' wof-staticd
 
 # Or:
 #
-# docker run -p 6161:8080 -e HOST='0.0.0.0' -e S3_BUCKET='example.com' -e S3_PREFIX='' -e S3_REGION='us-east-1' -e S3_CREDENTIALS='iam:' -e MAPZEN_APIKEY-'your-mapzen-apikey' wof-staticd
+# docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e S3_BUCKET='example.com' -e S3_PREFIX='' -e S3_REGION='us-east-1' -e S3_CREDENTIALS='iam:' -e MAPZEN_APIKEY-'your-mapzen-apikey' wof-staticd
 
 FROM golang
 
