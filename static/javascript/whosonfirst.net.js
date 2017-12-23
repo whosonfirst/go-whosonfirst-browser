@@ -25,16 +25,6 @@ whosonfirst.net = (function(){
 			    args = {};
 			}
 
-		    	else {}
-
-			if (args["cache_ttl"]){
-				args["cache_ttl"] = default_cache_ttl;
-			}
-			
-		        else {
-			     cache_ttl = default_cache_ttl;
-			}
-
 			var on_hit = function(data){
 
 				if (on_success){
@@ -43,11 +33,10 @@ whosonfirst.net = (function(){
 			};
 
 			var on_miss = function(){
-
 				self.fetch_with_xhr(url, on_success, on_fail, args);
 			};
 
-			if (! self.cache_get(url, on_hit, on_miss, cache_ttl)){
+			if (! self.cache_get(url, on_hit, on_miss, args)){
 				self.fetch_with_xhr(url, on_success, on_fail, args);
 			}
 		},
@@ -121,7 +110,8 @@ whosonfirst.net = (function(){
 		'cache_args': function(){
 
 			return {
-				'prefix': 'whosonfirst.net',
+				'suffix': 'whosonfirst.net',
+				'cache_ttl': default_cache_ttl,
 			};
 		},
 		
@@ -141,7 +131,7 @@ whosonfirst.net = (function(){
 				}
 			}
 			
-			whosonfirst.cache.get(key, on_hit, on_miss, args);
+			return whosonfirst.cache.get(key, on_hit, on_miss, args);
 		},
 
 		'cache_set': function(key, value){
@@ -152,7 +142,7 @@ whosonfirst.net = (function(){
 			}
 
 			var args = self.cache_args();			
-			whosonfirst.cache.set(key, value, args);
+			return whosonfirst.cache.set(key, value, args);
 		},
 
 		'cache_unset': function(key){
@@ -163,7 +153,7 @@ whosonfirst.net = (function(){
 			}
 
 			var args = self.cache_args();
-			whosonfirst.cache.unset(key, args);
+			return whosonfirst.cache.unset(key, args);
 		}
 	};
 

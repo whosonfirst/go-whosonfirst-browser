@@ -3,7 +3,7 @@ whosonfirst = whosonfirst || {};
 
 whosonfirst.cache = (function() {
 
-	var cache_ttl = 30000;
+	var default_cache_ttl = 30000;
 	var local_cache = {};
 	
 	var self = {
@@ -16,7 +16,13 @@ whosonfirst.cache = (function() {
 
 			var fq_key = self.prep_key(key, args);
 			console.log("CACHE GET", fq_key);
+
+			var cache_ttl = default_cache_ttl;
 			
+			if (args["cache_ttl"]){
+				cache_ttl = args["cache_ttl"];
+			}
+						
 			var handle_rsp = function(rsp){
 				
 				if (! rsp){
@@ -40,12 +46,13 @@ whosonfirst.cache = (function() {
 				var diff = ts - then;
 				
 				if (diff > cache_ttl){
-					console.log("CACHE EXPIRED", fq_key);					
+					console.log("CACHE EXPIRED", fq_key);
 					self.unset(key, args);
 					on_miss();
 					return;
 				}
-				
+
+				console.log("CACHE HIT", fq_key);									
 				on_hit(data);
 			};
 			

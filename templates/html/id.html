@@ -34,14 +34,20 @@
 
 	 <script src="/javascript/whosonfirst.cache.js"></script>	 
 	 <script src="/javascript/whosonfirst.uri.js"></script>
-	 <script src="/javascript/whosonfirst.net.js"></script> 	 
+	 <script src="/javascript/whosonfirst.net.js"></script>
+	 <script src="/javascript/whosonfirst.namify.js"></script> 	 	 
 
  	 <link rel="stylesheet" href="/css/whosonfirst.www.css">
  	 <link rel="stylesheet" href="/css/whosonfirst.common.css">	 
 	 
 	 <link rel="stylesheet" href="/css/whosonfirst.static.id.css">
 	 <script src="/javascript/whosonfirst.static.id.js"></script>
-	 
+
+	 <script type="text/javascript">
+	   window.addEventListener("load", function load(event){
+	   	whosonfirst.static.id.init();
+	   });
+	 </script>
   </head>
   <body data-mapzen-apikey="{{ .MapzenAPIKey }}">
     
@@ -50,7 +56,7 @@
 
       <h2>
 	<span class="whosonfirst-name">
-	  {{ .SPR.Name }}</span> <span id="whosonfirst-place-dates"></span> is a <span class="whosonfirst-placetype">{{ .SPR.Placetype }}</span> in <span class="whosonfirst-namify iso-country">{{ .SPR.Country}}	  
+	  {{ .SPR.Name }}</span> <span id="whosonfirst-place-dates"></span> is a <span class="whosonfirst-placetype">{{ .SPR.Placetype }}</span> in <span class="">{{ .SPR.Country}}	  
 	</span>.
 
 	<small>
@@ -73,7 +79,7 @@
 	  This record has been superseded by the following records:
 	    <ul class="whosonfirst-pointers">
 	      {{ range $i, $s := .SPR.SupersededBy }}
-	      <li><a href="/id/{{ $s }}" class="whosonfirst-id whosonfirst-namify">{{ $s }}</a></li>
+	      <li><a href="/id/{{ $s }}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ $s }}">{{ $s }}</a></li>
 	      {{ end }}
 	    </ul>
 	    .
@@ -86,7 +92,7 @@
 	    This record supersedes the following records:
 	  <ul class="whosonfirst-pointers">
 	  {{ range $i, $s := .SPR.Supersedes }}
-	  <li><a href="/id/{{ $s }}" class="whosonfirst-id whosonfirst-namify">{{ $s }}</a></li>
+	  <li><a href="/id/{{ $s }}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ $s }}">{{ $s }}</a></li>
 	  {{ end }}
 	  </ul>
 	  .
