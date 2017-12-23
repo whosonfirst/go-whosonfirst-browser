@@ -1,0 +1,83 @@
+/* whosonfirst.spr.css */
+
+body {
+    padding: 2em;
+    font-family:sans-serif;
+}
+
+#map {
+    height: 350px;
+    width: 100%;
+    border: solid 3px #000;
+}
+
+#whosonfirst-basics {
+    margin:0px;
+    padding:0px;
+    line-height: 1.6em;
+    margin-top:1.5em;
+}
+
+#whosonfirst-basics li {
+    list-style-type: none;
+    margin-bottom:.25em;
+}
+
+#whosonfirst-details {
+    font-size: small;
+    font-style: italic;
+    margin-top: 1em;
+    margin-bottom:1em;
+}
+
+#whosonfirst-properties-raw {
+    background-color: #ccc;
+    padding: 1em;
+}
+
+#whosonfirst-status {
+
+}
+
+#whosonfirst-status th {
+    text-align:left;
+}
+
+#whosonfirst-status th, td {
+    padding: .25em;
+}
+
+#whosonfirst-status td {
+    text-align:right;
+}
+
+.whosonfirst-pointers {
+    display:inline;
+    margin:0px;
+    padding: 0px;
+}    
+
+.whosonfirst-pointers li {
+    display:inline;
+    list-style-type:none;
+}    
+
+.whosonfirst-pointers li:before {
+    content: ", ";
+}
+
+.whosonfirst-pointers li:first-child:before {
+    content: "" !important;
+}    
+
+.whosonfirst-status-current {
+
+}
+
+.whosonfirst-status-not-current {
+
+}
+
+.whosonfirst-status-deprecated {
+    font-weight:700;
+}
