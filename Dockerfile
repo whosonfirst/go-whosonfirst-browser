@@ -10,13 +10,31 @@
 #
 # docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e S3_BUCKET='example.com' -e S3_PREFIX='' -e S3_REGION='us-east-1' -e S3_CREDENTIALS='iam:' -e MAPZEN_APIKEY-'your-mapzen-apikey' wof-staticd
 
-FROM golang
+# https://medium.com/travis-on-docker/multi-stage-docker-builds-for-creating-tiny-go-images-e0e1867efe5a
+# https://medium.com/travis-on-docker/triple-stage-docker-builds-with-go-and-angular-1b7d2006cb88
+
+# build phase
+
+FROM golang:alpine AS build-env
+
+# https://github.com/gliderlabs/docker-alpine/issues/24
+
+RUN apk add --update alpine-sdk
 
 ADD . /go-whosonfirst-static
 
 RUN cd /go-whosonfirst-static; make bin
 
+# bundle phase
+
+FROM alpine
+
+WORKDIR /go-whosonfirst-static/bin/
+
+COPY --from=build-env /go-whosonfirst-static/bin/wof-staticd /go-whosonfirst-static/bin/wof-staticd
+COPY --from=build-env /go-whosonfirst-static/docker/entrypoint.sh /go-whosonfirst-static/bin/entrypoint.sh
+
 EXPOSE 8080
 
-ENTRYPOINT /go-whosonfirst-static/docker/entrypoint.sh
+ENTRYPOINT /go-whosonfirst-static/bin/entrypoint.sh
 
