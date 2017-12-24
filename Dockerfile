@@ -5,15 +5,15 @@
 
 # For example:
 # docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e HTTP_ROOT='https://whosonfirst.mapzen.com/data/' -e MAPZEN_APIKEY='mapzen-****' wof-staticd
-
+#
 # Or:
 #
-# docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e S3_BUCKET='example.com' -e S3_PREFIX='' -e S3_REGION='us-east-1' -e S3_CREDENTIALS='iam:' -e MAPZEN_APIKEY-'your-mapzen-apikey' wof-staticd
+#
+# docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='s3' -e S3_BUCKET='whosonfirst' -e S3_PREFIX='' -e S3_REGION='us-east-1' -e S3_CREDENTIALS='env:' -e AWS_ACCESS_KEY_ID='***' -e AWS_SECRET_ACCESS_KEY='***' -e MAPZEN_APIKEY='mapzen-***' wof-staticd
 
+# build phase - see also:
 # https://medium.com/travis-on-docker/multi-stage-docker-builds-for-creating-tiny-go-images-e0e1867efe5a
 # https://medium.com/travis-on-docker/triple-stage-docker-builds-with-go-and-angular-1b7d2006cb88
-
-# build phase
 
 FROM golang:alpine AS build-env
 
@@ -25,9 +25,11 @@ ADD . /go-whosonfirst-static
 
 RUN cd /go-whosonfirst-static; make bin
 
-# bundle phase
+# bundle phase - note the way we need certificates
 
 FROM alpine
+
+RUN apk add --update ca-certificates
 
 WORKDIR /go-whosonfirst-static/bin/
 

@@ -77,6 +77,8 @@ then
     ARGS="${ARGS} -source fs -fs-root ${FS_ROOT}"
 fi
 
+# echo ${STATICD} ${ARGS}
+
 ${STATICD} ${ARGS}
 
 if [ $? -ne 0 ]
