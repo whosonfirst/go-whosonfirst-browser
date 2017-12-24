@@ -3,6 +3,62 @@
 body {
     padding: 2em;
     font-family:sans-serif;
+    font-weight: 100 !important;
+}
+
+table {
+    width: 100%;
+}
+
+table th {
+    text-align:left;
+}
+
+table tr {
+    border: solid thin;
+    margin: 0px !important;
+}
+
+table th, td {
+    padding: .5em;
+    border: solid thin;
+    margin: 0px !important;
+    vertical-align: top;
+}
+
+table th {
+    background-color: #ccc;
+}
+
+table td {
+    border: none;
+    padding-left: 1em;
+}
+
+table td ul  {
+    margin: 0px;
+    padding: 0px;
+    line-height: 1.7em;
+}
+
+ul {
+    margin:0px;
+    padding:0px;
+}
+
+ul li {
+    list-style-type:none;
+    line-height:1.6em;
+    margin-bottom:.5em;
+}
+
+table td ul li {
+    list-style-type:none;
+}
+
+#footer {
+    clear:both;
+    margin-bottom: 3em;
 }
 
 #left-shark {
@@ -11,7 +67,7 @@ body {
     min-width:50%;        
     max-width:50%;
     margin-right:2%;
-    border: 1px solid red;
+    border-right: 1px #ccc solid;
 }
 
 #right-shark {
@@ -19,7 +75,6 @@ body {
     float:left;
     min-width:45%;    
     max-width:45%;
-    border: 1px solid blue;    
 }
 
 
@@ -35,11 +90,12 @@ body {
     padding:0px;
     line-height: 1.6em;
     margin-top:1.5em;
+    margin-bottom:2em;    
 }
 
 #whosonfirst-basics li {
     list-style-type: none;
-    margin-bottom:.25em;
+    margin-bottom:.5em;
 }
 
 #whosonfirst-details {
@@ -51,23 +107,30 @@ body {
 
 #whosonfirst-properties-raw {
     background-color: #ccc;
-    padding: 1em;
+}
+
+#whosonfirst-properties-pretty {
+
 }
 
 #whosonfirst-status {
-
+    text-align: right !important;
 }
 
-#whosonfirst-status th {
-    text-align:left;
+.raw-pretty {
+    margin-top: -2.5em;
+    margin-right: 1.5em;
+    float:right;
+    border: none;
+    background-color:#fff;
+    padding:.5em;
+    font-style:italic;
+    color:#666;
 }
 
-#whosonfirst-status th, td {
-    padding: .25em;
-}
-
-#whosonfirst-status td {
-    text-align:right;
+.sect {
+    margin-top:1em;
+    margin-bottom: 2em;
 }
 
 .whosonfirst-pointers {

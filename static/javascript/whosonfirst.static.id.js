@@ -129,6 +129,7 @@ whosonfirst.static.id = (function(){
 				var pretty_el = document.getElementById("whosonfirst-properties-pretty");
 
 				var button_raw = document.createElement("button");
+				button_raw.setAttribute("class", "raw-pretty");
 				button_raw.appendChild(document.createTextNode("show pretty"));
 				
 				button_raw.onclick = function(){
@@ -137,6 +138,7 @@ whosonfirst.static.id = (function(){
 				};
 
 				var button_pretty = document.createElement("button");
+				button_pretty.setAttribute("class", "raw-pretty");				
 				button_pretty.appendChild(document.createTextNode("show raw"));
 				
 				button_pretty.onclick = function(){
@@ -168,12 +170,13 @@ whosonfirst.static.id = (function(){
 					console.log("PRETTY", "ERR", e);
 				}
 
-				var hier = props["wof:hierarchy"];
-				var hier_pretty = whosonfirst.properties.render(hier);
-
 				var hier_el = document.getElementById("whosonfirst-hierarchy");
-				hier_el.appendChild(hier_pretty);
-
+				
+				for (var h in props["wof:hierarchy"]){					
+					var hier_pretty = whosonfirst.properties.render(props["wof:hierarchy"][h]);
+					hier_el.appendChild(hier_pretty);
+				}
+				
 				self.init_names();				
 			};
 			

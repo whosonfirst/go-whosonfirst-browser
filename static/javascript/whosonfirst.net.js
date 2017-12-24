@@ -118,7 +118,7 @@ whosonfirst.net = (function(){
 		'cache_get': function(key, on_hit, on_miss, user_args){
 
 			if (typeof(whosonfirst.cache) != 'object'){
-				console.log("CACHE GET", key, "no whosonfirst.cache");
+				// console.log("CACHE GET", key, "no whosonfirst.cache");
 				return false;
 			}
 
@@ -137,7 +137,7 @@ whosonfirst.net = (function(){
 		'cache_set': function(key, value){
 
 			if (typeof(whosonfirst.cache) != 'object'){
-				console.log("CACHE SET", key, "no whosonfirst.cache");				
+				// console.log("CACHE SET", key, "no whosonfirst.cache");				
 				return false;
 			}
 
@@ -148,7 +148,7 @@ whosonfirst.net = (function(){
 		'cache_unset': function(key){
 
 			if (typeof(whosonfirst.cache) != 'object'){
-				console.log("CACHE UNSET", key, "no whosonfirst.cache");								
+				// console.log("CACHE UNSET", key, "no whosonfirst.cache");								
 				return false;
 			}
 

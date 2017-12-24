@@ -15,7 +15,7 @@ whosonfirst.cache = (function() {
 		'get': function(key, on_hit, on_miss, args){
 
 			var fq_key = self.prep_key(key, args);
-			console.log("CACHE GET", fq_key);
+			// console.log("CACHE GET", fq_key);
 
 			var cache_ttl = default_cache_ttl;
 			
@@ -26,7 +26,7 @@ whosonfirst.cache = (function() {
 			var handle_rsp = function(rsp){
 				
 				if (! rsp){
-					console.log("CACHE MISS", fq_key);
+					// console.log("CACHE MISS", fq_key);
 					on_miss();
 					return;
 				}
@@ -34,7 +34,7 @@ whosonfirst.cache = (function() {
 				var data = rsp['data'];
 				
 				if (! data){
-					console.log("CACHE MISS", fq_key);
+					// console.log("CACHE MISS", fq_key);
 					on_miss();
 					return;
 				}
@@ -46,13 +46,13 @@ whosonfirst.cache = (function() {
 				var diff = ts - then;
 				
 				if (diff > cache_ttl){
-					console.log("CACHE EXPIRED", fq_key);
+					// console.log("CACHE EXPIRED", fq_key);
 					self.unset(key, args);
 					on_miss();
 					return;
 				}
 
-				console.log("CACHE HIT", fq_key);									
+				// console.log("CACHE HIT", fq_key);									
 				on_hit(data);
 			};
 			
@@ -80,7 +80,7 @@ whosonfirst.cache = (function() {
 		'set': function(key, value, args){
 
 			var fq_key = self.prep_key(key, args);
-			console.log("CACHE SET", fq_key);
+			// console.log("CACHE SET", fq_key);
 			
 			var dt = new Date();
 			var ts = dt.getTime();
@@ -104,7 +104,7 @@ whosonfirst.cache = (function() {
 		'unset': function(key, args){
 
 			var fq_key = self.prep_key(key, args);
-			console.log("CACHE UNSET", fq_key);
+			// console.log("CACHE UNSET", fq_key);
 			
 			if (typeof(localforage) != 'object'){
 				localforage.removeItem(fq_key);				

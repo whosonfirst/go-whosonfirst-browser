@@ -128,83 +128,78 @@
 
       <div>
 
-      <div id="left-shark">
+	<div id="left-shark">
 	
-	<div>
-	  <h4>Properties</h4>
-	  
-	  <div id="whosonfirst-properties">
-	    <div id="whosonfirst-properties-pretty">
-	    </div>	  
-	    <div id="whosonfirst-properties-raw">
+	    <div id="whosonfirst-properties" class="sect">
+	      <div id="whosonfirst-properties-pretty"></div>	  
+	      <div id="whosonfirst-properties-raw"></div>
 	    </div>
-	  </div>
 	</div>
-	
-      </div>
 
-      </div>
-	
-      <div id="right-shark">
+	<div id="right-shark">
 
-	<div id="whosonfirst-hierarchy">
-	</div>
-	
-	<div id="whosonfirst-status">
+	  <div id="whosonfirst-status" class="sect">
 
-	  <h4>Status</h4>
-	  
-	  <table>
-	    <tr>
-	      <th>&#160;</th>
-	      <th>Status</th>
-	      <th>Value</th>
-	      <th>Confidence</th>
-	    </tr>
-	    <tr>
-	      <th>Current</th>
+	    <table>
+	      <!--
+		  <tr>
+		    <th>&#160;</th>
+		    <th>Status</th>
+		    <th>Value</th>
+		    <th>Confidence</th>
+		  </tr>
+		  -->
+	      <tr>
+		<th>is current</th>
 	      <td class="whosonfirst-status">{{ .SPR.IsCurrent.StringFlag }}</td>
 	      <td class="whosonfirst-status">{{ .SPR.IsCurrent.IsTrue }}</td>
 	      <td class="whosonfirst-status">{{ .SPR.IsCurrent.IsKnown }}</td>
-	    </tr>
-	    <tr>
-	      <th>Ceased</th>
+	      </tr>
+	      <tr>
+	      <th>is ceased</th>
 	      <td class="whosonfirst-status">{{ .SPR.IsCeased.StringFlag }}</td>
 	      <td class="whosonfirst-status">{{ .SPR.IsCeased.IsTrue }}</td>
 	      <td class="whosonfirst-status">{{ .SPR.IsCeased.IsKnown }}</td>
-	    </tr>
-	    <tr>
-	      <th>Deprecated</th>
-	      <td class="whosonfirst-status">{{ .SPR.IsDeprecated.StringFlag }}</td>
-	      <td class="whosonfirst-status">{{ .SPR.IsDeprecated.IsTrue }}</td>
-	      <td>{{ .SPR.IsDeprecated.IsKnown }}</td>
-	    </tr>
-	    <tr>
-	      <th>Superseded</th>
-	      <td class="whosonfirst-status">{{ .SPR.IsSuperseded.StringFlag }}</td>
-	      <td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsTrue }}</td>
-	      <td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsKnown }}</td>
-	    </tr>
-	    <tr>
-	      <th>Superseding</th>
-	      <td class="whosonfirst-status">{{ .SPR.IsSuperseding.StringFlag }}</td>
-	      <td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsTrue }}</td>
-	      <td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsKnown }}</td>
-	    </tr>	 	  
-	  </table>
-	</div>
+	      </tr>
+	      <tr>
+		<th>is deprecated</th>
+		<td class="whosonfirst-status">{{ .SPR.IsDeprecated.StringFlag }}</td>
+		<td class="whosonfirst-status">{{ .SPR.IsDeprecated.IsTrue }}</td>
+		<td>{{ .SPR.IsDeprecated.IsKnown }}</td>
+	      </tr>
+	      <tr>
+		<th>is superseded</th>
+		<td class="whosonfirst-status">{{ .SPR.IsSuperseded.StringFlag }}</td>
+		<td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsTrue }}</td>
+		<td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsKnown }}</td>
+	      </tr>
+	      <tr>
+		<th>is superseding</th>
+		<td class="whosonfirst-status">{{ .SPR.IsSuperseding.StringFlag }}</td>
+		<td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsTrue }}</td>
+		<td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsKnown }}</td>
+	      </tr>	 	  
+	    </table>
+	  </div>
 
-	<div>
-	  <h4>Source data</h4>
+	  <div id="whosonfirst-hierarchy" class="sect">
+	  </div>
+		  
+	  <div class="sect">
+	    
+	    <ul>
+	      <li><a href="https://data.whosonfirst.org/{{ .SPR.Path }}">https://data.whosonfirst.org/{{ .SPR.Path }}</a></li>
+	      <li><a href="https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}">https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}</a></li>
+	    </ul>
+	  </div>
 	  
-	  <ul>
-	    <li><a href="https://data.whosonfirst.org/{{ .SPR.Path }}">https://data.whosonfirst.org/{{ .SPR.Path }}</a></li>
-	    <li><a href="https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}">https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}</a></li>
-	  </ul>
 	</div>
-	
       </div>
-      	
+
+      <div id="footer">
+	<!-- <a href="https://twitter.com/alloftheplaces">@alloftheplaces</a> -->
+      </div>
+      
     </div>
     
   </body>

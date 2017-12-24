@@ -2,6 +2,8 @@ var whosonfirst = whosonfirst || {};
 
 whosonfirst.properties = (function(){
 
+	var spelunker = "http://whosonfirst.mapzen.com/spelunker/";
+	
 	var self = {
 
 		'render': function(props){
@@ -31,7 +33,13 @@ whosonfirst.properties = (function(){
 				'wof.hierarchy.continent_id', 'wof.hierarchy.country_id', 'wof.hierarchy.macroregion_id', 'wof.hierarchy.region_id',
 				'wof.hierarchy.county_id', 'wof.hierarchy.localadmin_id', 'wof.hierarchy.borough_id', 'wof.hierarchy.locality_id',
 				'wof.hierarchy.macrohood_id', 'wof.hierarchy.neighbourhood_id', 'wof.hierarchy.microhood_id',
-				'wof.hierarchy.campus_id', 'wof.hierarchy.venue_id'
+				'wof.hierarchy.campus_id', 'wof.hierarchy.venue_id',
+				// No really...
+				'_global_.continent_id', '_global_.country_id', '_global_.macroregion_id', '_global_.region_id',
+				'_global_.county_id', '_global_.localadmin_id', '_global_.borough_id', '_global_.locality_id',
+				'_global_.macrohood_id', '_global_.neighbourhood_id', '_global_.microhood_id',
+				'_global_.campus_id', '_global_.venue_id'
+				
 			];
 			
 			var text_callbacks = {
@@ -116,6 +124,20 @@ whosonfirst.properties = (function(){
 				'wof.hierarchy.macrohood_id': 'macro hood',
 				'wof.hierarchy.neighbourhood_id': 'neighbourhood',
 				'wof.hierarchy.microhood_id': 'micro hood',
+				// No really...ugh
+				'_global_.borough_id': 'borough',
+				'_global_.continent_id': 'continent',
+				'_global_.country_id': 'country',
+				'_global_.macroregion_id': 'macro region',
+				'_global_.region_id': 'region',
+				'_global_.campus_id': 'campus',
+				'_global_.county_id': 'county',
+				'_global_.intersection': 'intersection',
+				'_global_.localadmin_id': 'local admin',
+				'_global_.locality_id': 'locality',
+				'_global_.macrohood_id': 'macro hood',
+				'_global_.neighbourhood_id': 'neighbourhood',
+				'_global_.microhood_id': 'micro hood',				
 			};
 			
 			var dict_renderers = function(d, ctx){
@@ -174,8 +196,8 @@ whosonfirst.properties = (function(){
 		},
 		
 		'render_wof_id': function(d, ctx){
-			var root = whosonfirst.www.abs_root_url();
-			var link = root + "id/" + encodeURIComponent(d) + "/";
+			// PLEASE FIX ME TO BE CONFIGURABLE
+			var link = "/id/" + encodeURIComponent(d) + "/";
 			var el = whosonfirst.render.render_link(link, d, ctx);
 			
 			var text = el.children[0];
@@ -201,7 +223,8 @@ whosonfirst.properties = (function(){
 		},
 		
 		'render_wof_placetype': function(d, ctx){
-			var root = whosonfirst.www.abs_root_url();
+			
+			var root = spelunker;
 			var link = root + "placetypes/" + encodeURIComponent(d) + "/";
 			return whosonfirst.render.render_link(link, d, ctx);
 		},
@@ -337,43 +360,43 @@ whosonfirst.properties = (function(){
 		},
 		
 		'render_megacity': function(d, ctx){
-			var root = whosonfirst.www.abs_root_url();
+			var root = spelunker;
 			var link = root + "megacities/";
 			return whosonfirst.render.render_link(link, "HOW BIG WOW MEGA SO CITY", ctx);
 		},
 		
 		'render_wof_tags': function(d, ctx){
-			var root = whosonfirst.www.abs_root_url();
+			var root = spelunker;
 			var link = root + "tags/" + encodeURIComponent(d) + "/";
 			return whosonfirst.render.render_link(link, d, ctx);
 		},
 		
 		'render_wof_name': function(d, ctx){
-			var root = whosonfirst.www.abs_root_url();
+			var root = spelunker;
 			var link = root + "search/?q=" + encodeURIComponent(d);
 			return whosonfirst.render.render_link(link, d, ctx);
 		},
 		
 		'render_simplegeo_city': function(d, ctx){
-			var root = whosonfirst.www.abs_root_url();
+			var root = spelunker;
 			var link = root + "search/?q=" + encodeURIComponent(d) + "&placetype=locality";
 			return whosonfirst.render.render_link(link, d, ctx);	    
 		},
 		
 		'render_simplegeo_postcode': function(d, ctx){
-			var root = whosonfirst.www.abs_root_url();
+			var root = spelunker;
 			var link = root + "postalcodes/" + encodeURIComponent(d) + "/";
 			return whosonfirst.render.render_link(link, d, ctx);	    
 		},
 		
 		'render_simplegeo_classifiers': function(d, ctx){
-			var root = whosonfirst.www.abs_root_url();
+			var root = spelunker;
 			var link = root + "categories/" + encodeURIComponent(d) + "/";
 			return whosonfirst.render.render_link(link, d, ctx);
 		},
 		
 		'render_simplegeo_tags': function(d, ctx){
-			var root = whosonfirst.www.abs_root_url();
+			var root = spelunker;
 			var link = root + "tags/" + encodeURIComponent(d) + "/";
 			return whosonfirst.render.render_link(link, d, ctx);
 		},
