@@ -92,7 +92,7 @@ whosonfirst.static.id = (function(){
 			var id = place.getAttribute("data-whosonfirst-id");
 			
 			var data_url = whosonfirst.uri.id2abspath(id)
-			console.log("FETCH", data_url);
+			// console.log("FETCH", data_url);
 			
 			var on_success = function(feature){
 
@@ -115,15 +115,66 @@ whosonfirst.static.id = (function(){
 				
 				var centroid_layer = L.geoJSON(centroid);
 				centroid_layer.addTo(map);
+
+				// sudo put all of this in a wapper function somewhere...
+				// (20171224/thisisaaronland)
 				
 				var props = feature["properties"];
 				var props_str = JSON.stringify(props, null, "\t");
 				
-				var props_pre = document.createElement("pre");
-				props_pre.appendChild(document.createTextNode(props_str));
+				var props_raw = document.createElement("pre");
+				props_raw.appendChild(document.createTextNode(props_str));
 				
-				var props_el = document.getElementById("whosonfirst-properties-raw");
-				props_el.appendChild(props_pre);
+				var raw_el = document.getElementById("whosonfirst-properties-raw");
+				var pretty_el = document.getElementById("whosonfirst-properties-pretty");
+
+				var button_raw = document.createElement("button");
+				button_raw.appendChild(document.createTextNode("show pretty"));
+				
+				button_raw.onclick = function(){
+					raw_el.style.display = "none";
+					pretty_el.style.display = "block";					
+				};
+
+				var button_pretty = document.createElement("button");
+				button_pretty.appendChild(document.createTextNode("show raw"));
+				
+				button_pretty.onclick = function(){
+					pretty_el.style.display = "none";
+					raw_el.style.display = "block";					
+				};
+				
+				try {
+					var props_pretty = whosonfirst.properties.render(props);
+
+					if (props_pretty){
+						raw_el.style.display = "none";
+						
+						raw_el.appendChild(button_raw);
+						raw_el.appendChild(props_raw);
+						
+						pretty_el.appendChild(button_pretty);
+						pretty_el.appendChild(props_pretty);
+					}
+
+					else {
+						throw "Failed to generate pretty properties";
+					}
+				}
+
+				catch (e) {
+					raw_el.appendChild(button_raw);				
+					raw_el.appendChild(props_raw);
+					console.log("PRETTY", "ERR", e);
+				}
+
+				var hier = props["wof:hierarchy"];
+				var hier_pretty = whosonfirst.properties.render(hier);
+
+				var hier_el = document.getElementById("whosonfirst-hierarchy");
+				hier_el.appendChild(hier_pretty);
+
+				self.init_names();				
 			};
 			
 			var on_error = function(rsp){

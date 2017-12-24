@@ -32,6 +32,10 @@
 	 <script src="/javascript/localforage.min.js"></script>	  
 	 <script src="/javascript/slippymap.crosshairs.js"></script>
 
+	 <script src="/javascript/whosonfirst.www.js"></script>	 
+	 <script src="/javascript/whosonfirst.render.js"></script>
+	 <script src="/javascript/whosonfirst.properties.js"></script>
+	 
 	 <script src="/javascript/whosonfirst.cache.js"></script>	 
 	 <script src="/javascript/whosonfirst.uri.js"></script>
 	 <script src="/javascript/whosonfirst.net.js"></script>
@@ -121,70 +125,86 @@
 	<li>Its bounding box is <a href="#" class="whosonfirst-geometry whosonfirst-geometry-boundingbox">{{ .SPR.MinLatitude}}, {{ .SPR.MinLongitude }}, {{ .SPR.MaxLatitude}}, {{ .SPR.MaxLongitude }}</a> and its principal centroid is <a href="#" class="whosonfirst-geometry whosonfirst-geometry-centroid">{{ .SPR.Latitude }}, {{ .SPR.Longitude }}</a>.</li>
 
       </ul>
-      
-      <div id="whosonfirst-status">
-
-	<h4>Status</h4>
-	
-	<table>
-	  <tr>
-	    <th>&#160;</th>
-	    <th>Status</th>
-	    <th>Value</th>
-	    <th>Confidence</th>
-	  </tr>
-	  <tr>
-	    <th>Current</th>
-	    <td class="whosonfirst-status">{{ .SPR.IsCurrent.StringFlag }}</td>
-	    <td class="whosonfirst-status">{{ .SPR.IsCurrent.IsTrue }}</td>
-	    <td class="whosonfirst-status">{{ .SPR.IsCurrent.IsKnown }}</td>
-	  </tr>
-	  <tr>
-	    <th>Ceased</th>
-	    <td class="whosonfirst-status">{{ .SPR.IsCeased.StringFlag }}</td>
-	    <td class="whosonfirst-status">{{ .SPR.IsCeased.IsTrue }}</td>
-	    <td class="whosonfirst-status">{{ .SPR.IsCeased.IsKnown }}</td>
-	  </tr>
-	  <tr>
-	    <th>Deprecated</th>
-	    <td class="whosonfirst-status">{{ .SPR.IsDeprecated.StringFlag }}</td>
-	    <td class="whosonfirst-status">{{ .SPR.IsDeprecated.IsTrue }}</td>
-	    <td>{{ .SPR.IsDeprecated.IsKnown }}</td>
-	    </tr>
-	  <tr>
-	    <th>Superseded</th>
-	    <td class="whosonfirst-status">{{ .SPR.IsSuperseded.StringFlag }}</td>
-	    <td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsTrue }}</td>
-	    <td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsKnown }}</td>
-	    </tr>
-	  <tr>
-	    <th>Superseding</th>
-	    <td class="whosonfirst-status">{{ .SPR.IsSuperseding.StringFlag }}</td>
-	    <td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsTrue }}</td>
-	    <td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsKnown }}</td>
-	  </tr>	 	  
-	</table>
-      </div>
 
       <div>
-	<h4>Properties</h4>
 
-	<div id="whosonfirst-properties">
-	  <div id="whosonfirst-properties-raw"></div>
-	  <div id="whosonfirst-properties-pretty"></div>	  
+      <div id="left-shark">
+	
+	<div>
+	  <h4>Properties</h4>
+	  
+	  <div id="whosonfirst-properties">
+	    <div id="whosonfirst-properties-pretty">
+	    </div>	  
+	    <div id="whosonfirst-properties-raw">
+	    </div>
+	  </div>
 	</div>
+	
       </div>
-      
-      <div>
 
-	<h4>Source data</h4>
+      </div>
 	
-	<ul>
-	  <li><a href="https://data.whosonfirst.org/{{ .SPR.Path }}">https://data.whosonfirst.org/{{ .SPR.Path }}</a></li>
-	  <li><a href="https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}">https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}</a></li>
-	</ul>
+      <div id="right-shark">
+
+	<div id="whosonfirst-hierarchy">
+	</div>
+	
+	<div id="whosonfirst-status">
+
+	  <h4>Status</h4>
+	  
+	  <table>
+	    <tr>
+	      <th>&#160;</th>
+	      <th>Status</th>
+	      <th>Value</th>
+	      <th>Confidence</th>
+	    </tr>
+	    <tr>
+	      <th>Current</th>
+	      <td class="whosonfirst-status">{{ .SPR.IsCurrent.StringFlag }}</td>
+	      <td class="whosonfirst-status">{{ .SPR.IsCurrent.IsTrue }}</td>
+	      <td class="whosonfirst-status">{{ .SPR.IsCurrent.IsKnown }}</td>
+	    </tr>
+	    <tr>
+	      <th>Ceased</th>
+	      <td class="whosonfirst-status">{{ .SPR.IsCeased.StringFlag }}</td>
+	      <td class="whosonfirst-status">{{ .SPR.IsCeased.IsTrue }}</td>
+	      <td class="whosonfirst-status">{{ .SPR.IsCeased.IsKnown }}</td>
+	    </tr>
+	    <tr>
+	      <th>Deprecated</th>
+	      <td class="whosonfirst-status">{{ .SPR.IsDeprecated.StringFlag }}</td>
+	      <td class="whosonfirst-status">{{ .SPR.IsDeprecated.IsTrue }}</td>
+	      <td>{{ .SPR.IsDeprecated.IsKnown }}</td>
+	    </tr>
+	    <tr>
+	      <th>Superseded</th>
+	      <td class="whosonfirst-status">{{ .SPR.IsSuperseded.StringFlag }}</td>
+	      <td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsTrue }}</td>
+	      <td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsKnown }}</td>
+	    </tr>
+	    <tr>
+	      <th>Superseding</th>
+	      <td class="whosonfirst-status">{{ .SPR.IsSuperseding.StringFlag }}</td>
+	      <td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsTrue }}</td>
+	      <td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsKnown }}</td>
+	    </tr>	 	  
+	  </table>
+	</div>
+
+	<div>
+	  <h4>Source data</h4>
+	  
+	  <ul>
+	    <li><a href="https://data.whosonfirst.org/{{ .SPR.Path }}">https://data.whosonfirst.org/{{ .SPR.Path }}</a></li>
+	    <li><a href="https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}">https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}</a></li>
+	  </ul>
+	</div>
 	
       </div>
+      	
     </div>
     
   </body>

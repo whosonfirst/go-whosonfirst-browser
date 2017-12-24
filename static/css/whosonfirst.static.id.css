@@ -5,6 +5,24 @@ body {
     font-family:sans-serif;
 }
 
+#left-shark {
+    align:top;
+    float:left;
+    min-width:50%;        
+    max-width:50%;
+    margin-right:2%;
+    border: 1px solid red;
+}
+
+#right-shark {
+    align:top;
+    float:left;
+    min-width:45%;    
+    max-width:45%;
+    border: 1px solid blue;    
+}
+
+
 #map {
     height: 350px;
     width: 100%;
