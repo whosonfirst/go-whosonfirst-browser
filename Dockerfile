@@ -1,7 +1,7 @@
 # https://blog.docker.com/2016/09/docker-golang/
 # https://blog.golang.org/docker
 
-# docker build -t wof-staticd .
+# docker build -t wof-static .
 
 # For example:
 # docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e HTTP_ROOT='https://whosonfirst.mapzen.com/data/' -e MAPZEN_APIKEY='mapzen-****' wof-staticd

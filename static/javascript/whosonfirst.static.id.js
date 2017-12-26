@@ -109,13 +109,16 @@ whosonfirst.static.id = (function(){
 					"geometry": centroid_geom,
 					"properties": centroid_props
 				};
-				
-				var feature_layer = L.geoJSON(feature);
-				feature_layer.addTo(map);
-				
-				var centroid_layer = L.geoJSON(centroid);
-				centroid_layer.addTo(map);
 
+				var feature_style = whosonfirst.leaflet.styles.polygon();
+				whosonfirst.leaflet.utils.draw_feature(map, feature, feature_style);
+			
+				var centroid_style = whosonfirst.leaflet.styles.centroid();
+				var centroid_handler = whosonfirst.leaflet.handlers.centroid(centroid_style);
+				whosonfirst.leaflet.utils.draw_point(map, centroid, centroid_style, centroid_handler);
+
+				whosonfirst.leaflet.utils.fit_map(map, feature);
+				
 				// sudo put all of this in a wapper function somewhere...
 				// (20171224/thisisaaronland)
 				

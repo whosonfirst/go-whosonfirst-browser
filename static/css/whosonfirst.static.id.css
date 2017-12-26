@@ -68,6 +68,8 @@ table td ul li {
     max-width:50%;
     margin-right:2%;
     border-right: 1px #ccc solid;
+    padding-right:1em;
+    overflow:scroll;
 }
 
 #right-shark {
@@ -117,8 +119,15 @@ table td ul li {
     text-align: right !important;
 }
 
+.anchor {
+    font-size: small;
+    margin-left:1em;
+    font-weight: 100 !important;
+    color: #666;
+}
+
 .raw-pretty {
-    margin-top: -2.5em;
+    margin-top: -2.25em;
     margin-right: 1.5em;
     float:right;
     border: none;

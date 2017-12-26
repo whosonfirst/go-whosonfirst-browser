@@ -70,16 +70,18 @@ whosonfirst.properties = (function(){
 			};
 			
 			var text_renderers = function(d, ctx){
+
+				var test = ctx.replace(/\#\d+/, "")
 				
-				if ((possible_wof.indexOf(ctx) != -1) && (d > 0)){
+				if ((possible_wof.indexOf(test) != -1) && (d > 0)){
 					return self.render_wof_id;
 				}
-				
-				else if (ctx.match(/^name-/)){
+
+				else if (test.match(/^name-/)){
 					return self.render_wof_name;
 				}
 				
-				else if (ctx.match(/^sg-classifiers-/)){
+				else if (test.match(/^sg-classifiers-/)){
 					return self.render_simplegeo_classifiers;
 				}
 				

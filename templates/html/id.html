@@ -16,7 +16,7 @@
 	  <meta property="og:site_name" content="Who's On First" />
 	  <meta property="og:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
 	  <meta property="og:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
-	  <meta property="og:image" content="/id/{{ .SPR.Id }}.svg" />
+	  <!-- <meta property="og:image" content="/id/{{ .SPR.Id }}.svg" /> -->
 
 	  <meta property="twitter:card" value="summary" />
 	  <meta property="twitter:site" content="@alloftheplaces" />
@@ -24,7 +24,7 @@
 	  <meta property="twitter:url" content="/id/{{ .SPR.Id }}" />
 	  <meta property="twitter:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
 	  <meta property="twitter:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
-	  <meta property="twitter:image" content="/id/{{ .SPR.Id }}.svg" />
+	  <!-- <meta property="twitter:image" content="/id/{{ .SPR.Id }}.svg" /> -->
 
  	  <link rel="stylesheet" href="/css/mapzen.js.css">
 	  <script src="/javascript/mapzen.min.js"></script>
@@ -41,6 +41,12 @@
 	 <script src="/javascript/whosonfirst.net.js"></script>
 	 <script src="/javascript/whosonfirst.namify.js"></script> 	 	 
 
+	 <script src="/javascript/whosonfirst.geojson.js"></script>	 
+	 <script src="/javascript/whosonfirst.leaflet.utils.js"></script>
+	 <script src="/javascript/whosonfirst.leaflet.styles.js"></script>
+	 <script src="/javascript/whosonfirst.leaflet.handlers.js"></script> 	 	 
+
+	 
  	 <link rel="stylesheet" href="/css/whosonfirst.www.css">
  	 <link rel="stylesheet" href="/css/whosonfirst.common.css">	 
 	 
@@ -111,11 +117,11 @@
 	<li>Its Who's On First ID is <span class="whosonfirst-id">{{ .SPR.Id }}</span> and its relative URI is <a href="https://data.whosonfirst.org/{{ .SPR.Path }}" class="whosonfirst-relpath">{{ .SPR.Path }}</a>.</li>
 
 	{{ if eq .SPR.ParentId "-4" }}
-	<li>This record's parent ID is <code>-4</code> which indicates it has multiple parents because <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">it happens sometimes</a>.</li>
+	<li>This record's parent ID is <code>-4</code> which indicates it has <a href="#hierarchy">multiple parents</a> because <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">it happens sometimes</a>.</li>
 	{{ else if eq .SPR.ParentId "-3" }}
-	<li>This record's parent ID is <code>-3</code> which means it might legitimately have multiple parents <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">because people argue about this sort of thing</a>.</li>
+	<li>This record's parent ID is <code>-3</code> which means it might legitimately have <a href="#hierarchy">multiple parents</a> because people <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">argue about this sort of thing</a>.</li>
 	{{ else if eq .SPR.ParentId "-2" }}
-	<li>This record's parent ID is <code>-1</code> which means we haven't bothered trying to pin down this record's immediate parent because <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">life is complicated</a></li>
+	<li>This record's parent ID is <code>-1</code> which means we haven't bothered trying to pin down this record's <a href="#hierarchy">immediate parent</a> because <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">life is complicated</a></li>
 	{{ else if eq .SPR.ParentId "-1" }}
 	<li>This record's parent ID Is <code>-1</code> meaning we are <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">uncertain</a> which record parents this one.</li>
 	{{ else }}
@@ -140,6 +146,8 @@
 
 	  <div id="whosonfirst-status" class="sect">
 
+	    <h3 style="text-align:left !important;" id="status">status <a href="#status" class="anchor">¶</a></h3>
+	    
 	    <table>
 	      <!--
 		  <tr>
@@ -183,9 +191,14 @@
 	  </div>
 
 	  <div id="whosonfirst-hierarchy" class="sect">
+
+	    <h3 id="hierarchy">hierarchy <a href="#hierarchy" class="anchor">¶</a></h3>
+	    
 	  </div>
 		  
 	  <div class="sect">
+
+	    <h3 id="sources">sources <a href="#sources" class="anchor">¶</a></h3>
 	    
 	    <ul>
 	      <li><a href="https://data.whosonfirst.org/{{ .SPR.Path }}">https://data.whosonfirst.org/{{ .SPR.Path }}</a></li>

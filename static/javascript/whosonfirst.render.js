@@ -114,9 +114,18 @@ whosonfirst.render = (function(){
 		if (ns != '_global_'){
 
 			var header = document.createElement("h3");
-			var content = document.createTextNode(ns);
-			header.appendChild(content);
+			header.setAttribute("id", ns);
 
+			var anchor = document.createElement("a");
+			anchor.setAttribute("href", "#" + ns);
+			anchor.setAttribute("class", "anchor");
+			anchor.appendChild(document.createTextNode("¶"));
+			
+			var content = document.createTextNode(ns);
+
+			header.appendChild(content);
+			header.appendChild(anchor);
+			
 			wrapper.appendChild(header);			
 		}
 
