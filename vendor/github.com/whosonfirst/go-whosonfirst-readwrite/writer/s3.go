@@ -1,25 +1,30 @@
-package reader
+package writer
 
-// this is pretty much a clone of writer/s3.go and will be merged
+// this is pretty much a clone of reader/s3.go and will be merged
 // in to https://github.com/whosonfirst/go-whosonfirst-s3/
 // see also: https://github.com/thisisaaronland/go-iiif/blob/master/aws/s3.go
 // (20171217/thisisaaronland)
 
 import (
+	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"io"
+	"io/ioutil"
 	_ "log"
 	"os/user"
 	"path/filepath"
 	"strings"
 )
 
-type S3Reader struct {
-	Reader
+type S3Writer struct {
+	Writer
 	prefix  string
 	bucket  string
 	service *s3.S3
@@ -32,7 +37,7 @@ type S3Config struct {
 	Credentials string // see notes below
 }
 
-func NewS3Reader(s3cfg S3Config) (Reader, error) {
+func NewS3Writer(s3cfg S3Config) (Writer, error) {
 
 	// https://docs.aws.amazon.com/sdk-for-go/v1/developerguide/configuring-sdk.html
 	// https://docs.aws.amazon.com/sdk-for-go/api/service/s3/
@@ -101,40 +106,102 @@ func NewS3Reader(s3cfg S3Config) (Reader, error) {
 
 	service := s3.New(sess)
 
-	r := S3Reader{
+	w := S3Writer{
 		service: service,
 		prefix:  s3cfg.Prefix,
 		bucket:  s3cfg.Bucket,
 	}
 
-	return &r, nil
+	return &w, nil
 }
 
-func (r *S3Reader) Read(key string) (io.ReadCloser, error) {
+func (w *S3Writer) Write(key string, fh io.ReadCloser) error {
 
-	key = r.prepareKey(key)
+	// AWS needs a io.ReadSeeker and fh is a io.ReadCloser but
+	// either way we need to pass a blob of bytes to w.hasChanged
+	// below (20171227/thisisaaronland)
 
-	// log.Printf("FETCH s3://%s/%s\n", r.bucket, key)
-
-	params := &s3.GetObjectInput{
-		Bucket: aws.String(r.bucket),
-		Key:    aws.String(key),
-	}
-
-	rsp, err := r.service.GetObject(params)
+	body, err := ioutil.ReadAll(fh)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return rsp.Body, nil
+	key = w.prepareKey(key)
+
+	changed, err := w.hasChanged(key, body)
+
+	if err != nil {
+		return err
+	}
+
+	if !changed {
+		return nil
+	}
+
+	params := &s3.PutObjectInput{
+		Bucket: aws.String(w.bucket),
+		Key:    aws.String(key),
+		Body:   bytes.NewReader(body),
+		ACL:    aws.String("public-read"),
+	}
+
+	_, err = w.service.PutObject(params)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (r *S3Reader) prepareKey(key string) string {
+// how many times in how many different places have I written this code...
 
-	if r.prefix == "" {
+func (w *S3Writer) hasChanged(remote string, local []byte) (bool, error) {
+
+	// https://docs.aws.amazon.com/sdk-for-go/api/service/s3/#HeadObjectInput
+	// https://docs.aws.amazon.com/sdk-for-go/api/service/s3/#HeadObjectOutput
+
+	params := &s3.HeadObjectInput{
+		Bucket: aws.String(w.bucket),
+		Key:    aws.String(remote),
+	}
+
+	rsp, err := w.service.HeadObject(params)
+
+	if err != nil {
+
+		aws_err := err.(awserr.Error)
+
+		if aws_err.Code() == "NotFound" {
+			return true, nil
+		}
+
+		if aws_err.Code() == "SlowDown" {
+
+		}
+
+		return false, err
+	}
+
+	enc := md5.Sum(local)
+	local_hash := hex.EncodeToString(enc[:])
+
+	etag := *rsp.ETag
+	remote_hash := strings.Replace(etag, "\"", "", -1)
+
+	if local_hash == remote_hash {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (w *S3Writer) prepareKey(key string) string {
+
+	if w.prefix == "" {
 		return key
 	}
 
-	return filepath.Join(r.prefix, key)
+	return filepath.Join(w.prefix, key)
 }

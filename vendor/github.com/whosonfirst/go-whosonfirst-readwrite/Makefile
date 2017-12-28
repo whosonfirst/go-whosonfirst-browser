@@ -10,6 +10,7 @@ self:   prep rmdeps
 	cp -r cache src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r reader src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r utils src/github.com/whosonfirst/go-whosonfirst-readwrite/
+	cp -r writer src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r vendor/* src/
 
 rmdeps:
@@ -36,6 +37,7 @@ fmt:
 	go fmt cmd/*.go
 	go fmt reader/*.go
 	go fmt utils/*.go
+	go fmt writer/*.go
 
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-reader cmd/wof-reader.go
