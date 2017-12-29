@@ -1,19 +1,20 @@
-package reader
+package utils
 
 import (
 	"github.com/whosonfirst/go-whosonfirst-readwrite/cache"
+	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"io"
 	"log"
 )
 
 type CacheReader struct {
-	Reader
-	reader Reader
+	reader.Reader
+	reader reader.Reader
 	cache  cache.Cache
 	debug  bool
 }
 
-func NewCacheReader(r Reader, c cache.Cache) (Reader, error) {
+func NewCacheReader(r reader.Reader, c cache.Cache) (reader.Reader, error) {
 
 	cr := CacheReader{
 		reader: r,

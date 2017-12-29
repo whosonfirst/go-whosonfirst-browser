@@ -6,6 +6,7 @@ import (
 	gocache "github.com/patrickmn/go-cache"
 	"io"
 	"io/ioutil"
+	"strconv"
 	"sync/atomic"
 	"time"
 )
@@ -33,6 +34,46 @@ func DefaultGoCacheOptions() (*GoCacheOptions, error) {
 	}
 
 	return &opts, nil
+}
+
+func GoCacheOptionsFromArgs(args map[string]string) (*GoCacheOptions, error) {
+
+	opts, err := DefaultGoCacheOptions()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: parse out 1m, etc. strings
+	// (20171229/thisisaaronland)
+
+	str_exp, ok := args["DefaultExpiration"]
+
+	if ok {
+
+		exp, err := strconv.Atoi(str_exp)
+
+		if err != nil {
+			return nil, err
+		}
+
+		opts.DefaultExpiration = time.Duration(exp) * time.Second
+	}
+
+	str_cleanup, ok := args["CleanupInterval"]
+
+	if ok {
+
+		cleanup, err := strconv.Atoi(str_cleanup)
+
+		if err != nil {
+			return nil, err
+		}
+
+		opts.CleanupInterval = time.Duration(cleanup) * time.Second
+	}
+
+	return opts, nil
 }
 
 func NewGoCache(opts *GoCacheOptions) (Cache, error) {

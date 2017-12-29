@@ -1,15 +1,9 @@
 package reader
 
 import (
-	"bytes"
+	"github.com/whosonfirst/go-whosonfirst-readwrite/bytes"
 	"io"
 )
-
-type nopCloser struct {
-	io.Reader
-}
-
-func (nopCloser) Close() error { return nil }
 
 type NullReader struct {
 	Reader
@@ -23,6 +17,5 @@ func NewNullReader() (Reader, error) {
 
 func (r *NullReader) Read(uri string) (io.ReadCloser, error) {
 
-	buf := bytes.NewReader([]byte(uri))
-	return nopCloser{buf}, nil
+	return bytes.ReadCloserFromBytes([]byte(uri))
 }
