@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/whosonfirst/go-http-mapzenjs"
+	"github.com/whosonfirst/go-whosonfirst-readwrite/cache"
+	"github.com/whosonfirst/go-whosonfirst-readwrite/flags"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/utils"
 	"github.com/whosonfirst/go-whosonfirst-static/http"
@@ -30,7 +32,12 @@ func main() {
 	var s3_region = flag.String("s3-region", "us-east-1", "...")
 	var s3_creds = flag.String("s3-credentials", "", "...")
 
-	var test = flag.String("test", "", "...")
+	var cache_source = flag.String("cache", "null", "...")
+
+	var cache_args flags.KeyValueArgs
+	flag.Var(&cache_args, "cache-arg", "(0) or more user-defined '{KEY}={VALUE}' arguments to pass to the caching layer")
+
+	var test_reader = flag.String("test-reader", "", "Perform some basic sanity checking on the reader at startup")
 
 	var api_key = flag.String("mapzen-apikey", "mapzen-xxxxxxx", "")
 
@@ -61,9 +68,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if *test != "" {
+	c, err := cache.NewCacheFromSource(*cache_source, cache_args.ToMap())
 
-		_, err := utils.TestReader(r, *test)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cr, err := utils.NewCacheReader(r, c)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if *test_reader != "" {
+
+		_, err := utils.TestReader(cr, *test_reader)
 
 		if err != nil {
 			log.Fatal(err)
@@ -77,19 +96,19 @@ func main() {
 	html_opts := http.NewDefaultHTMLOptions()
 	html_opts.MapzenAPIKey = *api_key
 
-	html_handler, err := http.HTMLHandler(r, html_opts)
+	html_handler, err := http.HTMLHandler(cr, html_opts)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	svg_handler, err := http.SVGHandler(r)
+	svg_handler, err := http.SVGHandler(cr)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	spr_handler, err := http.SPRHandler(r)
+	spr_handler, err := http.SPRHandler(cr)
 
 	if err != nil {
 		log.Fatal(err)
