@@ -123,5 +123,5 @@ debug: build
 	bin/wof-staticd -port 8080 -source http -http-root https://data.whosonfirst.org -mapzen-apikey ${MAPZEN_APIKEY}
 
 debug-local: build
-	bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -mapzen-apikey ${MAPZEN_APIKEY}
+	bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -cache lru -cache-arg 'CacheSize=500' -mapzen-apikey ${MAPZEN_APIKEY}
 
