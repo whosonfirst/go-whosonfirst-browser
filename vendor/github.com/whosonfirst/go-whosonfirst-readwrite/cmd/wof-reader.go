@@ -27,6 +27,7 @@ func main() {
 	var cache_args flags.KeyValueArgs
 	flag.Var(&cache_args, "cache-arg", "(0) or more user-defined '{KEY}={VALUE}' arguments to pass to the caching layer")
 
+	var debug = flag.Bool("dump", false, "...")
 	var dump = flag.Bool("dump", false, "...")
 
 	flag.Parse()
@@ -56,7 +57,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cr, err := utils.NewCacheReader(r, c)
+	o, err := utils.NewDefaultCacheReaderOptions()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	o.Debug = *debug
+
+	cr, err := utils.NewCacheReader(r, c, o)
 
 	if err != nil {
 		log.Fatal(err)

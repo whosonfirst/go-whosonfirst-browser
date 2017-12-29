@@ -41,6 +41,8 @@ func main() {
 
 	var api_key = flag.String("mapzen-apikey", "mapzen-xxxxxxx", "")
 
+	var debug = flag.Bool("debug", false, "...")
+
 	flag.Parse()
 
 	/*
@@ -74,7 +76,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cr, err := utils.NewCacheReader(r, c)
+	opts, err := utils.NewDefaultCacheReaderOptions()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	opts.Debug = *debug
+
+	cr, err := utils.NewCacheReader(r, c, opts)
 
 	if err != nil {
 		log.Fatal(err)
