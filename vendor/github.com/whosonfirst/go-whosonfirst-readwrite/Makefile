@@ -25,8 +25,9 @@ docker-build:
 
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/aws/aws-sdk-go"
-	@GOPATH=$(GOPATH) go get -u "github.com/patrickmn/go-cache"
+	@GOPATH=$(GOPATH) go get -u "github.com/bradfitz/gomemcache/memcache"
 	@GOPATH=$(GOPATH) go get -u "github.com/hashicorp/golang-lru"
+	@GOPATH=$(GOPATH) go get -u "github.com/patrickmn/go-cache"
 
 vendor-deps: rmdeps deps
 	if test ! -d vendor; then mkdir vendor; fi

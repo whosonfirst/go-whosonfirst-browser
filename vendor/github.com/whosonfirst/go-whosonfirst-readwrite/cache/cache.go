@@ -55,6 +55,16 @@ func NewCacheFromSource(source string, args ...interface{}) (Cache, error) {
 			c, err = NewLRUCache(opts)
 		}
 
+	case "memcache":
+
+		opts, opts_err := MemcacheCacheOptionsFromArgs(cache_args)
+
+		if opts_err != nil {
+			err = opts_err
+		} else {
+			c, err = NewMemcacheCache(opts)
+		}
+
 	case "null":
 		c, err = NewNullCache()
 	default:
