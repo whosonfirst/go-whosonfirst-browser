@@ -18,9 +18,6 @@ rmdeps:
 
 build:	fmt bin
 
-docker-build:
-	docker build -t wof-static .
-
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/jteeuwen/go-bindata/"
 	@GOPATH=$(GOPATH) go get -u "github.com/elazarl/go-bindata-assetfs/"
@@ -125,3 +122,8 @@ debug: build
 debug-local: build
 	bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -cache lru -cache-arg 'CacheSize=500' -debug -mapzen-apikey ${MAPZEN_APIKEY}
 
+docker-build:
+	docker build -t wof-static .
+
+docker-debug: docker-build
+	docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e HTTP_ROOT='https://whosonfirst.mapzen.com/data/' -e CACHE='gocache' -e CACHE_ARGS='DefaultExpiration=300 CleanupInterval=600' -e DEBUG='debug' -e MAPZEN_APIKEY=${MAPZEN_APIKEY} wof-static

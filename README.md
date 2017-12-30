@@ -1,8 +1,10 @@
 # go-whosonfirst-static
 
+![](docs/images/wof-static-sf.png)
+
 ## Important
 
-Stop. This is too soon for you. Really. You should assume that everything about this package (including the name) will change.
+This is probably still too soon for you. If nothing else, there isn't really any documentation yet.
 
 ## Install
 
@@ -14,8 +16,40 @@ make bin
 
 All of this package's dependencies are bundled with the code in the `vendor` directory.
 
-## Known knowns and other things "to figure out"
+## Example
 
-* This package is already starting to get littered with both rendering and delivering code, for example all of the static assets necessary to show a WOF document rendered as a HTML document. It is probably the case that we should have two packages with the "delivery" package modifying the rendered HTML with instance-specific CSS and the like. Or not.
+```
+bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -cache lru -cache-arg 'CacheSize=500' -debug -mapzen-apikey ${MAPZEN_APIKEY}
+```
 
-* The "reader" code (and by extension the caching layer) in this package should probably be moved in to its own package.
+## Docker
+
+[Yes](Dockerfile). For example:
+
+First, do the usual Docker `build` dance:
+
+```
+docker build -t wof-static .
+```
+
+Then:
+
+```
+docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e HTTP_ROOT='https://whosonfirst.mapzen.com/data/' -e MAPZEN_APIKEY='mapzen-****' wof-staticd
+```
+
+Or:
+
+```
+docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='s3' -e S3_BUCKET='whosonfirst' -e S3_PREFIX='' -e S3_REGION='us-east-1' -e S3_CREDENTIALS='env:' -e AWS_ACCESS_KEY_ID='***' -e AWS_SECRET_ACCESS_KEY='***' -e MAPZEN_APIKEY='mapzen-***' wof-staticd
+```
+
+Or even still, with caching:
+
+```
+docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e HTTP_ROOT='https://whosonfirst.mapzen.com/data/' -e CACHE='gocache' -e CACHE_ARGS='DefaultExpiration=300 CleanupInterval=600' -e DEBUG='debug' -e MAPZEN_APIKEY='mapzen-*****' wof-static
+```
+
+## See also
+
+* https://github.com/whosonfirst/go-whosonfirst-readwrite

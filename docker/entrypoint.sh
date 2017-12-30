@@ -77,7 +77,28 @@ then
     ARGS="${ARGS} -source fs -fs-root ${FS_ROOT}"
 fi
 
-# echo ${STATICD} ${ARGS}
+if [ "${CACHE}" != "" ]
+then
+
+    ARGS="${ARGS} -cache ${CACHE}"
+
+    if [ "${CACHE_ARGS}" != "" ]
+    then
+
+	for CA in ${CACHE_ARGS}
+	do
+	    ARGS="${ARGS} -cache-arg ${CA}"
+	done
+    fi
+    
+fi
+
+if [ "${DEBUG}" != "" ]
+then	       
+    ARGS="${ARGS} -debug"
+fi
+   
+echo ${STATICD} ${ARGS}
 
 ${STATICD} ${ARGS}
 
