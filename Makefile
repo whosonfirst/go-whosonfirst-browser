@@ -120,7 +120,7 @@ debug: build
 	bin/wof-staticd -port 8080 -source http -http-root https://data.whosonfirst.org -cache lru -cache-arg 'CacheSize=500' -debug -mapzen-apikey ${MAPZEN_APIKEY}
 
 debug-local: build
-	bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -cache lru -cache-arg 'CacheSize=500' -debug -mapzen-apikey ${MAPZEN_APIKEY}
+	bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -cache bigcache -cache-arg HardMaxCacheSize=100 -cache-arg MaxEntrySize=1024 -debug -mapzen-apikey ${MAPZEN_APIKEY}
 
 docker-build:
 	docker build -t wof-static .

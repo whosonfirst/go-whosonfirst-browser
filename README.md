@@ -22,6 +22,20 @@ All of this package's dependencies are bundled with the code in the `vendor` dir
 bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -cache lru -cache-arg 'CacheSize=500' -debug -mapzen-apikey ${MAPZEN_APIKEY}
 ```
 
+Or with a fixed-sized cache:
+
+```
+bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -cache bigcache -cache-arg HardMaxCacheSize=100 -cache-arg MaxEntrySize=1024 -debug -mapzen-apikey ${MAPZEN_APIKEY}
+2017/12/29 18:37:10 listening on localhost:8080
+2017/12/29 18:37:54 REQUEST /id/85633793/
+2017/12/29 18:37:54 GET 856/337/93/85633793.geojson CACHE MISS
+2017/12/29 18:37:54 MISS 856/337/93/85633793.geojson
+2017/12/29 18:37:54 READ 856/337/93/85633793.geojson <nil>
+2017/12/29 18:37:56 SET 856/337/93/85633793.geojson entry is bigger than max shard size
+```
+
+_`HardMaxCacheSize` is measured in MB and `MaxEntrySize` in bytes._
+
 ## Docker
 
 [Yes](Dockerfile). For example:

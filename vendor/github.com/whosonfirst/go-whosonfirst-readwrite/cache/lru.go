@@ -1,5 +1,7 @@
 package cache
 
+// https://godoc.org/github.com/hashicorp/golang-lru
+
 import (
 	"errors"
 	"fmt"
@@ -128,8 +130,15 @@ func (c *LRUCache) Set(key string, fh io.ReadCloser) (io.ReadCloser, error) {
 	return bytes.ReadCloserFromBytes(body)
 }
 
+func (c *LRUCache) Unset(key string) error {
+	c.cache.Remove(key)
+	return nil
+}
+
 func (c *LRUCache) Size() int64 {
-	return atomic.LoadInt64(&c.keys)
+	// return atomic.LoadInt64(&c.keys)
+	i := c.cache.Len()
+	return int64(i)
 }
 
 func (c *LRUCache) Hits() int64 {

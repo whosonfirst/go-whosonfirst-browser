@@ -25,6 +25,7 @@ docker-build:
 
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/aws/aws-sdk-go"
+	@GOPATH=$(GOPATH) go get -u "github.com/allegro/bigcache"
 	@GOPATH=$(GOPATH) go get -u "github.com/bradfitz/gomemcache/memcache"
 	@GOPATH=$(GOPATH) go get -u "github.com/hashicorp/golang-lru"
 	@GOPATH=$(GOPATH) go get -u "github.com/patrickmn/go-cache"

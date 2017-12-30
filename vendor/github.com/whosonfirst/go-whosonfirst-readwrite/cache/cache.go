@@ -14,9 +14,9 @@ type nopCloser struct {
 func (nopCloser) Close() error { return nil }
 
 type Cache interface {
-	// GetWithReader(string, reader.Reader) (io.ReadCloser, error)
 	Get(string) (io.ReadCloser, error)
 	Set(string, io.ReadCloser) (io.ReadCloser, error)
+	Unset(string) error
 	Hits() int64
 	Misses() int64
 	Evictions() int64
@@ -35,6 +35,17 @@ func NewCacheFromSource(source string, args ...interface{}) (Cache, error) {
 	}
 
 	switch strings.ToLower(source) {
+
+	case "bigcache":
+
+		opts, opts_err := BigCacheCacheOptionsFromArgs(cache_args)
+
+		if opts_err != nil {
+			err = opts_err
+		} else {
+			c, err = NewBigCacheCache(opts)
+		}
+
 	case "gocache":
 
 		opts, opts_err := GoCacheOptionsFromArgs(cache_args)

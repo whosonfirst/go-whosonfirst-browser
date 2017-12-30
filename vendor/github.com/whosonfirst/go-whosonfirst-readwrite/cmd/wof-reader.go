@@ -27,7 +27,7 @@ func main() {
 	var cache_args flags.KeyValueArgs
 	flag.Var(&cache_args, "cache-arg", "(0) or more user-defined '{KEY}={VALUE}' arguments to pass to the caching layer")
 
-	var debug = flag.Bool("dump", false, "...")
+	var debug = flag.Bool("debug", false, "...")
 	var dump = flag.Bool("dump", false, "...")
 
 	flag.Parse()
@@ -73,15 +73,15 @@ func main() {
 
 	for _, path := range flag.Args() {
 
-		ok, err := utils.TestReader(cr, path)
-
-		if err != nil {
-			log.Fatal("TEST", err)
-		}
-
-		log.Println(path, ok)
+		log.Println(path)
 
 		fh, err := cr.Read(path)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = cr.Read(path)
 
 		if err != nil {
 			log.Fatal(err)

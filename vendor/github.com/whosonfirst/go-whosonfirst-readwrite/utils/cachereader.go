@@ -12,17 +12,18 @@ type CacheReader struct {
 	reader  reader.Reader
 	cache   cache.Cache
 	options *CacheReaderOptions
-	Debug   bool
 }
 
 type CacheReaderOptions struct {
 	Debug bool
+	Strict	bool	
 }
 
 func NewDefaultCacheReaderOptions() (*CacheReaderOptions, error) {
 
 	opts := CacheReaderOptions{
 		Debug: false,
+		Strict: false,
 	}
 
 	return &opts, nil
@@ -44,7 +45,7 @@ func (r *CacheReader) Read(key string) (io.ReadCloser, error) {
 	fh, err := r.cache.Get(key)
 
 	if r.options.Debug {
-		log.Println("GET", key, fh, err)
+		log.Println("GET", key, err)
 	}
 
 	if err == nil {
@@ -67,7 +68,7 @@ func (r *CacheReader) Read(key string) (io.ReadCloser, error) {
 	fh, err = r.reader.Read(key)
 
 	if r.options.Debug {
-		log.Println("READ", key, fh, err)
+		log.Println("READ", key, err)
 	}
 
 	if err != nil {
@@ -77,12 +78,12 @@ func (r *CacheReader) Read(key string) (io.ReadCloser, error) {
 	fh, err = r.cache.Set(key, fh)
 
 	if r.options.Debug {
-		log.Println("SET", key, fh, err)
+		log.Println("SET", key, err)
 	}
 
-	if err != nil {
+	if err != nil && r.options.Strict {
 		return nil, err
-	}
-
+	}	
+	
 	return fh, nil
 }

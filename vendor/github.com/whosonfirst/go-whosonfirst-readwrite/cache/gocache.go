@@ -1,5 +1,7 @@
 package cache
 
+// https://godoc.org/github.com/patrickmn/go-cache
+
 import (
 	"bytes"
 	"errors"
@@ -135,6 +137,12 @@ func (c *GoCache) Set(key string, fh io.ReadCloser) (io.ReadCloser, error) {
 
 	r := bytes.NewReader(body)
 	return nopCloser{r}, nil
+}
+
+func (c *GoCache) Unset(key string) error {
+	c.cache.Delete(key)
+	atomic.AddInt64(&c.keys, -1)
+	return nil
 }
 
 func (c *GoCache) Size() int64 {

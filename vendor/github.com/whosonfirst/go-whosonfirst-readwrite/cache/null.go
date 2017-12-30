@@ -29,6 +29,10 @@ func (c *NullCache) Set(key string, fh io.ReadCloser) (io.ReadCloser, error) {
 	return fh, nil
 }
 
+func (c *NullCache) Unset(key string) error {
+	return nil
+}
+
 func (c *NullCache) Size() int64 {
 	return 0
 }
