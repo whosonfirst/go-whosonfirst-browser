@@ -98,7 +98,7 @@ then
     ARGS="${ARGS} -debug"
 fi
    
-echo ${STATICD} ${ARGS}
+# echo ${STATICD} ${ARGS}
 
 ${STATICD} ${ARGS}
 
