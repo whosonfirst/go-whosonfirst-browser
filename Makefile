@@ -88,12 +88,14 @@ localforage:
 
 tangram:
 	if test ! -d static/tangram; then mkdir -p static/tangram; fi
-	curl -s -o static/javascript/tangram.js https://mapzen.com/tangram/tangram.debug.js
-	curl -s -o static/javascript/tangram.min.js https://mapzen.com/tangram/tangram.min.js
+	curl -s -o static/javascript/tangram.js https://www.nextzen.org/tangram/tangram.debug.js
+	curl -s -o static/javascript/tangram.min.js https://www.nextzen.org/tangram/tangram.min.js
 
 refill:
 	if test ! -d static/tangram; then mkdir -p static/tangram; fi
-	curl -s -o static/tangram/refill-style.zip https://mapzen.com/carto/refill-style/refill-style.zip
+	curl -s -o static/tangram/refill-style.zip https://www.nextzen.org/carto/refill-style/refill-style.zip
+
+# mapzen.js has not been moved over to nextzen yet (https://www.nextzen.org/)
 
 mapzenjs:
 	if test ! -d static/javascript; then mkdir -p static/javascript; fi
@@ -117,13 +119,13 @@ bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-staticd cmd/wof-staticd.go
 
 debug: build
-	bin/wof-staticd -port 8080 -source http -http-root https://data.whosonfirst.org -cache lru -cache-arg 'CacheSize=500' -debug -mapzen-apikey ${MAPZEN_APIKEY}
+	bin/wof-staticd -port 8080 -source http -http-root https://data.whosonfirst.org -cache lru -cache-arg 'CacheSize=500' -debug -mapzen-apikey ${NEXTZEN_APIKEY}
 
 debug-local: build
-	bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -cache bigcache -cache-arg HardMaxCacheSize=100 -cache-arg MaxEntrySize=1024 -debug -mapzen-apikey ${MAPZEN_APIKEY}
+	bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -cache bigcache -cache-arg HardMaxCacheSize=100 -cache-arg MaxEntrySize=1024 -debug -mapzen-apikey ${NEXTZEN_APIKEY}
 
 docker-build:
 	docker build -t wof-static .
 
 docker-debug: docker-build
-	docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e HTTP_ROOT='https://whosonfirst.mapzen.com/data/' -e CACHE='gocache' -e CACHE_ARGS='DefaultExpiration=300 CleanupInterval=600' -e DEBUG='debug' -e MAPZEN_APIKEY=${MAPZEN_APIKEY} wof-static
+	docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e HTTP_ROOT='https://whosonfirst.mapzen.com/data/' -e CACHE='gocache' -e CACHE_ARGS='DefaultExpiration=300 CleanupInterval=600' -e DEBUG='debug' -e NEXTZEN_APIKEY=${NEXTZEN_APIKEY} wof-static
