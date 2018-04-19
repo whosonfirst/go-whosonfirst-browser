@@ -120,7 +120,6 @@ func main() {
 	}()
 
 	html_opts := http.NewDefaultHTMLOptions()
-	html_opts.MapzenAPIKey = *api_key
 
 	html_handler, err := http.HTMLHandler(cr, html_opts)
 

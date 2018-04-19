@@ -12,19 +12,18 @@ import (
 )
 
 type HTMLOptions struct {
-	MapzenAPIKey string
+     DataEndpoint string
 }
 
 type HTMLVars struct {
 	SPR          spr.StandardPlacesResult
 	LastModified string
-	MapzenAPIKey string
 }
 
 func NewDefaultHTMLOptions() HTMLOptions {
 
 	opts := HTMLOptions{
-		MapzenAPIKey: "mapzen-xxxxxx",
+	     DataEndpoint: "https://data.whosonfirst.org",
 	}
 
 	return opts
@@ -70,7 +69,6 @@ func HTMLHandler(r reader.Reader, opts HTMLOptions) (gohttp.Handler, error) {
 		vars := HTMLVars{
 			SPR:          s,
 			LastModified: lastmod,
-			MapzenAPIKey: opts.MapzenAPIKey,
 		}
 
 		err = t.Execute(rsp, vars)
