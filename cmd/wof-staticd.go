@@ -66,7 +66,8 @@ func main() {
 		} else {
 			r, e = s3_reader.NewS3Reader(cfg)
 		}
-
+	// case "sqlite":
+	// 	r, e = sqlite_reader.NewSQLiteReader(*source_dsn)
 	default:
 		e = errors.New("Unknown or unsupported source")
 	}
