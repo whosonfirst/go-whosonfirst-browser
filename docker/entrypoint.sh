@@ -12,7 +12,7 @@ fi
 
 if [ "${NEXTZEN_APIKEY}" != "" ]
 then
-    ARGS="${ARGS} -mapzen-apikey ${NEXTZEN_APIKEY}"
+    ARGS="${ARGS} -nextzen-api-key ${NEXTZEN_APIKEY}"
 fi
 
 if [ "${TEST}" != "" ]

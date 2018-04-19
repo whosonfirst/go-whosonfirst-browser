@@ -102,10 +102,10 @@ bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-staticd cmd/wof-staticd.go
 
 debug: build
-	bin/wof-staticd -port 8080 -source http -source-dsn https://data.whosonfirst.org -cache lru -cache-arg 'CacheSize=500' -debug -nextzen-apikey ${NEXTZEN_APIKEY}
+	bin/wof-staticd -port 8080 -source http -source-dsn https://data.whosonfirst.org -cache lru -cache-arg 'CacheSize=500' -debug -nextzen-api-key ${NEXTZEN_APIKEY}
 
 debug-local: build
-	bin/wof-staticd -port 8080 -source fs -source-dsn /usr/local/data/whosonfirst-data/data -cache bigcache -cache-arg HardMaxCacheSize=100 -cache-arg MaxEntrySize=1024 -debug -nextzen-apikey ${NEXTZEN_APIKEY}
+	bin/wof-staticd -port 8080 -source fs -source-dsn /usr/local/data/whosonfirst-data/data -cache bigcache -cache-arg HardMaxCacheSize=100 -cache-arg MaxEntrySize=1024 -debug -nextzen-api-key ${NEXTZEN_APIKEY}
 
 docker-build:
 	docker build -t wof-static .
