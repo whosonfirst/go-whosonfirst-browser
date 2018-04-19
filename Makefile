@@ -100,6 +100,7 @@ fmt:
 	go fmt utils/*.go
 
 bin: 	self
+	rm -rf bin/*
 	@GOPATH=$(GOPATH) go build -o bin/wof-staticd cmd/wof-staticd.go
 
 debug: build
