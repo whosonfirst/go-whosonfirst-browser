@@ -55,7 +55,7 @@ then
     ARGS="${ARGS} -debug"
 fi
    
-# echo ${STATICD} ${ARGS}
+echo "[DOCKER] ${STATICD} ${ARGS}"
 
 ${STATICD} ${ARGS}
 
