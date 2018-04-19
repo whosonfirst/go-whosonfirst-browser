@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-spr"
 	"github.com/whosonfirst/go-whosonfirst-static/assets/html"
@@ -12,18 +13,19 @@ import (
 )
 
 type HTMLOptions struct {
-     DataEndpoint string
+	DataEndpoint string
 }
 
 type HTMLVars struct {
 	SPR          spr.StandardPlacesResult
 	LastModified string
+	DataEndpoint string
 }
 
 func NewDefaultHTMLOptions() HTMLOptions {
 
 	opts := HTMLOptions{
-	     DataEndpoint: "https://data.whosonfirst.org",
+		DataEndpoint: "",
 	}
 
 	return opts
@@ -66,9 +68,19 @@ func HTMLHandler(r reader.Reader, opts HTMLOptions) (gohttp.Handler, error) {
 		now := time.Now()
 		lastmod := now.Format(time.RFC3339)
 
+		// this assumes the GeoJSONHandler being assigned to /data
+		// (20180419/thisisaaronland)
+
+		data_endpoint := fmt.Sprintf("%s//%s/data/", req.URL.Scheme, req.Host)
+
+		if opts.DataEndpoint != "" {
+			data_endpoint = opts.DataEndpoint
+		}
+
 		vars := HTMLVars{
 			SPR:          s,
 			LastModified: lastmod,
+			DataEndpoint: data_endpoint,
 		}
 
 		err = t.Execute(rsp, vars)

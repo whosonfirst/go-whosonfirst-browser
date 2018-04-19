@@ -17,6 +17,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-static/http"
 	"log"
 	gohttp "net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -36,6 +37,8 @@ func main() {
 	flag.Var(&cache_args, "cache-arg", "(0) or more user-defined '{KEY}={VALUE}' arguments to pass to the caching layer")
 
 	var test_reader = flag.String("test-reader", "", "Perform some basic sanity checking on the reader at startup")
+
+	var data_endpoint = flag.String("data-endpoint", "", "")
 
 	var api_key = flag.String("nextzen-api-key", "xxxxxxx", "")
 
@@ -120,6 +123,17 @@ func main() {
 	}()
 
 	html_opts := http.NewDefaultHTMLOptions()
+
+	if *data_endpoint != "" {
+
+		_, err = url.Parse(*data_endpoint)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		html_opts.DataEndpoint = *data_endpoint
+	}
 
 	html_handler, err := http.HTMLHandler(cr, html_opts)
 

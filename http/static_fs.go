@@ -35,10 +35,10 @@
 package http
 
 import (
-	"github.com/elazarl/go-bindata-assetfs"
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"github.com/elazarl/go-bindata-assetfs"
 	"io"
 	"io/ioutil"
 	"os"
@@ -373,7 +373,7 @@ func staticJavascriptWhosonfirstStaticIdJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.static.id.js", size: 6856, mode: os.FileMode(420), modTime: time.Unix(1524159889, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.static.id.js", size: 6856, mode: os.FileMode(420), modTime: time.Unix(1524162427, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -750,36 +750,36 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"static/javascript/localforage.js": staticJavascriptLocalforageJs,
-	"static/javascript/localforage.min.js": staticJavascriptLocalforageMinJs,
-	"static/javascript/slippymap.crosshairs.js": staticJavascriptSlippymapCrosshairsJs,
-	"static/javascript/whosonfirst.cache.js": staticJavascriptWhosonfirstCacheJs,
-	"static/javascript/whosonfirst.geojson.js": staticJavascriptWhosonfirstGeojsonJs,
+	"static/javascript/localforage.js":                  staticJavascriptLocalforageJs,
+	"static/javascript/localforage.min.js":              staticJavascriptLocalforageMinJs,
+	"static/javascript/slippymap.crosshairs.js":         staticJavascriptSlippymapCrosshairsJs,
+	"static/javascript/whosonfirst.cache.js":            staticJavascriptWhosonfirstCacheJs,
+	"static/javascript/whosonfirst.geojson.js":          staticJavascriptWhosonfirstGeojsonJs,
 	"static/javascript/whosonfirst.leaflet.handlers.js": staticJavascriptWhosonfirstLeafletHandlersJs,
-	"static/javascript/whosonfirst.leaflet.styles.js": staticJavascriptWhosonfirstLeafletStylesJs,
-	"static/javascript/whosonfirst.leaflet.utils.js": staticJavascriptWhosonfirstLeafletUtilsJs,
-	"static/javascript/whosonfirst.namify.js": staticJavascriptWhosonfirstNamifyJs,
-	"static/javascript/whosonfirst.net.js": staticJavascriptWhosonfirstNetJs,
-	"static/javascript/whosonfirst.properties.js": staticJavascriptWhosonfirstPropertiesJs,
-	"static/javascript/whosonfirst.render.js": staticJavascriptWhosonfirstRenderJs,
-	"static/javascript/whosonfirst.static.id.init.js": staticJavascriptWhosonfirstStaticIdInitJs,
-	"static/javascript/whosonfirst.static.id.js": staticJavascriptWhosonfirstStaticIdJs,
-	"static/javascript/whosonfirst.uri.js": staticJavascriptWhosonfirstUriJs,
-	"static/javascript/whosonfirst.www.js": staticJavascriptWhosonfirstWwwJs,
-	"static/css/whosonfirst.common.css": staticCssWhosonfirstCommonCss,
-	"static/css/whosonfirst.static.id.css": staticCssWhosonfirstStaticIdCss,
-	"static/css/whosonfirst.www.css": staticCssWhosonfirstWwwCss,
-	"static/fonts/Poppins-Light.ttf": staticFontsPoppinsLightTtf,
-	"static/fonts/Poppins-Medium.ttf": staticFontsPoppinsMediumTtf,
-	"static/fonts/Poppins-SemiBold.ttf": staticFontsPoppinsSemiboldTtf,
-	"static/fonts/Roboto-Light.ttf": staticFontsRobotoLightTtf,
-	"static/fonts/Roboto-LightItalic.ttf": staticFontsRobotoLightitalicTtf,
-	"static/fonts/Roboto-Regular.ttf": staticFontsRobotoRegularTtf,
-	"static/fonts/RobotoMono-Light.ttf": staticFontsRobotomonoLightTtf,
-	"static/fonts/glyphicons-halflings-regular.eot": staticFontsGlyphiconsHalflingsRegularEot,
-	"static/fonts/glyphicons-halflings-regular.svg": staticFontsGlyphiconsHalflingsRegularSvg,
-	"static/fonts/glyphicons-halflings-regular.ttf": staticFontsGlyphiconsHalflingsRegularTtf,
-	"static/fonts/glyphicons-halflings-regular.woff": staticFontsGlyphiconsHalflingsRegularWoff,
+	"static/javascript/whosonfirst.leaflet.styles.js":   staticJavascriptWhosonfirstLeafletStylesJs,
+	"static/javascript/whosonfirst.leaflet.utils.js":    staticJavascriptWhosonfirstLeafletUtilsJs,
+	"static/javascript/whosonfirst.namify.js":           staticJavascriptWhosonfirstNamifyJs,
+	"static/javascript/whosonfirst.net.js":              staticJavascriptWhosonfirstNetJs,
+	"static/javascript/whosonfirst.properties.js":       staticJavascriptWhosonfirstPropertiesJs,
+	"static/javascript/whosonfirst.render.js":           staticJavascriptWhosonfirstRenderJs,
+	"static/javascript/whosonfirst.static.id.init.js":   staticJavascriptWhosonfirstStaticIdInitJs,
+	"static/javascript/whosonfirst.static.id.js":        staticJavascriptWhosonfirstStaticIdJs,
+	"static/javascript/whosonfirst.uri.js":              staticJavascriptWhosonfirstUriJs,
+	"static/javascript/whosonfirst.www.js":              staticJavascriptWhosonfirstWwwJs,
+	"static/css/whosonfirst.common.css":                 staticCssWhosonfirstCommonCss,
+	"static/css/whosonfirst.static.id.css":              staticCssWhosonfirstStaticIdCss,
+	"static/css/whosonfirst.www.css":                    staticCssWhosonfirstWwwCss,
+	"static/fonts/Poppins-Light.ttf":                    staticFontsPoppinsLightTtf,
+	"static/fonts/Poppins-Medium.ttf":                   staticFontsPoppinsMediumTtf,
+	"static/fonts/Poppins-SemiBold.ttf":                 staticFontsPoppinsSemiboldTtf,
+	"static/fonts/Roboto-Light.ttf":                     staticFontsRobotoLightTtf,
+	"static/fonts/Roboto-LightItalic.ttf":               staticFontsRobotoLightitalicTtf,
+	"static/fonts/Roboto-Regular.ttf":                   staticFontsRobotoRegularTtf,
+	"static/fonts/RobotoMono-Light.ttf":                 staticFontsRobotomonoLightTtf,
+	"static/fonts/glyphicons-halflings-regular.eot":     staticFontsGlyphiconsHalflingsRegularEot,
+	"static/fonts/glyphicons-halflings-regular.svg":     staticFontsGlyphiconsHalflingsRegularSvg,
+	"static/fonts/glyphicons-halflings-regular.ttf":     staticFontsGlyphiconsHalflingsRegularTtf,
+	"static/fonts/glyphicons-halflings-regular.woff":    staticFontsGlyphiconsHalflingsRegularWoff,
 }
 
 // AssetDir returns the file names below a certain
@@ -821,43 +821,44 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"static": &bintree{nil, map[string]*bintree{
 		"css": &bintree{nil, map[string]*bintree{
-			"whosonfirst.common.css": &bintree{staticCssWhosonfirstCommonCss, map[string]*bintree{}},
+			"whosonfirst.common.css":    &bintree{staticCssWhosonfirstCommonCss, map[string]*bintree{}},
 			"whosonfirst.static.id.css": &bintree{staticCssWhosonfirstStaticIdCss, map[string]*bintree{}},
-			"whosonfirst.www.css": &bintree{staticCssWhosonfirstWwwCss, map[string]*bintree{}},
+			"whosonfirst.www.css":       &bintree{staticCssWhosonfirstWwwCss, map[string]*bintree{}},
 		}},
 		"fonts": &bintree{nil, map[string]*bintree{
-			"Poppins-Light.ttf": &bintree{staticFontsPoppinsLightTtf, map[string]*bintree{}},
-			"Poppins-Medium.ttf": &bintree{staticFontsPoppinsMediumTtf, map[string]*bintree{}},
-			"Poppins-SemiBold.ttf": &bintree{staticFontsPoppinsSemiboldTtf, map[string]*bintree{}},
-			"Roboto-Light.ttf": &bintree{staticFontsRobotoLightTtf, map[string]*bintree{}},
-			"Roboto-LightItalic.ttf": &bintree{staticFontsRobotoLightitalicTtf, map[string]*bintree{}},
-			"Roboto-Regular.ttf": &bintree{staticFontsRobotoRegularTtf, map[string]*bintree{}},
-			"RobotoMono-Light.ttf": &bintree{staticFontsRobotomonoLightTtf, map[string]*bintree{}},
-			"glyphicons-halflings-regular.eot": &bintree{staticFontsGlyphiconsHalflingsRegularEot, map[string]*bintree{}},
-			"glyphicons-halflings-regular.svg": &bintree{staticFontsGlyphiconsHalflingsRegularSvg, map[string]*bintree{}},
-			"glyphicons-halflings-regular.ttf": &bintree{staticFontsGlyphiconsHalflingsRegularTtf, map[string]*bintree{}},
+			"Poppins-Light.ttf":                 &bintree{staticFontsPoppinsLightTtf, map[string]*bintree{}},
+			"Poppins-Medium.ttf":                &bintree{staticFontsPoppinsMediumTtf, map[string]*bintree{}},
+			"Poppins-SemiBold.ttf":              &bintree{staticFontsPoppinsSemiboldTtf, map[string]*bintree{}},
+			"Roboto-Light.ttf":                  &bintree{staticFontsRobotoLightTtf, map[string]*bintree{}},
+			"Roboto-LightItalic.ttf":            &bintree{staticFontsRobotoLightitalicTtf, map[string]*bintree{}},
+			"Roboto-Regular.ttf":                &bintree{staticFontsRobotoRegularTtf, map[string]*bintree{}},
+			"RobotoMono-Light.ttf":              &bintree{staticFontsRobotomonoLightTtf, map[string]*bintree{}},
+			"glyphicons-halflings-regular.eot":  &bintree{staticFontsGlyphiconsHalflingsRegularEot, map[string]*bintree{}},
+			"glyphicons-halflings-regular.svg":  &bintree{staticFontsGlyphiconsHalflingsRegularSvg, map[string]*bintree{}},
+			"glyphicons-halflings-regular.ttf":  &bintree{staticFontsGlyphiconsHalflingsRegularTtf, map[string]*bintree{}},
 			"glyphicons-halflings-regular.woff": &bintree{staticFontsGlyphiconsHalflingsRegularWoff, map[string]*bintree{}},
 		}},
 		"javascript": &bintree{nil, map[string]*bintree{
-			"localforage.js": &bintree{staticJavascriptLocalforageJs, map[string]*bintree{}},
-			"localforage.min.js": &bintree{staticJavascriptLocalforageMinJs, map[string]*bintree{}},
-			"slippymap.crosshairs.js": &bintree{staticJavascriptSlippymapCrosshairsJs, map[string]*bintree{}},
-			"whosonfirst.cache.js": &bintree{staticJavascriptWhosonfirstCacheJs, map[string]*bintree{}},
-			"whosonfirst.geojson.js": &bintree{staticJavascriptWhosonfirstGeojsonJs, map[string]*bintree{}},
+			"localforage.js":                  &bintree{staticJavascriptLocalforageJs, map[string]*bintree{}},
+			"localforage.min.js":              &bintree{staticJavascriptLocalforageMinJs, map[string]*bintree{}},
+			"slippymap.crosshairs.js":         &bintree{staticJavascriptSlippymapCrosshairsJs, map[string]*bintree{}},
+			"whosonfirst.cache.js":            &bintree{staticJavascriptWhosonfirstCacheJs, map[string]*bintree{}},
+			"whosonfirst.geojson.js":          &bintree{staticJavascriptWhosonfirstGeojsonJs, map[string]*bintree{}},
 			"whosonfirst.leaflet.handlers.js": &bintree{staticJavascriptWhosonfirstLeafletHandlersJs, map[string]*bintree{}},
-			"whosonfirst.leaflet.styles.js": &bintree{staticJavascriptWhosonfirstLeafletStylesJs, map[string]*bintree{}},
-			"whosonfirst.leaflet.utils.js": &bintree{staticJavascriptWhosonfirstLeafletUtilsJs, map[string]*bintree{}},
-			"whosonfirst.namify.js": &bintree{staticJavascriptWhosonfirstNamifyJs, map[string]*bintree{}},
-			"whosonfirst.net.js": &bintree{staticJavascriptWhosonfirstNetJs, map[string]*bintree{}},
-			"whosonfirst.properties.js": &bintree{staticJavascriptWhosonfirstPropertiesJs, map[string]*bintree{}},
-			"whosonfirst.render.js": &bintree{staticJavascriptWhosonfirstRenderJs, map[string]*bintree{}},
-			"whosonfirst.static.id.init.js": &bintree{staticJavascriptWhosonfirstStaticIdInitJs, map[string]*bintree{}},
-			"whosonfirst.static.id.js": &bintree{staticJavascriptWhosonfirstStaticIdJs, map[string]*bintree{}},
-			"whosonfirst.uri.js": &bintree{staticJavascriptWhosonfirstUriJs, map[string]*bintree{}},
-			"whosonfirst.www.js": &bintree{staticJavascriptWhosonfirstWwwJs, map[string]*bintree{}},
+			"whosonfirst.leaflet.styles.js":   &bintree{staticJavascriptWhosonfirstLeafletStylesJs, map[string]*bintree{}},
+			"whosonfirst.leaflet.utils.js":    &bintree{staticJavascriptWhosonfirstLeafletUtilsJs, map[string]*bintree{}},
+			"whosonfirst.namify.js":           &bintree{staticJavascriptWhosonfirstNamifyJs, map[string]*bintree{}},
+			"whosonfirst.net.js":              &bintree{staticJavascriptWhosonfirstNetJs, map[string]*bintree{}},
+			"whosonfirst.properties.js":       &bintree{staticJavascriptWhosonfirstPropertiesJs, map[string]*bintree{}},
+			"whosonfirst.render.js":           &bintree{staticJavascriptWhosonfirstRenderJs, map[string]*bintree{}},
+			"whosonfirst.static.id.init.js":   &bintree{staticJavascriptWhosonfirstStaticIdInitJs, map[string]*bintree{}},
+			"whosonfirst.static.id.js":        &bintree{staticJavascriptWhosonfirstStaticIdJs, map[string]*bintree{}},
+			"whosonfirst.uri.js":              &bintree{staticJavascriptWhosonfirstUriJs, map[string]*bintree{}},
+			"whosonfirst.www.js":              &bintree{staticJavascriptWhosonfirstWwwJs, map[string]*bintree{}},
 		}},
 	}},
 }}
@@ -908,7 +909,6 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-
 
 func assetFS() *assetfs.AssetFS {
 	assetInfo := func(path string) (os.FileInfo, error) {
