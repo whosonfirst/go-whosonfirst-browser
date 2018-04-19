@@ -19,3 +19,7 @@ func (r *NullReader) Read(uri string) (io.ReadCloser, error) {
 
 	return bytes.ReadCloserFromBytes([]byte(uri))
 }
+
+func (r *NullReader) URI(uri string) string {
+     return uri
+}

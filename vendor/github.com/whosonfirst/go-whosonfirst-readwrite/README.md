@@ -1,8 +1,13 @@
 # go-whosonfirst-readwrite
 
+Go package for reading and writing Who's On First documents from a variety of sources.
+
 ## Important
 
-It's probably too soon, for you. If nothing else the documentation is incomplete
+Two things:
+
+1. It's probably too soon, for you. If nothing else the documentation is incomplete
+2. While it is tempting to imagine that this could be used as a general purpose abstraction layer for reading and writing a variety of documents this is probably premature and likely incorrect. This is really about WOF documents. Once we get _that_ working we'll think about how this code applies more generally.
 
 ## Install
 
@@ -73,6 +78,8 @@ type Writer interface {
 }
 ```
 
+## fs
+
 ### multi
 
 ### null
@@ -80,4 +87,10 @@ type Writer interface {
 ### s3
 
 ### stdout
+
+## Permissions
+
+_Please write me_
+
+## See also
 

@@ -19,3 +19,7 @@ func (w *NullWriter) Write(path string, fh io.ReadCloser) error {
 	// maybe drain fh here?
 	return nil
 }
+
+func (w *NullWriter) URI(path string) string {
+     return "/dev/null"
+}

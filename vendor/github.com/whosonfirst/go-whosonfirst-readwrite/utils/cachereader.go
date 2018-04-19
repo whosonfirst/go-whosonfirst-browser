@@ -15,14 +15,14 @@ type CacheReader struct {
 }
 
 type CacheReaderOptions struct {
-	Debug bool
-	Strict	bool	
+	Debug  bool
+	Strict bool
 }
 
 func NewDefaultCacheReaderOptions() (*CacheReaderOptions, error) {
 
 	opts := CacheReaderOptions{
-		Debug: false,
+		Debug:  false,
 		Strict: false,
 	}
 
@@ -83,7 +83,7 @@ func (r *CacheReader) Read(key string) (io.ReadCloser, error) {
 
 	if err != nil && r.options.Strict {
 		return nil, err
-	}	
-	
+	}
+
 	return fh, nil
 }

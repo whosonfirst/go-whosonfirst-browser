@@ -2,11 +2,48 @@ package bigcache
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 )
+
+var sink []byte
+
+func TestParallel(t *testing.T) {
+	t.Parallel()
+
+	// given
+	cache, _ := NewBigCache(DefaultConfig(5 * time.Second))
+	value := []byte("value")
+	var wg sync.WaitGroup
+	wg.Add(3)
+	keys := 1337
+
+	// when
+	go func() {
+		defer wg.Done()
+		for i := 0; i < keys; i++ {
+			cache.Set(fmt.Sprintf("key%d", i), value)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		for i := 0; i < keys; i++ {
+			sink, _ = cache.Get(fmt.Sprintf("key%d", i))
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		for i := 0; i < keys; i++ {
+			cache.Delete(fmt.Sprintf("key%d", i))
+		}
+	}()
+
+	// then
+	wg.Wait()
+}
 
 func TestWriteAndGetOnCache(t *testing.T) {
 	t.Parallel()
@@ -177,8 +214,8 @@ func TestCacheLen(t *testing.T) {
 		MaxEntrySize:       256,
 	})
 	keys := 1337
-	// when
 
+	// when
 	for i := 0; i < keys; i++ {
 		cache.Set(fmt.Sprintf("key%d", i), []byte("value"))
 	}
@@ -472,6 +509,43 @@ func TestHashCollision(t *testing.T) {
 
 	assert.NotEqual(t, "", ml.lastFormat)
 	assert.Equal(t, cache.Stats().Collisions, int64(1))
+}
+
+func TestNilValueCaching(t *testing.T) {
+	t.Parallel()
+
+	// given
+	cache, _ := NewBigCache(Config{
+		Shards:             1,
+		LifeWindow:         5 * time.Second,
+		MaxEntriesInWindow: 1,
+		MaxEntrySize:       1,
+		HardMaxCacheSize:   1,
+	})
+
+	// when
+	cache.Set("Kierkegaard", []byte{})
+	cachedValue, err := cache.Get("Kierkegaard")
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, []byte{}, cachedValue)
+
+	// when
+	cache.Set("Sartre", nil)
+	cachedValue, err = cache.Get("Sartre")
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, []byte{}, cachedValue)
+
+	// when
+	cache.Set("Nietzsche", []byte(nil))
+	cachedValue, err = cache.Get("Nietzsche")
+
+	// then
+	assert.NoError(t, err)
+	assert.Equal(t, []byte{}, cachedValue)
 }
 
 type mockedLogger struct {

@@ -1,6 +1,7 @@
 package writer
 
 import (
+       "fmt"
 	"io"
 	_ "log"
 	"os"
@@ -19,4 +20,8 @@ func NewStdoutWriter() (Writer, error) {
 func (w *StdoutWriter) Write(path string, fh io.ReadCloser) error {
 	_, err := io.Copy(os.Stdout, fh)
 	return err
+}
+
+func (w *StdoutWriter) URI(path string) string {
+     return fmt.Sprintf("stdout://%s", path)
 }

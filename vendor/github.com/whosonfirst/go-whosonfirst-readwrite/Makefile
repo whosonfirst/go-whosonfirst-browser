@@ -10,6 +10,7 @@ self:   prep rmdeps
 	cp -r bytes src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r cache src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r flags src/github.com/whosonfirst/go-whosonfirst-readwrite/
+	cp -r http src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r reader src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r utils src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r writer src/github.com/whosonfirst/go-whosonfirst-readwrite/
@@ -24,7 +25,6 @@ docker-build:
 	docker build -t wof-readwrited .
 
 deps:
-	@GOPATH=$(GOPATH) go get -u "github.com/aws/aws-sdk-go"
 	@GOPATH=$(GOPATH) go get -u "github.com/allegro/bigcache"
 	@GOPATH=$(GOPATH) go get -u "github.com/bradfitz/gomemcache/memcache"
 	@GOPATH=$(GOPATH) go get -u "github.com/hashicorp/golang-lru"
@@ -40,11 +40,12 @@ vendor-deps: rmdeps deps
 fmt:
 	go fmt bytes/*.go
 	go fmt cache/*.go
-	go fmt flags/*.go
 	go fmt cmd/*.go
+	go fmt flags/*.go
+	go fmt http/*.go
 	go fmt reader/*.go
 	go fmt utils/*.go
 	go fmt writer/*.go
 
 bin: 	self
-	@GOPATH=$(GOPATH) go build -o bin/wof-reader cmd/wof-reader.go
+	# @GOPATH=$(GOPATH) go build -o bin/wof-reader cmd/wof-reader.go

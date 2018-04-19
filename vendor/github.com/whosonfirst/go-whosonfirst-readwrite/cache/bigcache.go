@@ -3,14 +3,14 @@ package cache
 // https://godoc.org/github.com/allegro/bigcache
 
 import (
-        "errors"
+	"errors"
 	"github.com/allegro/bigcache"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/bytes"
 	"io"
 	"io/ioutil"
 	_ "log"
-	"strings"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -131,7 +131,7 @@ func (c *BigCacheCache) Get(key string) (io.ReadCloser, error) {
 		atomic.AddInt64(&c.misses, 1)
 
 		if strings.HasSuffix(err.Error(), "not found") {
-		   return nil, errors.New("CACHE MISS")
+			return nil, errors.New("CACHE MISS")
 		}
 
 		return nil, err
