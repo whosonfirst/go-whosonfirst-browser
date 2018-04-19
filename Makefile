@@ -53,8 +53,8 @@ assets: self
 static: self
 	@GOPATH=$(GOPATH) go build -o bin/go-bindata ./vendor/github.com/zendesk/go-bindata/go-bindata/
 	@GOPATH=$(GOPATH) go build -o bin/go-bindata-assetfs vendor/github.com/elazarl/go-bindata-assetfs/go-bindata-assetfs/main.go
-	rm -f static/css/*~ static/javascript/*~ static/tangram/*~ static/fonts/*~
-	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -pkg http static/javascript static/css static/tangram static/fonts
+	rm -f static/css/*~ static/javascript/*~ static/fonts/*~
+	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -pkg http static/javascript static/css static/fonts
 	if test -f http/static_fs.go; then rm http/static_fs.go; fi
 	mv bindata.go http/static_fs.go
 
@@ -83,29 +83,9 @@ wof-css:
 	if test ! -d static/css; then mkdir -p static/css; fi
 	curl -s -o static/css/whosonfirst.www.css https://raw.githubusercontent.com/whosonfirst/whosonfirst-www/master/www/css/mapzen.whosonfirst.css
 
-maps: mapzenjs tangram refill crosshairs
-
 localforage:
 	curl -s -o static/javascript/localforage.js https://raw.githubusercontent.com/mozilla/localForage/master/dist/localforage.js
 	curl -s -o static/javascript/localforage.min.js https://raw.githubusercontent.com/mozilla/localForage/master/dist/localforage.min.js
-
-tangram:
-	if test ! -d static/tangram; then mkdir -p static/tangram; fi
-	curl -s -o static/javascript/tangram.js https://www.nextzen.org/tangram/tangram.debug.js
-	curl -s -o static/javascript/tangram.min.js https://www.nextzen.org/tangram/tangram.min.js
-
-refill:
-	if test ! -d static/tangram; then mkdir -p static/tangram; fi
-	curl -s -o static/tangram/refill-style.zip https://www.nextzen.org/carto/refill-style/refill-style.zip
-
-# mapzen.js has not been moved over to nextzen yet (https://www.nextzen.org/)
-
-mapzenjs:
-	if test ! -d static/javascript; then mkdir -p static/javascript; fi
-	if test ! -d static/css; then mkdir -p static/css; fi
-	curl -s -o static/css/mapzen.js.css https://mapzen.com/js/mapzen.css
-	curl -s -o static/javascript/mapzen.js https://mapzen.com/js/mapzen.js
-	curl -s -o static/javascript/mapzen.min.js https://mapzen.com/js/mapzen.min.js
 
 crosshairs:
 	if test ! -d static/javascript; then mkdir -p static/javascript; fi
@@ -122,13 +102,13 @@ bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-staticd cmd/wof-staticd.go
 
 debug: build
-	bin/wof-staticd -port 8080 -source http -http-root https://data.whosonfirst.org -cache lru -cache-arg 'CacheSize=500' -debug -mapzen-apikey ${NEXTZEN_APIKEY}
+	bin/wof-staticd -port 8080 -source http -source-dsn https://data.whosonfirst.org -cache lru -cache-arg 'CacheSize=500' -debug -nextzen-apikey ${NEXTZEN_APIKEY}
 
 debug-local: build
-	bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/data -cache bigcache -cache-arg HardMaxCacheSize=100 -cache-arg MaxEntrySize=1024 -debug -mapzen-apikey ${NEXTZEN_APIKEY}
+	bin/wof-staticd -port 8080 -source fs -source-dsn /usr/local/data/whosonfirst-data/data -cache bigcache -cache-arg HardMaxCacheSize=100 -cache-arg MaxEntrySize=1024 -debug -nextzen-apikey ${NEXTZEN_APIKEY}
 
 docker-build:
 	docker build -t wof-static .
 
 docker-debug: docker-build
-	docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e HTTP_ROOT='https://whosonfirst.mapzen.com/data/' -e CACHE='gocache' -e CACHE_ARGS='DefaultExpiration=300 CleanupInterval=600' -e DEBUG='debug' -e NEXTZEN_APIKEY=${NEXTZEN_APIKEY} wof-static
+	docker run -it -p 6161:8080 -e HOST='0.0.0.0' -e SOURCE='http' -e SOURCE_DSN='https://data.whosonfirst.org/' -e CACHE='gocache' -e CACHE_ARGS='DefaultExpiration=300 CleanupInterval=600' -e DEBUG='debug' -e NEXTZEN_APIKEY=${NEXTZEN_APIKEY} wof-static
