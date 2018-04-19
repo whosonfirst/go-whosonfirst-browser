@@ -65,8 +65,9 @@ whosonfirst.static.id = (function(){
 			var bounds = [ sw, ne ];
 			
 			var body = document.body;
-			var api_key = body.getAttribute("data-mapzen-apikey");
+			var api_key = body.getAttribute("data-mapzen-api-key");
 			
+			/*
 			L.Mapzen.apiKey = api_key;
 			
 			var map_opts = { tangramOptions: {
@@ -74,14 +75,78 @@ whosonfirst.static.id = (function(){
 			}};
 			
 			map = L.Mapzen.map('map', map_opts);
+			*/
+
+			var sources = {
+			    mapzen: {
+				url: 'https://{s}.tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.topojson',
+				url_subdomains: ['a', 'b', 'c', 'd'],
+				url_params: {
+				    api_key: api_key	// not clear this actually works... ?
+				},
+				tile_size: 512,
+				max_zoom: 15
+			    }
+			};
+			
+			var scene = {
+			    import: [
+				     "/tangram/refill-style.zip",
+				     "/tangram/refill-style-themes-label.zip",
+				     ],
+			    sources: sources,
+			    global: {
+				sdk_mapzen_api_key: api_key,
+			    },
+			};
+			
+			var attributions = {
+			    "Tangram": "https://github.com/tangrams/",
+			    "© OSM contributors": "http://www.openstreetmap.org/",
+			    "Who\"s On First": "http://www.whosonfirst.org/",
+			    "Nextzen": "https://nextzen.org/",
+			};
+			
+			var attrs = [];
+			
+			for (var label in attributions){
+			    
+			    var link = attrs[label];
+			    
+			    if (! link){
+				attrs.push(label);
+				continue;
+			    }
+			    
+			    var anchor = '<a href="' + link + '" target="_blank">' + enc_label + '</a>';
+			    attrs.push(anchor);
+			}
+			
+			var str_attributions = attrs.join(" | ");
+			
+			// waiting for nextzen.js to be updated to do all the things - that said it's
+			// not entirely clear we need all of (map/next)zen.js and could probably get
+			// away with leaflet + tangram but for now we'll just keep on as-is...
+			// (20180304/thisisaaronland)
+			
+			L.Mapzen.apiKey = api_key;
+			
+			var map_opts = {
+			    tangramOptions: {
+				scene: scene,
+				attribution: attributions,
+			    }
+			};
+			
+			map = L.Mapzen.map('map', map_opts);
 			
 			if ((minlat == maxlat) && (minlon == maxlon)){
-				map.setView(sw, 15);
+			    map.setView(sw, 15);
 			}
 			
 			else {
-				var fit_opts = {padding: [50, 50]};
-				map.fitBounds(bounds, fit_opts);
+			    var fit_opts = {padding: [50, 50]};
+			    map.fitBounds(bounds, fit_opts);
 			}
 			
 		},

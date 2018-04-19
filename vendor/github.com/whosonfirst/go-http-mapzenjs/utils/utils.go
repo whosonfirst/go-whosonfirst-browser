@@ -21,8 +21,8 @@ func AppendMapzenJSAssets(mux *http.ServeMux) error {
 func AssignMapzenJSAssetsURLs(mux *http.ServeMux, handler http.Handler) error {
 
 	mux.Handle("/javascript/mapzen.min.js", handler)
-	mux.Handle("/javascript/tangram.min.js", handler)
 	mux.Handle("/javascript/mapzen.js", handler)
+	mux.Handle("/javascript/tangram.min.js", handler)
 	mux.Handle("/javascript/tangram.js", handler)
 	mux.Handle("/css/mapzen.js.css", handler)
 	mux.Handle("/tangram/refill-style.zip", handler)

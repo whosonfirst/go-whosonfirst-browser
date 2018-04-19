@@ -12,6 +12,18 @@ make bin
 
 All of this package's dependencies are bundled with the code in the `vendor` directory.
 
+## A word about "Mapzen"
+
+[Mapzen is no more](https://mapzen.com/blog/shutdown/). As I write this I am not really sure what the state of
+[nextzen.js](https://github.com/nextzen/nextzen.js) (formerly `mapzen.js`)
+is. To top it off all the map vector tiles are now called _Tilezen_ but still
+hosted under the [Nextzen](https://www.nextzen.org/) domain.
+
+It's a bit confusing but so is life.
+
+So while this package bundles and exposes a copy of the old `mapzen.js` it
+_won't work_.
+
 ## Handlers
 
 ### MapzenJSHandler(http.Handler, MapzenJSOptions) (http.Handler, error)

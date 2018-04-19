@@ -44,19 +44,19 @@ vendor-deps: rmdeps deps
 	rm -rf src
 
 assets: self
-	@GOPATH=$(GOPATH) go build -o bin/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
+	@GOPATH=$(GOPATH) go build -o bin/go-bindata ./vendor/github.com/zendesk/go-bindata/go-bindata/
 	rm -rf templates/*/*~
 	rm -rf assets
 	mkdir -p assets/html
 	@GOPATH=$(GOPATH) bin/go-bindata -pkg html -o assets/html/html.go templates/html
 
 static: self
-	@GOPATH=$(GOPATH) go build -o bin/go-bindata ./vendor/github.com/jteeuwen/go-bindata/go-bindata/
+	@GOPATH=$(GOPATH) go build -o bin/go-bindata ./vendor/github.com/zendesk/go-bindata/go-bindata/
 	@GOPATH=$(GOPATH) go build -o bin/go-bindata-assetfs vendor/github.com/elazarl/go-bindata-assetfs/go-bindata-assetfs/main.go
 	rm -f static/css/*~ static/javascript/*~ static/tangram/*~ static/fonts/*~
 	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -pkg http static/javascript static/css static/tangram static/fonts
-	rm http/static_fs.go
-	mv bindata_assetfs.go http/static_fs.go
+	if test -f http/static_fs.go; then rm http/static_fs.go; fi
+	mv bindata.go http/static_fs.go
 
 build:
 	@make static
