@@ -150,6 +150,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	geojson_handler, err := http.GeoJSONHandler(cr)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	ping_handler, err := http.PingHandler()
 
 	if err != nil {
@@ -168,6 +174,8 @@ func main() {
 		ext := filepath.Ext(path)
 
 		switch ext {
+		case ".geojson":
+			geojson_handler.ServeHTTP(rsp, req)
 		case ".svg":
 			svg_handler.ServeHTTP(rsp, req)
 		case ".spr":
@@ -186,6 +194,7 @@ func main() {
 	mux.Handle("/id/", id_handler)
 	mux.Handle("/svg/", svg_handler)
 	mux.Handle("/spr/", spr_handler)
+	mux.Handle("/data/", geojson_handler)
 
 	mux.Handle("/ping", ping_handler)
 
