@@ -152,13 +152,25 @@ func main() {
 
 	// we set mapzen js assets stuff below
 
-	svg_handler, err := http.SVGHandler(cr)
+	svg_opts, err := http.NewDefaultSVGOptions()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	svg_handler, err := http.SVGHandler(cr, svg_opts)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	png_handler, err := http.RasterHandler(cr, "png")
+	png_opts, err := http.NewDefaultRasterOptions()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	png_handler, err := http.RasterHandler(cr, png_opts)
 
 	if err != nil {
 		log.Fatal(err)
