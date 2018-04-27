@@ -157,7 +157,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	svg_handler, err := http.SVGHandler(cr, svg_opts)
 
 	if err != nil {

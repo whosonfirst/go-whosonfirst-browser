@@ -15,7 +15,7 @@ type SVGSize struct {
 }
 
 type SVGOptions struct {
-	Sizes  map[string]SVGSize
+	Sizes map[string]SVGSize
 }
 
 func NewDefaultSVGOptions() (*SVGOptions, error) {
@@ -45,7 +45,7 @@ func NewDefaultSVGOptions() (*SVGOptions, error) {
 	}
 
 	opts := SVGOptions{
-		Sizes:  sz,
+		Sizes: sz,
 	}
 
 	return &opts, nil
