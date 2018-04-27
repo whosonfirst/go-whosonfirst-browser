@@ -158,6 +158,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	png_handler, err := http.RasterHandler(cr, "png")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	spr_handler, err := http.SPRHandler(cr)
 
 	if err != nil {
@@ -190,6 +196,8 @@ func main() {
 		switch ext {
 		case ".geojson":
 			geojson_handler.ServeHTTP(rsp, req)
+		case ".png":
+			png_handler.ServeHTTP(rsp, req)
 		case ".svg":
 			svg_handler.ServeHTTP(rsp, req)
 		case ".spr":
@@ -206,6 +214,7 @@ func main() {
 	mux := gohttp.NewServeMux()
 
 	mux.Handle("/id/", id_handler)
+	mux.Handle("/png/", png_handler)
 	mux.Handle("/svg/", svg_handler)
 	mux.Handle("/spr/", spr_handler)
 	mux.Handle("/data/", geojson_handler)

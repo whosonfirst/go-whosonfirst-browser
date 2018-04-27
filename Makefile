@@ -30,8 +30,11 @@ deps:
 	# @GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-readwrite-sqlite/..."
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-spr"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-svg"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-image"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-uri"
 	rm -rf src/github.com/zendesk/go-bindata/testdata
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-image/vendor/github.com/whosonfirst/go-whosonfirst-geojson-v2
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-image/vendor/github.com/whosonfirst/go-whosonfirst-svg
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-geojson-v2
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-flags
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-spr

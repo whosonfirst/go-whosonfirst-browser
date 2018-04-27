@@ -41,4 +41,5 @@ fmt:
 	go fmt cmd/*.go
 
 bin: 	self
+	@GOPATH=$(GOPATH) go build -o bin/wof-feature2svg cmd/wof-feature2svg.go
 	@GOPATH=$(GOPATH) go build -o bin/wof-build-svg cmd/wof-build-svg.go

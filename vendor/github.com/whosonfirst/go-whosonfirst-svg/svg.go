@@ -56,6 +56,8 @@ func FeatureToSVG(f geojson.Feature, opts *Options) error {
 		return err
 	}
 
+	attrs["viewBox"] = fmt.Sprintf("0 0 %0.2f %0.2f", opts.Width, opts.Height)
+	
 	namespaces := map[string]string{
 		"xmlns": "http://www.w3.org/2000/svg",
 	}
