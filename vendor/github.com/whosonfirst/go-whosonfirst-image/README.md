@@ -31,9 +31,11 @@ func main() {
      	path := "/path/to/feature.geojson"
 	
 	f, _ := feature.LoadFeatureFromFile(path)
-	img, _ := image.FeatureToImage(f)
 
-	png.Encode(os.Stdout, img)
+	opts := image.NewDefaultOptions()
+	img, _ := image.FeatureToImage(f, opts)
+
+	png.Encode(opts.Writer, img)
 }
 ```
 

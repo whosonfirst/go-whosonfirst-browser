@@ -7,7 +7,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-image"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-static/utils"
-	"log"
 	gohttp "net/http"
 )
 
@@ -23,6 +22,12 @@ type RasterOptions struct {
 }
 
 func NewDefaultRasterOptions() (*RasterOptions, error) {
+
+	xsm := RasterSize{
+		Label:     "xsm",
+		MaxHeight: 100,
+		MaxWidth:  100,
+	}
 
 	sm := RasterSize{
 		Label:     "sm",
@@ -43,6 +48,7 @@ func NewDefaultRasterOptions() (*RasterOptions, error) {
 	}
 
 	sz := map[string]RasterSize{
+		"xsm": xsm,
 		"sm":  sm,
 		"med": med,
 		"lg":  lg,
@@ -96,15 +102,16 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (gohttp.Handler, error)
 			return
 		}
 
-		log.Println(sz_info)
+		img_opts := image.NewDefaultOptions()
+
+		img_opts.Writer = rsp
+		img_opts.Height = sz_info.MaxHeight
+		img_opts.Width = sz_info.MaxWidth
 
 		content_type := fmt.Sprintf("image/%s", opts.Format)
 		rsp.Header().Set("Content-Type", content_type)
 
-		// THIS INTERFACE _WILL_ CHANGE SO DON'T GET TOO USED TO IT
-		// (20180427/thisisaaronland)
-
-		image.FeatureToPNG(f, rsp)
+		image.FeatureToPNG(f, img_opts)
 	}
 
 	h := gohttp.HandlerFunc(fn)

@@ -13,15 +13,32 @@ import (
 	"os"
 )
 
-func FeatureToPNG(f geojson.Feature, fh io.Writer) error {
+type Options struct {
+	Width  int
+	Height int
+	Writer io.Writer
+}
 
-	img, err := FeatureToImage(f)
+func NewDefaultOptions() *Options {
+
+	opts := Options{
+		Width:  1024,
+		Height: 1024,
+		Writer: os.Stdout,
+	}
+
+	return &opts
+}
+
+func FeatureToPNG(f geojson.Feature, opts *Options) error {
+
+	img, err := FeatureToImage(f, opts)
 
 	if err != nil {
 		return err
 	}
 
-	err = png.Encode(fh, img)
+	err = png.Encode(opts.Writer, img)
 
 	if err != nil {
 		return err
@@ -30,7 +47,7 @@ func FeatureToPNG(f geojson.Feature, fh io.Writer) error {
 	return nil
 }
 
-func FeatureToImage(f geojson.Feature) (image.Image, error) {
+func FeatureToImage(f geojson.Feature, opts *Options) (image.Image, error) {
 
 	tmpfile, err := ioutil.TempFile("", "svg")
 
@@ -38,14 +55,23 @@ func FeatureToImage(f geojson.Feature) (image.Image, error) {
 		return nil, err
 	}
 
-	defer os.Remove(tmpfile.Name())
+	defer func() {
+
+		_, err := os.Stat(tmpfile.Name())
+
+		if !os.IsNotExist(err) {
+			os.Remove(tmpfile.Name())
+		}
+	}()
 
 	// log.Println("TMP", tmpfile.Name())
 
-	opts := svg.NewDefaultOptions()
-	opts.Writer = tmpfile
+	svg_opts := svg.NewDefaultOptions()
+	svg_opts.Writer = tmpfile
+	svg_opts.Height = float64(opts.Height)
+	svg_opts.Width = float64(opts.Width)
 
-	err = svg.FeatureToSVG(f, opts)
+	err = svg.FeatureToSVG(f, svg_opts)
 
 	if err != nil {
 		return nil, err

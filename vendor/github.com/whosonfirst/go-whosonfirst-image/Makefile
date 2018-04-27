@@ -18,6 +18,7 @@ build:	fmt bin
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/srwiley/oksvg"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-svg"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/warning"
 	mv src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-geojson-v2 src/github.com/whosonfirst
 	mv src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-flags src/github.com/whosonfirst
 	mv src/github.com/whosonfirst/go-whosonfirst-svg/vendor/github.com/whosonfirst/go-whosonfirst-spr src/github.com/whosonfirst
