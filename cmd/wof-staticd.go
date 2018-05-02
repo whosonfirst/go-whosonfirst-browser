@@ -10,6 +10,7 @@ import (
 	http_reader "github.com/whosonfirst/go-whosonfirst-readwrite-http/reader"
 	s3_config "github.com/whosonfirst/go-whosonfirst-readwrite-s3/config"
 	s3_reader "github.com/whosonfirst/go-whosonfirst-readwrite-s3/reader"
+	sqlite_reader "github.com/whosonfirst/go-whosonfirst-readwrite-sqlite/reader"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/cache"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/flags"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
@@ -69,8 +70,8 @@ func main() {
 		} else {
 			r, e = s3_reader.NewS3Reader(cfg)
 		}
-	// case "sqlite":
-	// 	r, e = sqlite_reader.NewSQLiteReader(*source_dsn)
+	case "sqlite":
+		r, e = sqlite_reader.NewSQLiteReader(*source_dsn)
 	default:
 		e = errors.New("Unknown or unsupported source")
 	}
