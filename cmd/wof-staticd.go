@@ -8,6 +8,7 @@ import (
 	mapzenjs_utils "github.com/whosonfirst/go-http-mapzenjs/utils"
 	fs_reader "github.com/whosonfirst/go-whosonfirst-readwrite-fs/reader"
 	http_reader "github.com/whosonfirst/go-whosonfirst-readwrite-http/reader"
+	mysql_reader "github.com/whosonfirst/go-whosonfirst-readwrite-mysql/reader"
 	s3_config "github.com/whosonfirst/go-whosonfirst-readwrite-s3/config"
 	s3_reader "github.com/whosonfirst/go-whosonfirst-readwrite-s3/reader"
 	sqlite_reader "github.com/whosonfirst/go-whosonfirst-readwrite-sqlite/reader"
@@ -61,6 +62,8 @@ func main() {
 		r, e = fs_reader.NewFSReader(*source_dsn)
 	case "http":
 		r, e = http_reader.NewHTTPReader(*source_dsn)
+	case "mysql":
+		r, e = mysql_reader.NewMySQLGeoJSONReader(*source_dsn)
 	case "s3":
 
 		cfg, err := s3_config.NewS3ConfigFromString(*source_dsn)

@@ -26,6 +26,7 @@ deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-readwrite/..."
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-readwrite-fs/..."
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-readwrite-http/..."
+	@GOPATH=$(GOPATH) go get  "github.com/whosonfirst/go-whosonfirst-readwrite-mysql/..."
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-readwrite-s3/..."
 	@GOPATH=$(GOPATH) go get  "github.com/whosonfirst/go-whosonfirst-readwrite-sqlite/..."
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-spr"
