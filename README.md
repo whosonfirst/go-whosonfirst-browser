@@ -12,6 +12,53 @@ make bin
 
 All of this package's dependencies are bundled with the code in the `vendor` directory.
 
+## Tools
+
+### wof-staticd
+
+```
+./bin/wof-staticd -h
+Usage of ./bin/wof-staticd:
+  -cache string
+    	 ... (default "null")
+  -cache-arg value
+    	     (0) or more user-defined '{KEY}={VALUE}' arguments to pass to the caching layer
+  -data-endpoint string
+    		 
+  -debug
+	Enable debugging.
+  -enable-all
+	Enable all the available output handlers.
+  -enable-data
+	Enable the 'geojson' and 'spr' output handlers.
+  -enable-geojson
+	Enable the 'geojson' output handler. (default true)
+  -enable-graphics
+	Enable the 'png' and 'svg' output handlers.
+  -enable-html
+	Enable the 'html' (or human-friendly) output handler. (default true)
+  -enable-png
+	Enable the 'png' output handler.
+  -enable-spr
+	Enable the 'spr' (or "standard places response") output handler. (default true)
+  -enable-svg
+	Enable the 'svg' output handler.
+  -host string
+    	The hostname to listen for requests on (default "localhost")
+  -httptest.serve string
+    		  if non-empty, httptest.NewServer serves on this address and blocks
+  -nextzen-api-key string
+    		   A valid Nextzen API key (https://developers.nextzen.org/). (default "xxxxxxx")
+  -port int
+    	The port number to listen for requests on (default 8080)
+  -source string
+    	  Valid sources are: fs, http, mysql, s3, sqlite (default "fs")
+  -source-dsn string
+    	      A valid DSN string specific to the source you've chosen.
+  -test-reader string
+    	       Perform some basic sanity checking on the reader at startup
+```
+
 ## Example
 
 ```
