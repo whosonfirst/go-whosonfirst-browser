@@ -9,6 +9,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-uri"
+	"github.com/whosonfirst/warning"
 	"net/http"
 	"path/filepath"
 	"regexp"
@@ -74,7 +75,7 @@ func FeatureFromRequest(req *http.Request, r reader.Reader) (geojson.Feature, er
 
 	f, err := feature.LoadFeatureFromReader(fh)
 
-	if err != nil {
+	if err != nil && !warning.IsWarning(err) {
 		return nil, err, http.StatusInternalServerError
 	}
 
