@@ -1,9 +1,12 @@
+// Copyright 2018 The oksvg Authors. All rights reserved.
+// created: 2018 by S.R.Wiley
 package oksvg_test
 
 import (
 	"bufio"
 	"fmt"
 	"image"
+	"math"
 	"os"
 
 	"image/png"
@@ -12,6 +15,8 @@ import (
 
 	. "github.com/srwiley/oksvg"
 	. "github.com/srwiley/rasterx"
+
+	//"github.com/srwiley/go/scanFT"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -49,20 +54,36 @@ const testSVG11 = `M20,50 c200,200 800,200 400,300,200,200 800,200 400,300s500,3
 const testSVG12 = `M100,100 Q400,100 250,250 T400,400z`
 const testSVG13 = `M100,100 Q400,100 250,250 t150,150,150,150z`
 
-func DrawIcon(t *testing.T, iconPath string) {
+func DrawIcon(t *testing.T, iconPath string) image.Image {
 	icon, errSvg := ReadIcon(iconPath, WarnErrorMode)
 	if errSvg != nil {
 		t.Error(errSvg)
-		return
+		return nil
 	}
-	img := image.NewRGBA(image.Rect(0, 0, int(icon.ViewBox.W), int(icon.ViewBox.H)))
-	painter := NewRGBAPainter(img)
-	raster := NewDasher(int(icon.ViewBox.W), int(icon.ViewBox.H))
-	icon.Draw(raster, painter, 1.0)
-	p := strings.Split(iconPath, "/")
-	err := SaveToPngFile(fmt.Sprintf("testdata/%s.png", p[len(p)-1]), img)
-	if err != nil {
-		t.Error(err)
+	w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+
+	// Uncomment the next three lines and comment the three after to use ScannerFT
+	//	painter := scanFT.NewRGBAPainter(img)
+	//	scannerFT := scanFT.NewScannerFT(w, h, painter)
+	//	raster := NewDasher(w, h, scannerFT)
+	//tb := img.Bounds()
+	//tb.Max.X /= 2
+	scannerGV := NewScannerGV(w, h, img, img.Bounds())
+	raster := NewDasher(w, h, scannerGV)
+
+	icon.Draw(raster, 1.0)
+	return img
+}
+
+func SaveIcon(t *testing.T, iconPath string) {
+	img := DrawIcon(t, iconPath)
+	if img != nil {
+		p := strings.Split(iconPath, "/")
+		err := SaveToPngFile(fmt.Sprintf("testdata/%s.png", p[len(p)-1]), img)
+		if err != nil {
+			t.Error(err)
+		}
 	}
 }
 
@@ -88,54 +109,47 @@ func SaveToPngFile(filePath string, m image.Image) error {
 }
 
 func _TestSvgPathsStroke(t *testing.T) {
-	for _, v := range []string{"fill", "stroke"} {
-		for i, p := range []string{testArco, testArco2, testArcoS,
-			testSVG0, testSVG1, testSVG2, testSVG3, testSVG4, testSVG5,
-			testSVG6, testSVG7, testSVG8, testSVG9, testSVG10,
-			testSVG11, testSVG12, testSVG13,
-		} {
-			//t.Log(p)
-			img := image.NewRGBA(image.Rect(0, 0, 1600, 1600))
-			painter := NewRGBAPainter(img)
-			raster := NewDasher(1600, 1600)
-			c := &SvgCursor{}
-			d := DefaultStyle
-			if v == "stroke" {
-				d.DoFill = false
-				d.DoLine = true
-			}
-			icon := SvgIcon{}
+	for i, p := range []string{testArco, testArco2, testArcoS,
+		testSVG0, testSVG1, testSVG2, testSVG3, testSVG4, testSVG5,
+		testSVG6, testSVG7, testSVG8, testSVG9, testSVG10,
+		testSVG11, testSVG12, testSVG13,
+	} {
+		w := 1600
+		img := image.NewRGBA(image.Rect(0, 0, w, w))
 
-			err := c.CompilePath(p)
-			if err != nil {
-				t.Error(err)
-			}
-			icon.SVGPaths = append(icon.SVGPaths, SvgPath{d, c.Path})
-			icon.Draw(raster, painter, 1)
+		scannerGV := NewScannerGV(w, w, img, img.Bounds())
+		raster := NewDasher(w, w, scannerGV)
 
-			err = SaveToPngFile(fmt.Sprintf("testdata/%s%d.png", v, i), img)
-			if err != nil {
-				t.Error(err)
-			}
+		c := &PathCursor{}
+		d := DefaultStyle
+		icon := SvgIcon{}
+
+		err := c.CompilePath(p)
+		if err != nil {
+			t.Error(err)
 		}
+		icon.SVGPaths = append(icon.SVGPaths, SvgPath{d, c.Path})
+		icon.Draw(raster, 1)
 
+		err = SaveToPngFile(fmt.Sprintf("testdata/fill_%d.png", i), img)
+		if err != nil {
+			t.Error(err)
+		}
 	}
 }
 
-func _TestLandscapeIcons(t *testing.T) {
+func TestLandscapeIcons(t *testing.T) {
 	for _, p := range []string{
 		"beach", "cape", "iceberg", "island",
 		"mountains", "sea", "trees", "village"} {
-		t.Log("reading ", p)
-		DrawIcon(t, "testdata/landscapeIcons/"+p+".svg")
+		SaveIcon(t, "testdata/landscapeIcons/"+p+".svg")
 	}
 }
 
 func TestTestIcons(t *testing.T) {
 	for _, p := range []string{
-		"astronaut", "jupiter", "lander", "school-bus", "telescope", "diagram"} {
-		t.Log("reading ", p)
-		DrawIcon(t, "testdata/testIcons/"+p+".svg")
+		"astronaut", "jupiter", "lander", "school-bus", "telescope"} {
+		SaveIcon(t, "testdata/testIcons/"+p+".svg")
 	}
 }
 
@@ -149,13 +163,26 @@ func TestStrokeIcons(t *testing.T) {
 		"TestShapes3.svg",
 		"TestShapes4.svg",
 		"TestShapes5.svg",
+		"TestShapes6.svg",
 	} {
 		t.Log("reading ", p)
-		DrawIcon(t, "testdata/"+p)
+		SaveIcon(t, "testdata/"+p)
 	}
 }
 
-func TestCircleLineIntersect(t *testing.T) {
+func _TestM(t *testing.T) {
+	cx, cy := 120.0, 40.0
+	//dx, dy := 101.0, 100.0
+
+	rotc := Identity.Rotate(math.Pi/3).Translate(cx, cy)
+
+	irot := rotc.Invert()
+	t.Log("rotc", rotc)
+	t.Log("i rotc", irot)
+	t.Log("r*inv", rotc.Mult(irot))
+}
+
+func _TestCircleLineIntersect(t *testing.T) {
 	a := fixed.Point26_6{30 * 64, 55 * 64}
 	b := fixed.Point26_6{40 * 64, 40 * 64}
 	c := fixed.Point26_6{40 * 64, 40 * 64}

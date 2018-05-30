@@ -1,8 +1,4 @@
 // Copyright 2017 The oksvg Authors. All rights reserved.
-// Use of this source code is governed by your choice of either the
-// FreeType License or the GNU General Public License version 2 (or
-// any later version), both of which can be found in the LICENSE file.
-//
 // created: 2/12/2017 by S.R.Wiley
 
 // svgd.go implements translation of an SVG2.0 path into a rasterx Path.
@@ -18,22 +14,12 @@ import (
 
 	"github.com/srwiley/rasterx"
 
-	//"github.com/golang/freetype/raster"
 	"golang.org/x/image/math/fixed"
 )
 
-var (
-	paramMismatchError  = errors.New("Param mismatch")
-	commandUnknownError = errors.New("Unknown command")
-)
-
-// MaxDx is the Maximum radians a cubic splice is allowed to span
-// in ellipse parametric when approximating an off-axis ellipse
-var MaxDx float64 = math.Pi / 8
-
 type (
-	ErrorMode uint8
-	SvgCursor struct {
+	ErrorMode  uint8
+	PathCursor struct {
 		rasterx.Path
 		placeX, placeY         float64
 		cntlPtX, cntlPtY       float64
@@ -41,10 +27,20 @@ type (
 		points                 []float64
 		lastKey                uint8
 		ErrorMode              ErrorMode
-		StyleStack             []PathStyle
 		inPath                 bool
 	}
 )
+
+var (
+	paramMismatchError  = errors.New("Param mismatch")
+	commandUnknownError = errors.New("Unknown command")
+	zeroLengthIdError   = errors.New("zero length id")
+	missingIdError      = errors.New("cannot find id")
+)
+
+// MaxDx is the Maximum radians a cubic splice is allowed to span
+// in ellipse parametric when approximating an off-axis ellipse.
+const MaxDx float64 = math.Pi / 8
 
 const (
 	IgnoreErrorMode ErrorMode = iota
@@ -56,14 +52,14 @@ func reflect(px, py, rx, ry float64) (x, y float64) {
 	return px*2 - rx, py*2 - ry
 }
 
-func (c *SvgCursor) valsToAbs(last float64) {
+func (c *PathCursor) valsToAbs(last float64) {
 	for i := 0; i < len(c.points); i++ {
 		last += c.points[i]
 		c.points[i] = last
 	}
 }
 
-func (c *SvgCursor) pointsToAbs(sz int) {
+func (c *PathCursor) pointsToAbs(sz int) {
 	lastX := c.placeX
 	lastY := c.placeY
 	for j := 0; j < len(c.points); j += sz {
@@ -76,7 +72,7 @@ func (c *SvgCursor) pointsToAbs(sz int) {
 	}
 }
 
-func (c *SvgCursor) hasSetsOrMore(sz int, rel bool) bool {
+func (c *PathCursor) hasSetsOrMore(sz int, rel bool) bool {
 	if !(len(c.points) >= sz && len(c.points)%sz == 0) {
 		return false
 	}
@@ -87,7 +83,7 @@ func (c *SvgCursor) hasSetsOrMore(sz int, rel bool) bool {
 }
 
 // ReadFloat reads a floating point value and adds it to the cursor's points slice.
-func (c *SvgCursor) ReadFloat(numStr string) error {
+func (c *PathCursor) ReadFloat(numStr string) error {
 	f, err := strconv.ParseFloat(numStr, 64)
 	if err != nil {
 		return err
@@ -98,7 +94,7 @@ func (c *SvgCursor) ReadFloat(numStr string) error {
 
 // GetPoints reads a set of floating point values from the SVG format number string,
 // and add them to the cursor's points slice.
-func (c *SvgCursor) GetPoints(dataPoints string) error {
+func (c *PathCursor) GetPoints(dataPoints string) error {
 	lastIndex := -1
 	c.points = c.points[0:0]
 	lr := ' '
@@ -129,7 +125,7 @@ func (c *SvgCursor) GetPoints(dataPoints string) error {
 
 // addSeg decodes an SVG seqment string into equivalent raster path commands saved
 // in the cursor's Path
-func (c *SvgCursor) addSeg(segString string) error {
+func (c *PathCursor) addSeg(segString string) error {
 	// Parse the string describing the numeric points in SVG format
 	if err := c.GetPoints(segString[1:]); err != nil {
 		return err
@@ -161,7 +157,6 @@ func (c *SvgCursor) addSeg(segString string) error {
 		c.inPath = true
 		c.Path.Start(fixed.Point26_6{c.pathStartX, c.pathStartY})
 		for i := 2; i < l-1; i += 2 {
-
 			c.Path.Line(fixed.Point26_6{
 				fixed.Int26_6(c.points[i] * 64),
 				fixed.Int26_6(c.points[i+1] * 64)})
@@ -260,7 +255,6 @@ func (c *SvgCursor) addSeg(segString string) error {
 			return paramMismatchError
 		}
 		for i := 0; i < l-5; i += 6 {
-
 			c.Path.CubeBezier(
 				fixed.Point26_6{
 					fixed.Int26_6(c.points[i] * 64),
@@ -295,7 +289,6 @@ func (c *SvgCursor) addSeg(segString string) error {
 					fixed.Int26_6(c.points[i] * 64), fixed.Int26_6(c.points[i+1] * 64)},
 				fixed.Point26_6{
 					fixed.Int26_6(c.points[i+2] * 64), fixed.Int26_6(c.points[i+3] * 64)})
-
 			c.lastKey = k
 			c.cntlPtX, c.cntlPtY = c.points[i], c.points[i+1]
 			c.placeX = c.points[i+2]
@@ -325,32 +318,33 @@ func (c *SvgCursor) addSeg(segString string) error {
 	return nil
 }
 
-func (c *SvgCursor) ElipseAt(cx, cy, rx, ry float64) {
+func (c *PathCursor) ElipseAt(cx, cy, rx, ry float64) {
 	c.placeX, c.placeY = cx+rx, cy
 	c.points = c.points[0:0]
-	c.points = append(c.points, rx, ry, 0.0, 1.0, 1.0, c.placeX, c.placeY)
+	c.points = append(c.points, rx, ry, 0.0, 1.0, 0.0, c.placeX, c.placeY)
 	c.Path.Start(fixed.Point26_6{
 		fixed.Int26_6(c.placeX * 64),
 		fixed.Int26_6(c.placeY * 64)})
 	c.AddArcFromAC(c.points, cx, cy)
+	c.Path.Stop(true)
 }
 
-func (c *SvgCursor) AddArcFromA(points []float64) {
+func (c *PathCursor) AddArcFromA(points []float64) {
 	cx, cy := FindEllipseCenter(&points[0], &points[1], points[2]*math.Pi/180, c.placeX,
-		c.placeY, points[5], points[6], points[4] == 0)
+		c.placeY, points[5], points[6], points[4] == 0, points[3] == 0)
 	c.AddArcFromAC(points, cx, cy)
 }
 
-func (c *SvgCursor) AddArcFromAC(points []float64, cx, cy float64) {
+func (c *PathCursor) AddArcFromAC(points []float64, cx, cy float64) {
 	rotX := points[2] * math.Pi / 180 // Convert degress to radians
 	largeArc := points[3] != 0
-
+	sweep := points[4] != 0
 	startAngle := math.Atan2(c.placeY-cy, c.placeX-cx) - rotX
 	endAngle := math.Atan2(points[6]-cy, points[5]-cx) - rotX
 	deltaTheta := endAngle - startAngle
 	arcBig := math.Abs(deltaTheta) > math.Pi
 
-	//Approximate ellipse using cubic bezeir splines
+	// Approximate ellipse using cubic bezeir splines
 	etaStart := math.Atan2(math.Sin(startAngle)/points[1], math.Cos(startAngle)/points[0])
 	etaEnd := math.Atan2(math.Sin(endAngle)/points[1], math.Cos(endAngle)/points[0])
 	deltaEta := etaEnd - etaStart
@@ -360,6 +354,13 @@ func (c *SvgCursor) AddArcFromAC(points []float64, cx, cy float64) {
 		} else {
 			deltaEta -= math.Pi * 2
 		}
+	}
+	// This check migth be needed if the center point of the elipse is
+	// at the midpoint of the start and end lines.
+	if deltaEta < 0 && sweep {
+		deltaEta += math.Pi * 2
+	} else if deltaEta >= 0 && !sweep {
+		deltaEta -= math.Pi * 2
 	}
 
 	// Round up to determine number of cubic splines to approximate bezier curve
@@ -420,7 +421,7 @@ func ellipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float64) (px, py float
 // to reduce the problem to finding the center of a circle that includes the origin
 // and an arbitrary point. The center of the circle is then transformed
 // back to the original coordinates and returned.
-func FindEllipseCenter(ra, rb *float64, rotX, startX, startY, endX, endY float64, isNegSweep bool) (cx, cy float64) {
+func FindEllipseCenter(ra, rb *float64, rotX, startX, startY, endX, endY float64, sweep, smallArc bool) (cx, cy float64) {
 	cos, sin := math.Cos(rotX), math.Sin(rotX)
 
 	// Move origin to start point
@@ -448,9 +449,8 @@ func FindEllipseCenter(ra, rb *float64, rotX, startX, startY, endX, endY float64
 	} else {
 		hr = math.Sqrt(*rb**rb-midlenSq) / math.Sqrt(midlenSq)
 	}
-
-	//Sweep is determined by cross prod of mid vector and normal ray to center
-	if isNegSweep {
+	// Notice that if hr is zero, both answers are the same.
+	if (sweep && smallArc) || (!sweep && !smallArc) {
 		cx = midX + midY*hr
 		cy = midY - midX*hr
 	} else {
@@ -464,7 +464,7 @@ func FindEllipseCenter(ra, rb *float64, rotX, startX, startY, endX, endY float64
 	return cx*cos - cy*sin + startX, cx*sin + cy*cos + startY
 }
 
-func (c *SvgCursor) init() {
+func (c *PathCursor) init() {
 	c.placeX = 0.0
 	c.placeY = 0.0
 	c.points = c.points[0:0]
@@ -478,7 +478,7 @@ func (c *SvgCursor) init() {
 // the x-axis as defined by the SVG 'a' and 'A' elements are approximated
 // with cubic bezier splines since draw2d has no off-axis ellipse type.
 // The resulting path element is stored in the SvgCursor.
-func (c *SvgCursor) CompilePath(svgPath string) error {
+func (c *PathCursor) CompilePath(svgPath string) error {
 	c.init()
 	lastIndex := -1
 	for i, v := range svgPath {

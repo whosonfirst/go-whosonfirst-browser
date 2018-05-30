@@ -83,11 +83,13 @@ func FeatureToImage(f geojson.Feature, opts *Options) (image.Image, error) {
 		return nil, err
 	}
 
-	img := image.NewRGBA(image.Rect(0, 0, int(icon.ViewBox.W), int(icon.ViewBox.H)))
-	painter := rasterx.NewRGBAPainter(img)
-	raster := rasterx.NewDasher(int(icon.ViewBox.W), int(icon.ViewBox.H))
+	w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
 
-	icon.Draw(raster, painter, 1.0)
+	scanner := rasterx.NewScannerGV(w, h, img, img.Bounds())
+	raster := rasterx.NewDasher(w, h, scanner)
+
+	icon.Draw(raster, 1.0)
 
 	return img, nil
 }

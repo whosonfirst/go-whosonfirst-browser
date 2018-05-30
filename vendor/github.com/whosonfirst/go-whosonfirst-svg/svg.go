@@ -7,6 +7,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/geometry"
 	"github.com/whosonfirst/go-whosonfirst-spr/util"
 	"io"
+	_ "log"
 	"os"
 	"strings"
 )
@@ -29,6 +30,28 @@ func NewDefaultOptions() *Options {
 }
 
 func FeatureToSVG(f geojson.Feature, opts *Options) error {
+
+	bboxes, err := f.BoundingBoxes()
+
+	if err != nil {
+		return err
+	}
+
+	mbr := bboxes.MBR()
+
+	mbr_w := mbr.Width()
+	mbr_h := mbr.Height()
+
+	w := opts.Width
+	h := opts.Height
+
+	if mbr_w == mbr_h {
+		// pass
+	} else if mbr_w > mbr_h {
+		h = h * (mbr_h / mbr_w)
+	} else {
+		w = w * (mbr_w / mbr_h)
+	}
 
 	geom, err := geometry.ToString(f)
 
@@ -56,8 +79,8 @@ func FeatureToSVG(f geojson.Feature, opts *Options) error {
 		return err
 	}
 
-	attrs["viewBox"] = fmt.Sprintf("0 0 %0.2f %0.2f", opts.Width, opts.Height)
-	
+	attrs["viewBox"] = fmt.Sprintf("0 0 %0.2f %0.2f", w, h)
+
 	namespaces := map[string]string{
 		"xmlns": "http://www.w3.org/2000/svg",
 	}
@@ -90,7 +113,7 @@ func FeatureToSVG(f geojson.Feature, opts *Options) error {
 
 	s_opts := geojson2svg.WithAttributes(attrs)
 
-	rsp := s.Draw(opts.Width, opts.Height, s_opts)
+	rsp := s.Draw(w, h, s_opts)
 	_, err = opts.Writer.Write([]byte(rsp))
 
 	if err != nil {

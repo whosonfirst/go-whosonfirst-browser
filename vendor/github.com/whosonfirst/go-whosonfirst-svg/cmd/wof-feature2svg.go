@@ -27,7 +27,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		
+
 		err = svg.FeatureToSVG(f, o)
 
 		if err != nil {

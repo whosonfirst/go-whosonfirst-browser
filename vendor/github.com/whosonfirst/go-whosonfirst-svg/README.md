@@ -12,10 +12,6 @@ make bin
 
 All of this package's dependencies are bundled with the code in the `vendor` directory.
 
-## Important
-
-Probably too soon. Best to move along.
-
 ## See also
 
 * https://github.com/fapian/geojson2svg
