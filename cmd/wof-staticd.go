@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/go-ini/ini"
 	"github.com/whosonfirst/go-http-mapzenjs"
 	mapzenjs_utils "github.com/whosonfirst/go-http-mapzenjs/utils"
 	fs_reader "github.com/whosonfirst/go-whosonfirst-readwrite-fs/reader"
@@ -26,6 +27,9 @@ import (
 )
 
 func main() {
+
+	config := flag.String("config", "", "Read some or all flags from an ini-style config file. Values in the config file take precedence over command line flags.")
+	section := flag.String("section", "wof-static", "A valid ini-style config file section.")
 
 	var host = flag.String("host", "localhost", "The hostname to listen for requests on")
 	var port = flag.Int("port", 8080, "The port number to listen for requests on")
@@ -60,11 +64,62 @@ func main() {
 
 	flag.Parse()
 
-	/*
-		flag.VisitAll(func(f *flag.Flag){
-			log.Printf("flag %s %v (%s)\n", f.Name, f.Value, f.DefValue)
+	if *config != "" {
+
+		cfg, err := ini.LoadSources(ini.LoadOptions{
+			AllowBooleanKeys: true,
+		}, *config)
+
+		if err != nil {
+			logger.Fatal("Unable to load config file because %s", err)
+		}
+
+		sect, err := cfg.GetSection(*section)
+
+		if err != nil {
+			logger.Fatal("Config file is missing '%s' section, %s", *section, err)
+		}
+
+		flag.VisitAll(func(fl *flag.Flag) {
+
+			name := fl.Name
+
+			if name == "section" {
+				return
+			}
+
+			if sect.HasKey(name) {
+
+				k := sect.Key(name)
+				v := k.Value()
+
+				flag.Set(name, v)
+
+				logger.Status("Reset %s flag from config file", name)
+			}
 		})
-	*/
+
+	} else {
+
+		flag.VisitAll(func(fl *flag.Flag) {
+
+			name := fl.Name
+			env_name := name
+
+			env_name = strings.Replace(name, "-", "_", -1)
+			env_name = strings.ToUpper(name)
+
+			env_name = fmt.Sprintf("WOF_STATIC_%s", env_name)
+
+			v, ok := os.LookupEnv(env_name)
+
+			if ok {
+
+				flag.Set(name, v)
+				logger.Status("Reset %s flag from %s environment variable", name, env_name)
+			}
+		})
+	}
 
 	var r reader.Reader
 	var e error
