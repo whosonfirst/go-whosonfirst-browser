@@ -123,7 +123,7 @@ WOF_STATIC_ENABLE_DATA = true
 
 ### Lambda, API Gateway and images
 
-In order for requests to produce PNG output (rather than a base64 encoded string) you will need to do a few things:
+In order for requests to produce PNG output (rather than a base64 encoded string) you will need to do a few things. Even then it's not clear that it will work and I'm uncertain whether it's AWS itself, the way AWS is configure or this code. This is what you're _supposed_ to do and... sometimes it works?
 
 1. Make sure your API Gateway settings list `image/png` as a known and valid binary type:
 
