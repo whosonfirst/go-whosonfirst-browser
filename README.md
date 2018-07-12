@@ -64,7 +64,7 @@ Usage of ./bin/wof-staticd:
   -protocol string
     	The protocol for wof-staticd server to listen on. Valid protocols are: http, lambda. (default "http")
   -section string
-    	A valid ini-style config file section. (default "wof-static")
+    	A valid ini-style config file section. (default "wof-staticd")
   -source string
     	Valid sources are: fs, http, mysql, s3, sqlite (default "fs")
   -source-dsn string

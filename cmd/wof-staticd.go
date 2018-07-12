@@ -29,7 +29,7 @@ import (
 func main() {
 
 	config := flag.String("config", "", "Read some or all flags from an ini-style config file. Values in the config file take precedence over command line flags.")
-	section := flag.String("section", "wof-static", "A valid ini-style config file section.")
+	section := flag.String("section", "wof-staticd", "A valid ini-style config file section.")
 
 	var proto = flag.String("protocol", "http", "The protocol for wof-staticd server to listen on. Valid protocols are: http, lambda.")
 	var host = flag.String("host", "localhost", "The hostname to listen for requests on")
