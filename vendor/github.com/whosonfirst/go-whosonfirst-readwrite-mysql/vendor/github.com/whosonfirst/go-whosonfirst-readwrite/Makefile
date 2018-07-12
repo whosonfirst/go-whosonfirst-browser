@@ -11,6 +11,7 @@ self:   prep rmdeps
 	cp -r cache src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r flags src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r http src/github.com/whosonfirst/go-whosonfirst-readwrite/
+	cp -r pruner src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r reader src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r utils src/github.com/whosonfirst/go-whosonfirst-readwrite/
 	cp -r writer src/github.com/whosonfirst/go-whosonfirst-readwrite/
@@ -43,6 +44,7 @@ fmt:
 	go fmt cmd/*.go
 	go fmt flags/*.go
 	go fmt http/*.go
+	go fmt pruner/*.go
 	go fmt reader/*.go
 	go fmt utils/*.go
 	go fmt writer/*.go

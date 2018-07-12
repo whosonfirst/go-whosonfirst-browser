@@ -9,3 +9,4 @@ bin
 .travis.yml
 *.db
 testdata/*.txt
+*.cfg

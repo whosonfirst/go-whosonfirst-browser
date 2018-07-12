@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS geojson (
 ### whosonfirst
 
 ```
-CREATE TABLE IF NOT EXISTS whosonfirst (
+CREATE TABLE IF NOT EXISTS %s (
       id BIGINT UNSIGNED PRIMARY KEY,
       properties JSON NOT NULL,
       geometry GEOMETRY NOT NULL,
@@ -78,11 +78,11 @@ CREATE TABLE IF NOT EXISTS whosonfirst (
       lastmodified INT NOT NULL,
       parent_id BIGINT       GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(properties,'$."wof:parent_id"'))) VIRTUAL,
       placetype VARCHAR(64)  GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(properties,'$."wof:placetype"'))) VIRTUAL,
-      is_current TINYINT     GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(properties,'$."mz:is_current"'))) VIRTUAL,
-      is_nullisland TINYINT  GENERATED ALWAYS AS (JSON_LENGTH(JSON_EXTRACT(properties, '$."mz:is_nullisland"'))) VIRTUAL,
-      is_approximate TINYINT GENERATED ALWAYS AS (JSON_LENGTH(JSON_EXTRACT(properties, '$."mz:is_approximate"'))) VIRTUAL,
-      is_ceased TINYINT      GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(properties,'$."edtf:cessation"')) != "" AND json_unquote(json_extract(properties,'$."edtf:cessation"')) != "uuuu") VIRTUAL,
-      is_deprecated TINYINT  GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(properties,'$."edtf:deprecated"')) != "" AND json_unquote(json_extract(properties,'$."edtf:deprecated"')) != "uuuu") VIRTUAL,
+      is_current TINYINT     GENERATED ALWAYS AS (JSON_CONTAINS_PATH(properties, 'one', '$."mz:is_current"') AND JSON_UNQUOTE(JSON_EXTRACT(properties,'$."mz:is_current"'))) VIRTUAL,
+      is_nullisland TINYINT  GENERATED ALWAYS AS (JSON_CONTAINS_PATH(properties, 'one', '$."mz:is_nullisland"') AND JSON_LENGTH(JSON_EXTRACT(properties, '$."mz:is_nullisland"'))) VIRTUAL,
+      is_approximate TINYINT GENERATED ALWAYS AS (JSON_CONTAINS_PATH(properties, 'one', '$."mz:is_approximate"') AND JSON_LENGTH(JSON_EXTRACT(properties, '$."mz:is_approximate"'))) VIRTUAL,
+      is_ceased TINYINT      GENERATED ALWAYS AS (JSON_CONTAINS_PATH(properties, 'one', '$."edtf:cessation"') AND JSON_UNQUOTE(JSON_EXTRACT(properties,'$."edtf:cessation"')) != "" AND JSON_UNQUOTE(JSON_EXTRACT(properties,'$."edtf:cessation"')) != "open" AND json_unquote(json_extract(properties,'$."edtf:cessation"')) != "uuuu") VIRTUAL,
+      is_deprecated TINYINT  GENERATED ALWAYS AS (JSON_CONTAINS_PATH(properties, 'one', '$."edtf:deprecated"') AND JSON_UNQUOTE(JSON_EXTRACT(properties,'$."edtf:deprecated"')) != "" AND json_unquote(json_extract(properties,'$."edtf:deprecated"')) != "uuuu") VIRTUAL,
       is_superseded TINYINT  GENERATED ALWAYS AS (JSON_LENGTH(JSON_EXTRACT(properties, '$."wof:superseded_by"')) > 0) VIRTUAL,
       is_superseding TINYINT GENERATED ALWAYS AS (JSON_LENGTH(JSON_EXTRACT(properties, '$."wof:supersedes"')) > 0) VIRTUAL,
       date_upper DATE	     GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(properties, '$."date:cessation_upper"'))) VIRTUAL,
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS whosonfirst (
       KEY date_lower (date_lower),
       SPATIAL KEY idx_geometry (geometry),
       SPATIAL KEY idx_centroid (centroid)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
 ```
 
 There are a few important things to note about the `whosonfirst` table:
@@ -119,12 +119,22 @@ Sure. You just need to write a per-table package that implements the `Table` int
 ```
 ./bin/wof-mysql-index -h
 Usage of ./bin/wof-mysql-index:
+  -all
+	Index all the tables
+  -config string
+    	  Read some or all flags from an ini-style config file. Values in the config file take precedence over command line flags.
   -dsn string
        A valid go-sql-driver DSN string, for example '{USER}:{PASSWORD}@/{DATABASE}'
+  -geojson
+	Index the 'geojson' tables
   -mode string
     	The mode to use importing data. Valid modes are: directory,feature,feature-collection,files,geojson-ls,meta,path,repo,sqlite. (default "repo")
+  -section string
+    	   A valid ini-style config file section. (default "wof-mysql")
   -timings
 	Display timings during and after indexing
+  -whosonfirst
+	Index the 'whosonfirst' tables
 ```
 
 For example:
@@ -132,6 +142,40 @@ For example:
 ```
 ./bin/wof-mysql-index -dsn '{USER}:{PASSWORD}@/{DATABASE}' /usr/local/data/whosonfirst-data/
 ```
+
+### Config files
+
+You can read (or override) command line flags from a config file, by passing the `-config` flag with the path to a valid ini-style config file. For example, assuming a config file like this:
+
+```
+[wof-mysql]
+dsn={USER}:{PASS}@/{DATABASE}
+all
+timings
+```
+
+You might invoke it like this:
+
+```
+./bin/wof-mysql-index -config ./test.cfg /usr/local/data/whosonfirst-data-*
+13:47:57.021711 [wof-mysql-index] STATUS Reset all flag from config file
+13:47:57.021840 [wof-mysql-index] STATUS Reset dsn flag from config file
+13:47:57.021846 [wof-mysql-index] STATUS Reset timings flag from config file
+13:48:57.037310 [wof-mysql-index] STATUS time to index geojson (3155) : 16.979713633s
+13:48:57.037329 [wof-mysql-index] STATUS time to index whosonfirst (3155) : 29.342492075s
+13:48:57.037334 [wof-mysql-index] STATUS time to index all (3155) : 1m0.013715096s
+... and so on
+```
+
+### Environment variables
+
+_Unless_ you are passing the `-config` flag you can set (or override) command line flags with environment variables. Environment variable are expected to:
+
+* Be upper-cased
+* Replace all instances of `-` with `_`
+* Be prefixed with `WOF_MYSQL`
+
+For example the `-dsn` flag would be overridden by the `WOF_MYSQL_DSN` environment variable.
 
 ## See also:
 

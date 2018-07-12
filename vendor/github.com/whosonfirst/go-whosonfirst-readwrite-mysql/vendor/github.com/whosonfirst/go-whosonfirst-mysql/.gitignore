@@ -8,6 +8,7 @@ bin/wof-*
 *.json
 .travis.yml
 *.db*
+*.cfg*
 *.db-journal
 inventory.html
 inventory.json

@@ -24,6 +24,7 @@ build:	fmt bin
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/go-sql-driver/mysql"
 	@GOPATH=$(GOPATH) go get -u "github.com/twpayne/go-geom"
+	@GOPATH=$(GOPATH) go get -u "github.com/go-ini/ini"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-index"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-log"

@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -71,13 +72,13 @@ func main() {
 		}, *config)
 
 		if err != nil {
-			logger.Fatal("Unable to load config file because %s", err)
+			log.Fatal(err)
 		}
 
 		sect, err := cfg.GetSection(*section)
 
 		if err != nil {
-			logger.Fatal("Config file is missing '%s' section, %s", *section, err)
+			log.Fatal(err)
 		}
 
 		flag.VisitAll(func(fl *flag.Flag) {
@@ -95,7 +96,7 @@ func main() {
 
 				flag.Set(name, v)
 
-				logger.Status("Reset %s flag from config file", name)
+				// logger.Status("Reset %s flag from config file", name)
 			}
 		})
 
@@ -116,7 +117,7 @@ func main() {
 			if ok {
 
 				flag.Set(name, v)
-				logger.Status("Reset %s flag from %s environment variable", name, env_name)
+				// logger.Status("Reset %s flag from %s environment variable", name, env_name)
 			}
 		})
 	}

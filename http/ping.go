@@ -8,6 +8,7 @@ func PingHandler() (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 		rsp.Header().Set("Content-Type", "text/plain")
+		rsp.Header().Set("Access-Control-Allow-Origin", "*")
 		rsp.Write([]byte("PONG"))
 	}
 
