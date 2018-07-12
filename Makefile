@@ -10,6 +10,7 @@ self:   prep rmdeps
 	# cp -r cache src/github.com/whosonfirst/go-whosonfirst-static/
 	cp -r assets src/github.com/whosonfirst/go-whosonfirst-static/
 	cp -r http src/github.com/whosonfirst/go-whosonfirst-static/
+	cp -r server src/github.com/whosonfirst/go-whosonfirst-static/
 	cp -r utils src/github.com/whosonfirst/go-whosonfirst-static/
 	cp -r vendor/* src/
 
@@ -34,6 +35,7 @@ deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-svg"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-image"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-uri"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/algnhsa"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-sanitize"
 	mv src/github.com/whosonfirst/go-whosonfirst-geojson-v2/vendor/github.com/whosonfirst/warning src/github.com/whosonfirst/
 	rm -rf src/github.com/zendesk/go-bindata/testdata
@@ -104,6 +106,7 @@ fmt:
 	go fmt cmd/*.go
 	go fmt assets/*/*.go
 	go fmt http/*.go
+	go fmt server/*.go
 	go fmt utils/*.go
 
 bin: 	self

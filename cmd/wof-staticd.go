@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	// "github.com/go-ini/ini"
 	"github.com/whosonfirst/go-http-mapzenjs"
 	mapzenjs_utils "github.com/whosonfirst/go-http-mapzenjs/utils"
 	"github.com/whosonfirst/go-whosonfirst-cli/flags"
@@ -18,6 +17,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/utils"
 	"github.com/whosonfirst/go-whosonfirst-static/http"
+	"github.com/whosonfirst/go-whosonfirst-static/server"
 	"log"
 	gohttp "net/http"
 	"net/url"
@@ -31,6 +31,7 @@ func main() {
 	config := flag.String("config", "", "Read some or all flags from an ini-style config file. Values in the config file take precedence over command line flags.")
 	section := flag.String("section", "wof-static", "A valid ini-style config file section.")
 
+	var proto = flag.String("protocol", "http", "...")
 	var host = flag.String("host", "localhost", "The hostname to listen for requests on")
 	var port = flag.Int("port", 8080, "The port number to listen for requests on")
 
@@ -299,10 +300,23 @@ func main() {
 		}
 	}
 
-	address := fmt.Sprintf("%s:%d", *host, *port)
-	log.Printf("listening on %s\n", address)
+	address := fmt.Sprintf("http://%s:%d", *host, *port)
 
-	err = gohttp.ListenAndServe(address, mux)
+	u, err := url.Parse(address)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s, err := server.NewStaticServer(*proto, u)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Listening on %s\n", s.Address())
+
+	err = s.ListenAndServe(mux)
 
 	if err != nil {
 		log.Fatal(err)
