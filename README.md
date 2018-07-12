@@ -79,6 +79,17 @@ bin/wof-staticd -port 8080 -source fs -fs-root /usr/local/data/whosonfirst-data/
 
 _`HardMaxCacheSize` is measured in MB and `MaxEntrySize` in bytes._
 
+## Lambda
+
+```
+WOF_STATIC_SOURCE = s3
+WOF_STATIC_SOURCE_DSN = bucket={BUCKET} prefix={PREFIX} region={REGION} credentials=iam:
+WOF_STATIC_PROTOCOL = lambda
+WOF_STATIC_ENABLE_HTML = false
+WOF_STATIC_ENABLE_GRAPHICS = true
+WOF_STATIC_ENABLE_DATA = true
+```
+
 ## Docker
 
 [Yes](Dockerfile). For example:

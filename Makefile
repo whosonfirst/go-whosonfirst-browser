@@ -17,8 +17,6 @@ self:   prep rmdeps
 rmdeps:
 	if test -d src; then rm -rf src; fi 
 
-build:	fmt bin
-
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/zendesk/go-bindata/"
 	@GOPATH=$(GOPATH) go get -u "github.com/elazarl/go-bindata-assetfs/"
@@ -112,6 +110,14 @@ fmt:
 bin: 	self
 	rm -rf bin/*
 	@GOPATH=$(GOPATH) go build -o bin/wof-staticd cmd/wof-staticd.go
+
+lambda:	build
+	lambda: self
+	if test -f main; then rm -f main; fi
+	if test -f deployment.zip; then rm -f deployment.zip; fi
+	@GOPATH=$(GOPATH) GOOS=linux go build -o main cmd/wof-staticd-lambda.go
+	zip deployment.zip main
+	rm -f main
 
 debug: build
 	bin/wof-staticd -port 8080 -source http -source-dsn https://data.whosonfirst.org -cache lru -cache-arg 'CacheSize=500' -debug -nextzen-api-key ${NEXTZEN_APIKEY}
