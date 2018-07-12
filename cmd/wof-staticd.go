@@ -4,9 +4,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/go-ini/ini"
+	// "github.com/go-ini/ini"
 	"github.com/whosonfirst/go-http-mapzenjs"
 	mapzenjs_utils "github.com/whosonfirst/go-http-mapzenjs/utils"
+	"github.com/whosonfirst/go-whosonfirst-cli/flags"
 	fs_reader "github.com/whosonfirst/go-whosonfirst-readwrite-fs/reader"
 	http_reader "github.com/whosonfirst/go-whosonfirst-readwrite-http/reader"
 	mysql_reader "github.com/whosonfirst/go-whosonfirst-readwrite-mysql/reader"
@@ -14,7 +15,6 @@ import (
 	s3_reader "github.com/whosonfirst/go-whosonfirst-readwrite-s3/reader"
 	sqlite_reader "github.com/whosonfirst/go-whosonfirst-readwrite-sqlite/reader"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/cache"
-	"github.com/whosonfirst/go-whosonfirst-readwrite/flags"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/utils"
 	"github.com/whosonfirst/go-whosonfirst-static/http"
@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -67,59 +66,19 @@ func main() {
 
 	if *config != "" {
 
-		cfg, err := ini.LoadSources(ini.LoadOptions{
-			AllowBooleanKeys: true,
-		}, *config)
+		err := flags.SetFlagsFromConfig(*config, *section)
 
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		sect, err := cfg.GetSection(*section)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		flag.VisitAll(func(fl *flag.Flag) {
-
-			name := fl.Name
-
-			if name == "section" {
-				return
-			}
-
-			if sect.HasKey(name) {
-
-				k := sect.Key(name)
-				v := k.Value()
-
-				flag.Set(name, v)
-
-				// logger.Status("Reset %s flag from config file", name)
-			}
-		})
 
 	} else {
 
-		flag.VisitAll(func(fl *flag.Flag) {
+		err := flags.SetFlagsFromEnvVars("WOF_STATIC")
 
-			name := fl.Name
-			env_name := name
-
-			env_name = strings.Replace(name, "-", "_", -1)
-			env_name = strings.ToUpper(name)
-
-			env_name = fmt.Sprintf("WOF_STATIC_%s", env_name)
-
-			v, ok := os.LookupEnv(env_name)
-
-			if ok {
-
-				flag.Set(name, v)
-				// logger.Status("Reset %s flag from %s environment variable", name, env_name)
-			}
-		})
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	var r reader.Reader
