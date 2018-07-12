@@ -111,11 +111,13 @@ bin: 	self
 	rm -rf bin/*
 	@GOPATH=$(GOPATH) go build -o bin/wof-staticd cmd/wof-staticd.go
 
-lambda:	build
-	lambda: self
+lambda:	
+	@make static
+	@make assets
+	@make self
 	if test -f main; then rm -f main; fi
 	if test -f deployment.zip; then rm -f deployment.zip; fi
-	@GOPATH=$(GOPATH) GOOS=linux go build -o main cmd/wof-staticd-lambda.go
+	@GOPATH=$(GOPATH) GOOS=linux go build -o main cmd/wof-staticd.go
 	zip deployment.zip main
 	rm -f main
 

@@ -31,21 +31,21 @@ func main() {
 	config := flag.String("config", "", "Read some or all flags from an ini-style config file. Values in the config file take precedence over command line flags.")
 	section := flag.String("section", "wof-static", "A valid ini-style config file section.")
 
-	var proto = flag.String("protocol", "http", "...")
+	var proto = flag.String("protocol", "http", "The protocol for wof-staticd server to listen on. Valid protocols are: http, lambda.")
 	var host = flag.String("host", "localhost", "The hostname to listen for requests on")
 	var port = flag.Int("port", 8080, "The port number to listen for requests on")
 
 	var source = flag.String("source", "fs", "Valid sources are: fs, http, mysql, s3, sqlite")
 	var source_dsn = flag.String("source-dsn", "", "A valid DSN string specific to the source you've chosen.")
 
-	var cache_source = flag.String("cache", "null", "...")
+	var cache_source = flag.String("cache", "null", "The named source to use for caching requests.")
 
 	var cache_args flags.KeyValueArgs
 	flag.Var(&cache_args, "cache-arg", "(0) or more user-defined '{KEY}={VALUE}' arguments to pass to the caching layer")
 
 	var test_reader = flag.String("test-reader", "", "Perform some basic sanity checking on the reader at startup")
 
-	var data_endpoint = flag.String("data-endpoint", "", "")
+	var data_endpoint = flag.String("data-endpoint", "", "The endpoint your HTML handler should fetch data files from.")
 
 	var api_key = flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
 
@@ -63,6 +63,11 @@ func main() {
 
 	var enable_html = flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handler.")
 
+	var path_png = flag.String("path-png", "/png/", "The path that PNG requests should be served from")
+	var path_svg = flag.String("path-svg", "/svg/", "The path that PNG requests should be served from")
+	var path_geojson = flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from")
+	var path_spr = flag.String("path-spr", "/spr/", "The path that SPR requests should be served from")
+
 	flag.Parse()
 
 	if *config != "" {
@@ -75,7 +80,7 @@ func main() {
 
 	} else {
 
-		err := flags.SetFlagsFromEnvVars("WOF_STATIC")
+		err := flags.SetFlagsFromEnvVars("WOF_STATICD")
 
 		if err != nil {
 			log.Fatal(err)
@@ -213,7 +218,7 @@ func main() {
 		}
 
 		png_handler = h
-		mux.Handle("/png/", png_handler)
+		mux.Handle(*path_png, png_handler)
 	}
 
 	if *enable_all || *enable_graphics || *enable_svg {
@@ -231,7 +236,7 @@ func main() {
 		}
 
 		svg_handler = h
-		mux.Handle("/svg/", svg_handler)
+		mux.Handle(*path_svg, svg_handler)
 	}
 
 	if *enable_all || *enable_data || *enable_spr {
@@ -243,7 +248,7 @@ func main() {
 		}
 
 		spr_handler = h
-		mux.Handle("/spr/", spr_handler)
+		mux.Handle(*path_spr, spr_handler)
 	}
 
 	if *enable_all || *enable_data || *enable_geojson {
@@ -255,7 +260,7 @@ func main() {
 		}
 
 		geojson_handler = h
-		mux.Handle("/data/", geojson_handler)
+		mux.Handle(*path_geojson, geojson_handler)
 	}
 
 	if *enable_all || *enable_html {

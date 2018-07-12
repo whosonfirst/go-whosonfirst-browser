@@ -35,10 +35,10 @@
 package http
 
 import (
+	"github.com/elazarl/go-bindata-assetfs"
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"github.com/elazarl/go-bindata-assetfs"
 	"io"
 	"io/ioutil"
 	"os"
@@ -113,7 +113,7 @@ func staticJavascriptLocalforageJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/localforage.js", size: 90998, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/localforage.js", size: 90998, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -133,7 +133,7 @@ func staticJavascriptLocalforageMinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/localforage.min.js", size: 29052, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/localforage.min.js", size: 29052, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -153,7 +153,7 @@ func staticJavascriptSlippymapCrosshairsJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/slippymap.crosshairs.js", size: 3184, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/slippymap.crosshairs.js", size: 3184, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -173,7 +173,7 @@ func staticJavascriptWhosonfirstCacheJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.cache.js", size: 2273, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.cache.js", size: 2273, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -193,7 +193,7 @@ func staticJavascriptWhosonfirstGeojsonJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.geojson.js", size: 1566, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.geojson.js", size: 1566, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -213,7 +213,7 @@ func staticJavascriptWhosonfirstLeafletHandlersJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.handlers.js", size: 511, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.handlers.js", size: 511, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -233,7 +233,7 @@ func staticJavascriptWhosonfirstLeafletStylesJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.styles.js", size: 1592, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.styles.js", size: 1592, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -253,7 +253,7 @@ func staticJavascriptWhosonfirstLeafletUtilsJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.utils.js", size: 3145, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.utils.js", size: 3145, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -273,7 +273,7 @@ func staticJavascriptWhosonfirstNamifyJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.namify.js", size: 3563, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.namify.js", size: 3563, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -293,7 +293,7 @@ func staticJavascriptWhosonfirstNetJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.net.js", size: 2754, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.net.js", size: 2754, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -313,7 +313,7 @@ func staticJavascriptWhosonfirstPropertiesJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.properties.js", size: 12915, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.properties.js", size: 12915, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -333,7 +333,7 @@ func staticJavascriptWhosonfirstRenderJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.render.js", size: 9252, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.render.js", size: 9252, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -353,7 +353,7 @@ func staticJavascriptWhosonfirstStaticIdInitJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.static.id.init.js", size: 89, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.static.id.init.js", size: 89, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -373,7 +373,7 @@ func staticJavascriptWhosonfirstStaticIdJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.static.id.js", size: 6856, mode: os.FileMode(420), modTime: time.Unix(1524162427, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.static.id.js", size: 6856, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -393,7 +393,7 @@ func staticJavascriptWhosonfirstUriJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.uri.js", size: 1838, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.uri.js", size: 1838, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -413,7 +413,7 @@ func staticJavascriptWhosonfirstWwwJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.www.js", size: 257, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.www.js", size: 257, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -433,7 +433,7 @@ func staticCssWhosonfirstCommonCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/css/whosonfirst.common.css", size: 271, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/css/whosonfirst.common.css", size: 271, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -453,7 +453,7 @@ func staticCssWhosonfirstStaticIdCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/css/whosonfirst.static.id.css", size: 2399, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/css/whosonfirst.static.id.css", size: 2399, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -473,7 +473,7 @@ func staticCssWhosonfirstWwwCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/css/whosonfirst.www.css", size: 64322, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/css/whosonfirst.www.css", size: 64322, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -493,7 +493,7 @@ func staticFontsPoppinsLightTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Poppins-Light.ttf", size: 156104, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Poppins-Light.ttf", size: 156104, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -513,7 +513,7 @@ func staticFontsPoppinsMediumTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Poppins-Medium.ttf", size: 155248, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Poppins-Medium.ttf", size: 155248, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -533,7 +533,7 @@ func staticFontsPoppinsSemiboldTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Poppins-SemiBold.ttf", size: 153432, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Poppins-SemiBold.ttf", size: 153432, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -553,7 +553,7 @@ func staticFontsRobotoLightTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Roboto-Light.ttf", size: 170420, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Roboto-Light.ttf", size: 170420, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -573,7 +573,7 @@ func staticFontsRobotoLightitalicTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Roboto-LightItalic.ttf", size: 176616, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Roboto-LightItalic.ttf", size: 176616, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -593,7 +593,7 @@ func staticFontsRobotoRegularTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Roboto-Regular.ttf", size: 171676, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Roboto-Regular.ttf", size: 171676, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -613,7 +613,7 @@ func staticFontsRobotomonoLightTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/RobotoMono-Light.ttf", size: 118976, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/RobotoMono-Light.ttf", size: 118976, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -633,7 +633,7 @@ func staticFontsGlyphiconsHalflingsRegularEot() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.eot", size: 20127, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.eot", size: 20127, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -653,7 +653,7 @@ func staticFontsGlyphiconsHalflingsRegularSvg() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.svg", size: 108738, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.svg", size: 108738, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -673,7 +673,7 @@ func staticFontsGlyphiconsHalflingsRegularTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.ttf", size: 45404, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.ttf", size: 45404, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -693,7 +693,7 @@ func staticFontsGlyphiconsHalflingsRegularWoff() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.woff", size: 23424, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.woff", size: 23424, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -750,36 +750,36 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"static/javascript/localforage.js":                  staticJavascriptLocalforageJs,
-	"static/javascript/localforage.min.js":              staticJavascriptLocalforageMinJs,
-	"static/javascript/slippymap.crosshairs.js":         staticJavascriptSlippymapCrosshairsJs,
-	"static/javascript/whosonfirst.cache.js":            staticJavascriptWhosonfirstCacheJs,
-	"static/javascript/whosonfirst.geojson.js":          staticJavascriptWhosonfirstGeojsonJs,
+	"static/javascript/localforage.js": staticJavascriptLocalforageJs,
+	"static/javascript/localforage.min.js": staticJavascriptLocalforageMinJs,
+	"static/javascript/slippymap.crosshairs.js": staticJavascriptSlippymapCrosshairsJs,
+	"static/javascript/whosonfirst.cache.js": staticJavascriptWhosonfirstCacheJs,
+	"static/javascript/whosonfirst.geojson.js": staticJavascriptWhosonfirstGeojsonJs,
 	"static/javascript/whosonfirst.leaflet.handlers.js": staticJavascriptWhosonfirstLeafletHandlersJs,
-	"static/javascript/whosonfirst.leaflet.styles.js":   staticJavascriptWhosonfirstLeafletStylesJs,
-	"static/javascript/whosonfirst.leaflet.utils.js":    staticJavascriptWhosonfirstLeafletUtilsJs,
-	"static/javascript/whosonfirst.namify.js":           staticJavascriptWhosonfirstNamifyJs,
-	"static/javascript/whosonfirst.net.js":              staticJavascriptWhosonfirstNetJs,
-	"static/javascript/whosonfirst.properties.js":       staticJavascriptWhosonfirstPropertiesJs,
-	"static/javascript/whosonfirst.render.js":           staticJavascriptWhosonfirstRenderJs,
-	"static/javascript/whosonfirst.static.id.init.js":   staticJavascriptWhosonfirstStaticIdInitJs,
-	"static/javascript/whosonfirst.static.id.js":        staticJavascriptWhosonfirstStaticIdJs,
-	"static/javascript/whosonfirst.uri.js":              staticJavascriptWhosonfirstUriJs,
-	"static/javascript/whosonfirst.www.js":              staticJavascriptWhosonfirstWwwJs,
-	"static/css/whosonfirst.common.css":                 staticCssWhosonfirstCommonCss,
-	"static/css/whosonfirst.static.id.css":              staticCssWhosonfirstStaticIdCss,
-	"static/css/whosonfirst.www.css":                    staticCssWhosonfirstWwwCss,
-	"static/fonts/Poppins-Light.ttf":                    staticFontsPoppinsLightTtf,
-	"static/fonts/Poppins-Medium.ttf":                   staticFontsPoppinsMediumTtf,
-	"static/fonts/Poppins-SemiBold.ttf":                 staticFontsPoppinsSemiboldTtf,
-	"static/fonts/Roboto-Light.ttf":                     staticFontsRobotoLightTtf,
-	"static/fonts/Roboto-LightItalic.ttf":               staticFontsRobotoLightitalicTtf,
-	"static/fonts/Roboto-Regular.ttf":                   staticFontsRobotoRegularTtf,
-	"static/fonts/RobotoMono-Light.ttf":                 staticFontsRobotomonoLightTtf,
-	"static/fonts/glyphicons-halflings-regular.eot":     staticFontsGlyphiconsHalflingsRegularEot,
-	"static/fonts/glyphicons-halflings-regular.svg":     staticFontsGlyphiconsHalflingsRegularSvg,
-	"static/fonts/glyphicons-halflings-regular.ttf":     staticFontsGlyphiconsHalflingsRegularTtf,
-	"static/fonts/glyphicons-halflings-regular.woff":    staticFontsGlyphiconsHalflingsRegularWoff,
+	"static/javascript/whosonfirst.leaflet.styles.js": staticJavascriptWhosonfirstLeafletStylesJs,
+	"static/javascript/whosonfirst.leaflet.utils.js": staticJavascriptWhosonfirstLeafletUtilsJs,
+	"static/javascript/whosonfirst.namify.js": staticJavascriptWhosonfirstNamifyJs,
+	"static/javascript/whosonfirst.net.js": staticJavascriptWhosonfirstNetJs,
+	"static/javascript/whosonfirst.properties.js": staticJavascriptWhosonfirstPropertiesJs,
+	"static/javascript/whosonfirst.render.js": staticJavascriptWhosonfirstRenderJs,
+	"static/javascript/whosonfirst.static.id.init.js": staticJavascriptWhosonfirstStaticIdInitJs,
+	"static/javascript/whosonfirst.static.id.js": staticJavascriptWhosonfirstStaticIdJs,
+	"static/javascript/whosonfirst.uri.js": staticJavascriptWhosonfirstUriJs,
+	"static/javascript/whosonfirst.www.js": staticJavascriptWhosonfirstWwwJs,
+	"static/css/whosonfirst.common.css": staticCssWhosonfirstCommonCss,
+	"static/css/whosonfirst.static.id.css": staticCssWhosonfirstStaticIdCss,
+	"static/css/whosonfirst.www.css": staticCssWhosonfirstWwwCss,
+	"static/fonts/Poppins-Light.ttf": staticFontsPoppinsLightTtf,
+	"static/fonts/Poppins-Medium.ttf": staticFontsPoppinsMediumTtf,
+	"static/fonts/Poppins-SemiBold.ttf": staticFontsPoppinsSemiboldTtf,
+	"static/fonts/Roboto-Light.ttf": staticFontsRobotoLightTtf,
+	"static/fonts/Roboto-LightItalic.ttf": staticFontsRobotoLightitalicTtf,
+	"static/fonts/Roboto-Regular.ttf": staticFontsRobotoRegularTtf,
+	"static/fonts/RobotoMono-Light.ttf": staticFontsRobotomonoLightTtf,
+	"static/fonts/glyphicons-halflings-regular.eot": staticFontsGlyphiconsHalflingsRegularEot,
+	"static/fonts/glyphicons-halflings-regular.svg": staticFontsGlyphiconsHalflingsRegularSvg,
+	"static/fonts/glyphicons-halflings-regular.ttf": staticFontsGlyphiconsHalflingsRegularTtf,
+	"static/fonts/glyphicons-halflings-regular.woff": staticFontsGlyphiconsHalflingsRegularWoff,
 }
 
 // AssetDir returns the file names below a certain
@@ -821,44 +821,43 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
 	"static": &bintree{nil, map[string]*bintree{
 		"css": &bintree{nil, map[string]*bintree{
-			"whosonfirst.common.css":    &bintree{staticCssWhosonfirstCommonCss, map[string]*bintree{}},
+			"whosonfirst.common.css": &bintree{staticCssWhosonfirstCommonCss, map[string]*bintree{}},
 			"whosonfirst.static.id.css": &bintree{staticCssWhosonfirstStaticIdCss, map[string]*bintree{}},
-			"whosonfirst.www.css":       &bintree{staticCssWhosonfirstWwwCss, map[string]*bintree{}},
+			"whosonfirst.www.css": &bintree{staticCssWhosonfirstWwwCss, map[string]*bintree{}},
 		}},
 		"fonts": &bintree{nil, map[string]*bintree{
-			"Poppins-Light.ttf":                 &bintree{staticFontsPoppinsLightTtf, map[string]*bintree{}},
-			"Poppins-Medium.ttf":                &bintree{staticFontsPoppinsMediumTtf, map[string]*bintree{}},
-			"Poppins-SemiBold.ttf":              &bintree{staticFontsPoppinsSemiboldTtf, map[string]*bintree{}},
-			"Roboto-Light.ttf":                  &bintree{staticFontsRobotoLightTtf, map[string]*bintree{}},
-			"Roboto-LightItalic.ttf":            &bintree{staticFontsRobotoLightitalicTtf, map[string]*bintree{}},
-			"Roboto-Regular.ttf":                &bintree{staticFontsRobotoRegularTtf, map[string]*bintree{}},
-			"RobotoMono-Light.ttf":              &bintree{staticFontsRobotomonoLightTtf, map[string]*bintree{}},
-			"glyphicons-halflings-regular.eot":  &bintree{staticFontsGlyphiconsHalflingsRegularEot, map[string]*bintree{}},
-			"glyphicons-halflings-regular.svg":  &bintree{staticFontsGlyphiconsHalflingsRegularSvg, map[string]*bintree{}},
-			"glyphicons-halflings-regular.ttf":  &bintree{staticFontsGlyphiconsHalflingsRegularTtf, map[string]*bintree{}},
+			"Poppins-Light.ttf": &bintree{staticFontsPoppinsLightTtf, map[string]*bintree{}},
+			"Poppins-Medium.ttf": &bintree{staticFontsPoppinsMediumTtf, map[string]*bintree{}},
+			"Poppins-SemiBold.ttf": &bintree{staticFontsPoppinsSemiboldTtf, map[string]*bintree{}},
+			"Roboto-Light.ttf": &bintree{staticFontsRobotoLightTtf, map[string]*bintree{}},
+			"Roboto-LightItalic.ttf": &bintree{staticFontsRobotoLightitalicTtf, map[string]*bintree{}},
+			"Roboto-Regular.ttf": &bintree{staticFontsRobotoRegularTtf, map[string]*bintree{}},
+			"RobotoMono-Light.ttf": &bintree{staticFontsRobotomonoLightTtf, map[string]*bintree{}},
+			"glyphicons-halflings-regular.eot": &bintree{staticFontsGlyphiconsHalflingsRegularEot, map[string]*bintree{}},
+			"glyphicons-halflings-regular.svg": &bintree{staticFontsGlyphiconsHalflingsRegularSvg, map[string]*bintree{}},
+			"glyphicons-halflings-regular.ttf": &bintree{staticFontsGlyphiconsHalflingsRegularTtf, map[string]*bintree{}},
 			"glyphicons-halflings-regular.woff": &bintree{staticFontsGlyphiconsHalflingsRegularWoff, map[string]*bintree{}},
 		}},
 		"javascript": &bintree{nil, map[string]*bintree{
-			"localforage.js":                  &bintree{staticJavascriptLocalforageJs, map[string]*bintree{}},
-			"localforage.min.js":              &bintree{staticJavascriptLocalforageMinJs, map[string]*bintree{}},
-			"slippymap.crosshairs.js":         &bintree{staticJavascriptSlippymapCrosshairsJs, map[string]*bintree{}},
-			"whosonfirst.cache.js":            &bintree{staticJavascriptWhosonfirstCacheJs, map[string]*bintree{}},
-			"whosonfirst.geojson.js":          &bintree{staticJavascriptWhosonfirstGeojsonJs, map[string]*bintree{}},
+			"localforage.js": &bintree{staticJavascriptLocalforageJs, map[string]*bintree{}},
+			"localforage.min.js": &bintree{staticJavascriptLocalforageMinJs, map[string]*bintree{}},
+			"slippymap.crosshairs.js": &bintree{staticJavascriptSlippymapCrosshairsJs, map[string]*bintree{}},
+			"whosonfirst.cache.js": &bintree{staticJavascriptWhosonfirstCacheJs, map[string]*bintree{}},
+			"whosonfirst.geojson.js": &bintree{staticJavascriptWhosonfirstGeojsonJs, map[string]*bintree{}},
 			"whosonfirst.leaflet.handlers.js": &bintree{staticJavascriptWhosonfirstLeafletHandlersJs, map[string]*bintree{}},
-			"whosonfirst.leaflet.styles.js":   &bintree{staticJavascriptWhosonfirstLeafletStylesJs, map[string]*bintree{}},
-			"whosonfirst.leaflet.utils.js":    &bintree{staticJavascriptWhosonfirstLeafletUtilsJs, map[string]*bintree{}},
-			"whosonfirst.namify.js":           &bintree{staticJavascriptWhosonfirstNamifyJs, map[string]*bintree{}},
-			"whosonfirst.net.js":              &bintree{staticJavascriptWhosonfirstNetJs, map[string]*bintree{}},
-			"whosonfirst.properties.js":       &bintree{staticJavascriptWhosonfirstPropertiesJs, map[string]*bintree{}},
-			"whosonfirst.render.js":           &bintree{staticJavascriptWhosonfirstRenderJs, map[string]*bintree{}},
-			"whosonfirst.static.id.init.js":   &bintree{staticJavascriptWhosonfirstStaticIdInitJs, map[string]*bintree{}},
-			"whosonfirst.static.id.js":        &bintree{staticJavascriptWhosonfirstStaticIdJs, map[string]*bintree{}},
-			"whosonfirst.uri.js":              &bintree{staticJavascriptWhosonfirstUriJs, map[string]*bintree{}},
-			"whosonfirst.www.js":              &bintree{staticJavascriptWhosonfirstWwwJs, map[string]*bintree{}},
+			"whosonfirst.leaflet.styles.js": &bintree{staticJavascriptWhosonfirstLeafletStylesJs, map[string]*bintree{}},
+			"whosonfirst.leaflet.utils.js": &bintree{staticJavascriptWhosonfirstLeafletUtilsJs, map[string]*bintree{}},
+			"whosonfirst.namify.js": &bintree{staticJavascriptWhosonfirstNamifyJs, map[string]*bintree{}},
+			"whosonfirst.net.js": &bintree{staticJavascriptWhosonfirstNetJs, map[string]*bintree{}},
+			"whosonfirst.properties.js": &bintree{staticJavascriptWhosonfirstPropertiesJs, map[string]*bintree{}},
+			"whosonfirst.render.js": &bintree{staticJavascriptWhosonfirstRenderJs, map[string]*bintree{}},
+			"whosonfirst.static.id.init.js": &bintree{staticJavascriptWhosonfirstStaticIdInitJs, map[string]*bintree{}},
+			"whosonfirst.static.id.js": &bintree{staticJavascriptWhosonfirstStaticIdJs, map[string]*bintree{}},
+			"whosonfirst.uri.js": &bintree{staticJavascriptWhosonfirstUriJs, map[string]*bintree{}},
+			"whosonfirst.www.js": &bintree{staticJavascriptWhosonfirstWwwJs, map[string]*bintree{}},
 		}},
 	}},
 }}
@@ -909,6 +908,7 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+
 
 func assetFS() *assetfs.AssetFS {
 	assetInfo := func(path string) (os.FileInfo, error) {
