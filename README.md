@@ -123,7 +123,7 @@ WOF_STATIC_ENABLE_DATA = true
 
 ### Lambda, API Gateway and images
 
-In order for requests to produce PNG output (rather than a base64 encoded string) you will need to do a few things. Even then it's not clear that it will work and I'm uncertain whether it's AWS itself, the way AWS is configure or this code. This is what you're _supposed_ to do and... sometimes it works?
+In order for requests to produce PNG output (rather than a base64 encoded string) you will need to do a few things.
 
 1. Make sure your API Gateway settings list `image/png` as a known and valid binary type:
 
@@ -137,6 +137,10 @@ the CloudFront behaviour that points to your gateway):
 ![](docs/images/20180625-cf-cache.png)
 
 3. Make sure you pass an `Accept: image/png` header when you request the PNG rendering.
+
+4. If you add another image (or binary) handler to this package you'll need to
+repeat steps 1-3 _and_ update the `BinaryContentTypes` dictionary in
+[server/lambda.go](server/lambda.go) code accordingly. Good times...
 
 ## Docker
 
