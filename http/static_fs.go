@@ -113,7 +113,7 @@ func staticJavascriptLocalforageJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/localforage.js", size: 90998, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/localforage.js", size: 90998, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -133,7 +133,7 @@ func staticJavascriptLocalforageMinJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/localforage.min.js", size: 29052, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/localforage.min.js", size: 29052, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -153,7 +153,7 @@ func staticJavascriptSlippymapCrosshairsJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/slippymap.crosshairs.js", size: 3184, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/slippymap.crosshairs.js", size: 3184, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -173,7 +173,7 @@ func staticJavascriptWhosonfirstCacheJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.cache.js", size: 2273, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.cache.js", size: 2273, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -193,7 +193,7 @@ func staticJavascriptWhosonfirstGeojsonJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.geojson.js", size: 1566, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.geojson.js", size: 1566, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -213,7 +213,7 @@ func staticJavascriptWhosonfirstLeafletHandlersJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.handlers.js", size: 511, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.handlers.js", size: 511, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -233,7 +233,7 @@ func staticJavascriptWhosonfirstLeafletStylesJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.styles.js", size: 1592, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.styles.js", size: 1592, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -253,7 +253,7 @@ func staticJavascriptWhosonfirstLeafletUtilsJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.utils.js", size: 3145, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.leaflet.utils.js", size: 3145, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -273,7 +273,7 @@ func staticJavascriptWhosonfirstNamifyJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.namify.js", size: 3563, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.namify.js", size: 3563, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -293,7 +293,7 @@ func staticJavascriptWhosonfirstNetJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.net.js", size: 2754, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.net.js", size: 2754, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -313,7 +313,7 @@ func staticJavascriptWhosonfirstPropertiesJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.properties.js", size: 12915, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.properties.js", size: 12915, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -333,7 +333,7 @@ func staticJavascriptWhosonfirstRenderJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.render.js", size: 9252, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.render.js", size: 9252, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -353,7 +353,7 @@ func staticJavascriptWhosonfirstStaticIdInitJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.static.id.init.js", size: 89, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.static.id.init.js", size: 89, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -373,7 +373,7 @@ func staticJavascriptWhosonfirstStaticIdJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.static.id.js", size: 6856, mode: os.FileMode(420), modTime: time.Unix(1524162427, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.static.id.js", size: 6856, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -393,7 +393,7 @@ func staticJavascriptWhosonfirstUriJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.uri.js", size: 1838, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.uri.js", size: 1838, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -413,7 +413,7 @@ func staticJavascriptWhosonfirstWwwJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.www.js", size: 257, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.www.js", size: 257, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -433,7 +433,7 @@ func staticCssWhosonfirstCommonCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/css/whosonfirst.common.css", size: 271, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/css/whosonfirst.common.css", size: 271, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -453,7 +453,7 @@ func staticCssWhosonfirstStaticIdCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/css/whosonfirst.static.id.css", size: 2399, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/css/whosonfirst.static.id.css", size: 2399, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -473,7 +473,7 @@ func staticCssWhosonfirstWwwCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/css/whosonfirst.www.css", size: 64322, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/css/whosonfirst.www.css", size: 64322, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -493,7 +493,7 @@ func staticFontsPoppinsLightTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Poppins-Light.ttf", size: 156104, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Poppins-Light.ttf", size: 156104, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -513,7 +513,7 @@ func staticFontsPoppinsMediumTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Poppins-Medium.ttf", size: 155248, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Poppins-Medium.ttf", size: 155248, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -533,7 +533,7 @@ func staticFontsPoppinsSemiboldTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Poppins-SemiBold.ttf", size: 153432, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Poppins-SemiBold.ttf", size: 153432, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -553,7 +553,7 @@ func staticFontsRobotoLightTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Roboto-Light.ttf", size: 170420, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Roboto-Light.ttf", size: 170420, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -573,7 +573,7 @@ func staticFontsRobotoLightitalicTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Roboto-LightItalic.ttf", size: 176616, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Roboto-LightItalic.ttf", size: 176616, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -593,7 +593,7 @@ func staticFontsRobotoRegularTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/Roboto-Regular.ttf", size: 171676, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/Roboto-Regular.ttf", size: 171676, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -613,7 +613,7 @@ func staticFontsRobotomonoLightTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/RobotoMono-Light.ttf", size: 118976, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/RobotoMono-Light.ttf", size: 118976, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -633,7 +633,7 @@ func staticFontsGlyphiconsHalflingsRegularEot() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.eot", size: 20127, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.eot", size: 20127, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -653,7 +653,7 @@ func staticFontsGlyphiconsHalflingsRegularSvg() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.svg", size: 108738, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.svg", size: 108738, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -673,7 +673,7 @@ func staticFontsGlyphiconsHalflingsRegularTtf() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.ttf", size: 45404, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.ttf", size: 45404, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -693,7 +693,7 @@ func staticFontsGlyphiconsHalflingsRegularWoff() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.woff", size: 23424, mode: os.FileMode(420), modTime: time.Unix(1524155621, 0)}
+	info := bindataFileInfo{name: "static/fonts/glyphicons-halflings-regular.woff", size: 23424, mode: os.FileMode(420), modTime: time.Unix(1525302637, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

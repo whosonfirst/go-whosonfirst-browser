@@ -1,15 +1,12 @@
 package http
 
 import (
-       "bytes"
 	"errors"
 	"fmt"
 	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-whosonfirst-image"
 	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
 	"github.com/whosonfirst/go-whosonfirst-static/utils"
-	"io"
-	"log"
 	gohttp "net/http"
 )
 
@@ -105,12 +102,9 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (gohttp.Handler, error)
 			return
 		}
 
-		var buf bytes.Buffer
-		wr := io.MultiWriter(&buf, rsp)
-
 		img_opts := image.NewDefaultOptions()
 
-		img_opts.Writer = wr
+		img_opts.Writer = rsp
 		img_opts.Height = sz_info.MaxHeight
 		img_opts.Width = sz_info.MaxWidth
 
@@ -118,8 +112,6 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (gohttp.Handler, error)
 		rsp.Header().Set("Content-Type", content_type)
 
 		image.FeatureToPNG(f, img_opts)
-
-		log.Println("BYTES", buf.Len())
 	}
 
 	h := gohttp.HandlerFunc(fn)

@@ -27,6 +27,9 @@ func (s *LambdaServer) Address() string {
 
 func (s *LambdaServer) ListenAndServe(mux *http.ServeMux) error {
 
-	algnhsa.ListenAndServe(mux, nil)
+	lambda_opts := new(algnhsa.Options)
+	lambda_opts.BinaryContentTypes = []string{"image/png"}
+
+	algnhsa.ListenAndServe(mux, lambda_opts)
 	return nil
 }
