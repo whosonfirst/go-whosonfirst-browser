@@ -134,9 +134,13 @@ will to ensure that you blanket enable all HTTP headers or whitelist the
 `Accept:` header , via the `Cache Based on Selected Request Headers` option (for
 the CloudFront behaviour that points to your gateway):
 
+2a. **Or:** Don't use a custom whitelist (in your behaviour settings) but make sure you pass a custom header in your origin settings (see `3a` for details).
+
 ![](docs/images/20180625-cf-cache.png)
 
 3. Make sure you pass an `Accept: image/png` header when you request the PNG rendering.
+
+3a. **Or:** make sure you specify a `Origin Custom Headers` header in your CloudFront origin settings (specifically `Accept: image/png`)
 
 4. If you add another image (or binary) handler to this package you'll need to
 repeat steps 1-3 _and_ update the `BinaryContentTypes` dictionary in
