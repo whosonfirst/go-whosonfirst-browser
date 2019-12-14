@@ -259,6 +259,13 @@ func main() {
 		}
 
 		mux.Handle(*path_id, id_handler)
+
+		err = http.AppendStaticAssetHandlersWithPrefix(mux, *static_prefix)
+		
+		if err != nil {
+			log.Fatal(err)
+		}
+		
 	}
 
 	address := fmt.Sprintf("http://%s:%d", *host, *port)
