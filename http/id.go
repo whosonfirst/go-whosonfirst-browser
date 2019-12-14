@@ -6,8 +6,9 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-spr"
 	"html/template"
-	_ "log"
+	"log"
 	gohttp "net/http"
+	"path/filepath"
 	"time"
 )
 
@@ -32,9 +33,15 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
+		path := req.URL.Path
+		ext := filepath.Ext(path)
+
+		log.Println(path, ext)
+
 		f, err, status := FeatureFromRequest(req, r)
 
 		if err != nil {
+			log.Println("SAD", err)
 			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
