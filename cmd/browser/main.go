@@ -8,11 +8,11 @@ import (
 	"github.com/aaronland/go-http-tangramjs"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
-	_ "github.com/whosonfirst/go-reader-http"	
-	"github.com/whosonfirst/go-whosonfirst-browser/cachereader"	// eventually this will become a real go-reader thing...
-	"github.com/whosonfirst/go-whosonfirst-browser/http"	
+	_ "github.com/whosonfirst/go-reader-http"
+	"github.com/whosonfirst/go-whosonfirst-browser/assets/templates"
+	"github.com/whosonfirst/go-whosonfirst-browser/cachereader" // eventually this will become a real go-reader thing...
+	"github.com/whosonfirst/go-whosonfirst-browser/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/server"
-	"github.com/whosonfirst/go-whosonfirst-browser/assets/templates"	
 	"github.com/whosonfirst/go-whosonfirst-cli/flags"
 	"html/template"
 	"log"
@@ -66,7 +66,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	ctx := context.Background()
 
 	r, err := reader.NewReader(ctx, *reader_source)
@@ -86,7 +86,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	// start of sudo put me in a package
 
 	t := template.New("whosonfirst-browser").Funcs(template.FuncMap{
@@ -226,7 +226,7 @@ func main() {
 		tangramjs_opts.Nextzen.APIKey = *nextzen_api_key
 		tangramjs_opts.Nextzen.StyleURL = *nextzen_style_url
 		tangramjs_opts.Nextzen.TileURL = *nextzen_tile_url
-		
+
 		html_handler = bootstrap.AppendResourcesHandlerWithPrefix(html_handler, bootstrap_opts, *static_prefix)
 		html_handler = tangramjs.AppendResourcesHandlerWithPrefix(html_handler, tangramjs_opts, *static_prefix)
 
