@@ -1,15 +1,17 @@
 package main
 
 import (
-	_ "errors"
+	"context"
 	"flag"
 	"fmt"
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-tangramjs"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/http"
+	"github.com/whosonfirst/go-whosonfirst-browser/cachereader"	// eventually this will become a real go-reader thing...
+	"github.com/whosonfirst/go-whosonfirst-browser/http"	
 	"github.com/whosonfirst/go-whosonfirst-browser/server"
+	"github.com/whosonfirst/go-whosonfirst-browser/assets/templates"	
 	"github.com/whosonfirst/go-whosonfirst-cli/flags"
 	"html/template"
 	"log"
@@ -18,7 +20,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 func main() {
@@ -34,11 +35,11 @@ func main() {
 	var reader_source = flag.String("reader-source", "", "...")
 	var cache_source = flag.String("cache-source", "", "...")
 
-	nextzen_api_key = flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
+	nextzen_api_key := flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
 	nextzen_style_url := flag.String("nextzen-style-url", "/tangram/refill-style.zip", "...")
 	nextzen_tile_url := flag.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "...")
 
-	var debug = flag.Bool("debug", false, "Enable debugging.")
+	// var debug = flag.Bool("debug", false, "Enable debugging.")
 
 	var enable_all = flag.Bool("enable-all", false, "Enable all the available output handlers.")
 	var enable_graphics = flag.Bool("enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
@@ -59,7 +60,13 @@ func main() {
 
 	flag.Parse()
 
-	context := context.Background()
+	err := flags.SetFlagsFromEnvVars("BROWSER")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	ctx := context.Background()
 
 	r, err := reader.NewReader(ctx, *reader_source)
 
@@ -73,13 +80,18 @@ func main() {
 		log.Fatal(err)
 	}
 
+	cr, err := cachereader.NewCacheReader(r, c)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	
 	// start of sudo put me in a package
 
 	t := template.New("whosonfirst-browser").Funcs(template.FuncMap{
 		"Add": func(i int, offset int) int {
 			return i + offset
 		},
-		"Ancestors": http.Ancestors,
 		"Join": func(root string, path string) string {
 
 			root = strings.TrimRight(root, "/")
@@ -209,13 +221,13 @@ func main() {
 
 		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
 
-		html_handler = bootstrap.AppendResourcesHandlerWithPrefix(html_handler, bootstrap_opts, *static_prefix)
-		html_handler = tangramjs.AppendResourcesHandlerWithPrefix(html_handler, tangramjs_opts, *static_prefix)
-
 		tangramjs_opts := tangramjs.DefaultTangramJSOptions()
-		tangramjs_opts.Nextzen.APIKey = *nextzen_apikey
+		tangramjs_opts.Nextzen.APIKey = *nextzen_api_key
 		tangramjs_opts.Nextzen.StyleURL = *nextzen_style_url
 		tangramjs_opts.Nextzen.TileURL = *nextzen_tile_url
+		
+		html_handler = bootstrap.AppendResourcesHandlerWithPrefix(html_handler, bootstrap_opts, *static_prefix)
+		html_handler = tangramjs.AppendResourcesHandlerWithPrefix(html_handler, tangramjs_opts, *static_prefix)
 
 		err = bootstrap.AppendAssetHandlersWithPrefix(mux, *static_prefix)
 

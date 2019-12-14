@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type HTMLOptions struct {
+type HTMLHandlerOptions struct {
 	DataEndpoint string
 	Templates    *template.Template
 }
@@ -22,16 +22,7 @@ type HTMLVars struct {
 	DataEndpoint string
 }
 
-func NewDefaultHTMLOptions() HTMLOptions {
-
-	opts := HTMLOptions{
-		DataEndpoint: "",
-	}
-
-	return opts
-}
-
-func HTMLHandler(r reader.Reader, opts HTMLOptions) (gohttp.Handler, error) {
+func HTMLHandler(r reader.Reader, opts HTMLHandlerOptions) (gohttp.Handler, error) {
 
 	t := opts.Templates.Lookup("id")
 
