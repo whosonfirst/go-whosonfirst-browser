@@ -59,6 +59,8 @@ func main() {
 	var path_geojson = flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from")
 	var path_spr = flag.String("path-spr", "/spr/", "The path that SPR requests should be served from")
 
+	path_id := flag.String("path-id", "/id/", "...")
+
 	flag.Parse()
 
 	err := flags.SetFlagsFromEnvVars("BROWSER")
@@ -210,16 +212,6 @@ func main() {
 
 	if *enable_all || *enable_html {
 
-		html_opts := http.HTMLHandlerOptions{
-			Templates: t,
-		}
-
-		html_handler, err := http.HTMLHandler(cr, html_opts)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
 
 		tangramjs_opts := tangramjs.DefaultTangramJSOptions()
@@ -227,8 +219,32 @@ func main() {
 		tangramjs_opts.Nextzen.StyleURL = *nextzen_style_url
 		tangramjs_opts.Nextzen.TileURL = *nextzen_tile_url
 
-		html_handler = bootstrap.AppendResourcesHandlerWithPrefix(html_handler, bootstrap_opts, *static_prefix)
-		html_handler = tangramjs.AppendResourcesHandlerWithPrefix(html_handler, tangramjs_opts, *static_prefix)
+		index_opts := http.IndexHandlerOptions{
+			Templates: t,
+		}
+
+		index_handler, err := http.IndexHandler(index_opts)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, *static_prefix)
+
+		mux.Handle("/", index_handler)
+
+		id_opts := http.IDHandlerOptions{
+			Templates: t,
+		}
+
+		id_handler, err := http.IDHandler(cr, id_opts)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, *static_prefix)
+		id_handler = tangramjs.AppendResourcesHandlerWithPrefix(id_handler, tangramjs_opts, *static_prefix)
 
 		err = bootstrap.AppendAssetHandlersWithPrefix(mux, *static_prefix)
 
@@ -242,7 +258,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		mux.Handle("/", html_handler)
+		mux.Handle(*path_id, id_handler)
 	}
 
 	address := fmt.Sprintf("http://%s:%d", *host, *port)

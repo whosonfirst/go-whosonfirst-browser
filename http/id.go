@@ -11,18 +11,18 @@ import (
 	"time"
 )
 
-type HTMLHandlerOptions struct {
+type IDHandlerOptions struct {
 	DataEndpoint string
 	Templates    *template.Template
 }
 
-type HTMLVars struct {
+type IDVars struct {
 	SPR          spr.StandardPlacesResult
 	LastModified string
 	DataEndpoint string
 }
 
-func HTMLHandler(r reader.Reader, opts HTMLHandlerOptions) (gohttp.Handler, error) {
+func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 	t := opts.Templates.Lookup("id")
 
@@ -58,7 +58,7 @@ func HTMLHandler(r reader.Reader, opts HTMLHandlerOptions) (gohttp.Handler, erro
 			data_endpoint = opts.DataEndpoint
 		}
 
-		vars := HTMLVars{
+		vars := IDVars{
 			SPR:          s,
 			LastModified: lastmod,
 			DataEndpoint: data_endpoint,
