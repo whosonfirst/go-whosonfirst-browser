@@ -3,7 +3,6 @@ package http
 import (
 	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/utils"
 	"github.com/whosonfirst/go-whosonfirst-svg"
 	gohttp "net/http"
 )
@@ -55,7 +54,7 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		f, err, status := utils.FeatureFromRequest(req, r)
+		f, err, status := FeatureFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)

@@ -6,7 +6,6 @@ import (
 	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-whosonfirst-image"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/utils"
 	gohttp "net/http"
 )
 
@@ -70,7 +69,7 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (gohttp.Handler, error)
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		f, err, status := utils.FeatureFromRequest(req, r)
+		f, err, status := FeatureFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)

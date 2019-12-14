@@ -21,24 +21,12 @@ import (
 
 func main() {
 
-	config := flag.String("config", "", "Read some or all flags from an ini-style config file. Values in the config file take precedence over command line flags.")
-	section := flag.String("section", "wof-staticd", "A valid ini-style config file section.")
-
 	var proto = flag.String("protocol", "http", "The protocol for wof-staticd server to listen on. Valid protocols are: http, lambda.")
 	var host = flag.String("host", "localhost", "The hostname to listen for requests on")
 	var port = flag.Int("port", 8080, "The port number to listen for requests on")
 
-	var source = flag.String("source", "fs", "Valid sources are: fs, http, mysql, s3, sqlite")
-	var source_dsn = flag.String("source-dsn", "", "A valid DSN string specific to the source you've chosen.")
-
-	var cache_source = flag.String("cache", "null", "The named source to use for caching requests.")
-
-	var cache_args flags.KeyValueArgs
-	flag.Var(&cache_args, "cache-arg", "(0) or more user-defined '{KEY}={VALUE}' arguments to pass to the caching layer")
-
-	var test_reader = flag.String("test-reader", "", "Perform some basic sanity checking on the reader at startup")
-
-	var data_endpoint = flag.String("data-endpoint", "", "The endpoint your HTML handler should fetch data files from.")
+	var reader_source = flag.String("reader-source", "", "...")
+	var cache_source = flag.String("cache-source", "", "...")
 
 	var api_key = flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
 
@@ -63,24 +51,7 @@ func main() {
 
 	flag.Parse()
 
-	if *config != "" {
-
-		err := flags.SetFlagsFromConfig(*config, *section)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-	} else {
-
-		err := flags.SetFlagsFromEnvVars("WOF_STATICD")
-
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	r, err := reader.NewReader(*source_dsn)
+	r, err := reader.NewReader(*reader_source)
 
 	if err != nil {
 		log.Fatal(err)

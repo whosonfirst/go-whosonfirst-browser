@@ -2,7 +2,6 @@ package http
 
 import (
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/utils"
 	gohttp "net/http"
 )
 
@@ -10,7 +9,7 @@ func GeoJSONHandler(r reader.Reader) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		f, err, status := utils.FeatureFromRequest(req, r)
+		f, err, status := FeatureFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)

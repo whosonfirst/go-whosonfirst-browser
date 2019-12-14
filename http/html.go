@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-spr"
-	"github.com/whosonfirst/go-whosonfirst-browser/assets/html"
-	"github.com/whosonfirst/go-whosonfirst-browser/utils"
 	"html/template"
 	_ "log"
 	gohttp "net/http"
@@ -49,7 +47,7 @@ func HTMLHandler(r reader.Reader, opts HTMLOptions) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		f, err, status := utils.FeatureFromRequest(req, r)
+		f, err, status := FeatureFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
