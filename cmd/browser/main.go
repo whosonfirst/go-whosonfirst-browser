@@ -8,6 +8,7 @@ import (
 	"github.com/aaronland/go-http-tangramjs"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
+	_ "github.com/whosonfirst/go-reader-http"	
 	"github.com/whosonfirst/go-whosonfirst-browser/cachereader"	// eventually this will become a real go-reader thing...
 	"github.com/whosonfirst/go-whosonfirst-browser/http"	
 	"github.com/whosonfirst/go-whosonfirst-browser/server"
@@ -32,8 +33,8 @@ func main() {
 
 	path_templates := flag.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
 
-	var reader_source = flag.String("reader-source", "", "...")
-	var cache_source = flag.String("cache-source", "", "...")
+	var reader_source = flag.String("reader-source", "https://data.whosonfirst.org", "...")
+	var cache_source = flag.String("cache-source", "gocache://", "...")
 
 	nextzen_api_key := flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
 	nextzen_style_url := flag.String("nextzen-style-url", "/tangram/refill-style.zip", "...")
