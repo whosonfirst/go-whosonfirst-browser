@@ -2,10 +2,10 @@ package http
 
 import (
 	"fmt"
-	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
+	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-spr"
-	"github.com/whosonfirst/go-whosonfirst-static/assets/html"
-	"github.com/whosonfirst/go-whosonfirst-static/utils"
+	"github.com/whosonfirst/go-whosonfirst-browser/assets/html"
+	"github.com/whosonfirst/go-whosonfirst-browser/utils"
 	"html/template"
 	_ "log"
 	gohttp "net/http"

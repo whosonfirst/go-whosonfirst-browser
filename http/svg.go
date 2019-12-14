@@ -2,8 +2,8 @@ package http
 
 import (
 	"github.com/whosonfirst/go-sanitize"
-	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
-	"github.com/whosonfirst/go-whosonfirst-static/utils"
+	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-browser/utils"
 	"github.com/whosonfirst/go-whosonfirst-svg"
 	gohttp "net/http"
 )

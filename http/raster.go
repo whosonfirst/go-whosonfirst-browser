@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-whosonfirst-image"
-	"github.com/whosonfirst/go-whosonfirst-readwrite/reader"
-	"github.com/whosonfirst/go-whosonfirst-static/utils"
+	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-browser/utils"
 	gohttp "net/http"
 )
 

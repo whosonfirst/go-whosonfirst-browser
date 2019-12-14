@@ -1,3 +1,0 @@
-package render
-
-// interfaces go here...
