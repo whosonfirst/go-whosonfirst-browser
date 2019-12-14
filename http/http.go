@@ -26,7 +26,7 @@ func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (geojson.Feature, 
 	}
 
 	ctx := req.Context()
-	
+
 	fh, err := r.Read(ctx, rel_path)
 
 	if err != nil {

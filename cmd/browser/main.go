@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	_ "errors"
 	"flag"
 	"fmt"
 	"github.com/aaronland/go-http-bootstrap"
@@ -59,53 +59,38 @@ func main() {
 
 	flag.Parse()
 
-	r, err := reader.NewReader(*reader_source)
+	context := context.Background()
+
+	r, err := reader.NewReader(ctx, *reader_source)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	c, err := cache.NewCache(*cache_source)
+	c, err := cache.NewCache(ctx, *cache_source)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	html_opts := http.NewDefaultHTMLOptions()
+	// start of sudo put me in a package
 
-	html_handler, err := http.HTMLHandler(cr, html_opts)
+	t := template.New("whosonfirst-browser").Funcs(template.FuncMap{
+		"Add": func(i int, offset int) int {
+			return i + offset
+		},
+		"Ancestors": http.Ancestors,
+		"Join": func(root string, path string) string {
 
-	if err != nil {
-		log.Fatal(err)
-	}
+			root = strings.TrimRight(root, "/")
 
-	bootstrap_opts := bootstrap.DefaultBootstrapOptions()
+			if root != "" {
+				path = filepath.Join(root, path)
+			}
 
-	tangramjs_opts := tangramjs.DefaultTangramJSOptions()
-	tangramjs_opts.Nextzen.APIKey = *nextzen_apikey
-	tangramjs_opts.Nextzen.StyleURL = *nextzen_style_url
-	tangramjs_opts.Nextzen.TileURL = *nextzen_tile_url
-
-	err = bootstrap.AppendAssetHandlersWithPrefix(mux, *static_prefix)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	html_handler = bootstrap.AppendResourcesHandlerWithPrefix(html_handler, bootstrap_opts, *static_prefix)
-	html_handler = tangramjs.AppendResourcesHandlerWithPrefix(html_handler, tangramjs_opts, *static_prefix)
-
-	err = tangramjs.AppendAssetHandlersWithPrefix(mux, *static_prefix)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var png_handler gohttp.Handler
-	var svg_handler gohttp.Handler
-
-	var geojson_handler gohttp.Handler
-	var spr_handler gohttp.Handler
+			return path
+		},
+	})
 
 	if *path_templates != "" {
 
@@ -132,6 +117,8 @@ func main() {
 			}
 		}
 	}
+
+	// end of sudo put me in a package
 
 	if *static_prefix != "" {
 
@@ -160,13 +147,12 @@ func main() {
 			log.Fatal(err)
 		}
 
-		h, err := http.RasterHandler(cr, png_opts)
+		png_handler, err := http.RasterHandler(cr, png_opts)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		png_handler = h
 		mux.Handle(*path_png, png_handler)
 	}
 
@@ -178,69 +164,53 @@ func main() {
 			log.Fatal(err)
 		}
 
-		h, err := http.SVGHandler(cr, svg_opts)
+		svg_handler, err := http.SVGHandler(cr, svg_opts)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		svg_handler = h
 		mux.Handle(*path_svg, svg_handler)
 	}
 
 	if *enable_all || *enable_data || *enable_spr {
 
-		h, err := http.SPRHandler(cr)
+		spr_handler, err := http.SPRHandler(cr)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		spr_handler = h
 		mux.Handle(*path_spr, spr_handler)
 	}
 
 	if *enable_all || *enable_data || *enable_geojson {
 
-		h, err := http.GeoJSONHandler(cr)
+		geojson_handler, err := http.GeoJSONHandler(cr)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		geojson_handler = h
 		mux.Handle(*path_geojson, geojson_handler)
 	}
 
 	if *enable_all || *enable_html {
 
-		static_handler, err := http.StaticHandler()
+		html_opts := http.HTMLHandlerOptions{
+			Templates: t,
+		}
+
+		html_handler, err := http.HTMLHandler(cr, html_opts)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		id_func := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
-
-			path := req.URL.Path
-			ext := filepath.Ext(path)
-
-			if ext == ".geojson" && (*enable_data || *enable_geojson) {
-				geojson_handler.ServeHTTP(rsp, req)
-			} else if ext == ".spr" && (*enable_data || *enable_spr) {
-				spr_handler.ServeHTTP(rsp, req)
-			} else if ext == ".png" && (*enable_png || *enable_graphics) {
-				png_handler.ServeHTTP(rsp, req)
-			} else if ext == ".svg" && (*enable_svg || *enable_graphics) {
-				svg_handler.ServeHTTP(rsp, req)
-			} else {
-				mapzenjs_handler.ServeHTTP(rsp, req)
-			}
-
-			return
-		}
-
 		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
+
+		html_handler = bootstrap.AppendResourcesHandlerWithPrefix(html_handler, bootstrap_opts, *static_prefix)
+		html_handler = tangramjs.AppendResourcesHandlerWithPrefix(html_handler, tangramjs_opts, *static_prefix)
 
 		tangramjs_opts := tangramjs.DefaultTangramJSOptions()
 		tangramjs_opts.Nextzen.APIKey = *nextzen_apikey
@@ -253,8 +223,13 @@ func main() {
 			log.Fatal(err)
 		}
 
-		id_handler := gohttp.HandlerFunc(id_func)
+		err = tangramjs.AppendAssetHandlersWithPrefix(mux, *static_prefix)
 
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		mux.Handle("/", html_handler)
 	}
 
 	address := fmt.Sprintf("http://%s:%d", *host, *port)

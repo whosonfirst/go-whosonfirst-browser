@@ -13,7 +13,7 @@ import (
 
 type HTMLOptions struct {
 	DataEndpoint string
-	Templates         *template.Template	
+	Templates    *template.Template
 }
 
 type HTMLVars struct {
