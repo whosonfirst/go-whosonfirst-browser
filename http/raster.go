@@ -3,9 +3,9 @@ package http
 import (
 	"errors"
 	"fmt"
+	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-whosonfirst-image"
-	"github.com/whosonfirst/go-reader"
 	gohttp "net/http"
 )
 

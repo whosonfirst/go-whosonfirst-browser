@@ -1,8 +1,8 @@
 package http
 
 import (
-	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-whosonfirst-svg"
 	gohttp "net/http"
 )

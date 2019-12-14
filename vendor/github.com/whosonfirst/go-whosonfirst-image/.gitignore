@@ -1,0 +1,14 @@
+*~
+pkg
+src
+!vendor/src
+!vendor/github.com/*/geojson2svg/pkg
+bin
+!bin/.gitignore
+*.log
+*.json
+.travis.yml
+*.db
+*.svg
+*.png
+!images/*.png

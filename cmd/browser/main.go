@@ -6,17 +6,18 @@ import (
 	"fmt"
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-tangramjs"
-	"github.com/whosonfirst/go-whosonfirst-cli/flags"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-browser/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/server"
+	"github.com/whosonfirst/go-whosonfirst-cli/flags"
+	"html/template"
 	"log"
 	gohttp "net/http"
 	"net/url"
 	"os"
 	"path/filepath"
-	"html/template"
+	"strings"
 	"time"
 )
 
@@ -26,10 +27,16 @@ func main() {
 	var host = flag.String("host", "localhost", "The hostname to listen for requests on")
 	var port = flag.Int("port", 8080, "The port number to listen for requests on")
 
+	static_prefix := flag.String("static-prefix", "", "Prepend this prefix to URLs for static assets.")
+
+	path_templates := flag.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
+
 	var reader_source = flag.String("reader-source", "", "...")
 	var cache_source = flag.String("cache-source", "", "...")
 
-	var api_key = flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
+	nextzen_api_key = flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
+	nextzen_style_url := flag.String("nextzen-style-url", "/tangram/refill-style.zip", "...")
+	nextzen_tile_url := flag.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "...")
 
 	var debug = flag.Bool("debug", false, "Enable debugging.")
 
@@ -64,29 +71,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go func() {
-
-		for {
-
-			select {
-			case <-time.After(1 * time.Minute):
-				log.Printf("CACHE KEYS: %d HITS: %d MISSES: %d\n", c.Size(), c.Hits(), c.Misses())
-			}
-		}
-	}()
-
 	html_opts := http.NewDefaultHTMLOptions()
-
-	if *data_endpoint != "" {
-
-		_, err = url.Parse(*data_endpoint)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		html_opts.DataEndpoint = *data_endpoint
-	}
 
 	html_handler, err := http.HTMLHandler(cr, html_opts)
 
@@ -115,7 +100,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	var png_handler gohttp.Handler
 	var svg_handler gohttp.Handler
 
@@ -156,7 +141,7 @@ func main() {
 			log.Fatal("Invalid -static-prefix value")
 		}
 	}
-	
+
 	mux := gohttp.NewServeMux()
 
 	ping_handler, err := http.PingHandler()
@@ -255,18 +240,21 @@ func main() {
 			return
 		}
 
-		id_handler := gohttp.HandlerFunc(id_func)
+		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
 
-		mux.Handle("/id/", id_handler)
-		mux.Handle("/fonts/", static_handler)
-		mux.Handle("/javascript/", static_handler)
-		mux.Handle("/css/", static_handler)
+		tangramjs_opts := tangramjs.DefaultTangramJSOptions()
+		tangramjs_opts.Nextzen.APIKey = *nextzen_apikey
+		tangramjs_opts.Nextzen.StyleURL = *nextzen_style_url
+		tangramjs_opts.Nextzen.TileURL = *nextzen_tile_url
 
-		err = mapzenjs_utils.AppendMapzenJSAssets(mux)
+		err = bootstrap.AppendAssetHandlersWithPrefix(mux, *static_prefix)
 
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		id_handler := gohttp.HandlerFunc(id_func)
+
 	}
 
 	address := fmt.Sprintf("http://%s:%d", *host, *port)

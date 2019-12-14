@@ -1,23 +1,19 @@
 package http
 
 import (
-	"errors"
+	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
-	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/warning"
 	gohttp "net/http"
-	"path/filepath"
-	"regexp"
-	"strconv"
 )
 
 func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (geojson.Feature, error, int) {
 
 	path := req.URL.Path
 
-	wofid, err := IdFromPath(path)
+	wofid, err := uri.IdFromPath(path)
 
 	if err != nil {
 		return nil, err, gohttp.StatusNotFound
@@ -29,7 +25,9 @@ func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (geojson.Feature, 
 		return nil, err, gohttp.StatusBadRequest // StatusInternalServerError
 	}
 
-	fh, err := r.Read(rel_path)
+	ctx := req.Context()
+	
+	fh, err := r.Read(ctx, rel_path)
 
 	if err != nil {
 		return nil, err, gohttp.StatusBadRequest // StatusInternalServerError

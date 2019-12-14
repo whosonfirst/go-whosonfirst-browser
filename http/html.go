@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"fmt"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-spr"
@@ -12,6 +13,7 @@ import (
 
 type HTMLOptions struct {
 	DataEndpoint string
+	Templates         *template.Template	
 }
 
 type HTMLVars struct {
@@ -31,18 +33,10 @@ func NewDefaultHTMLOptions() HTMLOptions {
 
 func HTMLHandler(r reader.Reader, opts HTMLOptions) (gohttp.Handler, error) {
 
-	tpl, err := html.Asset("templates/html/id.html")
+	t := opts.Templates.Lookup("id")
 
-	if err != nil {
-		return nil, err
-	}
-
-	t := template.New("name")
-
-	t, err = t.Parse(string(tpl))
-
-	if err != nil {
-		return nil, err
+	if t == nil {
+		return nil, errors.New("Missing id template")
 	}
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
