@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"html/template"
 	"time"
 )
 
@@ -121,6 +122,41 @@ func main() {
 	var geojson_handler gohttp.Handler
 	var spr_handler gohttp.Handler
 
+	if *path_templates != "" {
+
+		t, err = t.ParseGlob(*path_templates)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	} else {
+
+		for _, name := range templates.AssetNames() {
+
+			body, err := templates.Asset(name)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			t, err = t.Parse(string(body))
+
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+
+	if *static_prefix != "" {
+
+		*static_prefix = strings.TrimRight(*static_prefix, "/")
+
+		if !strings.HasPrefix(*static_prefix, "/") {
+			log.Fatal("Invalid -static-prefix value")
+		}
+	}
+	
 	mux := gohttp.NewServeMux()
 
 	ping_handler, err := http.PingHandler()
