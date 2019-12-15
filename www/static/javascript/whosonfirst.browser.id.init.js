@@ -1,3 +1,3 @@
 window.addEventListener("load", function load(event){
-	whosonfirst.static.id.init();
+	whosonfirst.browser.id.init();
 });

@@ -17,7 +17,7 @@
 	  <meta property="og:site_name" content="Who's On First" />
 	  <meta property="og:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
 	  <meta property="og:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
-	  <meta property="og:image" content="/id/{{ .SPR.Id }}.png?size=xsm" />
+	  <meta property="og:image" content="/png/{{ .SPR.Id }}?size=xsm" />
 
 	  <meta property="twitter:card" value="summary" />
 	  <meta property="twitter:site" content="@alloftheplaces" />
@@ -25,7 +25,7 @@
 	  <meta property="twitter:url" content="/id/{{ .SPR.Id }}" />
 	  <meta property="twitter:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
 	  <meta property="twitter:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
-	  <meta property="twitter:image" content="/id/{{ .SPR.Id }}.png?size=xsm" />
+	  <meta property="twitter:image" content="/png/{{ .SPR.Id }}?size=xsm" />
 
 	 <script src="/javascript/localforage.min.js"></script>	  
 	 <script src="/javascript/slippymap.crosshairs.js"></script>
@@ -44,18 +44,22 @@
 	 <script src="/javascript/whosonfirst.leaflet.styles.js"></script>
 	 <script src="/javascript/whosonfirst.leaflet.handlers.js"></script> 	 	 
 
-	 
  	 <link rel="stylesheet" href="/css/whosonfirst.www.css">
  	 <link rel="stylesheet" href="/css/whosonfirst.common.css">	 
-	 
 	 <link rel="stylesheet" href="/css/whosonfirst.static.id.css">
-	 <script src="/javascript/whosonfirst.static.id.js"></script>
 
+	 <script src="/javascript/whosonfirst.browser.maps.js"></script>	 
+	 <script src="/javascript/whosonfirst.browser.id.js"></script>
+	 <script src="/javascript/whosonfirst.browser.id.init.js"></script>	 
+
+	 <!--
 	 <script type="text/javascript">
 	   window.addEventListener("load", function load(event){
-	   	whosonfirst.static.id.init();
+	   	whosonfirst.browser.id.init();
 	   });
 	 </script>
+	 -->
+	 
   </head>
   <body data-whosonfirst-uri-endpoint="{{ .DataEndpoint }}">
     
