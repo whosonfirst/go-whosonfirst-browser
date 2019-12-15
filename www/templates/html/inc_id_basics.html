@@ -8,7 +8,7 @@
     <span class="">{{ .SPR.Country}}</span>.
 </h3>
 
-<p>
+<div>
     <small>
 	{{ if eq .SPR.IsCurrent.StringFlag "1" }}
 	<span class="whosonfirst-status-current">We believe this record to be current.</span>
@@ -17,7 +17,7 @@
 	{{ else }}
 	{{ end }}	  
     </small>	
-</p>
+</div>
 
 <div id="whosonfirst-details">
 
@@ -51,7 +51,7 @@
 </div>
 	  
 <div id="whosonfirst-basics">
-    <p>Its Who's On First ID is <span class="whosonfirst-id">{{ .SPR.Id }}</span> and its relative URI is <a href="https://data.whosonfirst.org/{{ .SPR.Path }}" class="whosonfirst-relpath">{{ .SPR.Path }}</a>.</p>
+    <p>{{ .SPR.Name }}'s Who's On First ID is <span class="whosonfirst-id">{{ .SPR.Id }}</span> and its relative URI is <a href="https://data.whosonfirst.org/{{ .SPR.Path }}" class="whosonfirst-relpath">{{ .SPR.Path }}</a>.</p>
 	      
     {{ if eq .SPR.ParentId "-4" }}
     <p>This record's parent ID is <code>-4</code> which indicates it has <a href="#hierarchy">multiple parents</a> because <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">it happens sometimes</a>.</p>
