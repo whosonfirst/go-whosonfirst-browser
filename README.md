@@ -103,6 +103,7 @@ package main
 import (
 	"context"
 	_ "github.com/whosonfirst/go-reader-blob"
+	_ "github.com/whosonfirst/go-reader-http"	
 	"github.com/whosonfirst/go-whosonfirst-browser"
 )
 
@@ -139,8 +140,8 @@ BROWSER_PROTOCOL = lambda
 In reality you'll need to specify other flags, like `BROWSER_SOURCE` and `BROWSER_SOURCE_DSN`. For example here's how you might configure your function to render all the data and graphics formats (but not static HTML webpages) for your data:
 
 ```
-BROWSER_SOURCE = s3
-BROWSER_SOURCE_DSN = bucket={BUCKET} prefix={PREFIX} region={REGION} credentials=iam:
+BROWSER_CACHE_SOURCE = gocache://
+BROWSER_READER_SOURCE = s3://{BUCKET}?prefix={PREFIX}&region={REGION}
 BROWSER_ENABLE_HTML = false
 BROWSER_ENABLE_GRAPHICS = true
 BROWSER_ENABLE_DATA = true
