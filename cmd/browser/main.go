@@ -19,7 +19,6 @@ import (
 	gohttp "net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -33,12 +32,12 @@ func main() {
 
 	path_templates := flag.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
 
-	var reader_source = flag.String("reader-source", "https://data.whosonfirst.org", "...")
-	var cache_source = flag.String("cache-source", "gocache://", "...")
+	var reader_source = flag.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
+	var cache_source = flag.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
 
 	nextzen_api_key := flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
-	nextzen_style_url := flag.String("nextzen-style-url", "/tangram/refill-style.zip", "...")
-	nextzen_tile_url := flag.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "...")
+	nextzen_style_url := flag.String("nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
+	nextzen_tile_url := flag.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
 
 	// var debug = flag.Bool("debug", false, "Enable debugging.")
 
@@ -52,14 +51,14 @@ func main() {
 	var enable_geojson = flag.Bool("enable-geojson", true, "Enable the 'geojson' output handler.")
 	var enable_spr = flag.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
 
-	var enable_html = flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handler.")
+	var enable_html = flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
-	var path_png = flag.String("path-png", "/png/", "The path that PNG requests should be served from")
-	var path_svg = flag.String("path-svg", "/svg/", "The path that PNG requests should be served from")
-	var path_geojson = flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from")
-	var path_spr = flag.String("path-spr", "/spr/", "The path that SPR requests should be served from")
+	var path_png = flag.String("path-png", "/png/", "The path that PNG requests should be served from.")
+	var path_svg = flag.String("path-svg", "/svg/", "The path that SVG requests should be served from.")
+	var path_geojson = flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
+	var path_spr = flag.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
 
-	path_id := flag.String("path-id", "/id/", "...")
+	path_id := flag.String("path-id", "/id/", "The that Who's On First documents should be served from.")
 
 	flag.Parse()
 
@@ -69,10 +68,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if *enable_all {		
+	if *enable_all {
 		*enable_graphics = true
 		*enable_data = true
-		*enable_html = true		
+		*enable_html = true
 	}
 
 	if *enable_graphics {
@@ -88,8 +87,8 @@ func main() {
 	if *enable_html {
 		*enable_geojson = true
 		*enable_png = true
-	}	
-	
+	}
+
 	ctx := context.Background()
 
 	r, err := reader.NewReader(ctx, *reader_source)
@@ -115,16 +114,6 @@ func main() {
 	t := template.New("whosonfirst-browser").Funcs(template.FuncMap{
 		"Add": func(i int, offset int) int {
 			return i + offset
-		},
-		"Join": func(root string, path string) string {
-
-			root = strings.TrimRight(root, "/")
-
-			if root != "" {
-				path = filepath.Join(root, path)
-			}
-
-			return path
 		},
 	})
 
@@ -255,9 +244,17 @@ func main() {
 		mux.Handle("/", index_handler)
 
 		id_opts := http.IDHandlerOptions{
-			Templates: t,
+			Templates:    t,
 			DataEndpoint: *path_geojson,
-			PngEndpoint: *path_png,			
+			PngEndpoint:  *path_png,
+		}
+
+		if *enable_spr {
+			id_opts.SprEndpoint = *path_spr
+		}
+
+		if *enable_svg {
+			id_opts.SvgEndpoint = *path_svg
 		}
 
 		id_handler, err := http.IDHandler(cr, id_opts)
@@ -284,11 +281,11 @@ func main() {
 		mux.Handle(*path_id, id_handler)
 
 		err = http.AppendStaticAssetHandlersWithPrefix(mux, *static_prefix)
-		
+
 		if err != nil {
 			log.Fatal(err)
 		}
-		
+
 	}
 
 	address := fmt.Sprintf("http://%s:%d", *host, *port)

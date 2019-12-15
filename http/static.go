@@ -2,10 +2,10 @@ package http
 
 import (
 	"github.com/aaronland/go-http-rewrite"
+	_ "log"
 	gohttp "net/http"
 	"path/filepath"
 	"strings"
-	_ "log"
 )
 
 func StaticFileSystem() (gohttp.FileSystem, error) {

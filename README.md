@@ -1,6 +1,8 @@
-# go-whosonfirst-static
+# go-whosonfirst-browser
 
 ![](docs/images/wof-static-sf.png)
+
+_This package used to be called `go-whosonfirst-static`. Now it is called `go-whosonfirst-browser.`_
 
 ## Install
 
