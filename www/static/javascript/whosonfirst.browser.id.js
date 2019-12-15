@@ -205,6 +205,32 @@ whosonfirst.browser.id = (function(){
 		
 		for (var h in props["wof:hierarchy"]){					
 		    var hier_pretty = whosonfirst.properties.render(props["wof:hierarchy"][h]);
+
+		    var details = hier_pretty.getElementsByTagName("details");
+		    var details_count = details.length;
+
+		    for (var i=0; i < details_count; i++){
+
+			var d = details[i];
+
+			var summaries = d.getElementsByTagName("summary");
+			var summaries_count = summaries.length;
+
+			if (summaries_count == 0){
+
+			    var h = document.createElement("h3");
+			    h.setAttribute("style", "display:inline");
+			    h.appendChild(document.createTextNode("hierarchy"));
+			    
+			    var s = document.createElement("summary");
+			    s.appendChild(h);
+
+			    d.insertAdjacentElement("afterbegin", s);
+			}
+			
+			d.setAttribute("open", "true");
+		    }
+		    
 		    hier_el.appendChild(hier_pretty);
 		}
 		

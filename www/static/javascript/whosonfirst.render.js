@@ -194,7 +194,7 @@ whosonfirst.render = (function(){
 	'render_dict': function(d, ctx){
 	    
 	    var table = document.createElement("table");
-	    table.setAttribute("class", "table");
+	    table.setAttribute("class", "table table-sm");
 	    
 	    for (k in d){
 		
@@ -233,8 +233,12 @@ whosonfirst.render = (function(){
 		
 		table.appendChild(row);
 	    }
-	    
-	    return table;
+
+	    var wrapper = document.createElement("div");
+	    wrapper.setAttribute("class", "table-responsive");
+
+	    wrapper.appendChild(table);
+	    return wrapper;
 	},
 	
 	'render_list': function(d, ctx){
