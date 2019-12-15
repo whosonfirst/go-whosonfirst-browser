@@ -1,0 +1,67 @@
+{{define "inc_id_status"}}
+
+<div id="whosonfirst-hierarchy" class="sect">
+    <h3 id="hierarchy">hierarchy</h3>
+</div>
+
+<div id="whosonfirst-status-x" class="sect">
+
+    <details open>
+	<summary>
+	    <h3 style="display:inline;" id="x-status">status <a href="#status" class="anchor">¶</a></h3>
+	</summary>
+	<details-menu>
+	    
+	    <div class="table-responsive">
+		<table class="table table-sm">
+		    <tr>
+			<th>is current</th>
+			<td class="whosonfirst-status">{{ .SPR.IsCurrent.StringFlag }}</td>
+			<td class="whosonfirst-status">{{ .SPR.IsCurrent.IsTrue }}</td>
+			<td class="whosonfirst-status">{{ .SPR.IsCurrent.IsKnown }}</td>
+		    </tr>
+		    <tr>
+			<th>is ceased</th>
+			<td class="whosonfirst-status">{{ .SPR.IsCeased.StringFlag }}</td>
+			<td class="whosonfirst-status">{{ .SPR.IsCeased.IsTrue }}</td>
+			<td class="whosonfirst-status">{{ .SPR.IsCeased.IsKnown }}</td>
+		    </tr>
+		    <tr>
+			<th>is deprecated</th>
+			<td class="whosonfirst-status">{{ .SPR.IsDeprecated.StringFlag }}</td>
+			<td class="whosonfirst-status">{{ .SPR.IsDeprecated.IsTrue }}</td>
+			<td>{{ .SPR.IsDeprecated.IsKnown }}</td>
+		    </tr>
+		    <tr>
+			<th>is superseded</th>
+			<td class="whosonfirst-status">{{ .SPR.IsSuperseded.StringFlag }}</td>
+			<td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsTrue }}</td>
+			<td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsKnown }}</td>
+		    </tr>
+		    <tr>
+			<th>is superseding</th>
+			<td class="whosonfirst-status">{{ .SPR.IsSuperseding.StringFlag }}</td>
+			<td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsTrue }}</td>
+			<td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsKnown }}</td>
+		    </tr>	 	  
+		</table>
+	    </div>
+	    
+	</details-menu>
+    </details>
+    
+</div>
+
+<!--
+     <div class="sect">
+     
+     <h3 id="sources">sources <a href="#sources" class="anchor">¶</a></h3>
+     
+     <ul>
+     <li><a href="https://data.whosonfirst.org/{{ .SPR.Path }}">https://data.whosonfirst.org/{{ .SPR.Path }}</a></li>
+     <li><a href="https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}">https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}</a></li>
+     </ul>
+     </div>
+-->
+
+{{end}}

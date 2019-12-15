@@ -51,154 +51,31 @@
 
       <main class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-path="{{ .SPR.Path }}" data-whosonfirst-parent-id="{{ .SPR.ParentId }}" data-latitude="{{ .SPR.Latitude }}" data-longitude="{{ .SPR.Longitude }}" data-min-latitude="{{ .SPR.MinLatitude}}" data-min-longitude="{{ .SPR.MinLongitude }}" data-max-latitude="{{ .SPR.MaxLatitude}}" data-max-longitude="{{ .SPR.MaxLongitude }}">
 
-      <div id="map" class="row" style="border:solid red;">
-	<!-- <img src="/id/{{ .SPR.Id }}.svg" height="350" /> -->
-      </div>
+	  <div class="container">
+	      
+	      <div id="map" class="row" style="border:solid red;"></div>
 
-      <div class="row" style="border:solid red;">
-	  <h3>
-	      <span class="whosonfirst-name">
-		  {{ .SPR.Name }}</span> <span id="whosonfirst-place-dates"></span> is a <span class="whosonfirst-placetype">{{ .SPR.Placetype }}</span> in <span class="">{{ .SPR.Country}}	  
-		  </span>.
+	      <div class="row">
+		  {{ template "inc_id_basics" .}}
+	      </div>
+	      
+	      <div class="row">
 		  
-		  <small>
-		      {{ if eq .SPR.IsCurrent.StringFlag "1" }}
-		      <span class="whosonfirst-status-current">We believe this record to be current.</span>
-		      {{ else if eq .SPR.IsCurrent.StringFlag "0" }}
-		      <span class="whosonfirst-status-not-current">We no longer believe this record to be current.</span>
-		      {{ else }}
-		      {{ end }}	  
-		  </small>	
-	  </h3>
-
-      	  <div id="whosonfirst-details">
-	      {{ if eq .SPR.IsDeprecated.StringFlag "1" }}
-	      <span class="whosonfirst-status-deprecated">This record has been marked as deprecated.</span>
-	      {{ end }}
-	      
-	      {{ if eq .SPR.IsSuperseded.StringFlag "1" }}
-	      
-	      This record has been superseded by the following records:
-	      <ul class="whosonfirst-pointers">
-		  {{ range $i, $s := .SPR.SupersededBy }}
-		  <li><a href="/id/{{ $s }}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ $s }}">{{ $s }}</a></li>
-		  {{ end }}
-	      </ul>
-	      .
-	      
-	      {{ end }}
-	      
-	      {{ if eq .SPR.IsSuperseding.StringFlag "1" }}
-	      
-	      This record supersedes the following records:
-	      <ul class="whosonfirst-pointers">
-		  {{ range $i, $s := .SPR.Supersedes }}
-		  <li><a href="/id/{{ $s }}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ $s }}">{{ $s }}</a></li>
-		  {{ end }}
-	      </ul>
-	      .
-	      
-	      {{ end }}
-	  </div>
-	  
-	  <ul id="whosonfirst-basics">
-	      <li>Its Who's On First ID is <span class="whosonfirst-id">{{ .SPR.Id }}</span> and its relative URI is <a href="https://data.whosonfirst.org/{{ .SPR.Path }}" class="whosonfirst-relpath">{{ .SPR.Path }}</a>.</li>
-	      
-	      {{ if eq .SPR.ParentId "-4" }}
-	      <li>This record's parent ID is <code>-4</code> which indicates it has <a href="#hierarchy">multiple parents</a> because <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">it happens sometimes</a>.</li>
-	      {{ else if eq .SPR.ParentId "-3" }}
-	      <li>This record's parent ID is <code>-3</code> which means it might legitimately have <a href="#hierarchy">multiple parents</a> because people <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">argue about this sort of thing</a>.</li>
-	      {{ else if eq .SPR.ParentId "-2" }}
-	      <li>This record's parent ID is <code>-1</code> which means we haven't bothered trying to pin down this record's <a href="#hierarchy">immediate parent</a> because <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">life is complicated</a></li>
-	      {{ else if eq .SPR.ParentId "-1" }}
-	      <li>This record's parent ID Is <code>-1</code> meaning we are <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">uncertain</a> which record parents this one.</li>
-	      {{ else }}
-	      <li>It is parented by <a href="/id/{{ .SPR.ParentId}}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ .SPR.ParentId}}">Who's On First ID {{ .SPR.ParentId}}</a>.</li>
-	      {{ end }}
-	      
-	      <li>Its bounding box is <a href="#" class="whosonfirst-geometry whosonfirst-geometry-boundingbox">{{ .SPR.MinLatitude}}, {{ .SPR.MinLongitude }}, {{ .SPR.MaxLatitude}}, {{ .SPR.MaxLongitude }}</a> and its principal centroid is <a href="#" class="whosonfirst-geometry whosonfirst-geometry-centroid">{{ .SPR.Latitude }}, {{ .SPR.Longitude }}</a>.</li>
-	      
-	  </ul>
-	  
-	  
-
-	<div id="left-shark">
-	
-	    <div id="whosonfirst-properties" class="sect">
-	      <div id="whosonfirst-properties-pretty"></div>	  
-	      <div id="whosonfirst-properties-raw"></div>
-	    </div>
-	</div>
-
-	<div id="right-shark">
-
-	  <div id="whosonfirst-status" class="sect">
-
-	    <h3 style="text-align:left !important;" id="status">status <a href="#status" class="anchor">¶</a></h3>
-	    
-	    <table>
-	      <!--
-		  <tr>
-		    <th>&#160;</th>
-		    <th>Status</th>
-		    <th>Value</th>
-		    <th>Confidence</th>
-		  </tr>
-		  -->
-	      <tr>
-		<th>is current</th>
-	      <td class="whosonfirst-status">{{ .SPR.IsCurrent.StringFlag }}</td>
-	      <td class="whosonfirst-status">{{ .SPR.IsCurrent.IsTrue }}</td>
-	      <td class="whosonfirst-status">{{ .SPR.IsCurrent.IsKnown }}</td>
-	      </tr>
-	      <tr>
-	      <th>is ceased</th>
-	      <td class="whosonfirst-status">{{ .SPR.IsCeased.StringFlag }}</td>
-	      <td class="whosonfirst-status">{{ .SPR.IsCeased.IsTrue }}</td>
-	      <td class="whosonfirst-status">{{ .SPR.IsCeased.IsKnown }}</td>
-	      </tr>
-	      <tr>
-		<th>is deprecated</th>
-		<td class="whosonfirst-status">{{ .SPR.IsDeprecated.StringFlag }}</td>
-		<td class="whosonfirst-status">{{ .SPR.IsDeprecated.IsTrue }}</td>
-		<td>{{ .SPR.IsDeprecated.IsKnown }}</td>
-	      </tr>
-	      <tr>
-		<th>is superseded</th>
-		<td class="whosonfirst-status">{{ .SPR.IsSuperseded.StringFlag }}</td>
-		<td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsTrue }}</td>
-		<td class="whosonfirst-status">{{ .SPR.IsSuperseded.IsKnown }}</td>
-	      </tr>
-	      <tr>
-		<th>is superseding</th>
-		<td class="whosonfirst-status">{{ .SPR.IsSuperseding.StringFlag }}</td>
-		<td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsTrue }}</td>
-		<td class="whosonfirst-status">{{ .SPR.IsSuperseding.IsKnown }}</td>
-	      </tr>	 	  
-	    </table>
-	  </div>
-
-	  <div id="whosonfirst-hierarchy" class="sect">
-
-	    <h3 id="hierarchy">hierarchy <a href="#hierarchy" class="anchor">¶</a></h3>
-	    
-	  </div>
+		  <div class="col" style="border:solid blue;">
+		      <h4>Properties</h4>
+		      <div id="whosonfirst-properties" class="sect">
+			  <div id="whosonfirst-properties-pretty"></div>	  
+			  <div id="whosonfirst-properties-raw"></div>
+		      </div>
+		  </div>
 		  
-	  <div class="sect">
+		  <div class="col" style="border:solid blue;">
+		      {{ template "inc_id_status" .}}		      
+		      <p>WTF</p>
+		  </div>
+	      </div>
 
-	    <h3 id="sources">sources <a href="#sources" class="anchor">¶</a></h3>
-	    
-	    <ul>
-	      <li><a href="https://data.whosonfirst.org/{{ .SPR.Path }}">https://data.whosonfirst.org/{{ .SPR.Path }}</a></li>
-	      <li><a href="https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}">https://github.com/whosonfirst-data/{{ .SPR.Repo }}/blob/master/data/{{ .SPR.Path }}</a></li>
-	    </ul>
 	  </div>
-	  
-	</div>
-            </div>
-
-      <div id="whosonfirst-properties" class="row" style="border:solid red;">
-      </div>
       
       </main>
 

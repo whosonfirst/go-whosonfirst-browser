@@ -15,10 +15,13 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/server"
 	"github.com/whosonfirst/go-whosonfirst-cli/flags"
 	"html/template"
+	"io/ioutil"
 	"log"
 	gohttp "net/http"
 	"net/url"
+	"os"
 	"strings"
+	"time"
 )
 
 // TO DO: move flag stuff into a separate function and pass in a flags.Flags thing here...
@@ -86,6 +89,23 @@ func Start(ctx context.Context) error {
 	if *enable_html {
 		*enable_geojson = true
 		*enable_png = true
+	}
+
+	if *cache_source == "tmp://" {
+
+		now := time.Now()
+		prefix := fmt.Sprintf("go-whosonfirst-browser-%d", now.Unix())
+
+		tempdir, err := ioutil.TempDir("", prefix)
+
+		if err != nil {
+			return err
+		}
+
+		log.Println(tempdir)
+		defer os.RemoveAll(tempdir)
+
+		*cache_source = fmt.Sprintf("fs://%s", tempdir)
 	}
 
 	r, err := reader.NewReader(ctx, *reader_source)

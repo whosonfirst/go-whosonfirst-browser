@@ -148,7 +148,7 @@ whosonfirst.browser.id = (function(){
 		whosonfirst.leaflet.utils.fit_map(map, feature);
 		
 		// sudo put all of this in a wapper function somewhere...
-		    // (20171224/thisisaaronland)
+		// (20171224/thisisaaronland)
 		
 		var props = feature["properties"];
 		var props_str = JSON.stringify(props, null, "\t");
