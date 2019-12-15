@@ -2,60 +2,57 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	  <title>{{ .SPR.Name }} | {{ .SPR.Id }} | Who's On First</title>
-	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	  <meta name="referrer" content="origin">
-	  <meta http-equiv="X-UA-Compatible" content="IE=9" />
-	  <meta name="apple-mobile-web-app-capable" content="yes" />
-	  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-	  <meta name="HandheldFriendly" content="true" />
-	  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
-
-	  <meta property="html:lastmodified" content="{{ .LastModified }}" />
+      <title>{{ .SPR.Name }} | {{ .SPR.Id }} | Who's On First</title>
+      {{ template "inc_meta_common" }}
+      <meta property="html:lastmodified" content="{{ .LastModified }}" />
 	  
-	  <meta property="og:type" content="article" />
-	  <meta property="og:site_name" content="Who's On First" />
-	  <meta property="og:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
-	  <meta property="og:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
-	  <meta property="og:image" content="/png/{{ .SPR.Id }}?size=xsm" />
-
-	  <meta property="twitter:card" value="summary" />
-	  <meta property="twitter:site" content="@alloftheplaces" />
-	  <meta property="twitter:creator" content="@alloftheplaces" />
-	  <meta property="twitter:url" content="/id/{{ .SPR.Id }}" />
-	  <meta property="twitter:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
-	  <meta property="twitter:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
-	  <meta property="twitter:image" content="/png/{{ .SPR.Id }}?size=xsm" />
-
-	 <script src="/javascript/localforage.min.js"></script>	  
-	 <script src="/javascript/slippymap.crosshairs.js"></script>
-
-	 <script src="/javascript/whosonfirst.www.js"></script>	 
-	 <script src="/javascript/whosonfirst.render.js"></script>
-	 <script src="/javascript/whosonfirst.properties.js"></script>
-	 
-	 <script src="/javascript/whosonfirst.cache.js"></script>	 
-	 <script src="/javascript/whosonfirst.uri.js"></script>
-	 <script src="/javascript/whosonfirst.net.js"></script>
-	 <script src="/javascript/whosonfirst.namify.js"></script> 	 	 
-
-	 <script src="/javascript/whosonfirst.geojson.js"></script>	 
-	 <script src="/javascript/whosonfirst.leaflet.utils.js"></script>
-	 <script src="/javascript/whosonfirst.leaflet.styles.js"></script>
-	 <script src="/javascript/whosonfirst.leaflet.handlers.js"></script> 	 	 
-
- 	 <link rel="stylesheet" href="/css/whosonfirst.www.css">
- 	 <link rel="stylesheet" href="/css/whosonfirst.common.css">	 
-	 <link rel="stylesheet" href="/css/whosonfirst.static.id.css">
-
-	 <script src="/javascript/whosonfirst.browser.maps.js"></script>	 
-	 <script src="/javascript/whosonfirst.browser.id.js"></script>
-	 <script src="/javascript/whosonfirst.browser.id.init.js"></script>	 
-	 
+      <meta property="og:type" content="article" />
+      <meta property="og:site_name" content="Who's On First" />
+      <meta property="og:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
+      <meta property="og:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
+      <meta property="og:image" content="/png/{{ .SPR.Id }}?size=xsm" />
+      
+      <meta property="twitter:card" value="summary" />
+      <meta property="twitter:site" content="@alloftheplaces" />
+      <meta property="twitter:creator" content="@alloftheplaces" />
+      <meta property="twitter:url" content="/id/{{ .SPR.Id }}" />
+      <meta property="twitter:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
+      <meta property="twitter:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
+      <meta property="twitter:image" content="/png/{{ .SPR.Id }}?size=xsm" />
+      
+      <script src="/javascript/localforage.min.js"></script>	  
+      <script src="/javascript/slippymap.crosshairs.js"></script>
+      
+      <script src="/javascript/whosonfirst.www.js"></script>	 
+      <script src="/javascript/whosonfirst.render.js"></script>
+      <script src="/javascript/whosonfirst.properties.js"></script>
+      
+      <script src="/javascript/whosonfirst.cache.js"></script>	 
+      <script src="/javascript/whosonfirst.uri.js"></script>
+      <script src="/javascript/whosonfirst.net.js"></script>
+      <script src="/javascript/whosonfirst.namify.js"></script> 	 	 
+      
+      <script src="/javascript/whosonfirst.geojson.js"></script>	 
+      <script src="/javascript/whosonfirst.leaflet.utils.js"></script>
+      <script src="/javascript/whosonfirst.leaflet.styles.js"></script>
+      <script src="/javascript/whosonfirst.leaflet.handlers.js"></script> 	 	 
+      
+      <link rel="stylesheet" href="/css/whosonfirst.www.css">
+      <link rel="stylesheet" href="/css/whosonfirst.common.css">	 
+      <link rel="stylesheet" href="/css/whosonfirst.static.id.css">
+      
+      <script src="/javascript/whosonfirst.browser.maps.js"></script>	 
+      <script src="/javascript/whosonfirst.browser.id.js"></script>
+      <script src="/javascript/whosonfirst.browser.id.init.js"></script>	 
+      
   </head>
   <body data-whosonfirst-uri-endpoint="{{ .DataEndpoint }}">
-    
-    <div class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-path="{{ .SPR.Path }}" data-whosonfirst-parent-id="{{ .SPR.ParentId }}" data-latitude="{{ .SPR.Latitude }}" data-longitude="{{ .SPR.Longitude }}" data-min-latitude="{{ .SPR.MinLatitude}}" data-min-longitude="{{ .SPR.MinLongitude }}" data-max-latitude="{{ .SPR.MaxLatitude}}" data-max-longitude="{{ .SPR.MaxLongitude }}">
+
+      {{ template "inc_header" }}
+
+      <main>
+	  
+      <div class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-path="{{ .SPR.Path }}" data-whosonfirst-parent-id="{{ .SPR.ParentId }}" data-latitude="{{ .SPR.Latitude }}" data-longitude="{{ .SPR.Longitude }}" data-min-latitude="{{ .SPR.MinLatitude}}" data-min-longitude="{{ .SPR.MinLongitude }}" data-max-latitude="{{ .SPR.MaxLatitude}}" data-max-longitude="{{ .SPR.MaxLongitude }}">
 
       <div id="map">
 	<!-- <img src="/id/{{ .SPR.Id }}.svg" height="350" /> -->
@@ -202,12 +199,12 @@
 	  
 	</div>
       </div>
-
-      <div id="footer">
-	<!-- <a href="https://twitter.com/alloftheplaces">@alloftheplaces</a> -->
-      </div>
       
     </div>
+
+      </main>
+
+      {{ template "inc_footer" }}
     
   </body>
 </html>
