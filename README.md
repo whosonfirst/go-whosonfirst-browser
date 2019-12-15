@@ -69,10 +69,53 @@ Usage of ./bin/browser:
     	An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.
 ```
 
-## Example
+#### Example
 
 ```
-bin/browser -nextzen-api-key ${NEXTZEN_APIKEY}
+$> bin/browser -enable-all -nextzen-api-key ${NEXTZEN_APIKEY}
+2019/12/14 18:22:16 Listening on http://localhost:8080
+```
+
+## go-reader.Reader(s) and go-cache.Cache(s)
+
+This is what the code for default `browser` tool looks like, with error handling omitted for the sake of brevity:
+
+```
+package main
+
+import (
+	"context"
+	_ "github.com/whosonfirst/go-reader-http"
+	"github.com/whosonfirst/go-whosonfirst-browser"
+)
+
+func main() {
+	ctx := context.Background()
+	browser.Start(ctx)
+}
+```
+
+But if you wanted to using the [Go Cloud](#)
+
+```
+package main
+
+import (
+	"context"
+	_ "github.com/whosonfirst/go-reader-blob"
+	"github.com/whosonfirst/go-whosonfirst-browser"
+)
+
+func main() {
+	ctx := context.Background()
+	browser.Start(ctx)
+}
+```
+
+And then you would start the `browser` tool like this:
+
+```
+$> bin/browser -reader-source 's3://{BUCKET}?region={REGION}' -enable-all -nextzen-api-key ${NEXTZEN_APIKEY}
 ```
 
 ## Lambda
@@ -140,3 +183,5 @@ You will need a [valid Nextzen API key](https://developers.nextzen.org/) in orde
 
 * https://github.com/whosonfirst/go-reader
 * https://github.com/whosonfirst/go-cache
+* https://github.com/aaronland/go-http-bootstrap
+* https://github.com/aaronland/go-http-tangramjs
