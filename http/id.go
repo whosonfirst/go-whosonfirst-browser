@@ -2,18 +2,19 @@ package http
 
 import (
 	"errors"
-	"fmt"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-spr"
 	"html/template"
 	"log"
 	gohttp "net/http"
+	"net/url"
 	"path/filepath"
 	"time"
 )
 
 type IDHandlerOptions struct {
 	DataEndpoint string
+	PngEndpoint string
 	Templates    *template.Template
 }
 
@@ -21,6 +22,7 @@ type IDVars struct {
 	SPR          spr.StandardPlacesResult
 	LastModified string
 	DataEndpoint string
+	PngEndpoint string
 }
 
 func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
@@ -58,19 +60,25 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 		now := time.Now()
 		lastmod := now.Format(time.RFC3339)
 
-		// this assumes the GeoJSONHandler being assigned to /data
-		// (20180419/thisisaaronland)
+		data_url := new(url.URL)
+		data_url.Scheme = req.URL.Scheme
+		data_url.Host = req.URL.Host
+		data_url.Path = opts.DataEndpoint
+		
+		data_endpoint := data_url.String()
 
-		data_endpoint := fmt.Sprintf("%s//%s/data/", req.URL.Scheme, req.Host)
-
-		if opts.DataEndpoint != "" {
-			data_endpoint = opts.DataEndpoint
-		}
-
+		png_url := new(url.URL)
+		png_url.Scheme = req.URL.Scheme
+		png_url.Host = req.URL.Host
+		png_url.Path = opts.DataEndpoint
+		
+		png_endpoint := png_url.String()
+		
 		vars := IDVars{
 			SPR:          s,
 			LastModified: lastmod,
 			DataEndpoint: data_endpoint,
+			PngEndpoint: png_endpoint,
 		}
 
 		err = t.Execute(rsp, vars)

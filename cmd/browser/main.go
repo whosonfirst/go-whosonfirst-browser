@@ -69,6 +69,27 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if *enable_all {		
+		*enable_graphics = true
+		*enable_data = true
+		*enable_html = true		
+	}
+
+	if *enable_graphics {
+		*enable_png = true
+		*enable_svg = true
+	}
+
+	if *enable_data {
+		*enable_geojson = true
+		*enable_spr = true
+	}
+
+	if *enable_html {
+		*enable_geojson = true
+		*enable_png = true
+	}	
+	
 	ctx := context.Background()
 
 	r, err := reader.NewReader(ctx, *reader_source)
@@ -154,7 +175,7 @@ func main() {
 
 	mux.Handle("/ping", ping_handler)
 
-	if *enable_all || *enable_graphics || *enable_png {
+	if *enable_png {
 
 		png_opts, err := http.NewDefaultRasterOptions()
 
@@ -171,7 +192,7 @@ func main() {
 		mux.Handle(*path_png, png_handler)
 	}
 
-	if *enable_all || *enable_graphics || *enable_svg {
+	if *enable_svg {
 
 		svg_opts, err := http.NewDefaultSVGOptions()
 
@@ -188,7 +209,7 @@ func main() {
 		mux.Handle(*path_svg, svg_handler)
 	}
 
-	if *enable_all || *enable_data || *enable_spr {
+	if *enable_spr {
 
 		spr_handler, err := http.SPRHandler(cr)
 
@@ -199,7 +220,7 @@ func main() {
 		mux.Handle(*path_spr, spr_handler)
 	}
 
-	if *enable_all || *enable_data || *enable_geojson {
+	if *enable_geojson {
 
 		geojson_handler, err := http.GeoJSONHandler(cr)
 
@@ -210,7 +231,7 @@ func main() {
 		mux.Handle(*path_geojson, geojson_handler)
 	}
 
-	if *enable_all || *enable_html {
+	if *enable_html {
 
 		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
 
@@ -235,6 +256,8 @@ func main() {
 
 		id_opts := http.IDHandlerOptions{
 			Templates: t,
+			DataEndpoint: *path_geojson,
+			PngEndpoint: *path_png,			
 		}
 
 		id_handler, err := http.IDHandler(cr, id_opts)
