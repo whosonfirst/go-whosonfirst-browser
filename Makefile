@@ -21,5 +21,5 @@ bake-static:
 bake-templates:
 	mv bindata.go http/assetfs.go
 	rm -rf templates/html/*~
-	bin/go-bindata -pkg templates -o assets/templates/html.go templates/html
+	bin/go-bindata -pkg templates -o assets/templates/html.go www/templates/html
 

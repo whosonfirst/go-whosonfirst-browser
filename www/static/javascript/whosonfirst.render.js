@@ -109,32 +109,46 @@ whosonfirst.render = (function(){
 
 	'render_bucket': function(ns, bucket){
 	    
-	    var wrapper = document.createElement("div");
+	    // var wrapper = document.createElement("div");
 
-		if (ns != '_global_'){
+	    var details = document.createElement("details");	    
+	    details.setAttribute("style", "margin-bottom:1rem;");
+	    
+	    if (ns != '_global_'){
+		
+		var summary = document.createElement("summary");
+		summary.setAttribute("id", ns);
+		
+		var anchor = document.createElement("a");
+		anchor.setAttribute("href", "#" + ns);
+		anchor.setAttribute("class", "anchor");
+		anchor.appendChild(document.createTextNode("¶"));
 
-			var header = document.createElement("h3");
-			header.setAttribute("id", ns);
+		// TO DO: write whosonfirst.sources.js and
+		// assign the full label for 'ns' to 'content'
+		// (20191214/straup)
+		
+		var content = document.createTextNode(ns);
 
-			var anchor = document.createElement("a");
-			anchor.setAttribute("href", "#" + ns);
-			anchor.setAttribute("class", "anchor");
-			anchor.appendChild(document.createTextNode("¶"));
-			
-			var content = document.createTextNode(ns);
+		var header = document.createElement("h3");		
+		header.setAttribute("style", "display:inline");
+		
+		header.appendChild(content);
+		// header.appendChild(anchor);
+		
+		summary.appendChild(header);
+		details.appendChild(summary);			
+	    }
 
-			header.appendChild(content);
-			header.appendChild(anchor);
-			
-			wrapper.appendChild(header);			
-		}
-
+	    var menu = document.createElement("details-menu");
+	    
 	    var sorted = self.sort_bucket(bucket);
 	    var body = self.render_data(sorted, ns);
 	    
-	    wrapper.appendChild(body);
+	    menu.appendChild(body);
+	    details.appendChild(menu);
 	    
-	    return wrapper;
+	    return details;
 	},
 	
 	'render_data': function(d, ctx){
