@@ -3,22 +3,19 @@
 <html lang="en">
   <head>
       <title>Who's On First</title>
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-      <meta name="referrer" content="origin">
-      <meta http-equiv="X-UA-Compatible" content="IE=9" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-      <meta name="HandheldFriendly" content="true" />
-      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
-      
+      {{template "inc_common_meta"}}
+      {{template "inc_common_css"}}
   </head>
   <body>
 
-      {{ template "inc_header" }}
+      {{template "inc_common_header"}}
 
       <main>
-
+	  Who's On First Browser
       </main>
+      
+      {{template "inc_common_footer"}}
+    
   </body>
 </html>
 {{ end }}
