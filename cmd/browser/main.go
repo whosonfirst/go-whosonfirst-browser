@@ -24,39 +24,37 @@ import (
 
 func main() {
 
-	var proto = flag.String("protocol", "http", "The protocol for wof-staticd server to listen on. Valid protocols are: http, lambda.")
-	var host = flag.String("host", "localhost", "The hostname to listen for requests on")
-	var port = flag.Int("port", 8080, "The port number to listen for requests on")
+	proto := flag.String("protocol", "http", "The protocol for wof-staticd server to listen on. Valid protocols are: http, lambda.")
+	host := flag.String("host", "localhost", "The hostname to listen for requests on")
+	port := flag.Int("port", 8080, "The port number to listen for requests on")
 
 	static_prefix := flag.String("static-prefix", "", "Prepend this prefix to URLs for static assets.")
 
 	path_templates := flag.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
 
-	var reader_source = flag.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
-	var cache_source = flag.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
+	reader_source := flag.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
+	cache_source := flag.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
 
 	nextzen_api_key := flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
 	nextzen_style_url := flag.String("nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
 	nextzen_tile_url := flag.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
 
-	// var debug = flag.Bool("debug", false, "Enable debugging.")
+	enable_all := flag.Bool("enable-all", false, "Enable all the available output handlers.")
+	enable_graphics := flag.Bool("enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
+	enable_data := flag.Bool("enable-data", false, "Enable the 'geojson' and 'spr' output handlers.")
 
-	var enable_all = flag.Bool("enable-all", false, "Enable all the available output handlers.")
-	var enable_graphics = flag.Bool("enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
-	var enable_data = flag.Bool("enable-data", false, "Enable the 'geojson' and 'spr' output handlers.")
+	enable_png := flag.Bool("enable-png", false, "Enable the 'png' output handler.")
+	enable_svg := flag.Bool("enable-svg", false, "Enable the 'svg' output handler.")
 
-	var enable_png = flag.Bool("enable-png", false, "Enable the 'png' output handler.")
-	var enable_svg = flag.Bool("enable-svg", false, "Enable the 'svg' output handler.")
+	enable_geojson := flag.Bool("enable-geojson", true, "Enable the 'geojson' output handler.")
+	enable_spr := flag.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
 
-	var enable_geojson = flag.Bool("enable-geojson", true, "Enable the 'geojson' output handler.")
-	var enable_spr = flag.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
+	enable_html := flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
-	var enable_html = flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
-
-	var path_png = flag.String("path-png", "/png/", "The path that PNG requests should be served from.")
-	var path_svg = flag.String("path-svg", "/svg/", "The path that SVG requests should be served from.")
-	var path_geojson = flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
-	var path_spr = flag.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
+	path_png := flag.String("path-png", "/png/", "The path that PNG requests should be served from.")
+	path_svg := flag.String("path-svg", "/svg/", "The path that SVG requests should be served from.")
+	path_geojson := flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
+	path_spr := flag.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
 
 	path_id := flag.String("path-id", "/id/", "The that Who's On First documents should be served from.")
 
