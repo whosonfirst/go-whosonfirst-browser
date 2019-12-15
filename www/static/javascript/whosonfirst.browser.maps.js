@@ -39,7 +39,8 @@ whosonfirst.browser.maps = (function(){
 
 	    var attribution = self.getAttribution();
 	    map.attributionControl.addAttribution(attribution);
-	    
+
+	    console.log("WHA");
 	    return map;
 	},
 

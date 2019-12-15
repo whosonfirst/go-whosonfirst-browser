@@ -63,18 +63,41 @@ whosonfirst.browser.id = (function(){
 	    var ne = [ maxlat, maxlon ];
 	    
 	    var bounds = [ sw, ne ];
+
+	    var api_key = document.body.getAttribute("data-nextzen-api-key");
+	    var style_url = document.body.getAttribute("data-nextzen-style-url");
+	    var tile_url = document.body.getAttribute("data-nextzen-tile-url");    
 	    
-	    var body = document.body;
-	    var api_key = body.getAttribute("data-mapzen-api-key");
+	    if (! api_key){
+		console.log("Missing API key");
+		return;
+	    }
+	    
+	    if (! style_url){
+		console.log("Missing style URL");
+		return;
+	    }
+	    
+	    if (! tile_url){
+		console.log("Missing tile URL");
+		return;
+	    }
 	    
 	    var map_el = document.getElementById("map");
-
+	    
+	    if (! map_el){
+		console.log("Missing map element");	
+		return;
+	    }
+	    
 	    var map_args = {
 		"api_key": api_key,
+		"style_url": style_url,
+		"tile_url": tile_url,
 	    };
 	    
 	    map = whosonfirst.browser.maps.getMap(map_el, map_args);
-
+	    
 	    if (! map){
 		console.log("Failed to get map");
 		return false;
