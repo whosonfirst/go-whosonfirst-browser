@@ -36,6 +36,8 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 		path := req.URL.Path
 		ext := filepath.Ext(path)
 
+		// TODO: check for .geojson, .svg, etc and redirect accordingly
+		
 		log.Println(path, ext)
 
 		f, err, status := FeatureFromRequest(req, r)

@@ -5,7 +5,7 @@ import (
 	gohttp "net/http"
 	"path/filepath"
 	"strings"
-	"log"
+	_ "log"
 )
 
 func StaticFileSystem() (gohttp.FileSystem, error) {
