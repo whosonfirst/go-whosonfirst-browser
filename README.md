@@ -6,7 +6,7 @@ _This package used to be called `go-whosonfirst-static`. Now it is called `go-wh
 
 ## Install
 
-You will need to have both `Go` (specifically version [1.12](https://golang.org/dl/) or higher). All of this package's dependencies are bundled with the code in the `vendor` directory.
+You will need to have the `Go` programming language (specifically version [1.12](https://golang.org/dl/) or higher) installed. All of this package's dependencies are bundled with the code in the `vendor` directory.
 
 ## Tools
 
