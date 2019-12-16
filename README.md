@@ -14,17 +14,17 @@ You will need to have the `Go` programming language (specifically version [1.12]
 
 ## Tools
 
-### browser
+### whosonfirst-browser
 
 To build the browser use the handy `go build` tool, like this:
 
 ```
-go build -mod vendor cmd/browser/main.go bin/browser
+go build -mod vendor cmd/whosonfirst-browser/main.go bin/whosonfirst-browser
 ```
 
 ```
-$> bin/browser -h
-Usage of ./bin/browser:
+$> bin/whosonfirst-browser -h
+Usage of ./bin/whosonfirst-browser:
   -cache-source string
     	... (default "gocache://")
   -enable-all
