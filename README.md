@@ -8,6 +8,10 @@ _This package used to be called `go-whosonfirst-static`. Now it is called `go-wh
 
 You will need to have the `Go` programming language (specifically version [1.12](https://golang.org/dl/) or higher) installed. All of this package's dependencies are bundled with the code in the `vendor` directory.
 
+## Things this package is not
+
+### This is not a replacement for the [Who's On First Spelunker](#)
+
 ## Tools
 
 ### browser
@@ -174,7 +178,7 @@ repeat steps 1-3 _and_ update the `BinaryContentTypes` dictionary in
 
 ## Docker
 
-There used to be. There isn't now. There will probably be one again.
+[Yes](Dockerfile).
 
 ## Nextzen
 

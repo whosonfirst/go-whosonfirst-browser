@@ -8,7 +8,7 @@ go-bindata:
 
 debug:
 	@make bake
-	go run -mod vendor cmd/browser/main.go -enable-all -nextzen-api-key $(APIKEY)
+	go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -nextzen-api-key $(APIKEY)
 
 bake: bake-static bake-templates
 
@@ -23,3 +23,5 @@ bake-templates:
 	rm -rf templates/html/*~
 	bin/go-bindata -pkg templates -o assets/templates/html.go www/templates/html
 
+docker:
+	docker build -t whosonfirst-browser .
