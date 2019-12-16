@@ -30,17 +30,33 @@ type IDVars struct {
 
 func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
-	t := opts.Templates.Lookup("id")
+	id_t := opts.Templates.Lookup("id")
 
-	if t == nil {
+	if id_t == nil {
 		return nil, errors.New("Missing id template")
 	}
 
+	error_t := opts.Templates.Lookup("error")
+
+	if error_t == nil {
+		return nil, errors.New("Missing error template")
+	}
+
+	notfound_t := opts.Templates.Lookup("id")
+
+	if notfound_t == nil {
+		return nil, errors.New("Missing notfound template")
+	}
+		
 	handle_other := func(rsp gohttp.ResponseWriter, req *gohttp.Request, f geojson.Feature, endpoint string) {
 
 		if endpoint == "" {
-			gohttp.Error(rsp, "Not found", gohttp.StatusNotFound)
+
+			RenderTemplate(rsp, notfound_t, nil)
 			return
+			
+			// gohttp.Error(rsp, "Not found", gohttp.StatusNotFound)
+			// return
 		}
 
 		url := filepath.Join(endpoint, f.Id())
@@ -50,11 +66,15 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		f, err, status := FeatureFromRequest(req, r)
+		f, err, _ := FeatureFromRequest(req, r)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), status)
+
+			RenderTemplate(rsp, error_t, err)
 			return
+			
+			// gohttp.Error(rsp, err.Error(), status)
+			// return
 		}
 
 		path := req.URL.Path
@@ -80,7 +100,7 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 		s, err := f.SPR()
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+			RenderTemplate(rsp, error_t, err)
 			return
 		}
 
@@ -108,13 +128,8 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 			PngEndpoint:  png_endpoint,
 		}
 
-		err = t.Execute(rsp, vars)
-
-		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
-			return
-		}
-
+		RenderTemplate(rsp, id_t, vars)
+		return
 	}
 
 	h := gohttp.HandlerFunc(fn)
