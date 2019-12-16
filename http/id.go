@@ -8,24 +8,20 @@ import (
 	"html/template"
 	_ "log"
 	gohttp "net/http"
-	"net/url"
+	_ "net/url"
 	"path/filepath"
 	"time"
 )
 
 type IDHandlerOptions struct {
-	Templates    *template.Template
-	DataEndpoint string
-	SprEndpoint  string
-	SvgEndpoint  string
-	PngEndpoint  string
+	Templates *template.Template
+	Endpoints *Endpoints
 }
 
 type IDVars struct {
 	SPR          spr.StandardPlacesResult
 	LastModified string
-	DataEndpoint string
-	PngEndpoint  string
+	Endpoints    *Endpoints
 }
 
 func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
@@ -47,16 +43,17 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 	if notfound_t == nil {
 		return nil, errors.New("Missing notfound template")
 	}
-		
+
 	handle_other := func(rsp gohttp.ResponseWriter, req *gohttp.Request, f geojson.Feature, endpoint string) {
 
 		if endpoint == "" {
 
-			RenderTemplate(rsp, notfound_t, nil)
+			vars := NotFoundVars{
+				Endpoints: opts.Endpoints,
+			}
+
+			RenderTemplate(rsp, notfound_t, vars)
 			return
-			
-			// gohttp.Error(rsp, "Not found", gohttp.StatusNotFound)
-			// return
 		}
 
 		url := filepath.Join(endpoint, f.Id())
@@ -70,11 +67,14 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 		if err != nil {
 
-			RenderTemplate(rsp, error_t, err)
+			vars := ErrorVars{
+				Error:     err,
+				Endpoints: opts.Endpoints,
+				// status...
+			}
+
+			RenderTemplate(rsp, error_t, vars)
 			return
-			
-			// gohttp.Error(rsp, err.Error(), status)
-			// return
 		}
 
 		path := req.URL.Path
@@ -82,16 +82,16 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 		switch ext {
 		case ".geojson":
-			handle_other(rsp, req, f, opts.DataEndpoint)
+			handle_other(rsp, req, f, opts.Endpoints.Data)
 			return
 		case ".png":
-			handle_other(rsp, req, f, opts.PngEndpoint)
+			handle_other(rsp, req, f, opts.Endpoints.Png)
 			return
 		case ".spr":
-			handle_other(rsp, req, f, opts.SprEndpoint)
+			handle_other(rsp, req, f, opts.Endpoints.Spr)
 			return
 		case ".svg":
-			handle_other(rsp, req, f, opts.SvgEndpoint)
+			handle_other(rsp, req, f, opts.Endpoints.Svg)
 			return
 		default:
 			// pass
@@ -100,32 +100,39 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 		s, err := f.SPR()
 
 		if err != nil {
-			RenderTemplate(rsp, error_t, err)
+
+			vars := ErrorVars{
+				Error:     err,
+				Endpoints: opts.Endpoints,
+			}
+
+			RenderTemplate(rsp, error_t, vars)
 			return
 		}
 
 		now := time.Now()
 		lastmod := now.Format(time.RFC3339)
 
-		data_url := new(url.URL)
-		data_url.Scheme = req.URL.Scheme
-		data_url.Host = req.URL.Host
-		data_url.Path = opts.DataEndpoint
+		/*
+			data_url := new(url.URL)
+			data_url.Scheme = req.URL.Scheme
+			data_url.Host = req.URL.Host
+			data_url.Path = opts.Endpoints.Data
 
-		data_endpoint := data_url.String()
+			data_endpoint := data_url.String()
 
-		png_url := new(url.URL)
-		png_url.Scheme = req.URL.Scheme
-		png_url.Host = req.URL.Host
-		png_url.Path = opts.DataEndpoint
+			png_url := new(url.URL)
+			png_url.Scheme = req.URL.Scheme
+			png_url.Host = req.URL.Host
+			png_url.Path = opts.Endpoints.Data
 
-		png_endpoint := png_url.String()
+			png_endpoint := png_url.String()
+		*/
 
 		vars := IDVars{
 			SPR:          s,
 			LastModified: lastmod,
-			DataEndpoint: data_endpoint,
-			PngEndpoint:  png_endpoint,
+			Endpoints:    opts.Endpoints,
 		}
 
 		RenderTemplate(rsp, id_t, vars)

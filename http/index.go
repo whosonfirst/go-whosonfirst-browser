@@ -8,12 +8,12 @@ import (
 )
 
 type IndexHandlerOptions struct {
-	Templates  *template.Template
-	IdEndpoint string
+	Templates *template.Template
+	Endpoints *Endpoints
 }
 
 type IndexVars struct {
-	IdEndpoint string
+	Endpoints *Endpoints
 }
 
 func IndexHandler(opts IndexHandlerOptions) (gohttp.Handler, error) {
@@ -27,16 +27,11 @@ func IndexHandler(opts IndexHandlerOptions) (gohttp.Handler, error) {
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
 		vars := IndexVars{
-			IdEndpoint: "",
+			Endpoints: opts.Endpoints,
 		}
 
-		err := t.Execute(rsp, vars)
-
-		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
-			return
-		}
-
+		RenderTemplate(rsp, t, vars)
+		return
 	}
 
 	h := gohttp.HandlerFunc(fn)

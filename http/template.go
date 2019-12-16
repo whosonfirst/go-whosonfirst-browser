@@ -1,8 +1,8 @@
 package http
 
 import (
-	gohttp "net/http"
 	"html/template"
+	gohttp "net/http"
 )
 
 func RenderTemplate(rsp gohttp.ResponseWriter, t *template.Template, vars interface{}) {

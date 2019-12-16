@@ -246,8 +246,18 @@ func Start(ctx context.Context) error {
 		tangramjs_opts.Nextzen.StyleURL = *nextzen_style_url
 		tangramjs_opts.Nextzen.TileURL = *nextzen_tile_url
 
+		endpoints := &http.Endpoints{
+			Data:  *path_geojson,
+			Png:   *path_png,
+			Svg:   *path_svg,
+			Spr:   *path_spr,
+			Id:    *path_id,
+			Index: "/",
+		}
+
 		index_opts := http.IndexHandlerOptions{
 			Templates: t,
+			Endpoints: endpoints,
 		}
 
 		index_handler, err := http.IndexHandler(index_opts)
@@ -261,17 +271,8 @@ func Start(ctx context.Context) error {
 		mux.Handle("/", index_handler)
 
 		id_opts := http.IDHandlerOptions{
-			Templates:    t,
-			DataEndpoint: *path_geojson,
-			PngEndpoint:  *path_png,
-		}
-
-		if *enable_spr {
-			id_opts.SprEndpoint = *path_spr
-		}
-
-		if *enable_svg {
-			id_opts.SvgEndpoint = *path_svg
+			Templates: t,
+			Endpoints: endpoints,
 		}
 
 		id_handler, err := http.IDHandler(cr, id_opts)
