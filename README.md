@@ -1,6 +1,6 @@
 # go-whosonfirst-browser
 
-![](docs/images/wof-static-sf.png)
+![](docs/images/wof-browser-montreal.png)
 
 _This package used to be called `go-whosonfirst-static`. Now it is called `go-whosonfirst-browser.`_
 
