@@ -200,39 +200,33 @@ whosonfirst.browser.id = (function(){
 		    raw_el.appendChild(props_raw);
 		    console.log("PRETTY", "ERR", e);
 		}
+
+		var wof_el = document.getElementById("whosonfirst-wof");
+		var wof_props = {};
 		
-		var hier_el = document.getElementById("whosonfirst-hierarchy");
-		
-		for (var h in props["wof:hierarchy"]){					
-		    var hier_pretty = whosonfirst.properties.render(props["wof:hierarchy"][h]);
+		for (k in props){
 
-		    var details = hier_pretty.getElementsByTagName("details");
-		    var details_count = details.length;
+		    var parts = k.split(":");
 
-		    for (var i=0; i < details_count; i++){
-
-			var d = details[i];
-
-			var summaries = d.getElementsByTagName("summary");
-			var summaries_count = summaries.length;
-
-			if (summaries_count == 0){
-
-			    var h = document.createElement("h3");
-			    h.setAttribute("style", "display:inline");
-			    h.appendChild(document.createTextNode("hierarchy"));
-			    
-			    var s = document.createElement("summary");
-			    s.appendChild(h);
-
-			    d.insertAdjacentElement("afterbegin", s);
-			}
-			
-			d.setAttribute("open", "true");
+		    if (parts[0] != "wof"){
+			continue;
 		    }
-		    
-		    hier_el.appendChild(hier_pretty);
+
+		    var label = parts[1];
+		    wof_props[k] = props[k];
 		}
+		
+		var pretty = whosonfirst.properties.render(wof_props);
+
+		var details = pretty.getElementsByTagName("details");
+		var details_count = details.length;
+		
+		for (var i=0; i < details_count; i++){		    
+		    var d = details[i];
+		    d.setAttribute("open", "true");
+		}
+		
+		wof_el.appendChild(pretty);
 		
 		self.init_names();				
 	    };
