@@ -10,7 +10,21 @@ You will need to have the `Go` programming language (specifically version [1.12]
 
 ## Things this package is not
 
-### This is not a replacement for the [Who's On First Spelunker](#)
+### This is not a replacement for the [Who's On First Spelunker](https://spelunker.whosonfirst.org/).
+
+At least not yet.
+
+### This is not a search engine.
+
+This is a tool that is primarily geared towards displaying _known_ Who's On First IDs.
+
+...[Placeholder](#).
+
+### This is not a tool for editing Who's On First documents.
+
+At least not yet.
+
+...[Yes No Fix](https://whosonfirst.org/blog/2016/04/08/yesnofix/).
 
 ## Tools
 
