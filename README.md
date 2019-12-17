@@ -2,6 +2,8 @@
 
 ![](docs/images/wof-browser-montreal-props.png)
 
+Go package for rendering known Who's On First (WOF) IDs in a number of formats.
+
 _This package used to be called `go-whosonfirst-static`. Now it is called `go-whosonfirst-browser.`_
 
 ## Install
@@ -14,17 +16,21 @@ You will need to have the `Go` programming language (specifically version [1.12]
 
 At least not yet.
 
+`go-whosonfirst-browser` was designed to be a simple display tool for known Who's On First (WOF) IDs and records. That constitutes a third to half of [what the Spelunker does](https://github.com/whosonfirst/whosonfirst-www-spelunker) (the remainder being list views and facets) so in principle it would be easy enough to add the same functionality here.
+
+The principle advantage of migrating Spelunker functionality to this package is that it does not have any external dependencies and has been support for multiple data sources and caches and can be pre-compiled in to a standalone binary tool. The principle disadvantage would be that experimenting and developing code and functionality in Python (used by the existing Spelunker) has a lower barrier to entry than doing the same in Go (used by this package).
+
 ### This is not a search engine.
 
-This is a tool that is primarily geared towards displaying _known_ Who's On First IDs.
+This is a tool that is primarily geared towards displaying _known_ Who's On First IDs. It does not maintain an index, or a list of known reocrds, before it displays them.
 
-...[Placeholder](#).
+It would be easy enough to add flags to use an external instance of the [Pelias Placeholder API](https://millsfield.sfomuseum.org/blog/2019/11/04/placeholder/) for basic search functionality so we'll add that to the list of features for a "2.x" release.
 
 ### This is not a tool for editing Who's On First documents.
 
 At least not yet.
 
-...[Yes No Fix](https://whosonfirst.org/blog/2016/04/08/yesnofix/).
+Interestingly the code that renders Who's On First (WOF) property dictionaries in to pretty HTML tables is the same code used for the experimental Mapzen "[Yes No Fix](https://whosonfirst.org/blog/2016/04/08/yesnofix/) project". That functionality has not been enabled or tested with this tool yet.
 
 ## Tools
 
@@ -101,6 +107,33 @@ Usage of ./bin/whosonfirst-browser:
 $> bin/browser -enable-all -nextzen-api-key ${NEXTZEN_APIKEY}
 2019/12/14 18:22:16 Listening on http://localhost:8080
 ```
+
+## Output formats
+
+The following output formats are available.
+
+### GeoJSON
+
+A raw Who's On First (WOF) GeoJSON document.
+
+### HTML
+
+A responsive HTML table and map for a given WOF ID.
+
+### PNG
+
+A PNG-encoded representation of the geometry for a given WOF ID.
+
+### SPR (Standard Places Response)
+
+A JSON-encoded "standard places response" for a given WOF ID.
+
+### SVG
+
+An XML-encoded SVG representation of the geometry for a given WOF ID.
+
+## Tiles
+
 
 ## go-reader.Reader(s) and go-cache.Cache(s)
 
