@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-tangramjs"
+	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-browser/assets/templates"
@@ -20,6 +21,7 @@ import (
 	gohttp "net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -42,6 +44,11 @@ func Start(ctx context.Context) error {
 	nextzen_api_key := flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
 	nextzen_style_url := flag.String("nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
 	nextzen_tile_url := flag.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
+
+	proxy_tiles := flag.Bool("proxy-tiles", false, "Proxy (and cache) Nextzen tiles.")
+	proxy_tiles_url := flag.String("proxy-tiles-url", "/tiles/", "The URL (a relative path) for proxied tiles.")
+	proxy_tiles_cache := flag.String("proxy-tiles-cache", "gocache://", "A valid tile proxy DSN string.")
+	proxy_tiles_timeout := flag.Int("proxy-tiles-timeout", 30, "The maximum number of seconds to allow for fetching a tile from the proxy.")
 
 	enable_all := flag.Bool("enable-all", false, "Enable all the available output handlers.")
 	enable_graphics := flag.Bool("enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
@@ -238,6 +245,46 @@ func Start(ctx context.Context) error {
 	}
 
 	if *enable_html {
+
+		if *proxy_tiles {
+
+			tile_cache, err := cache.NewCache(ctx, *proxy_tiles_cache)
+
+			if err != nil {
+				return err
+			}
+
+			timeout := time.Duration(*proxy_tiles_timeout) * time.Second
+
+			proxy_opts := &tzhttp.TilezenProxyHandlerOptions{
+				Cache:   tile_cache,
+				Timeout: timeout,
+			}
+
+			proxy_handler, err := tzhttp.TilezenProxyHandler(proxy_opts)
+
+			if err != nil {
+				return err
+			}
+
+			// the order here is important - we don't have a general-purpose "add to
+			// mux with prefix" function here, like we do in the tangram handler so
+			// we set the nextzen tile url with *proxy_tiles_url and then update it
+			// (*proxy_tiles_url) with a prefix if necessary (20190911/thisisaaronland)
+
+			*nextzen_tile_url = fmt.Sprintf("%s{z}/{x}/{y}.mvt", *proxy_tiles_url)
+
+			if *static_prefix != "" {
+
+				*proxy_tiles_url = filepath.Join(*static_prefix, *proxy_tiles_url)
+
+				if !strings.HasSuffix(*proxy_tiles_url, "/") {
+					*proxy_tiles_url = fmt.Sprintf("%s/", *proxy_tiles_url)
+				}
+			}
+
+			mux.Handle(*proxy_tiles_url, proxy_handler)
+		}
 
 		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
 
