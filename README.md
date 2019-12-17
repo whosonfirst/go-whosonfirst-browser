@@ -108,8 +108,6 @@ $> bin/browser -enable-all -nextzen-api-key ${NEXTZEN_APIKEY}
 2019/12/14 18:22:16 Listening on http://localhost:8080
 ```
 
-![](docs/images/wof-browser-montreal-responsive.png)
-
 ## Output formats
 
 The following output formats are available.
@@ -156,6 +154,9 @@ An XML-encoded SVG representation of the geometry for a given WOF ID.  For examp
 
 ## Tiles
 
+`go-whosonfirst-browser` uses [Nextzen](https://nextzen.org/) vector data tiles and the [Tangram.js](https://github.com/tangrams/tangram) rendering library for displaying maps. The Tangram code and styling assets are bundled with this tool and served directly but, by default, tile data is retrieved from the Nextzen servers.
+
+It is possible to cache those tiles locally using the `-proxy-tiles` flag at start up. The default cache for proxying tiles is an ephemiral in-memory cache but you can also specify an alternative [go-cache](https://github.com/whosonfirst/go-cache) `cache.Cache` source using the `-proxy-tiles-cache` flag. Caches are discussed in detail below.
 
 ## go-reader.Reader(s) and go-cache.Cache(s)
 
