@@ -108,6 +108,12 @@ $> bin/browser -enable-all -nextzen-api-key ${NEXTZEN_APIKEY}
 2019/12/14 18:22:16 Listening on http://localhost:8080
 ```
 
+Then if you visited `http://localhost:8080/id/101736545` in your web browser you would see this:
+
+![](docs/images/wof-browser-montreal-props.png)
+
+By default Who's On First (WOF) properties are rendered as nested (and collapsed) trees but there is are handy `show raw` and `show pretty` toggles for viewing the raw WOF GeoJSON data.
+
 ## Output formats
 
 The following output formats are available.
