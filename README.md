@@ -153,17 +153,13 @@ A PNG-encoded representation of the geometry for a given WOF ID. For example:
 
 A JSON-encoded slice of a Who's On First (WOF) GeoJSON document matching a query pattern. For example:
 
-A raw Who's On First (WOF) GeoJSON document. For example:
-
 ![](docs/images/wof-browser-montreal-select.png)
 
 `http://localhost:8080/select/101736545?select=properties.wof:concordances`
 
-`select` parameters should conform to the [GJSON path syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md). As of this writing multiple `select` parameters are not supported.
+`select` parameters should conform to the [GJSON path syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md).
 
-#### Important
-
-`select` parameters that do not match the regular expression defined in the `-select-pattern` flag (at startup) will trigger an error.
+As of this writing multiple `select` parameters are not supported. `select` parameters that do not match the regular expression defined in the `-select-pattern` flag (at startup) will trigger an error.
  
 ### SPR (Standard Places Response)
 
