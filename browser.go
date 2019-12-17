@@ -22,6 +22,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -59,6 +60,9 @@ func Start(ctx context.Context) error {
 
 	enable_geojson := flag.Bool("enable-geojson", true, "Enable the 'geojson' output handler.")
 	enable_spr := flag.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
+	enable_select := flag.Bool("enable-select", false, "Enable the 'select' output handler.")
+
+	select_pattern := flag.String("select-pattern", "", "...")
 
 	enable_html := flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
@@ -66,6 +70,7 @@ func Start(ctx context.Context) error {
 	path_svg := flag.String("path-svg", "/svg/", "The path that SVG requests should be served from.")
 	path_geojson := flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
 	path_spr := flag.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
+	path_select := flag.String("path-select", "/select/", "The path that 'select' requests should be served from.")
 
 	path_id := flag.String("path-id", "/id/", "The that Who's On First documents should be served from.")
 
@@ -91,6 +96,7 @@ func Start(ctx context.Context) error {
 	if *enable_data {
 		*enable_geojson = true
 		*enable_spr = true
+		*enable_select = true
 	}
 
 	if *enable_html {
@@ -242,6 +248,31 @@ func Start(ctx context.Context) error {
 		}
 
 		mux.Handle(*path_geojson, geojson_handler)
+	}
+
+	if *enable_select {
+
+		if *select_pattern == "" {
+			return errors.New("Missing -select-pattern parameter.")
+		}
+
+		pat, err := regexp.Compile(*select_pattern)
+
+		if err != nil {
+			return err
+		}
+
+		select_opts := &http.SelectHandlerOptions{
+			Pattern: pat,
+		}
+
+		select_handler, err := http.SelectHandler(cr, select_opts)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(*path_select, select_handler)
 	}
 
 	if *enable_html {
