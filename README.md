@@ -265,3 +265,4 @@ You will need a [valid Nextzen API key](https://developers.nextzen.org/) in orde
 * https://github.com/whosonfirst/go-cache
 * https://github.com/aaronland/go-http-bootstrap
 * https://github.com/aaronland/go-http-tangramjs
+* https://github.com/sfomuseum/go-http-tilezen
