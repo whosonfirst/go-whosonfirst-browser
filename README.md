@@ -149,14 +149,6 @@ A PNG-encoded representation of the geometry for a given WOF ID. For example:
 
 `http://localhost:8080/png/101736545`
 
-### SPR (Standard Places Response)
-
-A JSON-encoded "standard places response" for a given WOF ID. For example:
-
-![](docs/images/wof-browser-montreal-spr.png)
-
-`http://localhost:8080/spr/101736545`
-
 ### "select"
 
 A JSON-encoded slice of a Who's On First (WOF) GeoJSON document matching a query pattern. For example:
@@ -175,6 +167,14 @@ As of this writing multiple `select` parameters are not supported.
 
 `select` parameters that do not match the regular expression defined in the `-select-pattern` flag (at startup) will trigger an error.
  
+### SPR (Standard Places Response)
+
+A JSON-encoded "standard places response" for a given WOF ID. For example:
+
+![](docs/images/wof-browser-montreal-spr.png)
+
+`http://localhost:8080/spr/101736545`
+
 ### SVG
 
 An XML-encoded SVG representation of the geometry for a given WOF ID.  For example:
