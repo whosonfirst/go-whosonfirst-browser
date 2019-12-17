@@ -172,6 +172,10 @@ The default `whosonfirst-browser` tool allows data sources to be specified as a 
 
 This is what the code for default `whosonfirst-browser` tool looks like, with error handling omitted for the sake of brevity:
 
+### Important
+
+You will need a [valid Nextzen API key](https://developers.nextzen.org/) in order for map tiles to work.
+
 ```
 package main
 
@@ -332,10 +336,6 @@ $> docker run -it -p 8080:8080 whosonfirst-browser \
 	
 2019/12/17 16:27:04 Listening on http://0.0.0.0:8080
 ```
-
-## Nextzen
-
-You will need a [valid Nextzen API key](https://developers.nextzen.org/) in order for map tiles to work.
 
 ## See also
 
