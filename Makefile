@@ -8,7 +8,7 @@ go-bindata:
 
 debug:
 	@make bake
-	go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -nextzen-api-key $(APIKEY)
+	go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -proxy-tiles -nextzen-api-key $(APIKEY)
 
 bake: bake-static bake-templates
 
