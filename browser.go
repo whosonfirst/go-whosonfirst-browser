@@ -53,7 +53,7 @@ func Start(ctx context.Context) error {
 
 	enable_all := flag.Bool("enable-all", false, "Enable all the available output handlers.")
 	enable_graphics := flag.Bool("enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
-	enable_data := flag.Bool("enable-data", false, "Enable the 'geojson' and 'spr' output handlers.")
+	enable_data := flag.Bool("enable-data", false, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
 
 	enable_png := flag.Bool("enable-png", false, "Enable the 'png' output handler.")
 	enable_svg := flag.Bool("enable-svg", false, "Enable the 'svg' output handler.")
@@ -62,7 +62,7 @@ func Start(ctx context.Context) error {
 	enable_spr := flag.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
 	enable_select := flag.Bool("enable-select", false, "Enable the 'select' output handler.")
 
-	select_pattern := flag.String("select-pattern", "", "...")
+	select_pattern := flag.String("select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "...")
 
 	enable_html := flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
