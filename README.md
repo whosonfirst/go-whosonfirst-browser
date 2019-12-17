@@ -150,6 +150,20 @@ A JSON-encoded "standard places response" for a given WOF ID. For example:
 
 `http://localhost:8080/spr/101736545`
 
+### "Select"
+
+A JSON-encoded slice of a Who's On First (WOF) GeoJSON document. For example:
+
+A raw Who's On First (WOF) GeoJSON document. For example:
+
+![](docs/images/wof-browser-montreal-select.png)
+
+`http://localhost:8080/select/101736545?select=properties.wof:concordances`
+
+`?select` parameters should conform to the [GJSON path syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md). Remember that `select` parameters that do not match the regular expression defined in the `-select-pattern` flag will trigger an error.
+
+As of this writing multiple `select` parameters are not supported.
+
 ### SVG
 
 An XML-encoded SVG representation of the geometry for a given WOF ID.  For example:

@@ -62,7 +62,7 @@ func Start(ctx context.Context) error {
 	enable_spr := flag.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
 	enable_select := flag.Bool("enable-select", false, "Enable the 'select' output handler.")
 
-	select_pattern := flag.String("select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "...")
+	select_pattern := flag.String("select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
 
 	enable_html := flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
