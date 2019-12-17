@@ -40,7 +40,7 @@ go build -mod vendor cmd/whosonfirst-browser/main.go bin/whosonfirst-browser
 $> bin/whosonfirst-browser -h
 Usage of ./bin/whosonfirst-browser:
   -cache-source string
-    	... (default "gocache://")
+    	A valid go-cache Cache URI string. (default "gocache://")
   -enable-all
     	Enable all the available output handlers.
   -enable-data
@@ -50,7 +50,7 @@ Usage of ./bin/whosonfirst-browser:
   -enable-graphics
     	Enable the 'png' and 'svg' output handlers.
   -enable-html
-    	Enable the 'html' (or human-friendly) output handler. (default true)
+    	Enable the 'html' (or human-friendly) output handlers. (default true)
   -enable-png
     	Enable the 'png' output handler.
   -enable-spr
@@ -62,25 +62,33 @@ Usage of ./bin/whosonfirst-browser:
   -nextzen-api-key string
     	A valid Nextzen API key (https://developers.nextzen.org/). (default "xxxxxxx")
   -nextzen-style-url string
-    	... (default "/tangram/refill-style.zip")
+    	A valid Tangram scene file URL. (default "/tangram/refill-style.zip")
   -nextzen-tile-url string
-    	... (default "https://{s}.tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
+    	A valid Nextzen MVT tile URL. (default "https://{s}.tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
   -path-geojson string
-    	The path that GeoJSON requests should be served from (default "/geojson/")
+    	The path that GeoJSON requests should be served from. (default "/geojson/")
   -path-id string
-    	... (default "/id/")
+    	The that Who's On First documents should be served from. (default "/id/")
   -path-png string
-    	The path that PNG requests should be served from (default "/png/")
+    	The path that PNG requests should be served from. (default "/png/")
   -path-spr string
-    	The path that SPR requests should be served from (default "/spr/")
+    	The path that SPR requests should be served from. (default "/spr/")
   -path-svg string
-    	The path that PNG requests should be served from (default "/svg/")
+    	The path that SVG requests should be served from. (default "/svg/")
   -port int
     	The port number to listen for requests on (default 8080)
   -protocol string
     	The protocol for wof-staticd server to listen on. Valid protocols are: http, lambda. (default "http")
+  -proxy-tiles
+    	Proxy (and cache) Nextzen tiles.
+  -proxy-tiles-cache string
+    	A valid tile proxy DSN string. (default "gocache://")
+  -proxy-tiles-timeout int
+    	The maximum number of seconds to allow for fetching a tile from the proxy. (default 30)
+  -proxy-tiles-url string
+    	The URL (a relative path) for proxied tiles. (default "/tiles/")
   -reader-source string
-    	... (default "https://data.whosonfirst.org")
+    	A valid go-reader Reader URI string. (default "https://data.whosonfirst.org")
   -static-prefix string
     	Prepend this prefix to URLs for static assets.
   -templates string
