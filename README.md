@@ -164,6 +164,10 @@ An XML-encoded SVG representation of the geometry for a given WOF ID.  For examp
 
 It is possible to cache those tiles locally using the `-proxy-tiles` flag at start up. The default cache for proxying tiles is an ephemiral in-memory cache but you can also specify an alternative [go-cache](https://github.com/whosonfirst/go-cache) `cache.Cache` source using the `-proxy-tiles-cache` flag. Caches are discussed in detail below.
 
+### Important
+
+You will need a [valid Nextzen API key](https://developers.nextzen.org/) in order for map tiles to work.
+
 ## Data sources and Caches
 
 The `go-whosonfirst-browser` uses the [go-reader](#) `reader.Reader` and [go-cache](#) `cache.Cache` interfaces for reading and caching data respectively. This enables the "guts" of the code to be developed and operate independently of any individual data source or cache.
@@ -171,10 +175,6 @@ The `go-whosonfirst-browser` uses the [go-reader](#) `reader.Reader` and [go-cac
 The default `whosonfirst-browser` tool allows data sources to be specified as a localfile system or a remote HTTP(S) endpoint and caching sources as a local filesystem or an ephemiral in-memory lookup.
 
 This is what the code for default `whosonfirst-browser` tool looks like, with error handling omitted for the sake of brevity:
-
-### Important
-
-You will need a [valid Nextzen API key](https://developers.nextzen.org/) in order for map tiles to work.
 
 ```
 package main
