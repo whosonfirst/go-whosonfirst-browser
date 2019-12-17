@@ -114,23 +114,43 @@ The following output formats are available.
 
 ### GeoJSON
 
-A raw Who's On First (WOF) GeoJSON document.
+A raw Who's On First (WOF) GeoJSON document. For example:
+
+![](docs/images/wof-browser-montreal-geojson.png)
+
+`http://localhost:8080/geojson/101736545`
 
 ### HTML
 
-A responsive HTML table and map for a given WOF ID.
+A responsive HTML table and map for a given WOF ID. For example:
+
+![](docs/images/wof-browser-montreal-html.png)
+
+`http://localhost:8080/id/101736545`
 
 ### PNG
 
-A PNG-encoded representation of the geometry for a given WOF ID.
+A PNG-encoded representation of the geometry for a given WOF ID. For example:
+
+![](docs/images/wof-browser-montreal-png.png)
+
+`http://localhost:8080/png/101736545`
 
 ### SPR (Standard Places Response)
 
-A JSON-encoded "standard places response" for a given WOF ID.
+A JSON-encoded "standard places response" for a given WOF ID. For example:
+
+![](docs/images/wof-browser-montreal-spr.png)
+
+`http://localhost:8080/spr/101736545`
 
 ### SVG
 
-An XML-encoded SVG representation of the geometry for a given WOF ID.
+An XML-encoded SVG representation of the geometry for a given WOF ID.  For example:
+
+![](docs/images/wof-browser-montreal-svg.png)
+
+`http://localhost:8080/svg/101736545`
 
 ## Tiles
 
