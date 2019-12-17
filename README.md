@@ -104,7 +104,7 @@ Usage of ./bin/whosonfirst-browser:
 #### Example
 
 ```
-$> bin/browser -enable-all -nextzen-api-key ${NEXTZEN_APIKEY}
+$> bin/browser -enable-all -nextzen-api-key {NEXTZEN_APIKEY}
 2019/12/14 18:22:16 Listening on http://localhost:8080
 ```
 
@@ -192,7 +192,7 @@ For example... :
 ```
 $> bin/whosonfirst-browser -enable-all \
 	-data-source 'file:///usr/local/data/whosonfirst-data-admin-us/data' \
-	-nextzen-api-key ${NEXTZEN_APIKEY}	
+	-nextzen-api-key {NEXTZEN_APIKEY}	
 ```
 
 Or... :
@@ -201,7 +201,7 @@ Or... :
 $> bin/whosonfirst-browser -enable-all \
 	-data-source 'https://data.whosonfirst.org' \
 	-cache-source 'file:///usr/local/cache/whosonfirst' \
-	-nextzen-api-key ${NEXTZEN_APIKEY}	
+	-nextzen-api-key {NEXTZEN_APIKEY}	
 ```
 
 
@@ -227,7 +227,7 @@ And then you would start the `browser` tool like this:
 ```
 $> bin/browser -enable-all \
 	-data-source 's3://{BUCKET}?region={REGION}' \
-	-nextzen-api-key ${NEXTZEN_APIKEY}
+	-nextzen-api-key {NEXTZEN_APIKEY}
 ```
 
 Or if you wanted to ... and cache tiles locally to a local directory:
@@ -256,7 +256,7 @@ $> bin/browser -enable-all \
 	-proxy-tiles \
 	-proxy-tiles-cache 'file:///usr/local/data/tilezen'
 	-data-source 's3://{BUCKET}?region={REGION}' \
-	-nextzen-api-key ${NEXTZEN_APIKEY}
+	-nextzen-api-key {NEXTZEN_APIKEY}
 ```
 
 ## Lambda
@@ -314,7 +314,19 @@ repeat steps 1-3 _and_ update the `BinaryContentTypes` dictionary in
 
 ## Docker
 
-[Yes](Dockerfile).
+[Yes](Dockerfile). For example:
+
+```
+$> docker build -t whosonfirst-browser .
+...
+```
+
+And then:
+
+```
+$> docker run -it -p 8080:8080 whosonfirst-browser /usr/local/bin/whosonfirst-browser -host '0.0.0.0' -enable-all -nextzen-api-key {NEXTZEN_APIKEY}
+2019/12/17 16:27:04 Listening on http://0.0.0.0:8080
+```
 
 ## Nextzen
 
