@@ -159,9 +159,7 @@ A raw Who's On First (WOF) GeoJSON document. For example:
 
 `http://localhost:8080/select/101736545?select=properties.wof:concordances`
 
-`select` parameters should conform to the [GJSON path syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md).
-
-As of this writing multiple `select` parameters are not supported.
+`select` parameters should conform to the [GJSON path syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md). As of this writing multiple `select` parameters are not supported.
 
 #### Important
 
