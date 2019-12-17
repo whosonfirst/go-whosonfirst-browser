@@ -45,12 +45,13 @@ go build -mod vendor cmd/whosonfirst-browser/main.go bin/whosonfirst-browser
 ```
 $> bin/whosonfirst-browser -h
 Usage of ./bin/whosonfirst-browser:
+
   -cache-source string
     	A valid go-cache Cache URI string. (default "gocache://")
   -enable-all
     	Enable all the available output handlers.
   -enable-data
-    	Enable the 'geojson' and 'spr' output handlers.
+    	Enable the 'geojson' and 'spr' and 'select' output handlers.
   -enable-geojson
     	Enable the 'geojson' output handler. (default true)
   -enable-graphics
@@ -59,6 +60,8 @@ Usage of ./bin/whosonfirst-browser:
     	Enable the 'html' (or human-friendly) output handlers. (default true)
   -enable-png
     	Enable the 'png' output handler.
+  -enable-select
+    	Enable the 'select' output handler.
   -enable-spr
     	Enable the 'spr' (or "standard places response") output handler. (default true)
   -enable-svg
@@ -77,6 +80,8 @@ Usage of ./bin/whosonfirst-browser:
     	The that Who's On First documents should be served from. (default "/id/")
   -path-png string
     	The path that PNG requests should be served from. (default "/png/")
+  -path-select string
+    	The path that 'select' requests should be served from. (default "/select/")
   -path-spr string
     	The path that SPR requests should be served from. (default "/spr/")
   -path-svg string
@@ -93,8 +98,10 @@ Usage of ./bin/whosonfirst-browser:
     	The maximum number of seconds to allow for fetching a tile from the proxy. (default 30)
   -proxy-tiles-url string
     	The URL (a relative path) for proxied tiles. (default "/tiles/")
-  -data-source string
+  -reader-source string
     	A valid go-reader Reader URI string. (default "https://data.whosonfirst.org")
+  -select-pattern string
+    	A valid regular expression for sanitizing select parameters. (default "properties(?:.[a-zA-Z0-9-_]+){1,}")
   -static-prefix string
     	Prepend this prefix to URLs for static assets.
   -templates string
