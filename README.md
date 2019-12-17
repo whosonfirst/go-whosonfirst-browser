@@ -93,7 +93,7 @@ Usage of ./bin/whosonfirst-browser:
     	The maximum number of seconds to allow for fetching a tile from the proxy. (default 30)
   -proxy-tiles-url string
     	The URL (a relative path) for proxied tiles. (default "/tiles/")
-  -reader-source string
+  -data-source string
     	A valid go-reader Reader URI string. (default "https://data.whosonfirst.org")
   -static-prefix string
     	Prepend this prefix to URLs for static assets.
@@ -158,9 +158,13 @@ An XML-encoded SVG representation of the geometry for a given WOF ID.  For examp
 
 It is possible to cache those tiles locally using the `-proxy-tiles` flag at start up. The default cache for proxying tiles is an ephemiral in-memory cache but you can also specify an alternative [go-cache](https://github.com/whosonfirst/go-cache) `cache.Cache` source using the `-proxy-tiles-cache` flag. Caches are discussed in detail below.
 
-## go-reader.Reader(s) and go-cache.Cache(s)
+## Data sources and Caches
 
-This is what the code for default `browser` tool looks like, with error handling omitted for the sake of brevity:
+The `go-whosonfirst-browser` uses the [go-reader](#) `reader.Reader` and [go-cache](#) `cache.Cache` interfaces for reading and caching data respectively. This enables the "guts" of the code to be developed and operate independently of any individual data source or cache.
+
+The default `whosonfirst-browser` tool allows data sources to be specified as a localfile system or a remote HTTP(S) endpoint and caching sources as a local filesystem or an ephemiral in-memory lookup.
+
+This is what the code for default `whosonfirst-browser` tool looks like, with error handling omitted for the sake of brevity:
 
 ```
 package main
@@ -177,7 +181,25 @@ func main() {
 }
 ```
 
-But if you wanted to using the [Go Cloud](#)
+For example... :
+
+```
+$> bin/whosonfirst-browser -enable-all \
+	-data-source 'file:///usr/local/data/whosonfirst-data-admin-us/data' \
+	-nextzen-api-key ${NEXTZEN_APIKEY}	
+```
+
+Or... :
+
+```
+$> bin/whosonfirst-browser -enable-all \
+	-data-source 'https://data.whosonfirst.org' \
+	-cache-source 'file:///usr/local/cache/whosonfirst' \
+	-nextzen-api-key ${NEXTZEN_APIKEY}	
+```
+
+
+But if you wanted to ... using the [Go Cloud Blob package](https://gocloud.dev/howto/blob/)
 
 ```
 package main
@@ -185,7 +207,6 @@ package main
 import (
 	"context"
 	_ "github.com/whosonfirst/go-reader-blob"
-	_ "github.com/whosonfirst/go-reader-http"	
 	"github.com/whosonfirst/go-whosonfirst-browser"
 )
 
@@ -198,7 +219,38 @@ func main() {
 And then you would start the `browser` tool like this:
 
 ```
-$> bin/browser -reader-source 's3://{BUCKET}?region={REGION}' -enable-all -nextzen-api-key ${NEXTZEN_APIKEY}
+$> bin/browser -enable-all \
+	-data-source 's3://{BUCKET}?region={REGION}' \
+	-nextzen-api-key ${NEXTZEN_APIKEY}
+```
+
+Or if you wanted to ... and cache tiles locally to a local directory:
+
+```
+package main
+
+import (
+	"context"
+	_ "github.com/whosonfirst/go-cache-blob"	
+	_ "github.com/whosonfirst/go-reader-blob"
+	"github.com/whosonfirst/go-whosonfirst-browser"
+	_ "gocloud.dev/blob/fileblob"
+)
+
+func main() {
+	ctx := context.Background()
+	browser.Start(ctx)
+}
+```
+
+And then you would start the `browser` tool like this:
+
+```
+$> bin/browser -enable-all \
+	-proxy-tiles \
+	-proxy-tiles-cache 'file:///usr/local/data/tilezen'
+	-data-source 's3://{BUCKET}?region={REGION}' \
+	-nextzen-api-key ${NEXTZEN_APIKEY}
 ```
 
 ## Lambda

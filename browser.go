@@ -38,7 +38,7 @@ func Start(ctx context.Context) error {
 
 	path_templates := flag.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
 
-	reader_source := flag.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
+	data_source := flag.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
 	cache_source := flag.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
 
 	nextzen_api_key := flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
@@ -115,7 +115,7 @@ func Start(ctx context.Context) error {
 		*cache_source = fmt.Sprintf("fs://%s", tempdir)
 	}
 
-	r, err := reader.NewReader(ctx, *reader_source)
+	r, err := reader.NewReader(ctx, *data_source)
 
 	if err != nil {
 		return err
