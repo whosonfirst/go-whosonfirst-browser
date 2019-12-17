@@ -324,7 +324,12 @@ $> docker build -t whosonfirst-browser .
 And then:
 
 ```
-$> docker run -it -p 8080:8080 whosonfirst-browser /usr/local/bin/whosonfirst-browser -host '0.0.0.0' -enable-all -nextzen-api-key {NEXTZEN_APIKEY}
+$> docker run -it -p 8080:8080 whosonfirst-browser \
+	/usr/local/bin/whosonfirst-browser \
+	-host '0.0.0.0' \
+	-enable-all \
+	-nextzen-api-key {NEXTZEN_APIKEY}
+	
 2019/12/17 16:27:04 Listening on http://0.0.0.0:8080
 ```
 
