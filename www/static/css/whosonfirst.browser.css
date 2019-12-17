@@ -16,3 +16,15 @@ body {
 #header-search {
 	float: right;
 }
+
+@media (max-width: 600px) {
+	#header h4 {
+		display: none !important;
+	}
+
+	#header-search {
+		float:left !important;
+	}
+	
+}
+

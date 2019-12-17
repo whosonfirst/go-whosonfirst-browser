@@ -178,7 +178,7 @@ func wwwTemplatesHtmlInc_common_footerHtml() (*asset, error) {
 	return a, nil
 }
 
-var _wwwTemplatesHtmlInc_common_headerHtml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x64\x91\xc1\x6a\xdc\x30\x10\x40\xcf\xd6\x57\x0c\xd3\x43\x4f\x8e\xa1\xe4\xb4\x2b\xeb\x50\x9a\x96\x40\xa1\x97\x42\x8f\x41\x96\xc6\xb5\x58\x79\xc6\x48\xb2\xb3\x8b\xd9\x4f\xe8\xad\xf7\xfe\x62\x3f\xa1\x6c\x9c\x86\x90\xbd\x88\x41\x08\xbd\xa7\xa7\x75\xf5\xd4\x07\x26\xc0\xc0\xee\xc1\xc9\x38\x0a\x3f\x0c\x64\x3d\x25\x3c\x9f\x95\xde\x46\x08\xbe\xc5\xe7\x5d\xa3\x00\x00\x9e\x16\xcd\x76\x31\x4a\x55\x7a\xb8\x05\x17\x6d\xce\x2d\xb2\x5d\xea\x50\x68\x44\xa3\x2d\x0c\x89\xfa\x16\xd7\x15\x6e\xee\xd8\x4f\x12\xb8\xe4\x9b\x7b\xf6\x74\x84\xf3\x19\xcd\x8f\x41\xde\x67\xf8\xc6\xf0\x39\xa4\x5c\xe0\x63\x92\xc7\x4c\x49\x37\xd6\xe8\x66\xb8\x35\xaa\x52\x95\xf6\x61\xb9\xba\xf9\x95\x4c\x9d\xc9\x26\x37\xa0\x51\xd5\x93\x4f\x2f\x69\x84\x91\xca\x20\xbe\xc5\x2f\x77\xdf\x11\xac\x2b\x41\xf8\x4a\xc2\x5f\x0c\x20\x97\x53\xa4\x16\x03\xc7\xc0\x54\x77\x51\xdc\x01\x4d\xa5\xaa\x4a\x77\x73\x29\xc2\x50\x4e\x13\xb5\x98\xe7\x6e\x0c\xe5\xe5\x78\x67\xdd\xe1\x67\x92\x99\x7d\xed\x24\x4a\xda\xbd\xeb\xfb\x7e\xdf\x49\xf2\x94\x76\xc0\xc2\xb4\x1f\xed\xb1\x7e\x0c\xbe\x0c\xbb\x0f\x89\xc6\xbd\x0f\x79\x8a\xf6\xb4\xdb\x40\x7b\x34\x7f\xff\xfc\xfe\xa5\x9b\x0d\x62\x2e\xbc\xc0\xd3\x5c\x9e\x71\x85\x8e\x05\x61\xb1\x71\xa6\x16\xb7\xd7\x06\x8f\xc0\x76\xa4\x6d\x9a\xa2\x75\x34\x48\xf4\x94\x5a\xfc\x2a\x72\x98\x27\xb0\xf0\x26\xe7\xfd\xa7\x17\xe1\xb7\xf8\xe6\x7f\xae\xe6\xd2\xcb\xa8\x4a\x37\x3e\x2c\x5b\xf0\x2e\x81\x8b\x64\x53\x8b\x36\x46\x84\xc6\xa8\xed\xa7\x9b\x2d\xb8\x51\xeb\x0a\xc4\x97\x7c\xea\x5f\x00\x00\x00\xff\xff\x36\xa8\xfb\xa4\x3b\x02\x00\x00")
+var _wwwTemplatesHtmlInc_common_headerHtml = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x64\x91\xc1\x6a\xdc\x30\x10\x40\xcf\xd6\x57\x0c\xd3\x43\x4f\x8e\xa1\xe4\xb4\x2b\xeb\x50\x9a\x96\x40\xa1\x97\x42\x8f\x41\x96\xc6\xb5\x58\x79\xc6\x48\xb2\xb3\x8b\xd9\x4f\xe8\xad\xf7\xfe\x62\x3f\xa1\x6c\x9c\x86\x90\xbd\x88\x41\x20\xbd\xa7\xa7\x75\xf5\xd4\x07\x26\xc0\xc0\xee\xc1\xc9\x38\x0a\x3f\x0c\x64\x3d\x25\x3c\x9f\x95\xde\x46\x08\xbe\xc5\xe7\x5d\xa3\x00\x00\x9e\x16\xcd\x76\x31\x4a\x55\x7a\xb8\x05\x17\x6d\xce\x2d\xb2\x5d\xea\x50\x68\x44\xa3\x2d\x0c\x89\xfa\x16\xd7\x15\x6e\xee\xd8\x4f\x12\xb8\xe4\x9b\x7b\xf6\x74\x84\xf3\x19\xcd\x8f\x41\xde\x67\xf8\xc6\xf0\x39\xa4\x5c\xe0\x63\x92\xc7\x4c\x49\x37\xd6\xe8\x66\xb8\x35\xaa\x52\x95\xf6\x61\xb9\xba\xf9\x95\x4c\x9d\xc9\x26\x37\xa0\x51\xd5\x93\x4f\x2f\x69\x84\x91\xca\x20\xbe\xc5\x2f\x77\xdf\x11\xac\x2b\x41\xf8\x4a\xc2\x5f\x0c\x20\x97\x53\xa4\x16\x03\xc7\xc0\x54\x77\x51\xdc\x01\x4d\xa5\xaa\x4a\x07\x9e\xe6\x02\xe5\x34\x51\x8b\x85\x8e\x05\x61\xb1\x71\xa6\x16\x37\x7a\xf0\x08\x6c\x47\xda\xa6\x29\x5a\x47\x83\x44\x4f\xa9\xc5\xaf\x22\x87\x79\x02\x0b\x6f\x9e\x77\xff\xe9\x85\xe7\x43\x9e\xa2\x3d\xed\x36\xee\x1e\x1b\x73\x41\x76\x73\x29\xc2\xcf\xcc\x3c\x77\x63\x28\x2f\x27\x3a\xeb\x0e\x3f\x93\xcc\xec\x6b\x27\x51\xd2\xee\x5d\xdf\xf7\xfb\x4e\x92\xa7\xb4\x03\x16\xa6\xfd\x68\x8f\xf5\x63\xf0\x65\xd8\x7d\x48\x34\xee\xdf\x32\xcc\xdf\x3f\xbf\x7f\xe9\x66\x83\xfc\xcf\xd5\x5c\x7a\x19\x55\xe9\xc6\x87\x65\x0b\xde\x25\x70\x91\x6c\x6a\xd1\xc6\x88\xd0\x18\xb5\xfd\x74\xb3\x05\x37\x6a\x5d\x81\xf8\x92\x4f\xfd\x0b\x00\x00\xff\xff\x7f\x09\xff\xc1\x3b\x02\x00\x00")
 
 func wwwTemplatesHtmlInc_common_headerHtmlBytes() ([]byte, error) {
 	return bindataRead(
@@ -193,7 +193,7 @@ func wwwTemplatesHtmlInc_common_headerHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_common_header.html", size: 571, mode: os.FileMode(420), modTime: time.Unix(1576561140, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_common_header.html", size: 571, mode: os.FileMode(420), modTime: time.Unix(1576563704, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -350,17 +350,17 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"www/templates/html/error.html":             wwwTemplatesHtmlErrorHtml,
-	"www/templates/html/example.html":           wwwTemplatesHtmlExampleHtml,
-	"www/templates/html/id.html":                wwwTemplatesHtmlIdHtml,
-	"www/templates/html/inc_common_css.html":    wwwTemplatesHtmlInc_common_cssHtml,
+	"www/templates/html/error.html": wwwTemplatesHtmlErrorHtml,
+	"www/templates/html/example.html": wwwTemplatesHtmlExampleHtml,
+	"www/templates/html/id.html": wwwTemplatesHtmlIdHtml,
+	"www/templates/html/inc_common_css.html": wwwTemplatesHtmlInc_common_cssHtml,
 	"www/templates/html/inc_common_footer.html": wwwTemplatesHtmlInc_common_footerHtml,
 	"www/templates/html/inc_common_header.html": wwwTemplatesHtmlInc_common_headerHtml,
-	"www/templates/html/inc_common_meta.html":   wwwTemplatesHtmlInc_common_metaHtml,
-	"www/templates/html/inc_id_basics.html":     wwwTemplatesHtmlInc_id_basicsHtml,
-	"www/templates/html/inc_id_status.html":     wwwTemplatesHtmlInc_id_statusHtml,
-	"www/templates/html/index.html":             wwwTemplatesHtmlIndexHtml,
-	"www/templates/html/notfound.html":          wwwTemplatesHtmlNotfoundHtml,
+	"www/templates/html/inc_common_meta.html": wwwTemplatesHtmlInc_common_metaHtml,
+	"www/templates/html/inc_id_basics.html": wwwTemplatesHtmlInc_id_basicsHtml,
+	"www/templates/html/inc_id_status.html": wwwTemplatesHtmlInc_id_statusHtml,
+	"www/templates/html/index.html": wwwTemplatesHtmlIndexHtml,
+	"www/templates/html/notfound.html": wwwTemplatesHtmlNotfoundHtml,
 }
 
 // AssetDir returns the file names below a certain
@@ -402,22 +402,21 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
 	"www": &bintree{nil, map[string]*bintree{
 		"templates": &bintree{nil, map[string]*bintree{
 			"html": &bintree{nil, map[string]*bintree{
-				"error.html":             &bintree{wwwTemplatesHtmlErrorHtml, map[string]*bintree{}},
-				"example.html":           &bintree{wwwTemplatesHtmlExampleHtml, map[string]*bintree{}},
-				"id.html":                &bintree{wwwTemplatesHtmlIdHtml, map[string]*bintree{}},
-				"inc_common_css.html":    &bintree{wwwTemplatesHtmlInc_common_cssHtml, map[string]*bintree{}},
+				"error.html": &bintree{wwwTemplatesHtmlErrorHtml, map[string]*bintree{}},
+				"example.html": &bintree{wwwTemplatesHtmlExampleHtml, map[string]*bintree{}},
+				"id.html": &bintree{wwwTemplatesHtmlIdHtml, map[string]*bintree{}},
+				"inc_common_css.html": &bintree{wwwTemplatesHtmlInc_common_cssHtml, map[string]*bintree{}},
 				"inc_common_footer.html": &bintree{wwwTemplatesHtmlInc_common_footerHtml, map[string]*bintree{}},
 				"inc_common_header.html": &bintree{wwwTemplatesHtmlInc_common_headerHtml, map[string]*bintree{}},
-				"inc_common_meta.html":   &bintree{wwwTemplatesHtmlInc_common_metaHtml, map[string]*bintree{}},
-				"inc_id_basics.html":     &bintree{wwwTemplatesHtmlInc_id_basicsHtml, map[string]*bintree{}},
-				"inc_id_status.html":     &bintree{wwwTemplatesHtmlInc_id_statusHtml, map[string]*bintree{}},
-				"index.html":             &bintree{wwwTemplatesHtmlIndexHtml, map[string]*bintree{}},
-				"notfound.html":          &bintree{wwwTemplatesHtmlNotfoundHtml, map[string]*bintree{}},
+				"inc_common_meta.html": &bintree{wwwTemplatesHtmlInc_common_metaHtml, map[string]*bintree{}},
+				"inc_id_basics.html": &bintree{wwwTemplatesHtmlInc_id_basicsHtml, map[string]*bintree{}},
+				"inc_id_status.html": &bintree{wwwTemplatesHtmlInc_id_statusHtml, map[string]*bintree{}},
+				"index.html": &bintree{wwwTemplatesHtmlIndexHtml, map[string]*bintree{}},
+				"notfound.html": &bintree{wwwTemplatesHtmlNotfoundHtml, map[string]*bintree{}},
 			}},
 		}},
 	}},
@@ -469,3 +468,4 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+
