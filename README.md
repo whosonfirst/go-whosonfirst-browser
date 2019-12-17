@@ -1,6 +1,6 @@
 # go-whosonfirst-browser
 
-![](docs/images/wof-browser-montreal-props.png)
+![](docs/images/wof-browser-montreal.png)
 
 Go package for rendering known Who's On First (WOF) IDs in a number of formats.
 
@@ -107,6 +107,8 @@ Usage of ./bin/whosonfirst-browser:
 $> bin/browser -enable-all -nextzen-api-key ${NEXTZEN_APIKEY}
 2019/12/14 18:22:16 Listening on http://localhost:8080
 ```
+
+![](docs/images/wof-browser-montreal-responsive.png)
 
 ## Output formats
 
