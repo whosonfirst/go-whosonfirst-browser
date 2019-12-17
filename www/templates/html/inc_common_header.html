@@ -1,13 +1,16 @@
 {{define "inc_common_header"}}
-<header id="details-menu">
+<header id="header">
+    
     <nav>
+
+	<h4 class="nav-item"><a href="{{ .Endpoints.Index }}">Who's On First Browser</a></h4>
 	
-	<nav id="search-navi-right">
+	<div class="nav-item" id="header-search">
 	    <form method="GET" action="{{ .Endpoints.Id }}" style="inline-block">	
 		<button type="submit" style="background-color:#fff;border: none;max-width:2rem;display:inline;">🔍</button>
 		<input type="text" value="" id="id" name="id" placeholder="Lookup a Who's On First ID" style="display:inline;"/>
 	    </form>
-	</nav>
+	</div>
 	
 	<br clear="all" />
 
