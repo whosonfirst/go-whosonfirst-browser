@@ -292,9 +292,12 @@ $> bin/whosonfirst-browser -enable-all \
 	-nextzen-api-key {NEXTZEN_APIKEY}
 ```
 
+As of this writing the `browser.go` packages does everything _including_ parsing command line flags. This is not ideal and flag parsing will be moved in to a separate method and be made extensible.
+
 ### See also
 
-* [List of available go-reader.Readers](https://github.com/whosonfirst/go-reader#available-readers)
+* [List of available go-reader.Reader implementations](https://github.com/whosonfirst/go-reader#available-readers)
+* [List of available go-cache.Cache implementations](https://github.com/whosonfirst/go-cache#available-caches)
 
 ## Lambda
 
