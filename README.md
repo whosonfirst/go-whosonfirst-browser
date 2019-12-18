@@ -267,12 +267,7 @@ $> bin/whosonfirst-browser -enable-all \
 ```
 
 
-The "guts" of the application live in the `browser.go` package
-
-For example... :
-
-
-But if you wanted to ... using the [Go Cloud Blob package](https://gocloud.dev/howto/blob/)
+The "guts" of the application live in the `browser.go` package. This is by design to make it easy (or easier, at least) to create derivative browser tools that use custom readers or caches. For example if you wanted to create a browser that read files using the [Go Cloud Blob package](https://gocloud.dev/howto/blob/) you would write:
 
 ```
 package main
@@ -289,42 +284,14 @@ func main() {
 }
 ```
 
-And then you would start the `browser` tool like this:
+And then you would start the browser tool like this:
 
 ```
-$> bin/browser -enable-all \
+$> bin/whosonfirst-browser -enable-all \
 	-data-source 's3://{BUCKET}?region={REGION}' \
 	-nextzen-api-key {NEXTZEN_APIKEY}
 ```
 
-Or if you wanted to ... and cache tiles locally to a local directory:
-
-```
-package main
-
-import (
-	"context"
-	_ "github.com/whosonfirst/go-cache-blob"	
-	_ "github.com/whosonfirst/go-reader-blob"
-	"github.com/whosonfirst/go-whosonfirst-browser"
-	_ "gocloud.dev/blob/fileblob"
-)
-
-func main() {
-	ctx := context.Background()
-	browser.Start(ctx)
-}
-```
-
-And then you would start the `browser` tool like this:
-
-```
-$> bin/browser -enable-all \
-	-proxy-tiles \
-	-proxy-tiles-cache 'file:///usr/local/data/tilezen'
-	-data-source 's3://{BUCKET}?region={REGION}' \
-	-nextzen-api-key {NEXTZEN_APIKEY}
-```
 
 ## Lambda
 
