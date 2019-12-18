@@ -281,6 +281,7 @@ And then if you went to `http://localhost:8080/id/1159554801` in your browser yo
 The "guts" of the application live in the `browser.go` package. This is by design to make it easy (or easier, at least) to create derivative browser tools that use custom readers or caches. For example if you wanted to create a browser that read files using the [Go Cloud Blob package](https://gocloud.dev/howto/blob/) you would write:
 
 ```
+// cmd/blob-browser/main.go
 package main
 
 import (
@@ -298,9 +299,39 @@ func main() {
 And then you would start the browser tool like this:
 
 ```
-$> bin/whosonfirst-browser -enable-all \
+$> bin/blob-browser -enable-all \
 	-reader-source 's3://{BUCKET}?region={REGION}' \
 	-nextzen-api-key {NEXTZEN_APIKEY}
+
+2019/12/18 08:44:15 Listening on http://localhost:8080
+```
+
+Or if you wanted to read data from a specific GitHub repository:
+
+```
+// cmd/github-browser/main.go
+package main
+
+import (
+	"context"
+	_ "github.com/whosonfirst/go-reader-github"
+	"github.com/whosonfirst/go-whosonfirst-browser"
+)
+
+func main() {
+	ctx := context.Background()
+	browser.Start(ctx)
+}
+```
+
+And then:
+
+```
+$> bin/github-browser -enable-all \
+	-reader-source 'github://whosonfirst-data/whosonfirst-data-admin-ca'
+	-nextzen-api-key {NEXTZEN_APIKEY}
+	
+2019/12/18 08:44:15 Listening on http://localhost:8080
 ```
 
 As of this writing the `browser.go` packages does everything _including_ parsing command line flags. This is not ideal and flag parsing will be moved in to a separate method and be made extensible.

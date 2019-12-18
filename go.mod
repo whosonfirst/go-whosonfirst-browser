@@ -10,7 +10,7 @@ require (
 	github.com/sfomuseum/go-http-tilezen v0.0.2
 	github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e // indirect
 	github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e // indirect
-	github.com/tidwall/gjson v1.3.4
+	github.com/tidwall/gjson v1.3.5
 	github.com/whosonfirst/algnhsa v0.1.0
 	github.com/whosonfirst/go-bindata v0.1.0
 	github.com/whosonfirst/go-bindata-assetfs v1.0.1
