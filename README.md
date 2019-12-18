@@ -276,7 +276,7 @@ $> bin/whosonfirst-browser -enable-all \
 
 And then if you went to `http://localhost:8080/id/1159554801` in your browser you would see:
 
-![](images/wof-browser-sfo.png)
+![](docs/images/wof-browser-sfo.png)
 
 The "guts" of the application live in the `browser.go` package. This is by design to make it easy (or easier, at least) to create derivative browser tools that use custom readers or caches. For example if you wanted to create a browser that read files using the [Go Cloud Blob package](https://gocloud.dev/howto/blob/) you would write:
 
