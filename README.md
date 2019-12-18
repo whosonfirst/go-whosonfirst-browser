@@ -18,7 +18,9 @@ At least not yet.
 
 `go-whosonfirst-browser` was designed to be a simple display tool for known Who's On First (WOF) IDs and records. That constitutes a third to half of [what the Spelunker does](https://github.com/whosonfirst/whosonfirst-www-spelunker) (the remainder being list views and facets) so in principle it would be easy enough to add the same functionality here.
 
-The principle advantage of migrating Spelunker functionality to this package is that it does not have any external dependencies and has been support for multiple data sources and caches and can be pre-compiled in to a standalone binary tool. The principle disadvantage would be that experimenting and developing code and functionality in Python (used by the existing Spelunker) has a lower barrier to entry than doing the same in Go (used by this package).
+The principle advantage of migrating Spelunker functionality to this package is that it does not have any external dependencies and has support for multiple data sources and caches and can be pre-compiled in to a standalone binary tool. The principle disadvantage would be that experimenting and developing code and functionality in Python (used by the existing Spelunker) has a lower barrier to entry than doing the same in Go (used by this package).
+
+For the time being though they are separate beasts.
 
 ### This is not a search engine.
 
@@ -31,6 +33,17 @@ It would be easy enough to add flags to use an external instance of the [Pelias 
 At least not yet.
 
 Interestingly the code that renders Who's On First (WOF) property dictionaries in to pretty HTML tables is the same code used for the experimental Mapzen "[Yes No Fix](https://whosonfirst.org/blog/2016/04/08/yesnofix/) project". That functionality has not been enabled or tested with this tool yet.
+
+On the other hand editing anything besides simple key-value pairs means identifying all the complex types, defining rules for how and when they can be updated (or added) and then maintaining all the code to do that. These are all worthwhile efforts but they are equally complex and not things this tool aims to tackle right now.
+
+If you'd like to read more about the subject of editing Who's On First documents have a look at:
+
+* [Who's On First blog posts about the Boundary Issues editing tool.](https://whosonfirst.org/blog/tags/boundaryissues/)
+* Gary Gale's [Three Steps Backwards, One Step Forwards; a Tale of Data Consistency and JSON Schema](https://whosonfirst.org/blog/2018/05/25/three-steps-backwards/)
+
+### This does not retrieve, render or display "alternate" geometries
+
+It really should but today it does not. Hopefully it will, soon.
 
 ## Tools
 
@@ -189,7 +202,32 @@ You will need a [valid Nextzen API key](https://developers.nextzen.org/) in orde
 
 ## Data sources and Caches
 
-The `go-whosonfirst-browser` uses the [go-reader](#) `reader.Reader` and [go-cache](#) `cache.Cache` interfaces for reading and caching data respectively. This enables the "guts" of the code to be developed and operate independently of any individual data source or cache.
+The `go-whosonfirst-browser` uses the [go-reader](https://github.com/whosonfirst/go-reader) `reader.Reader` and [go-cache](https://github.com/whosonfirst/go-cache) `cache.Cache` interfaces for reading and caching data respectively. This enables the "guts" of the code to be developed and operate independently of any individual data source or cache.
+
+Readers and caches alike are instantiated using the `reader.NewReader` or `cache.NewCache` methods respectively. In both case the methods are passed a URI string indicating the type of instance to create. For example, to create a local filesystem based reader, you would write:
+
+```
+import (
+       "github.com/whosonfirst/go-reader"
+)
+
+r, _ := reader.NewReader("file:///usr/local/data")
+fh, _ := r.Read("/123/456/78/12345678.geojson")
+```
+
+The base `go-reader` package defines a small number of default "readers". Others types of readers are kept in separate packages and loaded as-need. Similar to the way the Go language `database/sql` package works these readers announce themselves to the -reader` package when they are initialized. For example, if you wanted to use a [Go Cloud](https://gocloud.dev/howto/blob/) `Blob` reader you would do something this:
+
+```
+import (
+       "github.com/whosonfirst/go-reader"
+       _ "github.com/whosonfirst/go-reader-blob"       
+)
+
+r, _ := reader.NewReader("s3://{S3_BUCKET}?region={S3_REGION}&prefix=data")
+fh, _ := r.Read("/123/456/78/12345678.geojson")
+```
+
+The same principles appy to caches.
 
 The default `whosonfirst-browser` tool allows data sources to be specified as a localfile system or a remote HTTP(S) endpoint and caching sources as a local filesystem or an ephemiral in-memory lookup.
 
@@ -210,7 +248,9 @@ func main() {
 }
 ```
 
-For example... :
+The default settings for `go-whosonfirst-browser` are to fetch data from the `https://data.whosonfirst.org` servers and to cache those looks in an ephemeral in-memory [go-cache](https://github.com/patrickmn/go-cache) cache.
+
+If you wanted, instead, to read data from the local filesystem you would start the browser like this:
 
 ```
 $> bin/whosonfirst-browser -enable-all \
@@ -218,14 +258,18 @@ $> bin/whosonfirst-browser -enable-all \
 	-nextzen-api-key {NEXTZEN_APIKEY}	
 ```
 
-Or... :
+Or if you wanted to cache WOF records to the local filesystem you would start the browser like this:
 
 ```
 $> bin/whosonfirst-browser -enable-all \
-	-data-source 'https://data.whosonfirst.org' \
 	-cache-source 'file:///usr/local/cache/whosonfirst' \
 	-nextzen-api-key {NEXTZEN_APIKEY}	
 ```
+
+
+The "guts" of the application live in the `browser.go` package
+
+For example... :
 
 
 But if you wanted to ... using the [Go Cloud Blob package](https://gocloud.dev/howto/blob/)
