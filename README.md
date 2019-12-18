@@ -211,7 +211,7 @@ import (
        "github.com/whosonfirst/go-reader"
 )
 
-r, _ := reader.NewReader("file:///usr/local/data")
+r, _ := reader.NewReader("fs:///usr/local/data")
 fh, _ := r.Read("/123/456/78/12345678.geojson")
 ```
 
@@ -254,7 +254,7 @@ If you wanted, instead, to read data from the local filesystem you would start t
 
 ```
 $> bin/whosonfirst-browser -enable-all \
-	-data-source 'file:///usr/local/data/whosonfirst-data-admin-us/data' \
+	-reader-source 'fs:///usr/local/data/whosonfirst-data-admin-us/data' \
 	-nextzen-api-key {NEXTZEN_APIKEY}	
 ```
 
@@ -262,10 +262,21 @@ Or if you wanted to cache WOF records to the local filesystem you would start th
 
 ```
 $> bin/whosonfirst-browser -enable-all \
-	-cache-source 'file:///usr/local/cache/whosonfirst' \
+	-cache-source 'fs:///usr/local/cache/whosonfirst' \
 	-nextzen-api-key {NEXTZEN_APIKEY}	
 ```
 
+The browser tool will work with any WOF-like data including records outside of the "[core](https://github.com/whosonfirst-data)" dataset. For example this is how you might use the browser tool with the [SFO Museum architecture dataset](https://millsfield.sfomuseum.org/blog/2018/08/28/whosonfirst/):
+
+```
+$> bin/whosonfirst-browser -enable-all \
+	-reader-source 'fs:///usr/local/data/sfomuseum-data-architecture/data' \
+	-nextzen-api-key {NEXTZEN_APIKEY}	
+```
+
+And then if you went to `http://localhost:8080/id/1159554801` in your browser you would see:
+
+![](images/wof-browser-sfo.png)
 
 The "guts" of the application live in the `browser.go` package. This is by design to make it easy (or easier, at least) to create derivative browser tools that use custom readers or caches. For example if you wanted to create a browser that read files using the [Go Cloud Blob package](https://gocloud.dev/howto/blob/) you would write:
 
@@ -288,7 +299,7 @@ And then you would start the browser tool like this:
 
 ```
 $> bin/whosonfirst-browser -enable-all \
-	-data-source 's3://{BUCKET}?region={REGION}' \
+	-reader-source 's3://{BUCKET}?region={REGION}' \
 	-nextzen-api-key {NEXTZEN_APIKEY}
 ```
 
