@@ -42,7 +42,7 @@ func Start(ctx context.Context) error {
 	data_source := flag.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
 	cache_source := flag.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
 
-	nextzen_api_key := flag.String("nextzen-api-key", "xxxxxxx", "A valid Nextzen API key (https://developers.nextzen.org/).")
+	nextzen_api_key := flag.String("nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
 	nextzen_style_url := flag.String("nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
 	nextzen_tile_url := flag.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
 

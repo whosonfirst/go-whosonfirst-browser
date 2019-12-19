@@ -198,7 +198,9 @@ It is possible to cache those tiles locally using the `-proxy-tiles` flag at sta
 
 ### Important
 
-You will need a [valid Nextzen API key](https://developers.nextzen.org/) in order for map tiles to work.
+You will need a [valid Nextzen API key](https://developers.nextzen.org/) in order for map tiles to work. If no API key is present then the browser tool will display the SVG rendering for a place's geometry. For example:
+
+![](docs/images/wof-browser-montreal-map-svg.png)
 
 ## Data sources and Caches
 

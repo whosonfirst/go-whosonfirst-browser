@@ -54,8 +54,10 @@
       <main class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-path="{{ .SPR.Path }}" data-whosonfirst-parent-id="{{ .SPR.ParentId }}" data-latitude="{{ .SPR.Latitude }}" data-longitude="{{ .SPR.Longitude }}" data-min-latitude="{{ .SPR.MinLatitude}}" data-min-longitude="{{ .SPR.MinLongitude }}" data-max-latitude="{{ .SPR.MaxLatitude}}" data-max-longitude="{{ .SPR.MaxLongitude }}">
 
 	  <div class="container">
-	      
-	      <div id="map" class="row"></div>
+
+	      <div id="map" class="row">
+		  <img src="{{ .Endpoints.Svg }}{{ .SPR.Id }}" style="width:inherit; height:inherit; max-height:90%; max-width:90%;" />
+	      </div>
 
 	      <div class="row">
 		  <h3>
