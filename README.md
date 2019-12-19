@@ -28,6 +28,8 @@ This is a tool that is primarily geared towards displaying _known_ Who's On Firs
 
 It would be easy enough to add flags to use an external instance of the [Pelias Placeholder API](https://millsfield.sfomuseum.org/blog/2019/11/04/placeholder/) for basic search functionality so we'll add that to the list of features for a "2.x" release.
 
+It might also be easy enough to preload a [Bleve](https://github.com/blevesearch/bleve) index, or generate one at runtime depending on the data source and its size, but that is currently out of scope for the project.
+
 ### This is not a tool for editing Who's On First documents.
 
 At least not yet.
