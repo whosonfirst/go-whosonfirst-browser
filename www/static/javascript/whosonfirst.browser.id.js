@@ -53,7 +53,16 @@ whosonfirst.browser.id = (function(){
 		return;
 	    }
 
-	    console.log("WHAT", api_key);
+	    var map_svg = document.getElementById("map-svg");
+
+	    if (map_svg){
+		
+		var parent = map_svg.parentNode;
+
+		if (parent){
+		    parent.removeChild(map_svg);
+		}
+	    }
 	    
 	    var geom = document.getElementById("whosonfirst-place");
 	    
@@ -127,27 +136,33 @@ whosonfirst.browser.id = (function(){
 	    var on_success = function(feature){
 		
 		var geom = document.getElementById("whosonfirst-place");
+
+		// remember we might not have a nextzen API key and by extension
+		// no map - see above in init_map (20191219/straup)
 		
-		var lat = geom.getAttribute("data-latitude");
-		var lon = geom.getAttribute("data-longitude");
-		
-		var centroid_geom = { "type": "Point", "coordinates": [ lon, lat ] };
-		var centroid_props = {};
-		
-		var centroid = {
-		    "type": "Feature",
-		    "geometry": centroid_geom,
-		    "properties": centroid_props
-		};
-		
-		var feature_style = whosonfirst.leaflet.styles.polygon();
-		whosonfirst.leaflet.utils.draw_feature(map, feature, feature_style);
-		
-		var centroid_style = whosonfirst.leaflet.styles.centroid();
-		var centroid_handler = whosonfirst.leaflet.handlers.centroid(centroid_style);
-		whosonfirst.leaflet.utils.draw_point(map, centroid, centroid_style, centroid_handler);
-		
-		whosonfirst.leaflet.utils.fit_map(map, feature);
+		if (map){
+		    
+		    var lat = geom.getAttribute("data-latitude");
+		    var lon = geom.getAttribute("data-longitude");
+		    
+		    var centroid_geom = { "type": "Point", "coordinates": [ lon, lat ] };
+		    var centroid_props = {};
+		    
+		    var centroid = {
+			"type": "Feature",
+			"geometry": centroid_geom,
+			"properties": centroid_props
+		    };
+		    
+		    var feature_style = whosonfirst.leaflet.styles.polygon();
+		    whosonfirst.leaflet.utils.draw_feature(map, feature, feature_style);
+		    
+		    var centroid_style = whosonfirst.leaflet.styles.centroid();
+		    var centroid_handler = whosonfirst.leaflet.handlers.centroid(centroid_style);
+		    whosonfirst.leaflet.utils.draw_point(map, centroid, centroid_style, centroid_handler);
+		    
+		    whosonfirst.leaflet.utils.fit_map(map, feature);
+		}
 		
 		// sudo put all of this in a wapper function somewhere...
 		// (20171224/thisisaaronland)
