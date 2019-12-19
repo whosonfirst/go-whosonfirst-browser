@@ -430,3 +430,5 @@ $> docker run -it -p 8080:8080 whosonfirst-browser \
 * https://github.com/aaronland/go-http-bootstrap
 * https://github.com/aaronland/go-http-tangramjs
 * https://github.com/sfomuseum/go-http-tilezen
+* https://github.com/whosonfirst/go-whosonfirst-svg
+* https://github.com/whosonfirst/go-whosonfirst-image
