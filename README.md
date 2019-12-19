@@ -2,7 +2,9 @@
 
 ![](docs/images/wof-browser-montreal.png)
 
-Go package for rendering known Who's On First (WOF) IDs in a number of formats.
+`go-whosonfirst-browser` is a Go package for rendering known [Who's On First](https://whosonfirst.org/) (WOF) IDs in a number of formats including HTML, SVG, PNG and GeoJSON.
+
+It uses [Bootstrap](https://getbootstrap.com/) for HTML layouts and [Leaflet](https://leafletjs.com/), [Tangram.js](https://github.com/tangrams/tangram) and [Nextzen](https://nextzen.org) vector tiles for rendering maps. All of these dependencies are bundled with the tool and served locally. With the exception of the vector tiles (which can be cached) and a configurable data source there are no external dependencies.
 
 _This package used to be called `go-whosonfirst-static`. Now it is called `go-whosonfirst-browser.`_
 
@@ -41,7 +43,7 @@ On the other hand editing anything besides simple key-value pairs means identify
 If you'd like to read more about the subject of editing Who's On First documents have a look at:
 
 * Dan Phiffer's blog posts about the [Boundary Issues editing tool](https://whosonfirst.org/blog/tags/boundaryissues/).
-* Gary Gale's [Three Steps Backwards, One Step Forwards; a Tale of Data Consistency and JSON Schema](https://whosonfirst.org/blog/2018/05/25/three-steps-backwards/)
+* Gary Gale's [Three Steps Backwards, One Step Forwards; a Tale of Data Consistency and JSON Schema](https://whosonfirst.org/blog/2018/05/25/three-steps-backwards/).
 
 ### This does not retrieve, render or display "alternate" geometries
 
