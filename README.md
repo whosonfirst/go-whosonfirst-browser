@@ -22,7 +22,7 @@ For the time being though they are separate beasts.
 
 ### This is not a search engine.
 
-This is a tool that is primarily geared towards displaying _known_ Who's On First IDs. It does not maintain an index, or a list of known reocrds, before it displays them.
+This is a tool that is primarily geared towards displaying _known_ Who's On First IDs. It does not maintain an index, or a list of known records, before it displays them.
 
 It would be easy enough to add flags to use an external instance of the [Pelias Placeholder API](https://millsfield.sfomuseum.org/blog/2019/11/04/placeholder/) for basic search functionality so we'll add that to the list of features for a "2.x" release.
 
