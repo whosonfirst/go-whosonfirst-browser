@@ -1,3 +1,7 @@
+# github.com/aaronland/go-artisanal-integers v0.1.0
+github.com/aaronland/go-artisanal-integers
+# github.com/aaronland/go-brooklynintegers-api v1.0.1
+github.com/aaronland/go-brooklynintegers-api
 # github.com/aaronland/go-http-bootstrap v0.0.5
 github.com/aaronland/go-http-bootstrap
 github.com/aaronland/go-http-bootstrap/resources
@@ -27,6 +31,8 @@ github.com/hashicorp/go-multierror
 github.com/jtacoma/uritemplates
 # github.com/mmcloughlin/geohash v0.9.0
 github.com/mmcloughlin/geohash
+# github.com/natefinch/atomic v0.0.0-20150920032501-a62ce929ffcc
+github.com/natefinch/atomic
 # github.com/patrickmn/go-cache v2.1.0+incompatible
 github.com/patrickmn/go-cache
 # github.com/paulmach/go.geojson v1.4.0
@@ -35,9 +41,11 @@ github.com/paulmach/go.geojson
 github.com/paulmach/orb/clip
 github.com/paulmach/orb/geojson
 github.com/paulmach/orb/maptile
+github.com/paulmach/orb/planar
 github.com/paulmach/orb
 github.com/paulmach/orb/project
 github.com/paulmach/orb/internal/mercator
+github.com/paulmach/orb/internal/length
 # github.com/sfomuseum/go-http-tilezen v0.0.2
 github.com/sfomuseum/go-http-tilezen/http
 # github.com/sfomuseum/go-tilezen v0.0.1
@@ -54,6 +62,10 @@ github.com/tidwall/gjson
 github.com/tidwall/match
 # github.com/tidwall/pretty v1.0.0
 github.com/tidwall/pretty
+# github.com/tidwall/sjson v1.0.4
+github.com/tidwall/sjson
+# github.com/tomtaylor/go-whosonfirst-format v0.2.0
+github.com/tomtaylor/go-whosonfirst-format
 # github.com/whosonfirst/algnhsa v0.1.0
 github.com/whosonfirst/algnhsa
 # github.com/whosonfirst/go-bindata v0.1.0
@@ -72,6 +84,11 @@ github.com/whosonfirst/go-reader-http
 github.com/whosonfirst/go-sanitize
 # github.com/whosonfirst/go-whosonfirst-cli v0.1.0
 github.com/whosonfirst/go-whosonfirst-cli/flags
+# github.com/whosonfirst/go-whosonfirst-export v0.1.1
+github.com/whosonfirst/go-whosonfirst-export
+github.com/whosonfirst/go-whosonfirst-export/options
+github.com/whosonfirst/go-whosonfirst-export/properties
+github.com/whosonfirst/go-whosonfirst-export/uid
 # github.com/whosonfirst/go-whosonfirst-flags v0.1.0
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
@@ -99,6 +116,8 @@ github.com/whosonfirst/go-whosonfirst-spr/util
 github.com/whosonfirst/go-whosonfirst-svg
 # github.com/whosonfirst/go-whosonfirst-uri v0.1.0
 github.com/whosonfirst/go-whosonfirst-uri
+# github.com/whosonfirst/go-writer v0.0.2
+github.com/whosonfirst/go-writer
 # github.com/whosonfirst/warning v0.1.0
 github.com/whosonfirst/warning
 # golang.org/x/image v0.0.0-20191214001246-9130b4cfad52
