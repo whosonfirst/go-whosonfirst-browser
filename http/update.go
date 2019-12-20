@@ -3,6 +3,7 @@ package http
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"github.com/whosonfirst/go-reader"
@@ -47,7 +48,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 
 		body := f.Bytes()
 
-		max := int64(1024 * 1024 * 10)	// sudo make me an option
+		max := int64(1024 * 1024 * 10) // sudo make me an option
 		err = req.ParseMultipartForm(max)
 
 		if err != nil {
@@ -64,6 +65,8 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 
 		// MOVE THIS IN TO A GENERIC update/update.go PACKAGE
 
+		// can we (should we) do this concurrently?
+
 		for path, value := range req.PostForm {
 
 			log.Println("PATH", path)
@@ -75,7 +78,6 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 			}
 
 			// TO DO : SANITIZE value HERE
-			// TO DO: CHECK WHETHER value HAS CHANGED
 			// TO DO: CHECK WHETHER PROPERTY/VALUE IS A SINGLETON - FOR EXAMPLE:
 			// curl -s -X POST -F 'properties.wof:name=SPORK' -F 'properties.wof:name=BOB' http://localhost:8080/update/101736545 | \
 			// python -mjson.tool | grep 'wof:name'
@@ -93,6 +95,30 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 				new_value = value
 			}
 
+			old_rsp := gjson.GetBytes(body, path)
+
+			if old_rsp.Exists() {
+
+				old_enc, err := json.Marshal(old_rsp.Value())
+
+				if err != nil {
+					gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+					return
+				}
+
+				new_enc, err := json.Marshal(new_value)
+
+				if err != nil {
+					gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+					return
+				}
+
+				if bytes.Compare(new_enc, old_enc) == 0 {
+					log.Println("SAME SAME")
+					continue
+				}
+			}
+
 			log.Println("SET", path, new_value)
 			body, err = sjson.SetBytes(body, path, new_value)
 
@@ -105,6 +131,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 		}
 
 		if updates == 0 {
+			log.Println("NO UPDATES")
 			WriteGeoJSONHeaders(rsp)
 			rsp.Write(body)
 			return
