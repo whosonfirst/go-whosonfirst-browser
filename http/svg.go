@@ -86,8 +86,7 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 			return
 		}
 
-		rsp.Header().Set("Content-Type", "application/json")
-		rsp.Header().Set("Content-Type", "image/svg+xml")
+		WriteSVGHeaders(rsp)
 
 		opts := svg.NewDefaultOptions()
 		opts.Height = float64(sz_info.MaxHeight)

@@ -16,8 +16,7 @@ func GeoJSONHandler(r reader.Reader) (gohttp.Handler, error) {
 			return
 		}
 
-		rsp.Header().Set("Content-Type", "application/json")
-		rsp.Header().Set("Access-Control-Allow-Origin", "*")
+		WriteGeoJSONHeaders(rsp)
 
 		rsp.Write(f.Bytes())
 	}

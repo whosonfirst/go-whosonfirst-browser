@@ -12,9 +12,11 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-browser/assets/templates"
 	"github.com/whosonfirst/go-whosonfirst-browser/cachereader" // eventually this will become a real go-reader thing...
+	"github.com/whosonfirst/go-whosonfirst-browser/cachewriter" // eventually this will become a real go-writer thing...
 	"github.com/whosonfirst/go-whosonfirst-browser/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/server"
 	"github.com/whosonfirst/go-whosonfirst-cli/flags"
+	"github.com/whosonfirst/go-writer"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -40,6 +42,8 @@ func Start(ctx context.Context) error {
 	path_templates := flag.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
 
 	data_source := flag.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
+	writer_source := flag.String("writer-source", "null://", "")
+
 	cache_source := flag.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
 
 	nextzen_api_key := flag.String("nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
@@ -64,6 +68,9 @@ func Start(ctx context.Context) error {
 
 	select_pattern := flag.String("select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
 
+	enable_update := flag.Bool("enable-update", false, "...")
+	update_pattern := flag.String("update-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for updateable properties.")
+
 	enable_html := flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
 	path_png := flag.String("path-png", "/png/", "The path that PNG requests should be served from.")
@@ -71,6 +78,7 @@ func Start(ctx context.Context) error {
 	path_geojson := flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
 	path_spr := flag.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
 	path_select := flag.String("path-select", "/select/", "The path that 'select' requests should be served from.")
+	path_update := flag.String("path-update", "/update/", "...")
 
 	path_id := flag.String("path-id", "/id/", "The that Who's On First documents should be served from.")
 
@@ -273,6 +281,39 @@ func Start(ctx context.Context) error {
 		}
 
 		mux.Handle(*path_select, select_handler)
+	}
+
+	if *enable_update {
+
+		wr, err := writer.NewWriter(ctx, *writer_source)
+
+		if err != nil {
+			return err
+		}
+
+		cw, err := cachewriter.NewCacheWriter(wr, c)
+
+		if err != nil {
+			return err
+		}
+
+		pat, err := regexp.Compile(*update_pattern)
+
+		if err != nil {
+			return err
+		}
+
+		update_opts := &http.UpdateHandlerOptions{
+			AllowedPaths: pat,
+		}
+
+		update_handler, err := http.UpdateHandler(cr, cw, update_opts)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(*path_update, update_handler)
 	}
 
 	if *enable_html {
