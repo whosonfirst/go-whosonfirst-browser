@@ -47,7 +47,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 
 		body := f.Bytes()
 
-		max := int64(1024 * 1024 * 10)
+		max := int64(1024 * 1024 * 10)	// sudo make me an option
 		err = req.ParseMultipartForm(max)
 
 		if err != nil {
