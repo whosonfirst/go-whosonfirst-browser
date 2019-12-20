@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"github.com/whosonfirst/go-reader"
@@ -39,14 +40,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 			return
 		}
 
-		f, err, _ := FeatureFromRequest(req, r)
-
-		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
-			return
-		}
-
-		body := f.Bytes()
+		// CHECK WHETHER ID EXISTS (DO NOT LOAD FEATURE) BEFORE PARSING OPTIONS?
 
 		max := int64(1024 * 1024 * 10) // sudo make me an option
 		err = req.ParseMultipartForm(max)
@@ -61,6 +55,14 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 			return
 		}
 
+		f, err, _ := FeatureFromRequest(req, r)
+
+		if err != nil {
+			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+			return
+		}
+
+		body := f.Bytes()
 		updates := 0
 
 		// MOVE THIS IN TO A GENERIC update/update.go PACKAGE
@@ -83,16 +85,30 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 			// python -mjson.tool | grep 'wof:name'
 			// "wof:name": [
 
+			// TO DO: GENERALLY FIGURE OUT HOW TO PASS IN UPDATES
+			// AS FORM PARAMETERS?
+			// A BLOB OF JSON LIKE AN ARRAY OF { "path": JSON } THINGS OR...?
+
 			var new_value interface{}
+			var new_value_err error
 
 			switch len(value) {
 			case 0:
-				gohttp.Error(rsp, "Invalid value", gohttp.StatusBadRequest)
-				return
+				new_value_err = errors.New("Empty path")
 			case 1:
+				// new_value_err = json.Unmarshal([]byte(value[0]), &new_value)
+
 				new_value = value[0]
 			default:
+				// str_value := strings.Join(value, "")
+				// new_value_err = json.Unmarshal([]byte(str_value), &new_value)
+
 				new_value = value
+			}
+
+			if new_value_err != nil {
+				gohttp.Error(rsp, new_value_err.Error(), gohttp.StatusBadRequest)
+				return
 			}
 
 			old_rsp := gjson.GetBytes(body, path)
