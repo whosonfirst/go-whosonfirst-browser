@@ -98,6 +98,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 
 			if err != nil {
 				gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+				return
 			}
 
 			updates += 1
