@@ -1,19 +1,21 @@
 package http
 
+// curl -s -X POST -d '{"properties":{"wof:name":"SPORK"}}' http://localhost:8080/update/101736545 | python -mjson.tool | grep 'wof:name'
+// "wof:name": "SPORK",
+
 import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-browser/update"
 	"github.com/whosonfirst/go-whosonfirst-export"
 	"github.com/whosonfirst/go-whosonfirst-export/options"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/go-writer"
 	"io/ioutil"
-	"log"
+	_ "log"
 	gohttp "net/http"
 	"regexp"
 )
@@ -36,118 +38,38 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 		case "POST":
 			// pass
 		default:
-			gohttp.Error(rsp, "NOPE", gohttp.StatusInternalServerError)
+			gohttp.Error(rsp, "Method not allowed.", gohttp.StatusMethodNotAllowed)
 			return
 		}
 
-		// CHECK WHETHER ID EXISTS (DO NOT LOAD FEATURE) BEFORE PARSING OPTIONS?
-
-		max := int64(1024 * 1024 * 10) // sudo make me an option
-		err = req.ParseMultipartForm(max)
+		f, err, status := FeatureFromRequest(req, r)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
 
-		if len(req.PostForm) == 0 {
-			gohttp.Error(rsp, "No updates", gohttp.StatusInternalServerError)
-			return
-		}
+		var update_req *update.Update
 
-		f, err, _ := FeatureFromRequest(req, r)
+		decoder := json.NewDecoder(req.Body)
+		err = decoder.Decode(&update_req)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+			gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)
 			return
 		}
 
+		ctx := req.Context()
 		body := f.Bytes()
-		updates := 0
 
-		// MOVE THIS IN TO A GENERIC update/update.go PACKAGE
+		updated_body, updates, err := update.UpdateFeature(ctx, body, update_req, opts.AllowedPaths)
 
-		// can we (should we) do this concurrently?
-
-		for path, value := range req.PostForm {
-
-			log.Println("PATH", path)
-
-			if !opts.AllowedPaths.MatchString(path) {
-
-				gohttp.Error(rsp, "Invalid path", gohttp.StatusBadRequest)
-				return
-			}
-
-			// TO DO : SANITIZE value HERE
-			// TO DO: CHECK WHETHER PROPERTY/VALUE IS A SINGLETON - FOR EXAMPLE:
-			// curl -s -X POST -F 'properties.wof:name=SPORK' -F 'properties.wof:name=BOB' http://localhost:8080/update/101736545 | \
-			// python -mjson.tool | grep 'wof:name'
-			// "wof:name": [
-
-			// TO DO: GENERALLY FIGURE OUT HOW TO PASS IN UPDATES
-			// AS FORM PARAMETERS?
-			// A BLOB OF JSON LIKE AN ARRAY OF { "path": JSON } THINGS OR...?
-
-			var new_value interface{}
-			var new_value_err error
-
-			switch len(value) {
-			case 0:
-				new_value_err = errors.New("Empty path")
-			case 1:
-				// new_value_err = json.Unmarshal([]byte(value[0]), &new_value)
-
-				new_value = value[0]
-			default:
-				// str_value := strings.Join(value, "")
-				// new_value_err = json.Unmarshal([]byte(str_value), &new_value)
-
-				new_value = value
-			}
-
-			if new_value_err != nil {
-				gohttp.Error(rsp, new_value_err.Error(), gohttp.StatusBadRequest)
-				return
-			}
-
-			old_rsp := gjson.GetBytes(body, path)
-
-			if old_rsp.Exists() {
-
-				old_enc, err := json.Marshal(old_rsp.Value())
-
-				if err != nil {
-					gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
-					return
-				}
-
-				new_enc, err := json.Marshal(new_value)
-
-				if err != nil {
-					gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
-					return
-				}
-
-				if bytes.Compare(new_enc, old_enc) == 0 {
-					log.Println("SAME SAME")
-					continue
-				}
-			}
-
-			log.Println("SET", path, new_value)
-			body, err = sjson.SetBytes(body, path, new_value)
-
-			if err != nil {
-				gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
-				return
-			}
-
-			updates += 1
+		if err != nil {
+			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+			return
 		}
 
 		if updates == 0 {
-			log.Println("NO UPDATES")
 			WriteGeoJSONHeaders(rsp)
 			rsp.Write(body)
 			return
@@ -156,7 +78,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 		var buf bytes.Buffer
 		bw := bufio.NewWriter(&buf)
 
-		err = export.Export(body, ex_opts, bw)
+		err = export.Export(updated_body, ex_opts, bw)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
@@ -165,9 +87,9 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 
 		bw.Flush()
 
-		ex_body := buf.Bytes()
+		exported_body := buf.Bytes()
 
-		id_rsp := gjson.GetBytes(ex_body, "properties.wof:id")
+		id_rsp := gjson.GetBytes(exported_body, "properties.wof:id")
 
 		if !id_rsp.Exists() {
 			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
@@ -183,9 +105,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 			return
 		}
 
-		ctx := req.Context()
-
-		br := bytes.NewReader(ex_body)
+		br := bytes.NewReader(exported_body)
 		fh := ioutil.NopCloser(br)
 
 		err = wr.Write(ctx, rel_path, fh)
@@ -197,7 +117,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 
 		WriteGeoJSONHeaders(rsp)
 
-		rsp.Write(ex_body)
+		rsp.Write(exported_body)
 		return
 	}
 
