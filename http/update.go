@@ -4,17 +4,10 @@ package http
 // "wof:name": "SPORK",
 
 import (
-	"bufio"
-	"bytes"
 	"encoding/json"
-	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-browser/update"
-	"github.com/whosonfirst/go-whosonfirst-export"
-	"github.com/whosonfirst/go-whosonfirst-export/options"
-	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/go-writer"
-	"io/ioutil"
 	_ "log"
 	gohttp "net/http"
 	"regexp"
@@ -25,12 +18,6 @@ type UpdateHandlerOptions struct {
 }
 
 func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions) (gohttp.Handler, error) {
-
-	ex_opts, err := options.NewDefaultOptions()
-
-	if err != nil {
-		return nil, err
-	}
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
@@ -75,40 +62,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 			return
 		}
 
-		var buf bytes.Buffer
-		bw := bufio.NewWriter(&buf)
-
-		err = export.Export(updated_body, ex_opts, bw)
-
-		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
-			return
-		}
-
-		bw.Flush()
-
-		exported_body := buf.Bytes()
-
-		id_rsp := gjson.GetBytes(exported_body, "properties.wof:id")
-
-		if !id_rsp.Exists() {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
-			return
-		}
-
-		id := id_rsp.Int()
-
-		rel_path, err := uri.Id2RelPath(id)
-
-		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
-			return
-		}
-
-		br := bytes.NewReader(exported_body)
-		fh := ioutil.NopCloser(br)
-
-		err = wr.Write(ctx, rel_path, fh)
+		exported_body, err := update.ExportFeature(ctx, wr, updated_body)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
