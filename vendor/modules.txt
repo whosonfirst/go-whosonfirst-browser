@@ -21,6 +21,8 @@ github.com/aws/aws-lambda-go/lambda
 github.com/aws/aws-lambda-go/lambda/handlertrace
 github.com/aws/aws-lambda-go/lambda/messages
 github.com/aws/aws-lambda-go/lambdacontext
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
 # github.com/go-ini/ini v1.42.0
 github.com/go-ini/ini
 # github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
@@ -29,6 +31,21 @@ github.com/hashicorp/errwrap
 github.com/hashicorp/go-multierror
 # github.com/jtacoma/uritemplates v1.0.0
 github.com/jtacoma/uritemplates
+# github.com/lestrrat-go/jspointer v0.0.0-20181205001929-82fadba7561c
+github.com/lestrrat-go/jspointer
+# github.com/lestrrat-go/jsref v0.0.0-20181205001954-1b590508f37d
+github.com/lestrrat-go/jsref
+github.com/lestrrat-go/jsref/provider
+# github.com/lestrrat-go/jsschema v0.0.0-20181205002244-5c81c58ffcc3
+github.com/lestrrat-go/jsschema
+github.com/lestrrat-go/jsschema/validator
+# github.com/lestrrat-go/jsval v0.0.0-20181205002323-20277e9befc0
+github.com/lestrrat-go/jsval
+github.com/lestrrat-go/jsval/builder
+# github.com/lestrrat-go/pdebug v0.0.0-20180220043849-39f9a71bcabe
+github.com/lestrrat-go/pdebug
+# github.com/lestrrat-go/structinfo v0.0.0-20190212233437-acd51874663b
+github.com/lestrrat-go/structinfo
 # github.com/mmcloughlin/geohash v0.9.0
 github.com/mmcloughlin/geohash
 # github.com/natefinch/atomic v0.0.0-20150920032501-a62ce929ffcc
@@ -41,11 +58,13 @@ github.com/paulmach/go.geojson
 github.com/paulmach/orb/clip
 github.com/paulmach/orb/geojson
 github.com/paulmach/orb/maptile
-github.com/paulmach/orb/planar
 github.com/paulmach/orb
 github.com/paulmach/orb/project
+github.com/paulmach/orb/planar
 github.com/paulmach/orb/internal/mercator
 github.com/paulmach/orb/internal/length
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
 # github.com/sfomuseum/go-http-tilezen v0.0.2
 github.com/sfomuseum/go-http-tilezen/http
 # github.com/sfomuseum/go-tilezen v0.0.1

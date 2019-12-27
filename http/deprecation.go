@@ -9,16 +9,16 @@ import (
 	"regexp"
 )
 
-type DeprecateHandlerOptions struct {
+type DeprecationHandlerOptions struct {
 	AllowedPaths *regexp.Regexp // multiple regexps?
 }
 
-func DeprecateHandler(r reader.Reader, wr writer.Writer, opts *DeprecateHandlerOptions) (gohttp.Handler, error) {
+func DeprecationHandler(r reader.Reader, wr writer.Writer, opts *DeprecationHandlerOptions) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
 		switch req.Method {
-		case "DELETE":
+		case "POST":
 			// pass
 		default:
 			gohttp.Error(rsp, "Method not allowed.", gohttp.StatusMethodNotAllowed)

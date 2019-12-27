@@ -349,6 +349,51 @@ As of this writing the `browser.go` packages does everything _including_ parsing
 * [List of available go-reader.Reader implementations](https://github.com/whosonfirst/go-reader#available-readers)
 * [List of available go-cache.Cache implementations](https://github.com/whosonfirst/go-cache#available-caches)
 
+## Updates
+
+### Important
+
+Everything about updates is "wet paint" and subject to change and/or bug fixes. As of this writing, the default `go-writer.Writer` instance is `null://` so no changes which be applied except in the local `go-cache.Cache` source. If you want updates to persist you will need to define a suitable writer.
+
+Update endpoints have _no authentication_ yet. Authentication should (eventually) be handled by some sort of middleware and not anything in the `go-whosonfirst-browser/http/*.go` packages.
+
+
+Updates are not enabled by default. To enable update you need to start the `whosonfirst-browser` with the `-enable-update` flag.
+
+```
+$> go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -enable-update -nextzen-api-key {NEXTZEN_APIKEY}
+2019/12/27 10:35:28 Listening on http://localhost:8080
+```
+
+There is a general purpose `/update/` endpoint for updating WOF properties:
+
+```
+$> curl -s -X POST -d '{"properties":{"wof:name": "BOB"}}' 'http://localhost:8080/update/101736545' | grep 'wof:name'
+    "wof:name": "BOB",
+```
+
+Properties are validated using the `wof-properties.json` JSON Schema definition in the [whosonfirst-json-schema](https://github.com/whosonfirst/whosonfirst-json-schema) package:
+
+```
+$> curl -s -X POST -d '{"properties":{"wof:name": ["CAR", "BOB"]}}' 'http://localhost:8080/update/101736545'
+'properties.wof:name' property failed validation: validator 0xc0002cea80 failed: could not validate against any of the constraints
+```
+
+There are also handy `/deprecate/` and `/cessate/` endpoints for deprecating and cessating records:
+
+```
+$> curl -s -X POST 'http://localhost:8080/deprecate/101736545' | grep 'deprecated'
+    "edtf:deprecated": "2019-12-27",
+```
+
+```
+$> curl -s -X POST 'http://localhost:8080/cessate/101736545' | grep 'edtf:'
+    "edtf:cessation": "2019-12-27",
+    "edtf:inception": "1642-05-17",
+```
+
+As of this writing neither the `/deprecate/` or the `/cessate/` endpoint allow you to specify a custom date.
+
 ## Lambda
 
 Yes, it is possible to run `browser` as an AWS Lambda function.

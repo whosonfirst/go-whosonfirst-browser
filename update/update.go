@@ -66,18 +66,18 @@ func UpdateFeature(ctx context.Context, body []byte, update_req *Update, valid_p
 			}
 
 			if bytes.Compare(new_enc, old_enc) == 0 {
-				log.Println("SAME SAME")
 				continue
 			}
 		}
 
-		def, err := schema.PropertiesDefinition(path)
+		_, err := schema.IsValidProperty(path, new_value)
 
 		if err != nil {
-			return nil, -1, err
+			msg := fmt.Sprintf("'%s' property failed validation: %s", path, err.Error())
+			return nil, -1, errors.New(msg)
 		}
 
-		log.Println("SET", path, new_value, def)
+		log.Println("SET", path, new_value)
 
 		updated_body, updated_err = sjson.SetBytes(body, path, new_value)
 

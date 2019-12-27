@@ -68,7 +68,7 @@ func Start(ctx context.Context) error {
 
 	select_pattern := flag.String("select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
 
-	enable_update := flag.Bool("enable-update", false, "...")
+	enable_updates := flag.Bool("enable-updates", false, "...")
 	update_pattern := flag.String("update-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for updateable properties.")
 
 	enable_html := flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
@@ -78,7 +78,10 @@ func Start(ctx context.Context) error {
 	path_geojson := flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
 	path_spr := flag.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
 	path_select := flag.String("path-select", "/select/", "The path that 'select' requests should be served from.")
+
 	path_update := flag.String("path-update", "/update/", "...")
+	path_deprecate := flag.String("path-deprecate", "/deprecate/", "...")
+	path_cessate := flag.String("path-cessate", "/cessate/", "...")
 
 	path_id := flag.String("path-id", "/id/", "The that Who's On First documents should be served from.")
 
@@ -283,7 +286,7 @@ func Start(ctx context.Context) error {
 		mux.Handle(*path_select, select_handler)
 	}
 
-	if *enable_update {
+	if *enable_updates {
 
 		wr, err := writer.NewWriter(ctx, *writer_source)
 
@@ -314,6 +317,30 @@ func Start(ctx context.Context) error {
 		}
 
 		mux.Handle(*path_update, update_handler)
+
+		deprecate_opts := &http.DeprecationHandlerOptions{
+			AllowedPaths: pat,
+		}
+
+		deprecate_handler, err := http.DeprecationHandler(cr, cw, deprecate_opts)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(*path_deprecate, deprecate_handler)
+
+		cessation_opts := &http.CessationHandlerOptions{
+			AllowedPaths: pat,
+		}
+
+		cessation_handler, err := http.CessationHandler(cr, cw, cessation_opts)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(*path_cessate, cessation_handler)
 	}
 
 	if *enable_html {

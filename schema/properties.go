@@ -1,5 +1,9 @@
 package schema
 
+// THIS FILE WAS COPIED BY HAND FROM https://raw.githubusercontent.com/whosonfirst/whosonfirst-json-schema/master/schema/docs/wof-properties.json
+// EVENTUALLY IT WILL BE CLONE (BY ROBOT) FROM THE SAME SOURCE. YOU SHOULD NOT UPDATE THIS FILE BY HAND.
+// (20191227/thisisaaronland)
+
 const PROPERTIES string = `{
   "$schema": "http://json-schema.org/draft-06/schema#",
   "$id": "wof-properties.json", 
