@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/whosonfirst/go-whosonfirst-browser/schema"
 	"log"
 	"regexp"
 )
@@ -70,7 +71,14 @@ func UpdateFeature(ctx context.Context, body []byte, update_req *Update, valid_p
 			}
 		}
 
-		log.Println("SET", path, new_value)
+		def, err := schema.PropertiesDefinition(path)
+
+		if err != nil {
+			return nil, -1, err
+		}
+
+		log.Println("SET", path, new_value, def)
+
 		updated_body, updated_err = sjson.SetBytes(body, path, new_value)
 
 		if updated_err != nil {
