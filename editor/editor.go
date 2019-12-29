@@ -1,7 +1,4 @@
-package update
-
-// this might be moved in to its own go-whosonfirst-update package, but not today
-// (20191223/thisisaaronland)
+package editor
 
 import (
 	"bytes"
@@ -14,16 +11,30 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/schema"
 	"log"
 	"regexp"
+	"time"
 )
+
+type Editor struct {
+	allowed_paths *regexp.Regexp
+}
 
 type Update struct {
 	Geometry   map[string]interface{}
 	Properties map[string]interface{}
 }
 
+func NewEditor(allowed_paths *regexp.Regexp) (*Editor, error) {
+
+	ed := &Editor{
+		allowed_paths: allowed_paths,
+	}
+
+	return ed, nil
+}
+
 // this message signature will probably change (20191223/thisisaaronland)
 
-func UpdateFeature(ctx context.Context, body []byte, update_req *Update, valid_paths *regexp.Regexp) ([]byte, int, error) {
+func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Update) ([]byte, int, error) {
 
 	updates := 0
 
@@ -38,7 +49,7 @@ func UpdateFeature(ctx context.Context, body []byte, update_req *Update, valid_p
 
 		log.Println("PATH", path)
 
-		if !valid_paths.MatchString(path) {
+		if !ed.allowed_paths.MatchString(path) {
 			return nil, -1, errors.New("Invalid path")
 		}
 
@@ -91,4 +102,50 @@ func UpdateFeature(ctx context.Context, body []byte, update_req *Update, valid_p
 	}
 
 	return updated_body, updates, nil
+}
+
+// something something something EDTF dates... (20191229/straup)
+
+func (ed *Editor) DeprecateFeature(ctx context.Context, body []byte, t time.Time) ([]byte, error) {
+
+	deprecated_rsp := gjson.GetBytes(body, "properties.edtf:deprecated")
+
+	if deprecated_rsp.Exists() {
+		return nil, errors.New("Feature is already deprecated")
+	}
+
+	props := map[string]interface{}{
+		"edtf:deprecated": t.Format("2006-01-02"),
+		"mz:is_current":   0,
+	}
+
+	update_req := &Update{
+		Properties: props,
+	}
+
+	updated_body, _, err := ed.UpdateFeature(ctx, body, update_req)
+	return updated_body, err
+}
+
+// something something something EDTF dates... (20191229/straup)
+
+func (ed *Editor) CessateFeature(ctx context.Context, body []byte, t time.Time) ([]byte, error) {
+
+	cessated_rsp := gjson.GetBytes(body, "properties.edtf:cessated")
+
+	if cessated_rsp.Exists() {
+		return nil, errors.New("Feature is already cessated")
+	}
+
+	props := map[string]interface{}{
+		"edtf:cessation": t.Format("2006-01-02"),
+		"mz:is_current":  0,
+	}
+
+	update_req := &Update{
+		Properties: props,
+	}
+
+	updated_body, _, err := ed.UpdateFeature(ctx, body, update_req)
+	return updated_body, err
 }

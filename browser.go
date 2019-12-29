@@ -13,6 +13,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/assets/templates"
 	"github.com/whosonfirst/go-whosonfirst-browser/cachereader" // eventually this will become a real go-reader thing...
 	"github.com/whosonfirst/go-whosonfirst-browser/cachewriter" // eventually this will become a real go-writer thing...
+	"github.com/whosonfirst/go-whosonfirst-browser/editor"
 	"github.com/whosonfirst/go-whosonfirst-browser/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/server"
 	"github.com/whosonfirst/go-whosonfirst-cli/flags"
@@ -306,11 +307,13 @@ func Start(ctx context.Context) error {
 			return err
 		}
 
-		update_opts := &http.UpdateHandlerOptions{
-			AllowedPaths: pat,
+		ed, err := editor.NewEditor(pat)
+
+		if err != nil {
+			return err
 		}
 
-		update_handler, err := http.UpdateHandler(cr, cw, update_opts)
+		update_handler, err := http.UpdateHandler(cr, cw, ed)
 
 		if err != nil {
 			return err
@@ -318,11 +321,7 @@ func Start(ctx context.Context) error {
 
 		mux.Handle(*path_update, update_handler)
 
-		deprecate_opts := &http.DeprecationHandlerOptions{
-			AllowedPaths: pat,
-		}
-
-		deprecate_handler, err := http.DeprecationHandler(cr, cw, deprecate_opts)
+		deprecate_handler, err := http.DeprecationHandler(cr, cw, ed)
 
 		if err != nil {
 			return err
@@ -330,11 +329,7 @@ func Start(ctx context.Context) error {
 
 		mux.Handle(*path_deprecate, deprecate_handler)
 
-		cessation_opts := &http.CessationHandlerOptions{
-			AllowedPaths: pat,
-		}
-
-		cessation_handler, err := http.CessationHandler(cr, cw, cessation_opts)
+		cessation_handler, err := http.CessationHandler(cr, cw, ed)
 
 		if err != nil {
 			return err

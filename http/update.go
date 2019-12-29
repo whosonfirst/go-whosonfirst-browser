@@ -6,18 +6,14 @@ package http
 import (
 	"encoding/json"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/update"
+	"github.com/whosonfirst/go-whosonfirst-browser/editor"
+	"github.com/whosonfirst/go-whosonfirst-browser/export"
 	"github.com/whosonfirst/go-writer"
 	_ "log"
 	gohttp "net/http"
-	"regexp"
 )
 
-type UpdateHandlerOptions struct {
-	AllowedPaths *regexp.Regexp // multiple regexps?
-}
-
-func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions) (gohttp.Handler, error) {
+func UpdateHandler(r reader.Reader, wr writer.Writer, ed *editor.Editor) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
@@ -36,7 +32,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 			return
 		}
 
-		var update_req *update.Update
+		var update_req *editor.Update
 
 		decoder := json.NewDecoder(req.Body)
 		err = decoder.Decode(&update_req)
@@ -49,7 +45,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 		ctx := req.Context()
 		body := f.Bytes()
 
-		updated_body, updates, err := update.UpdateFeature(ctx, body, update_req, opts.AllowedPaths)
+		updated_body, updates, err := ed.UpdateFeature(ctx, body, update_req)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
@@ -62,7 +58,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, opts *UpdateHandlerOptions
 			return
 		}
 
-		exported_body, err := update.ExportFeature(ctx, wr, updated_body)
+		exported_body, err := export.ExportFeature(ctx, wr, updated_body)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)

@@ -392,7 +392,22 @@ $> curl -s -X POST 'http://localhost:8080/cessate/101736545' | grep 'edtf:'
     "edtf:inception": "1642-05-17",
 ```
 
-As of this writing neither the `/deprecate/` or the `/cessate/` endpoint allow you to specify a custom date.
+Or with a specific date:
+
+```
+$> curl -s -F 'edtf:deprecated=2001-05-21' http://localhost:8080/deprecate/1108962799 | grep edtf
+    "edtf:cessation": "uuuu",
+    "edtf:deprecated": "2001-05-21",
+    "edtf:inception": "uuuu",
+```    
+
+```
+$> curl -s -F 'edtf:cessation=2018-06-22' http://localhost:8080/cessate/1108962799 | grep edtf
+    "edtf:cessation": "2018-06-22",
+    "edtf:inception": "uuuu",
+```
+
+As of this writing only `YYYY-MM-DD` dates are supported.
 
 ## Lambda
 
