@@ -27,7 +27,9 @@ func UpdateFeature(ctx context.Context, body []byte, update_req *Update, valid_p
 
 	updates := 0
 
-	var updated_body []byte
+	updated_body := make([]byte, len(body))
+	copy(updated_body, body)
+
 	var updated_err error
 
 	for path, new_value := range update_req.Properties {
@@ -79,7 +81,7 @@ func UpdateFeature(ctx context.Context, body []byte, update_req *Update, valid_p
 
 		log.Println("SET", path, new_value)
 
-		updated_body, updated_err = sjson.SetBytes(body, path, new_value)
+		updated_body, updated_err = sjson.SetBytes(updated_body, path, new_value)
 
 		if updated_err != nil {
 			return nil, -1, updated_err
