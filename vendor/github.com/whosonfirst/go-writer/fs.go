@@ -12,20 +12,21 @@ import (
 )
 
 func init() {
-	wr := NewLocalWriter()
+	wr := NewFSWriter()
+	Register("fs", wr)	
 	Register("local", wr)
 }
 
-type LocalWriter struct {
+type FSWriter struct {
 	Writer
 	root      string
 	dir_mode  os.FileMode
 	file_mode os.FileMode
 }
 
-func NewLocalWriter() Writer {
+func NewFSWriter() Writer {
 
-	wr := LocalWriter{
+	wr := FSWriter{
 		dir_mode:  0755,
 		file_mode: 0644,
 	}
@@ -33,7 +34,7 @@ func NewLocalWriter() Writer {
 	return &wr
 }
 
-func (wr *LocalWriter) Open(ctx context.Context, uri string) error {
+func (wr *FSWriter) Open(ctx context.Context, uri string) error {
 
 	u, err := url.Parse(uri)
 
@@ -58,7 +59,7 @@ func (wr *LocalWriter) Open(ctx context.Context, uri string) error {
 	return nil
 }
 
-func (wr *LocalWriter) Write(ctx context.Context, path string, fh io.ReadCloser) error {
+func (wr *FSWriter) Write(ctx context.Context, path string, fh io.ReadCloser) error {
 
 	abs_path := wr.URI(path)
 	abs_root := filepath.Dir(abs_path)
@@ -104,6 +105,6 @@ func (wr *LocalWriter) Write(ctx context.Context, path string, fh io.ReadCloser)
 	return atomic.ReplaceFile(tmp_path, abs_path)
 }
 
-func (wr *LocalWriter) URI(path string) string {
+func (wr *FSWriter) URI(path string) string {
 	return filepath.Join(wr.root, path)
 }

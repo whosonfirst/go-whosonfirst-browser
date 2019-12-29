@@ -135,7 +135,7 @@ github.com/whosonfirst/go-whosonfirst-spr/util
 github.com/whosonfirst/go-whosonfirst-svg
 # github.com/whosonfirst/go-whosonfirst-uri v0.1.0
 github.com/whosonfirst/go-whosonfirst-uri
-# github.com/whosonfirst/go-writer v0.0.2
+# github.com/whosonfirst/go-writer v0.0.3
 github.com/whosonfirst/go-writer
 # github.com/whosonfirst/warning v0.1.0
 github.com/whosonfirst/warning

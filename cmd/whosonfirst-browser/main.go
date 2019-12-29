@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	_ "github.com/whosonfirst/go-reader-http"
+	_ "github.com/whosonfirst/go-writer"	
 	"github.com/whosonfirst/go-whosonfirst-browser"
 	"log"
 )

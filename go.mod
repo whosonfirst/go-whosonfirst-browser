@@ -33,7 +33,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-svg v0.0.2
 	github.com/whosonfirst/go-whosonfirst-uri v0.1.0
 	github.com/whosonfirst/go-whosonfirst-writer v0.0.0-20191127234528-5eedb3b16302 // indirect
-	github.com/whosonfirst/go-writer v0.0.2
+	github.com/whosonfirst/go-writer v0.0.3
 	github.com/whosonfirst/go-writer-github v0.0.1 // indirect
 	github.com/whosonfirst/warning v0.1.0
 	golang.org/x/image v0.0.0-20191214001246-9130b4cfad52 // indirect

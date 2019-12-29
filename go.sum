@@ -180,6 +180,8 @@ github.com/whosonfirst/go-whosonfirst-writer v0.0.0-20191127234528-5eedb3b16302 
 github.com/whosonfirst/go-whosonfirst-writer v0.0.0-20191127234528-5eedb3b16302/go.mod h1:tuUivLsON8XrxZvByqPx1m+Bnzt27H6S6VJ0HIOak9U=
 github.com/whosonfirst/go-writer v0.0.2 h1:ZWPMCUyQS8Khvyhz34iAsEhvRFFWo5JvraQOU/0kf5U=
 github.com/whosonfirst/go-writer v0.0.2/go.mod h1:icuZIaxlsSAb8TnAzZFYt2G4ObYeI3vBmcNRimB92sY=
+github.com/whosonfirst/go-writer v0.0.3 h1:OO9b/Hm8Xohx/KgQvvcBF3raxNWffi+J0Z3fNfgCiAA=
+github.com/whosonfirst/go-writer v0.0.3/go.mod h1:icuZIaxlsSAb8TnAzZFYt2G4ObYeI3vBmcNRimB92sY=
 github.com/whosonfirst/go-writer-github v0.0.1 h1:j25nvpgUi6qkvUKHl+nXS5nDYc21ge1/9engHsUxe7U=
 github.com/whosonfirst/go-writer-github v0.0.1/go.mod h1:oe9fVPhnmtnasgjvFCLjWZxukTagdxeoTs1+IB0cAtQ=
 github.com/whosonfirst/walk v0.0.0-20160802000000-c0a349674b73681a7272f5ce6ade8ea28055059f/go.mod h1:U/1VXxlMzNZbyylg18AzEeHkGi1RXiBCMKpaM2XR+tQ=
