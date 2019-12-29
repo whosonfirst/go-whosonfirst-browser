@@ -47,18 +47,11 @@ func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Up
 
 		path = fmt.Sprintf("properties.%s", path)
 
-		log.Println("PATH", path)
-
 		if !ed.allowed_paths.MatchString(path) {
 			return nil, -1, errors.New("Invalid path")
 		}
 
 		// TO DO : SANITIZE value HERE... BUT WHAT ABOUT NOT-STRINGS...
-
-		// TO DO: CHECK WHETHER PROPERTY/VALUE IS A SINGLETON - FOR EXAMPLE:
-		// curl -s -X POST -F 'properties.wof:name=SPORK' -F 'properties.wof:name=BOB' http://localhost:8080/update/101736545 | \
-		// python -mjson.tool | grep 'wof:name'
-		// "wof:name": [
 
 		// TO DO: HOW TO REMOVE THINGS...
 
