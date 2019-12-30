@@ -30,6 +30,22 @@ func IsValidProperty(rel_path string, input interface{}) (bool, error) {
 		return false, err
 	}
 
+	return Validate(def, input)
+}
+
+func HasValidProperties(input interface{}) (bool, error) {
+
+	rsp := gjson.Get(PROPERTIES, "definitions.properties")
+
+	if !rsp.Exists() {
+		return false, errors.New("Missing properties definition.")
+	}
+
+	return Validate(rsp.String(), input)
+}
+
+func Validate(def string, input interface{}) (bool, error) {
+
 	fh := strings.NewReader(def)
 	s, err := jsschema.Read(fh)
 

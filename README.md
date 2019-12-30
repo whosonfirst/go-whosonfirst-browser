@@ -409,6 +409,23 @@ $> curl -s -F 'edtf:cessation=2018-06-22' http://localhost:8080/cessate/11089627
 
 As of this writing only `YYYY-MM-DD` dates are supported.
 
+There is also preliminary support for removing properties. To do so assing a `null` value to the path you want to delete. For example:
+
+```
+$> curl -d '{ "properties": { "wof:hierarchy.0.neighbourhood_id": null }}' http://localhost:8080/update/1377462865
+```
+
+There is also preliminary support for validating all properties using the Who's On First JSON schema. As of this writing errors are logged but do not stop features from being exported. For example:
+
+```
+$> go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -enable-updates \
+	-reader-source fs:///usr/local/data/sfomuseum-data-exhibition/data \
+	-writer-source fs:///usr/local/data/sfomuseum-data-exhibition/data
+
+2019/12/30 10:31:33 Listening on http://localhost:8080
+2019/12/30 10:31:39 warning: validator 0xc000278240 failed: object property 'wof:repo' validation failed: string 'sfomuseum-data-exhibition' does not match regular expression '^whosonfirst-.*$'
+```
+
 ## Lambda
 
 Yes, it is possible to run `browser` as an AWS Lambda function.

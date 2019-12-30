@@ -6,14 +6,34 @@ import (
 	"context"
 	"errors"
 	"github.com/tidwall/gjson"
+	"github.com/whosonfirst/go-whosonfirst-browser/schema"
 	"github.com/whosonfirst/go-whosonfirst-export"
 	"github.com/whosonfirst/go-whosonfirst-export/options"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/go-writer"
 	"io/ioutil"
+	"log"
 )
 
+// TBD: passing update/commit messages
+// TBD: how strict to be about validating properties
+// TBD: validating geometries
+// (20191230/thisisaaronland)
+
 func ExportFeature(ctx context.Context, wr writer.Writer, body []byte) ([]byte, error) {
+
+	props_rsp := gjson.GetBytes(body, "properties")
+
+	if !props_rsp.Exists() {
+		return nil, errors.New("Missing properties")
+	}
+
+	_, err := schema.HasValidProperties(props_rsp.Value())
+
+	if err != nil {
+		// return nil, err
+		log.Printf("warning: %s\n", err.Error())
+	}
 
 	ex_opts, err := options.NewDefaultOptions()
 

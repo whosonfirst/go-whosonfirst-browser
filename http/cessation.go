@@ -57,7 +57,7 @@ func CessationHandler(r reader.Reader, wr writer.Writer, ed *editor.Editor) (goh
 		ctx := req.Context()
 		body := f.Bytes()
 
-		updated_body, err := ed.CessateFeature(ctx, body, t)
+		updated_body, _, err := ed.CessateFeature(ctx, body, t)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)

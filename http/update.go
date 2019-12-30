@@ -32,7 +32,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, ed *editor.Editor) (gohttp
 			return
 		}
 
-		var update_req *editor.Update
+		var update_req *editor.UpdateRequest
 
 		decoder := json.NewDecoder(req.Body)
 		err = decoder.Decode(&update_req)
@@ -45,14 +45,14 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, ed *editor.Editor) (gohttp
 		ctx := req.Context()
 		body := f.Bytes()
 
-		updated_body, updates, err := ed.UpdateFeature(ctx, body, update_req)
+		updated_body, update_rsp, err := ed.UpdateFeature(ctx, body, update_req)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
 			return
 		}
 
-		if updates == 0 {
+		if update_rsp.Count() == 0 {
 			WriteGeoJSONHeaders(rsp)
 			rsp.Write(body)
 			return

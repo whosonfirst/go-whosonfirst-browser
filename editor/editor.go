@@ -9,18 +9,13 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"github.com/whosonfirst/go-whosonfirst-browser/schema"
-	"log"
+	_ "log"
 	"regexp"
 	"time"
 )
 
 type Editor struct {
 	allowed_paths *regexp.Regexp
-}
-
-type Update struct {
-	Geometry   map[string]interface{}
-	Properties map[string]interface{}
 }
 
 func NewEditor(allowed_paths *regexp.Regexp) (*Editor, error) {
@@ -32,11 +27,11 @@ func NewEditor(allowed_paths *regexp.Regexp) (*Editor, error) {
 	return ed, nil
 }
 
-// this message signature will probably change (20191223/thisisaaronland)
+// this message signature may still change... (20191230/thisisaaronland)
 
-func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Update) ([]byte, int, error) {
+func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *UpdateRequest) ([]byte, *UpdateResponse, error) {
 
-	updates := 0
+	updates := make([]*Update, 0)
 
 	updated_body := make([]byte, len(body))
 	copy(updated_body, body)
@@ -48,12 +43,31 @@ func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Up
 		path = fmt.Sprintf("properties.%s", path)
 
 		if !ed.allowed_paths.MatchString(path) {
-			return nil, -1, errors.New("Invalid path")
+			return nil, nil, errors.New("Invalid path")
+		}
+
+		// TBD - is this the best way to signal things to delete? as
+		// { "properties": { "foo.bar.baz": null } }
+		// (20191230/thisisaaronland)
+
+		if new_value == nil {
+
+			updated_body, updated_err = sjson.DeleteBytes(updated_body, path)
+
+			if updated_err != nil {
+				return nil, nil, updated_err
+			}
+
+			u := &Update{
+				Type: UPDATE_TYPE_REMOVE,
+				Path: path,
+			}
+
+			updates = append(updates, u)
+			continue
 		}
 
 		// TO DO : SANITIZE value HERE... BUT WHAT ABOUT NOT-STRINGS...
-
-		// TO DO: HOW TO REMOVE THINGS...
 
 		old_rsp := gjson.GetBytes(body, path)
 
@@ -62,13 +76,13 @@ func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Up
 			old_enc, err := json.Marshal(old_rsp.Value())
 
 			if err != nil {
-				return nil, -1, err
+				return nil, nil, err
 			}
 
 			new_enc, err := json.Marshal(new_value)
 
 			if err != nil {
-				return nil, -1, err
+				return nil, nil, err
 			}
 
 			if bytes.Compare(new_enc, old_enc) == 0 {
@@ -80,31 +94,40 @@ func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Up
 
 		if err != nil {
 			msg := fmt.Sprintf("'%s' property failed validation: %s", path, err.Error())
-			return nil, -1, errors.New(msg)
+			return nil, nil, errors.New(msg)
 		}
 
-		log.Println("SET", path, new_value)
+		// log.Println("SET", path, new_value)
 
 		updated_body, updated_err = sjson.SetBytes(updated_body, path, new_value)
 
 		if updated_err != nil {
-			return nil, -1, updated_err
+			return nil, nil, updated_err
 		}
 
-		updates += 1
+		u := &Update{
+			Type: UPDATE_TYPE_CHANGE,
+			Path: path,
+		}
+
+		updates = append(updates, u)
 	}
 
-	return updated_body, updates, nil
+	update_rsp := &UpdateResponse{
+		Updates: updates,
+	}
+
+	return updated_body, update_rsp, nil
 }
 
 // something something something EDTF dates... (20191229/straup)
 
-func (ed *Editor) DeprecateFeature(ctx context.Context, body []byte, t time.Time) ([]byte, error) {
+func (ed *Editor) DeprecateFeature(ctx context.Context, body []byte, t time.Time) ([]byte, *UpdateResponse, error) {
 
 	deprecated_rsp := gjson.GetBytes(body, "properties.edtf:deprecated")
 
 	if deprecated_rsp.Exists() {
-		return nil, errors.New("Feature is already deprecated")
+		return nil, nil, errors.New("Feature is already deprecated")
 	}
 
 	props := map[string]interface{}{
@@ -112,22 +135,21 @@ func (ed *Editor) DeprecateFeature(ctx context.Context, body []byte, t time.Time
 		"mz:is_current":   0,
 	}
 
-	update_req := &Update{
+	update_req := &UpdateRequest{
 		Properties: props,
 	}
 
-	updated_body, _, err := ed.UpdateFeature(ctx, body, update_req)
-	return updated_body, err
+	return ed.UpdateFeature(ctx, body, update_req)
 }
 
 // something something something EDTF dates... (20191229/straup)
 
-func (ed *Editor) CessateFeature(ctx context.Context, body []byte, t time.Time) ([]byte, error) {
+func (ed *Editor) CessateFeature(ctx context.Context, body []byte, t time.Time) ([]byte, *UpdateResponse, error) {
 
 	cessated_rsp := gjson.GetBytes(body, "properties.edtf:cessated")
 
 	if cessated_rsp.Exists() {
-		return nil, errors.New("Feature is already cessated")
+		return nil, nil, errors.New("Feature is already cessated")
 	}
 
 	props := map[string]interface{}{
@@ -135,10 +157,9 @@ func (ed *Editor) CessateFeature(ctx context.Context, body []byte, t time.Time) 
 		"mz:is_current":  0,
 	}
 
-	update_req := &Update{
+	update_req := &UpdateRequest{
 		Properties: props,
 	}
 
-	updated_body, _, err := ed.UpdateFeature(ctx, body, update_req)
-	return updated_body, err
+	return ed.UpdateFeature(ctx, body, update_req)
 }

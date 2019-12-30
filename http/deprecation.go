@@ -57,7 +57,7 @@ func DeprecationHandler(r reader.Reader, wr writer.Writer, ed *editor.Editor) (g
 		ctx := req.Context()
 		body := f.Bytes()
 
-		updated_body, err := ed.DeprecateFeature(ctx, body, t)
+		updated_body, _, err := ed.DeprecateFeature(ctx, body, t)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
