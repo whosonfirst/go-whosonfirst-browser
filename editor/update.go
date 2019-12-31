@@ -8,9 +8,14 @@ import (
 const UPDATE_TYPE_CHANGE string = "change"
 const UPDATE_TYPE_REMOVE string = "remove"
 
+type UpdateRequestGeometry struct {
+	Type        string      `json:"type"`
+	Coordinates interface{} `json:"coordinates"`
+}
+
 type UpdateRequest struct {
-	Geometry   map[string]interface{}
-	Properties map[string]interface{}
+	Geometry   *UpdateRequestGeometry `json:"geometry"`
+	Properties map[string]interface{} `json:"properties"`
 }
 
 // TBD: return Feature/GeoJSON body as part of UpdateResponse

@@ -33,6 +33,17 @@ func IsValidProperty(rel_path string, input interface{}) (bool, error) {
 	return Validate(def, input)
 }
 
+func HasValidGeometry(input interface{}) (bool, error) {
+
+	rsp := gjson.Get(GEOMETRY, "definitions")
+
+	if !rsp.Exists() {
+		return false, errors.New("Missing geometry definition.")
+	}
+
+	return Validate(rsp.String(), input)
+}
+
 func HasValidProperties(input interface{}) (bool, error) {
 
 	rsp := gjson.Get(PROPERTIES, "definitions.properties")

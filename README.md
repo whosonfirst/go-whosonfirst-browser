@@ -357,6 +357,7 @@ Everything about updates is "wet paint" and subject to change and/or bug fixes. 
 
 Update endpoints have _no authentication_ yet. Authentication should (eventually) be handled by some sort of middleware and not anything in the `go-whosonfirst-browser/http/*.go` packages.
 
+### Updating properties
 
 Updates are not enabled by default. To enable update you need to start the `whosonfirst-browser` with the `-enable-update` flag.
 
@@ -378,6 +379,8 @@ Properties are validated using the `wof-properties.json` JSON Schema definition 
 $> curl -s -X POST -d '{"properties":{"wof:name": ["CAR", "BOB"]}}' 'http://localhost:8080/update/101736545'
 'properties.wof:name' property failed validation: validator 0xc0002cea80 failed: could not validate against any of the constraints
 ```
+
+### Deprecating and "cessating" records
 
 There are also handy `/deprecate/` and `/cessate/` endpoints for deprecating and cessating records:
 
@@ -409,7 +412,9 @@ $> curl -s -F 'edtf:cessation=2018-06-22' http://localhost:8080/cessate/11089627
 
 As of this writing only `YYYY-MM-DD` dates are supported.
 
-There is also preliminary support for removing properties. To do so assing a `null` value to the path you want to delete. For example:
+### Removing properties
+
+There is preliminary support for removing properties. To do so assing a `null` value to the path you want to delete. For example:
 
 ```
 $> curl -d '{ "properties": { "wof:hierarchy.0.neighbourhood_id": null }}' http://localhost:8080/update/1377462865
@@ -425,6 +430,33 @@ $> go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -enable-update
 2019/12/30 10:31:33 Listening on http://localhost:8080
 2019/12/30 10:31:39 warning: validator 0xc000278240 failed: object property 'wof:repo' validation failed: string 'sfomuseum-data-exhibition' does not match regular expression '^whosonfirst-.*$'
 ```
+
+### Updating geometries
+
+There is preliminary support for updating geometries. To do so pass in a valid GeoJSON `geometry` struct with your update request. It is not possible to update part, or parts, of a geometry. You must define the entire geometry for it to be updated.
+
+```
+$> go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -enable-updates \
+	-update-pattern 'geometry|properties(?:.[a-zA-Z0-9-_]+){1,}' \
+	-reader-source 'fs:///usr/local/data/sfomuseum-data-exhibition/data' \
+	-writer-source 'fs:///usr/local/data/sfomuseum-data-exhibition/data'
+	
+2019/12/31 11:32:04 Listening on http://localhost:8080
+```
+
+Note the custom `-update-pattern` flag to include geometries as a valid pattern. Update patterns, in general, are still a moving target so these details may still change.
+
+And then:
+
+```
+$> curl -s -d '{ "geometry": { "type": "Point", "coordinates": [ -121.387939, 36.546 ] } }' \
+	http://localhost:8080/update/1377462865 \
+	| grep geometry
+	
+  "geometry": {"coordinates":[-121.387939,36.546],"type":"Point"}
+```
+
+As of this writing geometries are only validated against a JSON Scheme definition for geometries. Coordinate values and their relationship to one another (for example winding order) are not validated yet.
 
 ## Lambda
 
