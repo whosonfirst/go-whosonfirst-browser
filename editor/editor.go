@@ -79,6 +79,10 @@ func (ed *Editor) CreateFeature(ctx context.Context, update_req *UpdateRequest) 
 		return nil, nil, errors.New("Missing geometry")
 	}
 
+	if update_req.Properties == nil {
+		return nil, nil, errors.New("Missing properties")
+	}
+
 	_, err := schema.HasValidGeometry(update_req.Geometry)
 
 	if err != nil {
