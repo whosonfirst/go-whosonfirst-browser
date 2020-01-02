@@ -29,6 +29,75 @@ func NewEditor(allowed_paths *regexp.Regexp) (*Editor, error) {
 
 // this message signature may still change... (20191230/thisisaaronland)
 
+func (ed *Editor) CreateFeature(ctx context.Context, update_req *UpdateRequest) ([]byte, *UpdateResponse, error) {
+
+	if update_req.Geometry == nil {
+		return nil, nil, errors.New("Missing geometry")
+	}
+
+	_, err := schema.HasValidGeometry(update_req.Geometry)
+
+	if err != nil {
+		msg := fmt.Sprintf("geometry failed validation: %s", err.Error())
+		return nil, nil, errors.New(msg)
+	}
+
+	required_props := []string{
+		"wof:name",
+		"wof:placetype",
+		"wof:country",
+		"wof:parent_id",
+		"wof:repo",
+		"src:geom",
+	}
+
+	for _, prop := range required_props {
+
+		_, ok := update_req.Properties[prop]
+
+		if !ok {
+			msg := fmt.Sprintf("Missing property '%s'", prop)
+			return nil, nil, errors.New(msg)
+		}
+	}
+
+	for path, new_value := range update_req.Properties {
+
+		path = fmt.Sprintf("properties.%s", path)
+
+		if !ed.allowed_paths.MatchString(path) {
+			return nil, nil, errors.New("Invalid path")
+		}
+
+		_, err := schema.IsValidProperty(path, new_value)
+
+		if err != nil {
+			msg := fmt.Sprintf("'%s' property failed validation: %s", path, err.Error())
+			return nil, nil, errors.New(msg)
+		}
+	}
+
+	f := struct {
+		Type       string                 `json:"type"`
+		Properties map[string]interface{} `json:"properties"`
+		Geometry   *UpdateRequestGeometry `json:"geometry"`
+	}{
+		Type:       "Feature",
+		Properties: update_req.Properties,
+		Geometry:   update_req.Geometry,
+	}
+
+	enc_f, err := json.Marshal(f)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return enc_f, nil, nil
+}
+
+// this message signature may still change... (20191230/thisisaaronland)
+
 func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *UpdateRequest) ([]byte, *UpdateResponse, error) {
 
 	updates := make([]*Update, 0)
