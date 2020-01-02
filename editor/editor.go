@@ -13,7 +13,9 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"github.com/whosonfirst/go-whosonfirst-browser/schema"
+	"github.com/whosonfirst/go-whosonfirst-placetypes"
 	_ "log"
+	"path/filepath"
 	"regexp"
 	"time"
 )
@@ -83,7 +85,7 @@ func (ed *Editor) CreateFeature(ctx context.Context, update_req *UpdateRequest) 
 		return nil, nil, errors.New("Missing properties")
 	}
 
-	_, err := schema.HasValidGeometry(update_req.Geometry)
+	err := ed.ensureValidGeometry(ctx, update_req.Geometry)
 
 	if err != nil {
 		msg := fmt.Sprintf("geometry failed validation: %s", err.Error())
@@ -124,18 +126,14 @@ func (ed *Editor) CreateFeature(ctx context.Context, update_req *UpdateRequest) 
 		}
 	}
 
-	for path, new_value := range update_req.Properties {
+	for rel_path, new_value := range update_req.Properties {
 
-		path = fmt.Sprintf("properties.%s", path)
+		abs_path := fmt.Sprintf("properties.%s", rel_path)
 
-		if !ed.allowed_paths.MatchString(path) {
-			return nil, nil, errors.New("Invalid path")
-		}
-
-		_, err := schema.IsValidProperty(path, new_value)
+		err = ed.ensureValidProperty(ctx, abs_path, new_value)
 
 		if err != nil {
-			msg := fmt.Sprintf("'%s' property failed validation: %s", path, err.Error())
+			msg := fmt.Sprintf("'%s' property failed validation: %s", abs_path, err.Error())
 			return nil, nil, errors.New(msg)
 		}
 	}
@@ -201,16 +199,12 @@ func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Up
 
 		if bytes.Compare(new_enc, old_enc) != 0 {
 
-			// NOTE THIS IS _NOT_ TESTING WHETHER THE GEOMETRY/COORDINATES IS VALID
-
-			_, err := schema.HasValidGeometry(update_req.Geometry)
+			err := ed.ensureValidGeometry(ctx, update_req.Geometry)
 
 			if err != nil {
 				msg := fmt.Sprintf("geometry failed validation: %s", err.Error())
 				return nil, nil, errors.New(msg)
 			}
-
-			// CHECK COORDINATES, WINDING, ETC. HERE...
 
 			updated_body, updated_err = sjson.SetBytes(updated_body, path, update_req.Geometry)
 
@@ -227,21 +221,17 @@ func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Up
 		}
 	}
 
-	for path, new_value := range update_req.Properties {
+	for rel_path, new_value := range update_req.Properties {
 
-		path = fmt.Sprintf("properties.%s", path)
-
-		if !ed.allowed_paths.MatchString(path) {
-			return nil, nil, errors.New("Invalid path")
-		}
-
-		// TBD - is this the best way to signal things to delete? as
-		// { "properties": { "foo.bar.baz": null } }
-		// (20191230/thisisaaronland)
+		abs_path := fmt.Sprintf("properties.%s", rel_path)
 
 		if new_value == nil {
 
-			updated_body, updated_err = sjson.DeleteBytes(updated_body, path)
+			if !ed.allowed_paths.MatchString(abs_path) {
+				return nil, nil, errors.New("Invalid path")
+			}
+
+			updated_body, updated_err = sjson.DeleteBytes(updated_body, abs_path)
 
 			if updated_err != nil {
 				return nil, nil, updated_err
@@ -249,7 +239,7 @@ func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Up
 
 			u := &Update{
 				Type: UPDATE_TYPE_REMOVE,
-				Path: path,
+				Path: abs_path,
 			}
 
 			updates = append(updates, u)
@@ -258,7 +248,7 @@ func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Up
 
 		// TO DO : SANITIZE value HERE... BUT WHAT ABOUT NOT-STRINGS...
 
-		old_rsp := gjson.GetBytes(body, path)
+		old_rsp := gjson.GetBytes(body, abs_path)
 
 		if old_rsp.Exists() {
 
@@ -279,16 +269,16 @@ func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Up
 			}
 		}
 
-		_, err := schema.IsValidProperty(path, new_value)
+		err := ed.ensureValidProperty(ctx, abs_path, new_value)
 
 		if err != nil {
-			msg := fmt.Sprintf("'%s' property failed validation: %s", path, err.Error())
+			msg := fmt.Sprintf("'%s' property failed validation: %s", abs_path, err.Error())
 			return nil, nil, errors.New(msg)
 		}
 
 		// log.Println("SET", path, new_value)
 
-		updated_body, updated_err = sjson.SetBytes(updated_body, path, new_value)
+		updated_body, updated_err = sjson.SetBytes(updated_body, abs_path, new_value)
 
 		if updated_err != nil {
 			return nil, nil, updated_err
@@ -296,7 +286,7 @@ func (ed *Editor) UpdateFeature(ctx context.Context, body []byte, update_req *Up
 
 		u := &Update{
 			Type: UPDATE_TYPE_CHANGE,
-			Path: path,
+			Path: abs_path,
 		}
 
 		updates = append(updates, u)
@@ -351,4 +341,53 @@ func (ed *Editor) CessateFeature(ctx context.Context, body []byte, t time.Time) 
 	}
 
 	return ed.UpdateFeature(ctx, body, update_req)
+}
+
+func (ed *Editor) ensureValidProperty(ctx context.Context, abs_path string, value interface{}) error {
+
+	if !ed.allowed_paths.MatchString(abs_path) {
+		return errors.New("Invalid path")
+	}
+
+	_, err := schema.IsValidProperty(abs_path, value)
+
+	if err != nil {
+		return err
+	}
+
+	// make this a discrete function?
+
+	rel_path := filepath.Base(abs_path)
+
+	switch rel_path {
+
+	case "wof:placetype":
+
+		if !placetypes.IsValidPlacetype(value.(string)) {
+			return errors.New("Invalid placetype")
+		}
+
+	case "wof:source":
+
+		// maybe? see also go-whosonfirst-sources
+
+	default:
+		// pass
+	}
+
+	// if name:* check https://github.com/whosonfirst/go-whosonfirst-names
+	
+	return nil
+}
+
+func (ed *Editor) ensureValidGeometry(ctx context.Context, geom *UpdateRequestGeometry) error {
+
+	_, err := schema.HasValidGeometry(geom)
+
+	if err != nil {
+		return err
+	}
+
+	// CHECK WINDING ETC. HERE...
+	return nil
 }
