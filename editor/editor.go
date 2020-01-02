@@ -23,11 +23,7 @@ type Editor struct {
 	id_service    artisanalinteger.Service
 }
 
-// TO DO: sync.Once STUFF FOR EDITOR... MAYBE?
-
-func NewEditor(allowed_paths *regexp.Regexp) (*Editor, error) {
-
-	ctx := context.Background()
+func DefaultIDService(ctx context.Context) (artisanalinteger.Service, error) {
 
 	cl, err := artisanalinteger.NewClient(ctx, "brooklynintegers://")
 
@@ -48,9 +44,20 @@ func NewEditor(allowed_paths *regexp.Regexp) (*Editor, error) {
 	}
 
 	svc_opts.Pool = pl
-	svc_opts.Minimum = 0
+	svc_opts.Minimum = 1
 
-	svc, err := service.NewProxyService(svc_opts, cl)
+	return service.NewProxyService(svc_opts, cl)
+}
+
+// THIS METHOD SIGNATURE WILL CHANGE (20200101/straup)
+
+func NewEditor(allowed_paths *regexp.Regexp) (*Editor, error) {
+
+	// TO DO: sync.Once STUFF FOR EDITOR... MAYBE?
+
+	ctx := context.Background()
+
+	id_service, err := DefaultIDService(ctx)
 
 	if err != nil {
 		return nil, err
@@ -58,7 +65,7 @@ func NewEditor(allowed_paths *regexp.Regexp) (*Editor, error) {
 
 	ed := &Editor{
 		allowed_paths: allowed_paths,
-		id_service:    svc,
+		id_service:    id_service,
 	}
 
 	return ed, nil
@@ -80,12 +87,27 @@ func (ed *Editor) CreateFeature(ctx context.Context, update_req *UpdateRequest) 
 	}
 
 	required_props := []string{
+		"wof:id",
 		"wof:name",
 		"wof:placetype",
 		"wof:country",
 		"wof:parent_id",
+		// wof:hierarchy... ?
 		"wof:repo",
 		"src:geom",
+	}
+
+	_, ok := update_req.Properties["wof:id"]
+
+	if !ok {
+
+		wof_id, err := ed.id_service.NextInt()
+
+		if err != nil {
+			return nil, nil, err
+		}
+
+		update_req.Properties["wof:id"] = wof_id
 	}
 
 	for _, prop := range required_props {
@@ -97,8 +119,6 @@ func (ed *Editor) CreateFeature(ctx context.Context, update_req *UpdateRequest) 
 			return nil, nil, errors.New(msg)
 		}
 	}
-
-	// i, err := ed.id_proxy.NextInt()
 
 	for path, new_value := range update_req.Properties {
 
