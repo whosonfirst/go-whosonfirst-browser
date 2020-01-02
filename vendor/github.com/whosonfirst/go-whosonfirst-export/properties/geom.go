@@ -79,15 +79,32 @@ func EnsureGeomCoords(feature []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	bbox := f.BBox
-	bounds := bbox.Bound()
+	bounds := f.Geometry.Bound()
 
 	min := bounds.Min
 	max := bounds.Max
 
-	str_bbox := fmt.Sprintf("%.06f,%.06f,%.06f,%.06f", min.X(), min.Y(), max.X(), max.Y())
+	minx := min.X()
+	miny := min.Y()
+	maxx := max.X()
+	maxy := max.Y()
+
+	bbox := []float64{
+		minx,
+		miny,
+		maxx,
+		maxy,
+	}
+
+	str_bbox := fmt.Sprintf("%.06f,%.06f,%.06f,%.06f", minx, miny, maxx, maxy)
 
 	feature, err = sjson.SetBytes(feature, "properties.geom:bbox", str_bbox)
+
+	if err != nil {
+		return nil, err
+	}
+
+	feature, err = sjson.SetBytes(feature, "bbox", bbox)
 
 	if err != nil {
 		return nil, err

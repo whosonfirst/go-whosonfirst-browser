@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+const UPDATE_TYPE_CREATE string = "create"
 const UPDATE_TYPE_CHANGE string = "change"
 const UPDATE_TYPE_REMOVE string = "remove"
 

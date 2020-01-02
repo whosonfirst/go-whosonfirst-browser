@@ -6,6 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/aaronland/go-artisanal-integers"
+	"github.com/aaronland/go-artisanal-integers-proxy/service"
+	_ "github.com/aaronland/go-brooklynintegers-api"
+	"github.com/aaronland/go-pool"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"github.com/whosonfirst/go-whosonfirst-browser/schema"
@@ -16,12 +20,45 @@ import (
 
 type Editor struct {
 	allowed_paths *regexp.Regexp
+	id_service    artisanalinteger.Service
 }
+
+// TO DO: sync.Once STUFF FOR EDITOR... MAYBE?
 
 func NewEditor(allowed_paths *regexp.Regexp) (*Editor, error) {
 
+	ctx := context.Background()
+
+	cl, err := artisanalinteger.NewClient(ctx, "brooklynintegers://")
+
+	if err != nil {
+		return nil, err
+	}
+
+	pl, err := pool.NewPool(ctx, "memory://")
+
+	if err != nil {
+		return nil, err
+	}
+
+	svc_opts, err := service.DefaultProxyServiceOptions()
+
+	if err != nil {
+		return nil, err
+	}
+
+	svc_opts.Pool = pl
+	svc_opts.Minimum = 0
+
+	svc, err := service.NewProxyService(svc_opts, cl)
+
+	if err != nil {
+		return nil, err
+	}
+
 	ed := &Editor{
 		allowed_paths: allowed_paths,
+		id_service:    svc,
 	}
 
 	return ed, nil
@@ -60,6 +97,8 @@ func (ed *Editor) CreateFeature(ctx context.Context, update_req *UpdateRequest) 
 			return nil, nil, errors.New(msg)
 		}
 	}
+
+	// i, err := ed.id_proxy.NextInt()
 
 	for path, new_value := range update_req.Properties {
 

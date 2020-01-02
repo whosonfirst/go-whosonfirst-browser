@@ -3,10 +3,10 @@ package properties
 import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-	"github.com/whosonfirst/go-whosonfirst-export/uid"
+	"github.com/whosonfirst/go-whosonfirst-id"
 )
 
-func EnsureWOFId(feature []byte, provider uid.Provider) ([]byte, error) {
+func EnsureWOFId(feature []byte, provider id.Provider) ([]byte, error) {
 
 	var err error
 
@@ -20,7 +20,7 @@ func EnsureWOFId(feature []byte, provider uid.Provider) ([]byte, error) {
 
 	} else {
 
-		i, err := provider.UID()
+		i, err := provider.NewID()
 
 		if err != nil {
 			return nil, err

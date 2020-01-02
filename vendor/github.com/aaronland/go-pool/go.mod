@@ -1,4 +1,4 @@
-module github.com/aaronland/go-artisanal-integers
+module github.com/aaronland/go-pool
 
 go 1.12
 
