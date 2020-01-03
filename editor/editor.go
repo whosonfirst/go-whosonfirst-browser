@@ -388,6 +388,7 @@ func (ed *Editor) ensureValidGeometry(ctx context.Context, geom *UpdateRequestGe
 		return err
 	}
 
-	// CHECK WINDING ETC. HERE...
+	// https://github.com/whosonfirst/go-whosonfirst-validate/issues/1
+
 	return nil
 }
