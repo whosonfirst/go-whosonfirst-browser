@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"path/filepath"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -39,6 +40,8 @@ func IdFromURI(path string) (int64, *uri.URIArgs, error) {
 
 	match := re_uri.FindStringSubmatch(fname)
 
+	log.Println("M", match)
+	
 	if len(match) == 0 {
 		return -1, nil, errors.New("Unable to parse WOF ID")
 	}
@@ -52,6 +55,8 @@ func IdFromURI(path string) (int64, *uri.URIArgs, error) {
 
 	wofid, err := strconv.ParseInt(str_id, 10, 64)
 
+	log.Println(str_id, wofid, err)
+	
 	if err != nil {
 		return -1, nil, err
 	}
@@ -79,5 +84,6 @@ func IdFromURI(path string) (int64, *uri.URIArgs, error) {
 		}
 	}
 
+	log.Println("OKAY")
 	return wofid, args, nil
 }

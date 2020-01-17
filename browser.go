@@ -73,7 +73,7 @@ func Start(ctx context.Context) error {
 	path_select := flag.String("path-select", "/select/", "The path that 'select' requests should be served from.")
 
 	path_id := flag.String("path-id", "/id/", "The that Who's On First documents should be served from.")
-	path_alt := flag.String("path-alt", "/alt/", "The that Who's On First alternative geometry documents should be served from.")
+	// path_alt := flag.String("path-alt", "/alt/", "The that Who's On First alternative geometry documents should be served from.")
 
 	flag.Parse()
 
@@ -363,6 +363,7 @@ func Start(ctx context.Context) error {
 		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, *static_prefix)
 		id_handler = tangramjs.AppendResourcesHandlerWithPrefix(id_handler, tangramjs_opts, *static_prefix)
 
+		/*
 		alt_opts := http.AltHandlerOptions{
 			Templates: t,
 			Endpoints: endpoints,
@@ -376,8 +377,9 @@ func Start(ctx context.Context) error {
 
 		alt_handler = bootstrap.AppendResourcesHandlerWithPrefix(alt_handler, bootstrap_opts, *static_prefix)
 		alt_handler = tangramjs.AppendResourcesHandlerWithPrefix(alt_handler, tangramjs_opts, *static_prefix)
-
+		
 		mux.Handle(*path_alt, alt_handler)
+		*/
 
 		err = bootstrap.AppendAssetHandlersWithPrefix(mux, *static_prefix)
 
