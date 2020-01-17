@@ -32,6 +32,12 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 		return nil, errors.New("Missing id template")
 	}
 
+	alt_t := opts.Templates.Lookup("alt")
+
+	if alt_t == nil {
+		return nil, errors.New("Missing alt template")
+	}
+	
 	error_t := opts.Templates.Lookup("error")
 
 	if error_t == nil {
@@ -137,7 +143,13 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 			Endpoints:    opts.Endpoints,
 		}
 
-		RenderTemplate(rsp, id_t, vars)
+		t := id_t
+
+		if foo.URIArgs.Alternate {
+			t = alt_t
+		}
+		
+		RenderTemplate(rsp, t, vars)
 		return
 	}
 

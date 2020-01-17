@@ -99,6 +99,7 @@ whosonfirst.browser.common = (function(){
 	    }
 
 	    return map;
+	},
     };
 
     return self;

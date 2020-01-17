@@ -3,7 +3,7 @@
 // www/static/javascript/localforage.js
 // www/static/javascript/localforage.min.js
 // www/static/javascript/slippymap.crosshairs.js
-// www/static/javascript/whosonfirst.alt.init.js
+// www/static/javascript/whosonfirst.browser.alt.init.js
 // www/static/javascript/whosonfirst.browser.alt.js
 // www/static/javascript/whosonfirst.browser.common.js
 // www/static/javascript/whosonfirst.browser.id.init.js
@@ -40,10 +40,10 @@
 package http
 
 import (
+	"github.com/whosonfirst/go-bindata-assetfs"
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"github.com/whosonfirst/go-bindata-assetfs"
 	"io"
 	"io/ioutil"
 	"os"
@@ -163,22 +163,22 @@ func staticJavascriptSlippymapCrosshairsJs() (*asset, error) {
 	return a, nil
 }
 
-var _staticJavascriptWhosonfirstAltInitJs = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x14\xca\x31\x0a\x42\x31\x0c\x00\xd0\xd9\x9e\xe2\xf3\xa7\x16\x24\x17\xe8\xec\xe6\x25\xaa\x49\x31\x50\x12\x48\xa2\x19\xc4\xbb\x4b\xc7\x07\x2f\x59\x50\x13\x06\xe2\xed\x43\x12\x77\xf6\x20\x21\xab\xe7\xd2\x81\xe7\xf5\x98\x6f\x79\x06\xab\x1c\xdb\x95\xf6\x69\xdf\x72\xc9\x97\xba\xca\x64\xf3\x80\x87\x69\x3a\x19\x8c\x15\xc0\xc2\x51\x5b\x2f\xbf\xd6\xcb\x3f\x00\x00\xff\xff\x78\x1f\x42\x8c\x5b\x00\x00\x00")
+var _staticJavascriptWhosonfirstBrowserAltInitJs = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x14\xca\x31\x0a\x42\x31\x0c\x00\xd0\xd9\x9e\xe2\xf3\xa7\x16\x24\x17\xe8\xec\xe6\x25\xaa\x49\x31\x50\x12\x48\xa2\x19\xc4\xbb\x4b\xc7\x07\x2f\x59\x50\x13\x06\xe2\xed\x43\x12\x77\xf6\x20\x21\xab\xe7\xd2\x81\xe7\xf5\x98\x6f\x79\x06\xab\x1c\xdb\x95\xf6\x69\xdf\x72\xc9\x97\xba\xca\x64\xf3\x80\x87\x69\x3a\x19\x8c\x15\xc0\xc2\x51\x5b\x2f\xbf\xd6\xcb\x3f\x00\x00\xff\xff\x78\x1f\x42\x8c\x5b\x00\x00\x00")
 
-func staticJavascriptWhosonfirstAltInitJsBytes() ([]byte, error) {
+func staticJavascriptWhosonfirstBrowserAltInitJsBytes() ([]byte, error) {
 	return bindataRead(
-		_staticJavascriptWhosonfirstAltInitJs,
-		"static/javascript/whosonfirst.alt.init.js",
+		_staticJavascriptWhosonfirstBrowserAltInitJs,
+		"static/javascript/whosonfirst.browser.alt.init.js",
 	)
 }
 
-func staticJavascriptWhosonfirstAltInitJs() (*asset, error) {
-	bytes, err := staticJavascriptWhosonfirstAltInitJsBytes()
+func staticJavascriptWhosonfirstBrowserAltInitJs() (*asset, error) {
+	bytes, err := staticJavascriptWhosonfirstBrowserAltInitJsBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.alt.init.js", size: 91, mode: os.FileMode(420), modTime: time.Unix(1579221093, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.browser.alt.init.js", size: 91, mode: os.FileMode(420), modTime: time.Unix(1579281839, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -198,12 +198,12 @@ func staticJavascriptWhosonfirstBrowserAltJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.browser.alt.js", size: 788, mode: os.FileMode(420), modTime: time.Unix(1579221306, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.browser.alt.js", size: 788, mode: os.FileMode(420), modTime: time.Unix(1579281839, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _staticJavascriptWhosonfirstBrowserCommonJs = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x94\x56\x4b\x6f\xe3\x36\x10\x3e\xcb\xbf\x62\xaa\xc3\xae\x0c\xc8\xc2\xf6\x90\x8b\x0c\x1f\x76\x8b\x06\x58\xa0\x29\x82\x02\xed\x25\x30\x0c\xda\x1a\x2b\x44\x28\x92\x20\x29\x3f\xea\xf8\xbf\x17\x43\x3d\x2c\xd9\x92\xd3\x5c\x0c\x6b\x34\xdf\x63\x86\xa3\x91\x76\xcc\xc0\xfe\x55\x59\x25\xb7\xdc\x58\x07\x8b\xde\xd5\xfb\x3b\x9c\xce\xf3\x49\x27\x94\xac\x8d\xda\x5b\x34\xfd\xc4\x36\x5a\x03\x86\x10\xc9\x46\x15\x85\x92\xb0\x80\x68\x5b\xca\x8d\xe3\x4a\x46\xd3\xd3\x04\x00\xc0\xff\x90\x93\x82\xe9\x79\x3f\x62\x51\x6c\x61\x01\xa7\xc9\x24\xf8\xca\x25\x77\xab\x82\xe9\xaf\x29\x74\x19\x02\x0f\x08\x1a\x04\xd3\x7c\xf5\x86\x47\x58\x40\xa6\x36\x65\x81\xd2\x25\x6b\x95\x1d\x93\x1c\xdd\x77\xe7\x0c\x5f\x97\x0e\xa3\x30\x63\x8e\xcd\x24\x1e\xdc\xbf\x28\x67\x4c\xf3\xd9\x1b\x1e\xc3\xe9\xfc\x42\x63\xdd\x51\xe0\xaa\x34\xe2\x33\x44\x1e\x34\x2b\x8d\xe8\x51\x39\xfe\x79\x26\xc2\xd4\x44\x97\xf2\xaa\x5f\xbe\x85\xe8\x97\xa6\x4c\xaa\x3f\xd8\x28\x69\x95\xc0\x44\xa8\x3c\x0a\x9f\xb8\xb5\x5c\xe6\xf0\xfd\xf9\x27\x34\x45\x05\x06\x5d\x69\x64\xed\xe9\x7c\xcb\xd6\x56\x3b\xce\xe7\x53\xe0\xef\xbf\xfe\xf8\x7f\x8c\x4d\xd1\xe3\x84\x94\x31\xca\x77\xe9\x5e\xc1\xf4\xca\xee\xf2\x6e\xf3\x72\x74\xbf\x0b\xa4\xbf\x3f\x8e\x3f\xb3\x28\x2c\x98\x9e\xd9\x5d\x4e\x44\x17\x0b\x35\xce\xeb\x4f\x82\x80\xa8\x34\x33\x28\x69\xc6\xeb\x7b\x49\x15\xf8\x53\x65\x48\xc8\x80\x60\x55\xc8\xa3\x88\xa9\xba\x4c\x0c\x16\x6a\x87\xbf\xbd\x72\x91\xb5\xc4\xe4\xfa\x3c\x50\x3f\x29\xe5\xa8\x8a\x7b\x8e\x3b\xcf\xc7\x4c\x0b\xb6\xc1\x76\x60\x2e\x1c\x82\x91\x55\x62\x1a\x1a\x14\xc1\x1c\x77\x65\x86\xbd\x49\x13\xfe\xf9\x1a\x85\x28\x99\xf7\x31\x17\xe4\x06\xa5\x33\x8a\x67\xab\xda\xf9\x09\x42\x77\xd4\x18\xa6\x10\x3e\x2b\x2e\x5d\x18\x43\xb8\x51\xca\x64\x5c\x32\x87\x36\x4c\xe1\x85\xd4\x62\xef\x72\x09\xe7\xf9\x00\x95\x36\x4a\x5b\xe2\x3a\x8f\xca\xf9\x47\x3b\x08\x5a\xad\x47\x64\xae\x34\x18\xc6\x14\x24\x2b\xe8\xcc\x31\x4c\xfb\xf6\xfc\x4d\x22\x47\xe3\xb8\xf7\xd2\x97\xac\xcf\xe4\x46\xb4\xe0\xf2\x7e\x4f\x0b\x2e\x87\xfb\x4a\xc8\xbb\xad\xf5\xc8\x3b\xed\x2d\xd8\xe1\x03\x69\x76\x18\x91\x66\x87\x0f\xa4\x09\xd9\x91\x0e\xba\xda\x6d\xc9\x9a\x19\x8b\x8f\x42\x31\x17\x55\xb1\x46\xa3\x2d\xed\x2a\x43\xc9\x36\xa3\xf1\xde\xcd\xf0\xb1\x6e\xc6\x0d\x87\x8f\x5d\xd9\xf1\x8b\x75\x0f\x0b\x78\xa9\x9d\xc5\x8d\xfe\xb2\x53\xb2\xc4\x2a\xc3\x6b\xc4\x0d\xfb\xf2\xa6\xa9\x6b\x55\xca\xcc\xfa\x5c\xbb\x8f\x09\x76\x9b\x43\x0f\x2b\x8a\x0f\x96\xc7\xd5\x81\x55\x0b\xac\x42\x8e\xaf\xaf\x82\x69\xc0\x8a\xa8\xea\xfa\x9d\x95\xd8\x38\x61\x26\xb7\xcd\xc8\xd7\x0b\x3c\x4c\x9b\x55\xee\xc7\xba\x5d\xc4\x61\x7a\x59\xca\xfe\x4e\xb3\x50\xc3\xb4\xdd\xad\xf1\xd0\xa4\x93\xaf\xc1\x97\x73\x52\x30\x6d\xa9\xfc\x27\xa6\xa3\xaa\xba\xb8\x75\x35\xd2\x81\xdb\xf2\x1f\x19\x17\x98\x81\x53\x90\xa3\x83\xa6\x79\x75\xed\xb0\x65\xc2\xe2\xd8\x4b\x21\x6a\xa6\x71\x51\x9f\xed\x14\xbe\x7c\x81\xa8\x99\xc0\x45\x7d\xd2\x53\x2f\x5a\x30\x9d\x58\x74\xff\x70\xdc\x47\x74\xba\xbf\x3e\x4c\x87\x78\x51\x58\xf4\xfd\xa4\x16\x6f\xb9\x5b\x29\xed\x7c\x8b\x35\xcb\x32\x2e\xf3\x14\x5e\x1e\xbe\xc5\xf0\xf0\x6d\x49\x5d\xf2\xac\x5b\xee\x7e\xf8\xc9\x89\xaa\x01\x8a\x5b\xdc\xf4\xea\xf5\x53\x17\xd5\x7e\x95\xd0\x97\x4d\x27\x4e\xdf\x26\xf3\xc9\xe4\x3c\x8d\xea\x97\xf4\x7f\x01\x00\x00\xff\xff\x65\xe9\x3d\x45\x4d\x09\x00\x00")
+var _staticJavascriptWhosonfirstBrowserCommonJs = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x94\x56\x4b\x6f\xe2\x30\x10\x3e\x27\xbf\x62\x36\x87\x36\x48\x21\xea\x1e\x7a\x09\xe2\xd0\xae\xb6\x52\xa5\xed\xaa\x5a\x69\xf7\x52\x21\x64\xc8\x90\x5a\x75\x6c\xcb\x76\x78\x2c\xe5\xbf\xaf\xec\x3c\x48\x20\xa1\xdb\x0b\x82\xc9\x7c\x8f\x19\x4f\xc6\xac\x89\x82\xcd\xab\xd0\x82\xaf\xa8\xd2\x06\xa6\x9d\x5f\xef\xef\xb0\x3f\x4c\xfc\x56\x28\x5e\x28\xb1\xd1\xa8\xba\x89\x4d\xb4\x02\xf4\x21\xe2\xa5\xc8\x73\xc1\x61\x0a\xe1\xaa\xe0\x4b\x43\x05\x0f\x47\x7b\x1f\x00\xc0\x7d\x58\x27\x39\x91\x93\x6e\x44\x23\x5b\xc1\x14\xf6\xbe\xef\x5d\x53\x4e\xcd\x3c\x27\xf2\x3a\x81\x36\x83\xe7\x00\x5e\x8d\x20\x92\xce\xdf\x70\x07\x53\x48\xc5\xb2\xc8\x91\x9b\x78\x21\xd2\x5d\x9c\xa1\xb9\x33\x46\xd1\x45\x61\x30\x0c\x52\x62\xc8\x98\xe3\xd6\xfc\x45\x3e\x26\x92\x8e\xdf\x70\x17\x8c\x26\x47\x1a\x6d\x76\x0c\xe7\x85\x62\x9f\x21\x72\xa0\x71\xa1\x58\x87\xca\xd0\xcf\x33\x59\x4c\x45\x74\x2c\xaf\xfc\xa4\x2b\x08\xbf\xd4\x65\xda\xfa\xbd\xa5\xe0\x5a\x30\x8c\x99\xc8\xc2\xe0\x89\x6a\x4d\x79\x06\x77\xcf\x8f\x50\x17\xe5\x29\x34\x85\xe2\x95\xa7\xc3\x39\x5b\x53\xed\x30\x9f\x4b\x81\xdf\xbf\x7e\xfc\x1f\x63\x5d\xf4\x30\xa1\xcd\x18\xe4\x3b\x76\x2f\x27\x72\xae\xd7\x59\xbb\x79\x19\x9a\xef\x0c\xed\xd7\xfb\xdd\x63\x1a\x06\x39\x91\x63\xbd\xce\x2c\xd1\xd1\x42\x85\x73\xfa\xbe\xe7\x59\x2a\x49\x14\x72\x3b\xe3\xd5\xb3\xb8\x0c\xfc\x14\x29\x5a\xa4\x67\x61\x65\xc8\xa1\x2c\x53\xf9\x33\x56\x98\x8b\x35\x7e\x7b\xa5\x2c\x6d\x88\xad\xeb\x43\x4f\xfd\x56\x29\x43\x91\x5f\x72\xdc\x7a\x3f\xc6\x92\x91\x25\x36\x03\x73\xe4\x60\xc4\x5a\xb5\x4c\x7d\x83\xc2\x88\xa1\xa6\x48\xb1\x33\x69\xcc\xbd\x5f\x83\x10\xc1\xb3\x2e\xe6\x88\x5c\x22\x37\x4a\xd0\x74\x5e\x39\xdf\x43\x60\x76\x12\x83\x04\x82\x67\x41\xb9\x09\x22\x08\x96\x42\xa8\x94\x72\x62\x50\x07\x09\xbc\x58\xb5\xc8\xb9\x9c\xc1\x61\xd2\x43\x25\x95\x90\xda\x72\x1d\x06\xe5\xdc\xab\xed\x79\x8d\xd6\x03\x12\x53\x28\x0c\x22\x1b\xb4\x56\xd0\xa8\x5d\x90\x74\xed\xb9\x87\x96\x1c\x95\xa1\xce\x4b\x57\xb2\x3a\x93\x33\xd1\x9c\xf2\xcb\x3d\xcd\x29\xef\xef\xab\x45\x5e\x6c\xad\x43\x5e\x68\x6f\x4e\xb6\x1f\x48\x93\xed\x80\x34\xd9\x7e\x20\x6d\x91\x2d\x69\xaf\xad\xdd\x94\x2c\x89\xd2\xf8\xc0\x04\x31\x61\x19\xab\x35\x9a\xd2\x4e\x32\x04\x6f\x32\x6a\xef\xed\x0c\x17\x6b\x67\x9c\x71\xb8\xd8\x89\x1d\xb7\x58\x37\x30\x85\x97\xca\x59\x54\xeb\xcf\x5a\x25\x73\x2c\x33\x9c\x46\x54\xb3\xcf\xce\x9a\xba\x10\x05\x4f\xb5\xcb\xd5\x9b\xc8\xc2\xce\x73\xec\xcb\x8a\xec\x83\xe5\x71\x72\x60\xe5\x02\x2b\x91\xc3\xeb\x2b\x27\x12\xb0\x24\x2a\xbb\x7e\x61\x25\xd6\x4e\x88\xca\x74\x3d\xf2\xd5\x02\x0f\x92\x7a\x95\xbb\xb1\x6e\x16\x71\x90\x1c\x97\xb2\x7b\x52\x2f\xd4\x20\x69\x76\x6b\xd4\x37\xe9\xd6\x57\xef\xe5\x1c\xe7\x44\x6a\x5b\xfe\x13\x91\x61\x59\x5d\xd4\xb8\x1a\xe8\xc0\x79\xf9\x0f\x84\x32\x4c\xc1\x08\xc8\xd0\x40\xdd\xbc\xaa\x76\x58\x11\xa6\x71\xe8\x52\x08\xeb\x69\x9c\x56\x67\x3b\x82\xab\x2b\x08\xeb\x09\x9c\x56\x27\x3d\x72\xa2\x39\x91\xb1\x46\xf3\x87\xe2\x26\xb4\xa7\xfb\xf5\x76\xd4\xc7\x8b\x4c\xa3\xeb\xa7\x6d\xf1\x8a\x9a\xb9\x90\xc6\xb5\x58\x92\x34\xa5\x3c\x4b\xe0\xe5\xf6\x26\x82\xdb\x9b\x99\xed\x92\x63\x5d\x51\x73\xef\x26\x27\x2c\x07\x28\x6a\x70\xa3\x93\xeb\xa7\x2a\xca\xfd\x2b\xf1\x0e\x91\x5f\x35\xdb\x6f\x3d\xb3\xff\x4f\x26\xbe\x7f\x18\x85\xd5\x45\xfd\x2f\x00\x00\xff\xff\xdc\x57\x64\x3d\x51\x09\x00\x00")
 
 func staticJavascriptWhosonfirstBrowserCommonJsBytes() ([]byte, error) {
 	return bindataRead(
@@ -218,7 +218,7 @@ func staticJavascriptWhosonfirstBrowserCommonJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.browser.common.js", size: 2381, mode: os.FileMode(420), modTime: time.Unix(1579222298, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.browser.common.js", size: 2385, mode: os.FileMode(420), modTime: time.Unix(1579283349, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -855,41 +855,41 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"static/javascript/localforage.js":                  staticJavascriptLocalforageJs,
-	"static/javascript/localforage.min.js":              staticJavascriptLocalforageMinJs,
-	"static/javascript/slippymap.crosshairs.js":         staticJavascriptSlippymapCrosshairsJs,
-	"static/javascript/whosonfirst.alt.init.js":         staticJavascriptWhosonfirstAltInitJs,
-	"static/javascript/whosonfirst.browser.alt.js":      staticJavascriptWhosonfirstBrowserAltJs,
-	"static/javascript/whosonfirst.browser.common.js":   staticJavascriptWhosonfirstBrowserCommonJs,
-	"static/javascript/whosonfirst.browser.id.init.js":  staticJavascriptWhosonfirstBrowserIdInitJs,
-	"static/javascript/whosonfirst.browser.id.js":       staticJavascriptWhosonfirstBrowserIdJs,
-	"static/javascript/whosonfirst.browser.maps.js":     staticJavascriptWhosonfirstBrowserMapsJs,
-	"static/javascript/whosonfirst.cache.js":            staticJavascriptWhosonfirstCacheJs,
-	"static/javascript/whosonfirst.geojson.js":          staticJavascriptWhosonfirstGeojsonJs,
+	"static/javascript/localforage.js": staticJavascriptLocalforageJs,
+	"static/javascript/localforage.min.js": staticJavascriptLocalforageMinJs,
+	"static/javascript/slippymap.crosshairs.js": staticJavascriptSlippymapCrosshairsJs,
+	"static/javascript/whosonfirst.browser.alt.init.js": staticJavascriptWhosonfirstBrowserAltInitJs,
+	"static/javascript/whosonfirst.browser.alt.js": staticJavascriptWhosonfirstBrowserAltJs,
+	"static/javascript/whosonfirst.browser.common.js": staticJavascriptWhosonfirstBrowserCommonJs,
+	"static/javascript/whosonfirst.browser.id.init.js": staticJavascriptWhosonfirstBrowserIdInitJs,
+	"static/javascript/whosonfirst.browser.id.js": staticJavascriptWhosonfirstBrowserIdJs,
+	"static/javascript/whosonfirst.browser.maps.js": staticJavascriptWhosonfirstBrowserMapsJs,
+	"static/javascript/whosonfirst.cache.js": staticJavascriptWhosonfirstCacheJs,
+	"static/javascript/whosonfirst.geojson.js": staticJavascriptWhosonfirstGeojsonJs,
 	"static/javascript/whosonfirst.leaflet.handlers.js": staticJavascriptWhosonfirstLeafletHandlersJs,
-	"static/javascript/whosonfirst.leaflet.styles.js":   staticJavascriptWhosonfirstLeafletStylesJs,
-	"static/javascript/whosonfirst.leaflet.utils.js":    staticJavascriptWhosonfirstLeafletUtilsJs,
-	"static/javascript/whosonfirst.namify.js":           staticJavascriptWhosonfirstNamifyJs,
-	"static/javascript/whosonfirst.net.js":              staticJavascriptWhosonfirstNetJs,
-	"static/javascript/whosonfirst.properties.js":       staticJavascriptWhosonfirstPropertiesJs,
-	"static/javascript/whosonfirst.render.js":           staticJavascriptWhosonfirstRenderJs,
-	"static/javascript/whosonfirst.uri.js":              staticJavascriptWhosonfirstUriJs,
-	"static/javascript/whosonfirst.www.js":              staticJavascriptWhosonfirstWwwJs,
-	"static/css/whosonfirst.browser.css":                staticCssWhosonfirstBrowserCss,
-	"static/css/whosonfirst.browser.id.css":             staticCssWhosonfirstBrowserIdCss,
-	"static/css/whosonfirst.common.css":                 staticCssWhosonfirstCommonCss,
-	"static/css/whosonfirst.www.css":                    staticCssWhosonfirstWwwCss,
-	"static/fonts/Poppins-Light.ttf":                    staticFontsPoppinsLightTtf,
-	"static/fonts/Poppins-Medium.ttf":                   staticFontsPoppinsMediumTtf,
-	"static/fonts/Poppins-SemiBold.ttf":                 staticFontsPoppinsSemiboldTtf,
-	"static/fonts/Roboto-Light.ttf":                     staticFontsRobotoLightTtf,
-	"static/fonts/Roboto-LightItalic.ttf":               staticFontsRobotoLightitalicTtf,
-	"static/fonts/Roboto-Regular.ttf":                   staticFontsRobotoRegularTtf,
-	"static/fonts/RobotoMono-Light.ttf":                 staticFontsRobotomonoLightTtf,
-	"static/fonts/glyphicons-halflings-regular.eot":     staticFontsGlyphiconsHalflingsRegularEot,
-	"static/fonts/glyphicons-halflings-regular.svg":     staticFontsGlyphiconsHalflingsRegularSvg,
-	"static/fonts/glyphicons-halflings-regular.ttf":     staticFontsGlyphiconsHalflingsRegularTtf,
-	"static/fonts/glyphicons-halflings-regular.woff":    staticFontsGlyphiconsHalflingsRegularWoff,
+	"static/javascript/whosonfirst.leaflet.styles.js": staticJavascriptWhosonfirstLeafletStylesJs,
+	"static/javascript/whosonfirst.leaflet.utils.js": staticJavascriptWhosonfirstLeafletUtilsJs,
+	"static/javascript/whosonfirst.namify.js": staticJavascriptWhosonfirstNamifyJs,
+	"static/javascript/whosonfirst.net.js": staticJavascriptWhosonfirstNetJs,
+	"static/javascript/whosonfirst.properties.js": staticJavascriptWhosonfirstPropertiesJs,
+	"static/javascript/whosonfirst.render.js": staticJavascriptWhosonfirstRenderJs,
+	"static/javascript/whosonfirst.uri.js": staticJavascriptWhosonfirstUriJs,
+	"static/javascript/whosonfirst.www.js": staticJavascriptWhosonfirstWwwJs,
+	"static/css/whosonfirst.browser.css": staticCssWhosonfirstBrowserCss,
+	"static/css/whosonfirst.browser.id.css": staticCssWhosonfirstBrowserIdCss,
+	"static/css/whosonfirst.common.css": staticCssWhosonfirstCommonCss,
+	"static/css/whosonfirst.www.css": staticCssWhosonfirstWwwCss,
+	"static/fonts/Poppins-Light.ttf": staticFontsPoppinsLightTtf,
+	"static/fonts/Poppins-Medium.ttf": staticFontsPoppinsMediumTtf,
+	"static/fonts/Poppins-SemiBold.ttf": staticFontsPoppinsSemiboldTtf,
+	"static/fonts/Roboto-Light.ttf": staticFontsRobotoLightTtf,
+	"static/fonts/Roboto-LightItalic.ttf": staticFontsRobotoLightitalicTtf,
+	"static/fonts/Roboto-Regular.ttf": staticFontsRobotoRegularTtf,
+	"static/fonts/RobotoMono-Light.ttf": staticFontsRobotomonoLightTtf,
+	"static/fonts/glyphicons-halflings-regular.eot": staticFontsGlyphiconsHalflingsRegularEot,
+	"static/fonts/glyphicons-halflings-regular.svg": staticFontsGlyphiconsHalflingsRegularSvg,
+	"static/fonts/glyphicons-halflings-regular.ttf": staticFontsGlyphiconsHalflingsRegularTtf,
+	"static/fonts/glyphicons-halflings-regular.woff": staticFontsGlyphiconsHalflingsRegularWoff,
 }
 
 // AssetDir returns the file names below a certain
@@ -931,49 +931,48 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
 	"static": &bintree{nil, map[string]*bintree{
 		"css": &bintree{nil, map[string]*bintree{
-			"whosonfirst.browser.css":    &bintree{staticCssWhosonfirstBrowserCss, map[string]*bintree{}},
+			"whosonfirst.browser.css": &bintree{staticCssWhosonfirstBrowserCss, map[string]*bintree{}},
 			"whosonfirst.browser.id.css": &bintree{staticCssWhosonfirstBrowserIdCss, map[string]*bintree{}},
-			"whosonfirst.common.css":     &bintree{staticCssWhosonfirstCommonCss, map[string]*bintree{}},
-			"whosonfirst.www.css":        &bintree{staticCssWhosonfirstWwwCss, map[string]*bintree{}},
+			"whosonfirst.common.css": &bintree{staticCssWhosonfirstCommonCss, map[string]*bintree{}},
+			"whosonfirst.www.css": &bintree{staticCssWhosonfirstWwwCss, map[string]*bintree{}},
 		}},
 		"fonts": &bintree{nil, map[string]*bintree{
-			"Poppins-Light.ttf":                 &bintree{staticFontsPoppinsLightTtf, map[string]*bintree{}},
-			"Poppins-Medium.ttf":                &bintree{staticFontsPoppinsMediumTtf, map[string]*bintree{}},
-			"Poppins-SemiBold.ttf":              &bintree{staticFontsPoppinsSemiboldTtf, map[string]*bintree{}},
-			"Roboto-Light.ttf":                  &bintree{staticFontsRobotoLightTtf, map[string]*bintree{}},
-			"Roboto-LightItalic.ttf":            &bintree{staticFontsRobotoLightitalicTtf, map[string]*bintree{}},
-			"Roboto-Regular.ttf":                &bintree{staticFontsRobotoRegularTtf, map[string]*bintree{}},
-			"RobotoMono-Light.ttf":              &bintree{staticFontsRobotomonoLightTtf, map[string]*bintree{}},
-			"glyphicons-halflings-regular.eot":  &bintree{staticFontsGlyphiconsHalflingsRegularEot, map[string]*bintree{}},
-			"glyphicons-halflings-regular.svg":  &bintree{staticFontsGlyphiconsHalflingsRegularSvg, map[string]*bintree{}},
-			"glyphicons-halflings-regular.ttf":  &bintree{staticFontsGlyphiconsHalflingsRegularTtf, map[string]*bintree{}},
+			"Poppins-Light.ttf": &bintree{staticFontsPoppinsLightTtf, map[string]*bintree{}},
+			"Poppins-Medium.ttf": &bintree{staticFontsPoppinsMediumTtf, map[string]*bintree{}},
+			"Poppins-SemiBold.ttf": &bintree{staticFontsPoppinsSemiboldTtf, map[string]*bintree{}},
+			"Roboto-Light.ttf": &bintree{staticFontsRobotoLightTtf, map[string]*bintree{}},
+			"Roboto-LightItalic.ttf": &bintree{staticFontsRobotoLightitalicTtf, map[string]*bintree{}},
+			"Roboto-Regular.ttf": &bintree{staticFontsRobotoRegularTtf, map[string]*bintree{}},
+			"RobotoMono-Light.ttf": &bintree{staticFontsRobotomonoLightTtf, map[string]*bintree{}},
+			"glyphicons-halflings-regular.eot": &bintree{staticFontsGlyphiconsHalflingsRegularEot, map[string]*bintree{}},
+			"glyphicons-halflings-regular.svg": &bintree{staticFontsGlyphiconsHalflingsRegularSvg, map[string]*bintree{}},
+			"glyphicons-halflings-regular.ttf": &bintree{staticFontsGlyphiconsHalflingsRegularTtf, map[string]*bintree{}},
 			"glyphicons-halflings-regular.woff": &bintree{staticFontsGlyphiconsHalflingsRegularWoff, map[string]*bintree{}},
 		}},
 		"javascript": &bintree{nil, map[string]*bintree{
-			"localforage.js":                  &bintree{staticJavascriptLocalforageJs, map[string]*bintree{}},
-			"localforage.min.js":              &bintree{staticJavascriptLocalforageMinJs, map[string]*bintree{}},
-			"slippymap.crosshairs.js":         &bintree{staticJavascriptSlippymapCrosshairsJs, map[string]*bintree{}},
-			"whosonfirst.alt.init.js":         &bintree{staticJavascriptWhosonfirstAltInitJs, map[string]*bintree{}},
-			"whosonfirst.browser.alt.js":      &bintree{staticJavascriptWhosonfirstBrowserAltJs, map[string]*bintree{}},
-			"whosonfirst.browser.common.js":   &bintree{staticJavascriptWhosonfirstBrowserCommonJs, map[string]*bintree{}},
-			"whosonfirst.browser.id.init.js":  &bintree{staticJavascriptWhosonfirstBrowserIdInitJs, map[string]*bintree{}},
-			"whosonfirst.browser.id.js":       &bintree{staticJavascriptWhosonfirstBrowserIdJs, map[string]*bintree{}},
-			"whosonfirst.browser.maps.js":     &bintree{staticJavascriptWhosonfirstBrowserMapsJs, map[string]*bintree{}},
-			"whosonfirst.cache.js":            &bintree{staticJavascriptWhosonfirstCacheJs, map[string]*bintree{}},
-			"whosonfirst.geojson.js":          &bintree{staticJavascriptWhosonfirstGeojsonJs, map[string]*bintree{}},
+			"localforage.js": &bintree{staticJavascriptLocalforageJs, map[string]*bintree{}},
+			"localforage.min.js": &bintree{staticJavascriptLocalforageMinJs, map[string]*bintree{}},
+			"slippymap.crosshairs.js": &bintree{staticJavascriptSlippymapCrosshairsJs, map[string]*bintree{}},
+			"whosonfirst.browser.alt.init.js": &bintree{staticJavascriptWhosonfirstBrowserAltInitJs, map[string]*bintree{}},
+			"whosonfirst.browser.alt.js": &bintree{staticJavascriptWhosonfirstBrowserAltJs, map[string]*bintree{}},
+			"whosonfirst.browser.common.js": &bintree{staticJavascriptWhosonfirstBrowserCommonJs, map[string]*bintree{}},
+			"whosonfirst.browser.id.init.js": &bintree{staticJavascriptWhosonfirstBrowserIdInitJs, map[string]*bintree{}},
+			"whosonfirst.browser.id.js": &bintree{staticJavascriptWhosonfirstBrowserIdJs, map[string]*bintree{}},
+			"whosonfirst.browser.maps.js": &bintree{staticJavascriptWhosonfirstBrowserMapsJs, map[string]*bintree{}},
+			"whosonfirst.cache.js": &bintree{staticJavascriptWhosonfirstCacheJs, map[string]*bintree{}},
+			"whosonfirst.geojson.js": &bintree{staticJavascriptWhosonfirstGeojsonJs, map[string]*bintree{}},
 			"whosonfirst.leaflet.handlers.js": &bintree{staticJavascriptWhosonfirstLeafletHandlersJs, map[string]*bintree{}},
-			"whosonfirst.leaflet.styles.js":   &bintree{staticJavascriptWhosonfirstLeafletStylesJs, map[string]*bintree{}},
-			"whosonfirst.leaflet.utils.js":    &bintree{staticJavascriptWhosonfirstLeafletUtilsJs, map[string]*bintree{}},
-			"whosonfirst.namify.js":           &bintree{staticJavascriptWhosonfirstNamifyJs, map[string]*bintree{}},
-			"whosonfirst.net.js":              &bintree{staticJavascriptWhosonfirstNetJs, map[string]*bintree{}},
-			"whosonfirst.properties.js":       &bintree{staticJavascriptWhosonfirstPropertiesJs, map[string]*bintree{}},
-			"whosonfirst.render.js":           &bintree{staticJavascriptWhosonfirstRenderJs, map[string]*bintree{}},
-			"whosonfirst.uri.js":              &bintree{staticJavascriptWhosonfirstUriJs, map[string]*bintree{}},
-			"whosonfirst.www.js":              &bintree{staticJavascriptWhosonfirstWwwJs, map[string]*bintree{}},
+			"whosonfirst.leaflet.styles.js": &bintree{staticJavascriptWhosonfirstLeafletStylesJs, map[string]*bintree{}},
+			"whosonfirst.leaflet.utils.js": &bintree{staticJavascriptWhosonfirstLeafletUtilsJs, map[string]*bintree{}},
+			"whosonfirst.namify.js": &bintree{staticJavascriptWhosonfirstNamifyJs, map[string]*bintree{}},
+			"whosonfirst.net.js": &bintree{staticJavascriptWhosonfirstNetJs, map[string]*bintree{}},
+			"whosonfirst.properties.js": &bintree{staticJavascriptWhosonfirstPropertiesJs, map[string]*bintree{}},
+			"whosonfirst.render.js": &bintree{staticJavascriptWhosonfirstRenderJs, map[string]*bintree{}},
+			"whosonfirst.uri.js": &bintree{staticJavascriptWhosonfirstUriJs, map[string]*bintree{}},
+			"whosonfirst.www.js": &bintree{staticJavascriptWhosonfirstWwwJs, map[string]*bintree{}},
 		}},
 	}},
 }}
@@ -1024,6 +1023,7 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+
 
 func assetFS() *assetfs.AssetFS {
 	assetInfo := func(path string) (os.FileInfo, error) {
