@@ -36,6 +36,7 @@ whosonfirst.browser.alt = (function(){
 	},
 
 	'init_properties': function(){
+	    whosonfirst.browser.common.init_properties();	    
 	},
     }
     

@@ -8,13 +8,16 @@ import (
 	"github.com/whosonfirst/warning"
 	_ "log"
 	gohttp "net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 type Foo struct {
-	Id      int64
-	Feature geojson.Feature
-	URIArgs *uri.URIArgs
+	Id          int64
+	URI         string
+	Feature     geojson.Feature
+	IsAlternate bool
 }
 
 func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (*Foo, error, int) {
@@ -61,10 +64,20 @@ func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (*Foo, error, int)
 		return nil, err, gohttp.StatusInternalServerError
 	}
 
+	fname, err := uri.Id2Fname(wofid, uri_args)
+
+	if err != nil {
+		return nil, err, gohttp.StatusInternalServerError
+	}
+
+	ext := filepath.Ext(fname)
+	fname = strings.Replace(fname, ext, "", 1)
+
 	foo := &Foo{
-		Id:      wofid,
-		Feature: f,
-		URIArgs: uri_args,
+		Id:          wofid,
+		URI:         fname,
+		Feature:     f,
+		IsAlternate: uri_args.Alternate,
 	}
 
 	return foo, nil, 0

@@ -20,6 +20,8 @@ type IDHandlerOptions struct {
 
 type IDVars struct {
 	SPR          spr.StandardPlacesResult
+	URI string
+	IsAlternate bool
 	LastModified string
 	Endpoints    *Endpoints
 }
@@ -37,7 +39,7 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 	if alt_t == nil {
 		return nil, errors.New("Missing alt template")
 	}
-	
+
 	error_t := opts.Templates.Lookup("error")
 
 	if error_t == nil {
@@ -139,16 +141,18 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 		vars := IDVars{
 			SPR:          s,
+			URI: foo.URI,
+			IsAlternate: foo.IsAlternate,
 			LastModified: lastmod,
 			Endpoints:    opts.Endpoints,
 		}
 
 		t := id_t
 
-		if foo.URIArgs.Alternate {
+		if foo.IsAlternate {
 			t = alt_t
 		}
-		
+
 		RenderTemplate(rsp, t, vars)
 		return
 	}

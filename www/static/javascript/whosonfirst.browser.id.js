@@ -131,7 +131,7 @@ whosonfirst.browser.id = (function(){
 	    var id = place.getAttribute("data-whosonfirst-id");
 	    
 	    var data_url = whosonfirst.uri.id2abspath(id)
-	    // console.log("FETCH", data_url);
+	    console.log("FETCH", data_url);
 	    
 	    var on_success = function(feature){
 		
