@@ -1,7 +1,6 @@
 package http
 
 import (
-	"errors"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
@@ -9,51 +8,20 @@ import (
 	"github.com/whosonfirst/warning"
 	_ "log"
 	gohttp "net/http"
-	"path/filepath"
-	"regexp"
 	"strconv"
 )
 
-var re_wofid *regexp.Regexp
-
-func init() {
-	re_wofid = regexp.MustCompile(`^(\d+)(?:(?:\-alt\-.*)?\.[^\.]+)?$`)
-}
-
 func IdFromPath(path string) (int64, error) {
 
-	abs_path, err := filepath.Abs(path)
-
-	if err != nil {
-		return -1, err
-	}
-
-	fname := filepath.Base(abs_path)
-
-	match := re_wofid.FindAllStringSubmatch(fname, -1)
-
-	if len(match) == 0 {
-		return -1, errors.New("Unable to parse WOF ID")
-	}
-
-	if len(match[0]) != 2 {
-		return -1, errors.New("Unable to parse WOF ID")
-	}
-
-	wofid, err := strconv.ParseInt(match[0][1], 10, 64)
-
-	if err != nil {
-		return -1, err
-	}
-
-	return wofid, nil
+	wofid, _, err := IdFromURI(path)
+	return wofid, err
 }
 
 func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (geojson.Feature, error, int) {
 
 	path := req.URL.Path
 
-	wofid, err := IdFromPath(path)
+	wofid, uri_args, err := IdFromURI(path)
 
 	if err != nil {
 
@@ -73,7 +41,7 @@ func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (geojson.Feature, 
 		wofid = id
 	}
 
-	rel_path, err := uri.Id2RelPath(wofid)
+	rel_path, err := uri.Id2RelPath(wofid, uri_args)
 
 	if err != nil {
 		return nil, err, gohttp.StatusBadRequest // StatusInternalServerError
@@ -121,16 +89,16 @@ func AltFeatureFromRequest(req *gohttp.Request, r reader.Reader) (geojson.Featur
 	}
 
 	q := req.URL.Query()
-	
+
 	alt_source := q.Get("source")
-	alt_function := q.Get("function")	
+	alt_function := q.Get("function")
 
 	args := &uri.URIArgs{
 		Alternate: true,
-		Source: alt_source,
-		Function: alt_function,
+		Source:    alt_source,
+		Function:  alt_function,
 	}
-	
+
 	rel_path, err := uri.Id2RelPath(wofid, args)
 
 	if err != nil {

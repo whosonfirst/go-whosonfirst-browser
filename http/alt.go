@@ -6,7 +6,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-spr"
 	"html/template"
-	"log"
+	_ "log"
 	gohttp "net/http"
 	_ "net/url"
 	"path/filepath"
