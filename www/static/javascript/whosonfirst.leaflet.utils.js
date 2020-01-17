@@ -11,6 +11,10 @@ whosonfirst.leaflet.utils = (function(){
 				return self.draw_point(map, feature, style, handler);
 			}
 
+			if (feature["geometry"]["type"] == "MultiPoint"){
+				return self.draw_point(map, feature, style, handler);
+			}
+		    
 			self.draw_polygon(map, feature, style);
 		},
 		
@@ -21,7 +25,7 @@ whosonfirst.leaflet.utils = (function(){
 					return L.circle(latlon, style);
 				}
 			}
-			
+
 			var layer = L.geoJson(feature, {
 				'style': style,
 				'pointToLayer': handler,

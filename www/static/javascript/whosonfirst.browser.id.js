@@ -153,12 +153,23 @@ whosonfirst.browser.id = (function(){
 			"geometry": centroid_geom,
 			"properties": centroid_props
 		    };
-		    
+
 		    var feature_style = whosonfirst.leaflet.styles.polygon();
-		    whosonfirst.leaflet.utils.draw_feature(map, feature, feature_style);
-		    
 		    var centroid_style = whosonfirst.leaflet.styles.centroid();
 		    var centroid_handler = whosonfirst.leaflet.handlers.centroid(centroid_style);
+		    
+		    if (feature["geometry"]["type"] == "Point"){
+			whosonfirst.leaflet.utils.draw_point(map, feature, feature_style, centroid_handler);
+		    }
+		    
+		    else if (feature["geometry"]["type"] == "MultiPoint"){
+			whosonfirst.leaflet.utils.draw_point(map, feature, feature_style, centroid_handler);
+		    }
+
+		    else {
+			whosonfirst.leaflet.utils.draw_feature(map, feature, feature_style);
+		    }
+		    
 		    whosonfirst.leaflet.utils.draw_point(map, centroid, centroid_style, centroid_handler);
 		    
 		    whosonfirst.leaflet.utils.fit_map(map, feature);

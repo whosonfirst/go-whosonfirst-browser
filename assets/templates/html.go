@@ -93,7 +93,7 @@ func wwwTemplatesHtmlErrorHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/error.html", size: 439, mode: os.FileMode(420), modTime: time.Unix(1576562714, 0)}
+	info := bindataFileInfo{name: "www/templates/html/error.html", size: 439, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -113,7 +113,7 @@ func wwwTemplatesHtmlExampleHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/example.html", size: 339, mode: os.FileMode(420), modTime: time.Unix(1576509744, 0)}
+	info := bindataFileInfo{name: "www/templates/html/example.html", size: 339, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -133,7 +133,7 @@ func wwwTemplatesHtmlIdHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/id.html", size: 3876, mode: os.FileMode(420), modTime: time.Unix(1576772262, 0)}
+	info := bindataFileInfo{name: "www/templates/html/id.html", size: 3876, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -153,7 +153,7 @@ func wwwTemplatesHtmlInc_common_cssHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_common_css.html", size: 213, mode: os.FileMode(420), modTime: time.Unix(1576560928, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_common_css.html", size: 213, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -173,7 +173,7 @@ func wwwTemplatesHtmlInc_common_footerHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_common_footer.html", size: 150, mode: os.FileMode(420), modTime: time.Unix(1576394134, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_common_footer.html", size: 150, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -193,7 +193,7 @@ func wwwTemplatesHtmlInc_common_headerHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_common_header.html", size: 571, mode: os.FileMode(420), modTime: time.Unix(1576563704, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_common_header.html", size: 571, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -213,7 +213,7 @@ func wwwTemplatesHtmlInc_common_metaHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_common_meta.html", size: 500, mode: os.FileMode(420), modTime: time.Unix(1576394094, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_common_meta.html", size: 500, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -233,7 +233,7 @@ func wwwTemplatesHtmlInc_id_basicsHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_id_basics.html", size: 3408, mode: os.FileMode(420), modTime: time.Unix(1576512581, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_id_basics.html", size: 3408, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -253,7 +253,7 @@ func wwwTemplatesHtmlInc_id_statusHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_id_status.html", size: 2073, mode: os.FileMode(420), modTime: time.Unix(1576562666, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_id_status.html", size: 2073, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -273,7 +273,7 @@ func wwwTemplatesHtmlIndexHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/index.html", size: 405, mode: os.FileMode(420), modTime: time.Unix(1576561588, 0)}
+	info := bindataFileInfo{name: "www/templates/html/index.html", size: 405, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -293,7 +293,7 @@ func wwwTemplatesHtmlNotfoundHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/notfound.html", size: 434, mode: os.FileMode(420), modTime: time.Unix(1576562749, 0)}
+	info := bindataFileInfo{name: "www/templates/html/notfound.html", size: 434, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
