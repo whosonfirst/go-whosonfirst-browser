@@ -5,6 +5,7 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-spr"
+	"github.com/whosonfirst/go-whosonfirst-uri"
 	"html/template"
 	_ "log"
 	gohttp "net/http"
@@ -20,8 +21,9 @@ type IDHandlerOptions struct {
 
 type IDVars struct {
 	SPR          spr.StandardPlacesResult
-	URI string
-	IsAlternate bool
+	URI          string
+	URIArgs      *uri.URIArgs
+	IsAlternate  bool
 	LastModified string
 	Endpoints    *Endpoints
 }
@@ -141,8 +143,9 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 		vars := IDVars{
 			SPR:          s,
-			URI: foo.URI,
-			IsAlternate: foo.IsAlternate,
+			URI:          foo.URI,
+			URIArgs:      foo.URIArgs,
+			IsAlternate:  foo.IsAlternate,
 			LastModified: lastmod,
 			Endpoints:    opts.Endpoints,
 		}

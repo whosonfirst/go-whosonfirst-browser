@@ -17,6 +17,7 @@ type Foo struct {
 	Id          int64
 	URI         string
 	Feature     geojson.Feature
+	URIArgs     *uri.URIArgs
 	IsAlternate bool
 }
 
@@ -76,6 +77,7 @@ func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (*Foo, error, int)
 	foo := &Foo{
 		Id:          wofid,
 		URI:         fname,
+		URIArgs:     uri_args,
 		Feature:     f,
 		IsAlternate: uri_args.Alternate,
 	}

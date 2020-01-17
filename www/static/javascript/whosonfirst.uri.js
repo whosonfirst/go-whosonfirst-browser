@@ -60,6 +60,8 @@ whosonfirst.uri = (function(){
 
 		    if (args["alt"]) {
 
+			fname.push("alt");
+			
 			if (args["source"]){
 
 			    // to do: validate source here

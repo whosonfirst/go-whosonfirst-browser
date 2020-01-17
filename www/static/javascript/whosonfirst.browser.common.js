@@ -106,7 +106,20 @@ whosonfirst.browser.common = (function(){
 	    var place = document.getElementById("whosonfirst-place");
 	    var id = place.getAttribute("data-whosonfirst-id");
 	    
-	    var data_url = whosonfirst.uri.id2abspath(id)
+	    var is_alt = place.getAttribute("data-whosonfirst-is-alternate");	    
+	    var src = place.getAttribute("data-whosonfirst-alt-source");
+	    var func = place.getAttribute("data-whosonfirst-alt-function");	    
+
+	    var uri_args = {
+		'alt': is_alt,
+		'source': src,
+		'function': func,
+		'extras': [],
+	    };
+
+	    console.log("ARGS", uri_args);
+	    
+	    var data_url = whosonfirst.uri.id2abspath(id, uri_args)
 	    console.log("FETCH", data_url);
 	    
 	    var on_success = function(feature){
