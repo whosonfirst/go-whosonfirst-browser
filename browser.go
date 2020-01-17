@@ -363,22 +363,24 @@ func Start(ctx context.Context) error {
 		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, *static_prefix)
 		id_handler = tangramjs.AppendResourcesHandlerWithPrefix(id_handler, tangramjs_opts, *static_prefix)
 
+		mux.Handle(*path_id, id_handler)
+
 		/*
-		alt_opts := http.AltHandlerOptions{
-			Templates: t,
-			Endpoints: endpoints,
-		}
+			alt_opts := http.AltHandlerOptions{
+				Templates: t,
+				Endpoints: endpoints,
+			}
 
-		alt_handler, err := http.AltHandler(cr, alt_opts)
+			alt_handler, err := http.AltHandler(cr, alt_opts)
 
-		if err != nil {
-			return err
-		}
+			if err != nil {
+				return err
+			}
 
-		alt_handler = bootstrap.AppendResourcesHandlerWithPrefix(alt_handler, bootstrap_opts, *static_prefix)
-		alt_handler = tangramjs.AppendResourcesHandlerWithPrefix(alt_handler, tangramjs_opts, *static_prefix)
-		
-		mux.Handle(*path_alt, alt_handler)
+			alt_handler = bootstrap.AppendResourcesHandlerWithPrefix(alt_handler, bootstrap_opts, *static_prefix)
+			alt_handler = tangramjs.AppendResourcesHandlerWithPrefix(alt_handler, tangramjs_opts, *static_prefix)
+
+			mux.Handle(*path_alt, alt_handler)
 		*/
 
 		err = bootstrap.AppendAssetHandlersWithPrefix(mux, *static_prefix)

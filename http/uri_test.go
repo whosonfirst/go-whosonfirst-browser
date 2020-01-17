@@ -6,15 +6,10 @@ import (
 
 func TestIdFromURI(t *testing.T) {
 
-	uris := []string{
-
-	}
-
+	uris := []string{}
 
 	for _, u := range uris {
 
-		
-
 	}
-	
+
 }

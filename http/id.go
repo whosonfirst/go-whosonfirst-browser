@@ -6,7 +6,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-spr"
 	"html/template"
-	"log"
+	_ "log"
 	gohttp "net/http"
 	_ "net/url"
 	"path/filepath"
@@ -63,9 +63,7 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		log.Println("HELLO", req.URL.Path)
-		
-		f, err, _ := FeatureFromRequest(req, r)
+		foo, err, _ := FeatureFromRequest(req, r)
 
 		if err != nil {
 
@@ -78,6 +76,8 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 			RenderTemplate(rsp, error_t, vars)
 			return
 		}
+
+		f := foo.Feature
 
 		path := req.URL.Path
 		ext := filepath.Ext(path)

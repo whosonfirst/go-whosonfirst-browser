@@ -54,12 +54,14 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		f, err, status := FeatureFromRequest(req, r)
+		foo, err, status := FeatureFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
+
+		f := foo.Feature
 
 		sn_opts := sanitize.DefaultOptions()
 

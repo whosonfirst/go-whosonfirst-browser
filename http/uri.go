@@ -6,8 +6,8 @@ package http
 import (
 	"errors"
 	"github.com/whosonfirst/go-whosonfirst-uri"
-	"path/filepath"
 	"log"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,7 +16,7 @@ import (
 var re_uri *regexp.Regexp
 
 func init() {
-	re_uri = regexp.MustCompile(`^(\d+)(?:\-alt(?:\-([a-zA-Z0-9_]+(?:\-[a-zA-Z0-9_]+(?:\-[a-zA-Z0-9_\-]+)?)?)))?\.[^\.]+?$`)
+	re_uri = regexp.MustCompile(`^(\d+)(?:\-alt(?:\-([a-zA-Z0-9_]+(?:\-[a-zA-Z0-9_]+(?:\-[a-zA-Z0-9_\-]+)?)?)))?(?:\.[^\.]+|\/)?$`)
 }
 
 /*
@@ -40,8 +40,8 @@ func IdFromURI(path string) (int64, *uri.URIArgs, error) {
 
 	match := re_uri.FindStringSubmatch(fname)
 
-	log.Println("M", match)
-	
+	log.Println(fname, match)
+
 	if len(match) == 0 {
 		return -1, nil, errors.New("Unable to parse WOF ID")
 	}
@@ -55,8 +55,6 @@ func IdFromURI(path string) (int64, *uri.URIArgs, error) {
 
 	wofid, err := strconv.ParseInt(str_id, 10, 64)
 
-	log.Println(str_id, wofid, err)
-	
 	if err != nil {
 		return -1, nil, err
 	}
@@ -84,6 +82,5 @@ func IdFromURI(path string) (int64, *uri.URIArgs, error) {
 		}
 	}
 
-	log.Println("OKAY")
 	return wofid, args, nil
 }
