@@ -1,0 +1,23 @@
+{{define "inc_alt_basics"}}
+<div id="whosonfirst-details">
+</div>
+	  
+<div id="whosonfirst-basics">
+    <p>This is an alternate geometry for Who's On First ID <a href="{{ .Endpoints.Id }}{{ .SPR.Id }}" class="whosonfirst-id">{{ .SPR.Id }}</a>.</p>
+    
+    <p>Its bounding box is <a href="#" class="whosonfirst-geometry whosonfirst-geometry-boundingbox">{{ .SPR.MinLatitude}}, {{ .SPR.MinLongitude }}, {{ .SPR.MaxLatitude}}, {{ .SPR.MaxLongitude }}</a></p>
+
+    <p>Its principal centroid is <a href="#" class="whosonfirst-geometry whosonfirst-geometry-centroid">{{ .SPR.Latitude }}, {{ .SPR.Longitude }}</a>.</p>
+
+<p>
+    {{ if eq .SPR.IsCurrent.StringFlag "1" }}
+    <span class="whosonfirst-status-current">We believe this record to be current.</span>
+    {{ else if eq .SPR.IsCurrent.StringFlag "0" }}
+    <span class="whosonfirst-status-not-current">We no longer believe this record to be current.</span>
+    {{ else }}
+    {{ end }}	  
+</p>
+
+    
+</div>
+{{end}}

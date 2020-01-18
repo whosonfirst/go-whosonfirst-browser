@@ -9,7 +9,7 @@ func GeoJSONHandler(r reader.Reader) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		f, err, status := FeatureFromRequest(req, r)
+		foo, err, status := FeatureFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
@@ -17,6 +17,8 @@ func GeoJSONHandler(r reader.Reader) (gohttp.Handler, error) {
 		}
 
 		WriteGeoJSONHeaders(rsp)
+
+		f := foo.Feature
 
 		rsp.Write(f.Bytes())
 	}

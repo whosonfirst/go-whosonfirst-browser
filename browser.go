@@ -85,6 +85,7 @@ func Start(ctx context.Context) error {
 	path_cessate := flag.String("path-cessate", "/cessate/", "...")
 
 	path_id := flag.String("path-id", "/id/", "The that Who's On First documents should be served from.")
+	// path_alt := flag.String("path-alt", "/alt/", "The that Who's On First alternative geometry documents should be served from.")
 
 	flag.Parse()
 
@@ -425,6 +426,26 @@ func Start(ctx context.Context) error {
 		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, *static_prefix)
 		id_handler = tangramjs.AppendResourcesHandlerWithPrefix(id_handler, tangramjs_opts, *static_prefix)
 
+		mux.Handle(*path_id, id_handler)
+
+		/*
+			alt_opts := http.AltHandlerOptions{
+				Templates: t,
+				Endpoints: endpoints,
+			}
+
+			alt_handler, err := http.AltHandler(cr, alt_opts)
+
+			if err != nil {
+				return err
+			}
+
+			alt_handler = bootstrap.AppendResourcesHandlerWithPrefix(alt_handler, bootstrap_opts, *static_prefix)
+			alt_handler = tangramjs.AppendResourcesHandlerWithPrefix(alt_handler, tangramjs_opts, *static_prefix)
+
+			mux.Handle(*path_alt, alt_handler)
+		*/
+
 		err = bootstrap.AppendAssetHandlersWithPrefix(mux, *static_prefix)
 
 		if err != nil {
@@ -436,8 +457,6 @@ func Start(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-
-		mux.Handle(*path_id, id_handler)
 
 		err = http.AppendStaticAssetHandlersWithPrefix(mux, *static_prefix)
 

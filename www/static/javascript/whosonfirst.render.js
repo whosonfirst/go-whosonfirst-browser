@@ -87,7 +87,7 @@ whosonfirst.render = (function(){
 	},
 	
 	'render': function(props){
-	    
+
 	    var pretty = document.createElement("div");
 	    pretty.setAttribute("id", "render-pretty");
 
@@ -108,7 +108,7 @@ whosonfirst.render = (function(){
 	},
 
 	'render_bucket': function(ns, bucket){
-	    
+
 	    // var wrapper = document.createElement("div");
 
 	    var details = document.createElement("details");	    
@@ -170,19 +170,21 @@ whosonfirst.render = (function(){
 		wrapper.setAttribute("class", "render-content");
 		
 		var content;
-
+		
 		var renderer = self.get_custom_renderer('text', d, ctx);
-		// console.log("rendered for " + ctx + " : " + typeof(renderer));
+		// console.log("rendered for " + ctx + " : " + typeof(renderer), renderer);
 
 		if (renderer){
+		    // console.log("try to render for " + ctx + " with renderer");
 		    try {
 			content = renderer(d, ctx);
 		    } catch (e) {
-			console.log("UNABLE TO RENDER " + ctx + " BECAUSE " + e);
+			// console.log("UNABLE TO RENDER " + ctx + " BECAUSE " + e);
 		    }
 		}
 
 		else {
+		    // console.log("render " + ctx + " as plain text");		    
 		    content = self.render_text(d, ctx);
 		}
 
@@ -209,7 +211,7 @@ whosonfirst.render = (function(){
 		    try {
 			label_text = renderer(d, _ctx);
 		    } catch (e) {
-			console.log("UNABLE TO RENDER " + _ctx + " BECAUSE " + e);
+			// console.log("UNABLE TO RENDER " + _ctx + " BECAUSE " + e);
 		    }
 		}
 

@@ -1,7 +1,6 @@
 package http
 
 import (
-	"errors"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
@@ -10,50 +9,23 @@ import (
 	_ "log"
 	gohttp "net/http"
 	"path/filepath"
-	"regexp"
 	"strconv"
+	"strings"
 )
 
-var re_wofid *regexp.Regexp
-
-func init() {
-	re_wofid = regexp.MustCompile(`^(\d+)(?:(?:\-alt\-.*)?\.[^\.]+)?$`)
+type Foo struct {
+	Id          int64
+	URI         string
+	Feature     geojson.Feature
+	URIArgs     *uri.URIArgs
+	IsAlternate bool
 }
 
-func IdFromPath(path string) (int64, error) {
-
-	abs_path, err := filepath.Abs(path)
-
-	if err != nil {
-		return -1, err
-	}
-
-	fname := filepath.Base(abs_path)
-
-	match := re_wofid.FindAllStringSubmatch(fname, -1)
-
-	if len(match) == 0 {
-		return -1, errors.New("Unable to parse WOF ID")
-	}
-
-	if len(match[0]) != 2 {
-		return -1, errors.New("Unable to parse WOF ID")
-	}
-
-	wofid, err := strconv.ParseInt(match[0][1], 10, 64)
-
-	if err != nil {
-		return -1, err
-	}
-
-	return wofid, nil
-}
-
-func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (geojson.Feature, error, int) {
+func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (*Foo, error, int) {
 
 	path := req.URL.Path
 
-	wofid, err := IdFromPath(path)
+	wofid, uri_args, err := IdFromURI(path)
 
 	if err != nil {
 
@@ -73,7 +45,7 @@ func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (geojson.Feature, 
 		wofid = id
 	}
 
-	rel_path, err := uri.Id2RelPath(wofid)
+	rel_path, err := uri.Id2RelPath(wofid, uri_args)
 
 	if err != nil {
 		return nil, err, gohttp.StatusBadRequest // StatusInternalServerError
@@ -93,5 +65,22 @@ func FeatureFromRequest(req *gohttp.Request, r reader.Reader) (geojson.Feature, 
 		return nil, err, gohttp.StatusInternalServerError
 	}
 
-	return f, nil, 0
+	fname, err := uri.Id2Fname(wofid, uri_args)
+
+	if err != nil {
+		return nil, err, gohttp.StatusInternalServerError
+	}
+
+	ext := filepath.Ext(fname)
+	fname = strings.Replace(fname, ext, "", 1)
+
+	foo := &Foo{
+		Id:          wofid,
+		URI:         fname,
+		URIArgs:     uri_args,
+		Feature:     f,
+		IsAlternate: uri_args.Alternate,
+	}
+
+	return foo, nil, 0
 }

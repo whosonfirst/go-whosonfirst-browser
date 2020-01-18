@@ -5,6 +5,7 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-spr"
+	"github.com/whosonfirst/go-whosonfirst-uri"
 	"html/template"
 	_ "log"
 	gohttp "net/http"
@@ -20,6 +21,9 @@ type IDHandlerOptions struct {
 
 type IDVars struct {
 	SPR          spr.StandardPlacesResult
+	URI          string
+	URIArgs      *uri.URIArgs
+	IsAlternate  bool
 	LastModified string
 	Endpoints    *Endpoints
 }
@@ -30,6 +34,12 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 	if id_t == nil {
 		return nil, errors.New("Missing id template")
+	}
+
+	alt_t := opts.Templates.Lookup("alt")
+
+	if alt_t == nil {
+		return nil, errors.New("Missing alt template")
 	}
 
 	error_t := opts.Templates.Lookup("error")
@@ -63,7 +73,7 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		f, err, _ := FeatureFromRequest(req, r)
+		foo, err, _ := FeatureFromRequest(req, r)
 
 		if err != nil {
 
@@ -76,6 +86,8 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 			RenderTemplate(rsp, error_t, vars)
 			return
 		}
+
+		f := foo.Feature
 
 		path := req.URL.Path
 		ext := filepath.Ext(path)
@@ -131,11 +143,20 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 		vars := IDVars{
 			SPR:          s,
+			URI:          foo.URI,
+			URIArgs:      foo.URIArgs,
+			IsAlternate:  foo.IsAlternate,
 			LastModified: lastmod,
 			Endpoints:    opts.Endpoints,
 		}
 
-		RenderTemplate(rsp, id_t, vars)
+		t := id_t
+
+		if foo.IsAlternate {
+			t = alt_t
+		}
+
+		RenderTemplate(rsp, t, vars)
 		return
 	}
 

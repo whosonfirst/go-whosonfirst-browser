@@ -2,7 +2,7 @@ var whosonfirst = whosonfirst || {};
 
 whosonfirst.properties = (function(){
 
-	var spelunker = "http://whosonfirst.mapzen.com/spelunker/";
+	var spelunker = "http://spelunker.whosonfirst.org";	// MAYBE NOT THE SPELUNKER BUT THE BROWSER...
 	
 	var self = {
 
@@ -24,7 +24,8 @@ whosonfirst.properties = (function(){
 			}
 			
 			var possible_wof = [
-				'wof.belongsto',
+			        'wof.belongsto',
+				'wof.involves',			    
 				'wof.parent_id', 'wof.children',
 				'wof.breaches',
 				'wof.supersedes',
@@ -33,7 +34,9 @@ whosonfirst.properties = (function(){
 				'wof.hierarchy.continent_id', 'wof.hierarchy.country_id', 'wof.hierarchy.macroregion_id', 'wof.hierarchy.region_id',
 				'wof.hierarchy.county_id', 'wof.hierarchy.localadmin_id', 'wof.hierarchy.borough_id', 'wof.hierarchy.locality_id',
 				'wof.hierarchy.macrohood_id', 'wof.hierarchy.neighbourhood_id', 'wof.hierarchy.microhood_id',
-				'wof.hierarchy.campus_id', 'wof.hierarchy.venue_id',
+			        'wof.hierarchy.campus_id', 'wof.hierarchy.venue_id',
+			        'wof.hierarchy.postalcode_id',
+			        'wof.hierarchy.building_id', 'wof.hierarchy.concourse_id', 'wof.hierarchy.wing_id',
 				// No really...
 				'_global_.continent_id', '_global_.country_id', '_global_.macroregion_id', '_global_.region_id',
 				'_global_.county_id', '_global_.localadmin_id', '_global_.borough_id', '_global_.locality_id',
@@ -66,13 +69,14 @@ whosonfirst.properties = (function(){
 				'sg.city': self.render_simplegeo_city,
 				'sg.postcode': self.render_simplegeo_postcode,
 				'sg.tags': self.render_simplegeo_tags,
-				'sg.classifier': self.render_simplegeo_classifiers,
+			    	'sg.classifier': self.render_simplegeo_classifiers,
+			    	'src.geom_alt': self.render_src_geom_alt,
 			};
 			
 			var text_renderers = function(d, ctx){
 
 				var test = ctx.replace(/\#\d+/, "")
-				
+
 				if ((possible_wof.indexOf(test) != -1) && (d > 0)){
 					return self.render_wof_id;
 				}
@@ -85,11 +89,12 @@ whosonfirst.properties = (function(){
 					return self.render_simplegeo_classifiers;
 				}
 				
-				else if (text_callbacks[ctx]){
-					return text_callbacks[ctx];
+				else if (text_callbacks[test]){
+					return text_callbacks[test];
 				}
 				
-				else {
+			    else {
+					// console.log("NOPE", test, text_callbacks);
 					return null;
 				}
 			};
@@ -161,7 +166,7 @@ whosonfirst.properties = (function(){
 				
 				return function(){
 					
-					if (ctx.match(/^geom/)){
+				        if (ctx.match(/^geom/)){
 						return true;
 					}
 					
@@ -402,7 +407,18 @@ whosonfirst.properties = (function(){
 			var link = root + "tags/" + encodeURIComponent(d) + "/";
 			return whosonfirst.render.render_link(link, d, ctx);
 		},
-		
+
+		'render_src_geom_alt': function(d, ctx){
+		        var root = location.href;
+
+		    	if (root.endsWith("/")){
+			    root = root.substr(0, root.length-1);
+		        }
+		    
+			var link = root + "-alt-" + encodeURIComponent(d) + "/";
+			return whosonfirst.render.render_link(link, d, ctx);
+		},
+	    
 	};
 	
 	return self;

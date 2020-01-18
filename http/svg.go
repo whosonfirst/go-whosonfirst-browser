@@ -1,9 +1,13 @@
 package http
 
 import (
+	"errors"
+	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-svg"
+	_ "log"
 	gohttp "net/http"
 )
 
@@ -54,12 +58,14 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		f, err, status := FeatureFromRequest(req, r)
+		foo, err, status := FeatureFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
+
+		f := foo.Feature
 
 		sn_opts := sanitize.DefaultOptions()
 
@@ -92,6 +98,38 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 		opts.Height = float64(sz_info.MaxHeight)
 		opts.Width = float64(sz_info.MaxWidth)
 		opts.Writer = rsp
+
+		// to do: support for custom styles:
+		// https://github.com/whosonfirst/go-whosonfirst-browser/issues/19
+		
+		opts.StyleFunction = func(f geojson.Feature) (map[string]string, error) {
+
+			attrs := make(map[string]string)
+
+			type_rsp := gjson.GetBytes(f.Bytes(), "geometry.type")
+
+			if !type_rsp.Exists() {
+				return nil, errors.New("Missing geometry.type")
+			}
+
+			geom_type := type_rsp.String()
+			// log.Println(geom_type)
+
+			switch geom_type {
+			case "LineString":
+				attrs["fill-opacity"] = "0.0"
+				attrs["stroke-width"] = "1.0"
+				attrs["stroke-opacity"] = "2.0"
+				attrs["stroke"] = "#000"
+			case "Point", "MultiPoint":
+				// something something something
+				// https://github.com/whosonfirst/go-whosonfirst-browser/issues/18
+			default:
+				// pass
+			}
+
+			return attrs, nil
+		}
 
 		svg.FeatureToSVG(f, opts)
 	}

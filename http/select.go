@@ -34,12 +34,14 @@ func SelectHandler(r reader.Reader, opts *SelectHandlerOptions) (gohttp.Handler,
 			return
 		}
 
-		f, err, status := FeatureFromRequest(req, r)
+		foo, err, status := FeatureFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
+
+		f := foo.Feature
 
 		query_rsp := gjson.GetBytes(f.Bytes(), query)
 
