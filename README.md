@@ -41,10 +41,6 @@ If you'd like to read more about the subject of editing Who's On First documents
 * Dan Phiffer's blog posts about the [Boundary Issues editing tool](https://whosonfirst.org/blog/tags/boundaryissues/).
 * Gary Gale's [Three Steps Backwards, One Step Forwards; a Tale of Data Consistency and JSON Schema](https://whosonfirst.org/blog/2018/05/25/three-steps-backwards/).
 
-### This does not retrieve, render or display "alternate" geometries
-
-It really should but today it does not. Hopefully it will, soon.
-
 ## Install
 
 You will need to have the `Go` programming language (specifically version [1.12](https://golang.org/dl/) or higher) installed. All of this package's dependencies are bundled with the code in the `vendor` directory.
