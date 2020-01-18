@@ -100,6 +100,9 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 		opts.Width = float64(sz_info.MaxWidth)
 		opts.Writer = rsp
 
+		// to do: support for custom styles:
+		// https://github.com/whosonfirst/go-whosonfirst-browser/issues/19
+		
 		opts.StyleFunction = func(f geojson.Feature) (map[string]string, error) {
 
 			attrs := make(map[string]string)
