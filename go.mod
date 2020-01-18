@@ -19,7 +19,7 @@ require (
 	github.com/whosonfirst/go-reader-http v0.0.1
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-cli v0.1.0
-	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.0
+	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.2
 	github.com/whosonfirst/go-whosonfirst-image v0.0.1
 	github.com/whosonfirst/go-whosonfirst-spr v0.1.0
 	github.com/whosonfirst/go-whosonfirst-svg v0.0.2
