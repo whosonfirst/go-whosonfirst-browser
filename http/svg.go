@@ -2,13 +2,13 @@ package http
 
 import (
 	"errors"
+	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
-	"github.com/whosonfirst/go-whosonfirst-svg"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
-	"github.com/tidwall/gjson"
-	gohttp "net/http"
+	"github.com/whosonfirst/go-whosonfirst-svg"
 	"log"
+	gohttp "net/http"
 )
 
 type SVGSize struct {
@@ -101,29 +101,31 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 		opts.Writer = rsp
 
 		opts.StyleFunction = func(f geojson.Feature) (map[string]string, error) {
+
 			attrs := make(map[string]string)
 
 			type_rsp := gjson.GetBytes(f.Bytes(), "geometry.type")
 
-			if !type_rsp.Exists(){
+			if !type_rsp.Exists() {
 				return nil, errors.New("Missing geometry.type")
 			}
 
 			geom_type := type_rsp.String()
-			log.Println(geom_type)
-			
+			// log.Println(geom_type)
+
 			switch geom_type {
-			case "LineString":			
+			case "LineString":
 				attrs["fill-opacity"] = "0.0"
 				attrs["stroke-width"] = "1.0"
-				attrs["stroke-opacity"] = "2.0"			
+				attrs["stroke-opacity"] = "2.0"
 				attrs["stroke"] = "#000"
 			case "Point", "MultiPoint":
-				// something...
+				// something something something
+				// https://github.com/whosonfirst/go-whosonfirst-browser/issues/18
 			default:
 				// pass
 			}
-			
+
 			return attrs, nil
 		}
 

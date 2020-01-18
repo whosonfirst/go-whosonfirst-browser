@@ -37,7 +37,7 @@ func IdFromURI(path string) (int64, *uri.URIArgs, error) {
 	}
 
 	fname := filepath.Base(abs_path)
-	
+
 	match := re_uri.FindStringSubmatch(fname)
 
 	log.Println(fname, match)
