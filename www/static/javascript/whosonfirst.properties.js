@@ -24,7 +24,8 @@ whosonfirst.properties = (function(){
 			}
 			
 			var possible_wof = [
-				'wof.belongsto',
+			        'wof.belongsto',
+				'wof.involves',			    
 				'wof.parent_id', 'wof.children',
 				'wof.breaches',
 				'wof.supersedes',
@@ -33,7 +34,9 @@ whosonfirst.properties = (function(){
 				'wof.hierarchy.continent_id', 'wof.hierarchy.country_id', 'wof.hierarchy.macroregion_id', 'wof.hierarchy.region_id',
 				'wof.hierarchy.county_id', 'wof.hierarchy.localadmin_id', 'wof.hierarchy.borough_id', 'wof.hierarchy.locality_id',
 				'wof.hierarchy.macrohood_id', 'wof.hierarchy.neighbourhood_id', 'wof.hierarchy.microhood_id',
-				'wof.hierarchy.campus_id', 'wof.hierarchy.venue_id',
+			        'wof.hierarchy.campus_id', 'wof.hierarchy.venue_id',
+			        'wof.hierarchy.postalcode_id',
+			        'wof.hierarchy.building_id', 'wof.hierarchy.concourse_id', 'wof.hierarchy.wing_id',
 				// No really...
 				'_global_.continent_id', '_global_.country_id', '_global_.macroregion_id', '_global_.region_id',
 				'_global_.county_id', '_global_.localadmin_id', '_global_.borough_id', '_global_.locality_id',
