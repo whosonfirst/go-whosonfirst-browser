@@ -7,7 +7,7 @@ import (
 	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-svg"
-	"log"
+	_ "log"
 	gohttp "net/http"
 )
 

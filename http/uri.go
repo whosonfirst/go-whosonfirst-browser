@@ -6,7 +6,7 @@ package http
 import (
 	"errors"
 	"github.com/whosonfirst/go-whosonfirst-uri"
-	"log"
+	_ "log"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -40,7 +40,7 @@ func IdFromURI(path string) (int64, *uri.URIArgs, error) {
 
 	match := re_uri.FindStringSubmatch(fname)
 
-	log.Println(fname, match)
+	// log.Println(fname, match)
 
 	if len(match) == 0 {
 		return -1, nil, errors.New("Unable to parse WOF ID")

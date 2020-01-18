@@ -3,7 +3,7 @@ package http
 import (
 	"errors"
 	"html/template"
-	"log"
+	_ "log"
 	gohttp "net/http"
 )
 
@@ -25,8 +25,6 @@ func IndexHandler(opts IndexHandlerOptions) (gohttp.Handler, error) {
 	}
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
-
-		log.Println("HI", req.URL.Path)
 
 		vars := IndexVars{
 			Endpoints: opts.Endpoints,
