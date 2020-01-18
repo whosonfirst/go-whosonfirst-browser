@@ -107,6 +107,8 @@ github.com/whosonfirst/go-cache v0.0.2 h1:O6DxFeSkHPSCxmXSmsTX5tXCY8m/FStEPgglR/
 github.com/whosonfirst/go-cache v0.0.2/go.mod h1:SUK9m5/Dh2WvYGCtlu1Uxo1h+6VUaRra1QHaPSOF+gI=
 github.com/whosonfirst/go-geojson-svg v0.0.2 h1:198PG76+x7qdMtDg7VZQR9GDhTOmHAMQEIdkEg5hWrw=
 github.com/whosonfirst/go-geojson-svg v0.0.2/go.mod h1:9Ss1nPfGQailPzqzwg957XEuklQhU7rNgtqtY+c9IRM=
+github.com/whosonfirst/go-geojson-svg v0.0.3 h1:tN1AcMmLvhxweaoz/52GW1j0rPB0rfk7O59oWYOZkmA=
+github.com/whosonfirst/go-geojson-svg v0.0.3/go.mod h1:9Ss1nPfGQailPzqzwg957XEuklQhU7rNgtqtY+c9IRM=
 github.com/whosonfirst/go-reader v0.0.3 h1:q39C4kncHIF3WIFOQB8CL+1afBJzRdSHbKqGgXmjdkc=
 github.com/whosonfirst/go-reader v0.0.3/go.mod h1:TNCpgVgg71qA+jhPltXpGum8gTG5TAJYNGTMJmxFZtQ=
 github.com/whosonfirst/go-reader v0.0.4 h1:DucfFJB9IY35QU8kzdy8O99Nmn0r/gE7IIBdTg8qyMk=
@@ -135,6 +137,7 @@ github.com/whosonfirst/go-whosonfirst-image v0.0.1 h1:TihfxW7Lzk4NrZYtCNdbQGRRkJ
 github.com/whosonfirst/go-whosonfirst-image v0.0.1/go.mod h1:s1izfVHKlDVJTnY+5YDUf/6P0O5iV6eRM4MPDYAXxLQ=
 github.com/whosonfirst/go-whosonfirst-index v0.1.1/go.mod h1:vgUaNF7Y7gFrqQ67UTkkMioXdGNUY4KpSlqhGy46wfg=
 github.com/whosonfirst/go-whosonfirst-index v0.2.2/go.mod h1:n3rY2Hza4+MFtKES9C1sS4AAIkA5va/nagzvt+4ZFBw=
+github.com/whosonfirst/go-whosonfirst-index v0.2.3/go.mod h1:n3rY2Hza4+MFtKES9C1sS4AAIkA5va/nagzvt+4ZFBw=
 github.com/whosonfirst/go-whosonfirst-log v0.1.0/go.mod h1:pmgBbxZSnjGVy2nsUJBBMcFagxwIKLlmRsW7ClkXmac=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.1.0 h1:zuSk8eqeEkg42sIZ4EF71IMtphdTbG80qJsXhuZXXbM=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.1.0/go.mod h1:Jdmug2QQLbrmg+UcYGz8k575GnrOEg63vZVS46e5fMs=
@@ -146,6 +149,8 @@ github.com/whosonfirst/go-whosonfirst-sqlite v0.0.2/go.mod h1:JmSK+NaXOzmZJXkzOd
 github.com/whosonfirst/go-whosonfirst-sqlite v0.1.0/go.mod h1:mm4RnFLe1ydCn1sItwU+Jfy2SYTHNp2zMSZasmM3/1M=
 github.com/whosonfirst/go-whosonfirst-svg v0.0.2 h1:jRRqjv41nXbTso7wc1QJil3iPZTmUY/m1vtM27FN4Cg=
 github.com/whosonfirst/go-whosonfirst-svg v0.0.2/go.mod h1:OccCcByQVS1GEhaBsMekBUO/5/99KPrD7GfMgpC6f/Y=
+github.com/whosonfirst/go-whosonfirst-svg v0.0.3 h1:DVEy/2det3ia6r7J01h1jdaDuQhS/jiJHEeKKQjyIRA=
+github.com/whosonfirst/go-whosonfirst-svg v0.0.3/go.mod h1:EbRk0lvJdpFt840g1Lp//5Dy1CgdSiCr+yVGaIlSgwE=
 github.com/whosonfirst/go-whosonfirst-uri v0.1.0 h1:JMlpam0x1hVrFBMTAPY3edIHz7azfMK8lLI2kM9BgbI=
 github.com/whosonfirst/go-whosonfirst-uri v0.1.0/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=
 github.com/whosonfirst/walk v0.0.0-20160802000000-c0a349674b73681a7272f5ce6ade8ea28055059f/go.mod h1:U/1VXxlMzNZbyylg18AzEeHkGi1RXiBCMKpaM2XR+tQ=

@@ -62,7 +62,7 @@ github.com/whosonfirst/go-bindata
 github.com/whosonfirst/go-bindata-assetfs
 # github.com/whosonfirst/go-cache v0.0.2
 github.com/whosonfirst/go-cache
-# github.com/whosonfirst/go-geojson-svg v0.0.2
+# github.com/whosonfirst/go-geojson-svg v0.0.3
 github.com/whosonfirst/go-geojson-svg
 # github.com/whosonfirst/go-reader v0.0.4
 github.com/whosonfirst/go-reader
@@ -95,7 +95,7 @@ github.com/whosonfirst/go-whosonfirst-sources/sources
 # github.com/whosonfirst/go-whosonfirst-spr v0.1.0
 github.com/whosonfirst/go-whosonfirst-spr
 github.com/whosonfirst/go-whosonfirst-spr/util
-# github.com/whosonfirst/go-whosonfirst-svg v0.0.2
+# github.com/whosonfirst/go-whosonfirst-svg v0.0.3
 github.com/whosonfirst/go-whosonfirst-svg
 # github.com/whosonfirst/go-whosonfirst-uri v0.1.0
 github.com/whosonfirst/go-whosonfirst-uri

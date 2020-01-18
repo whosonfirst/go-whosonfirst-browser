@@ -1,10 +1,14 @@
 package http
 
 import (
+	"errors"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-whosonfirst-svg"
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
+	"github.com/tidwall/gjson"
 	gohttp "net/http"
+	"log"
 )
 
 type SVGSize struct {
@@ -95,6 +99,33 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 		opts.Height = float64(sz_info.MaxHeight)
 		opts.Width = float64(sz_info.MaxWidth)
 		opts.Writer = rsp
+
+		opts.StyleFunction = func(f geojson.Feature) (map[string]string, error) {
+			attrs := make(map[string]string)
+
+			type_rsp := gjson.GetBytes(f.Bytes(), "geometry.type")
+
+			if !type_rsp.Exists(){
+				return nil, errors.New("Missing geometry.type")
+			}
+
+			geom_type := type_rsp.String()
+			log.Println(geom_type)
+			
+			switch geom_type {
+			case "LineString":			
+				attrs["fill-opacity"] = "0.0"
+				attrs["stroke-width"] = "1.0"
+				attrs["stroke-opacity"] = "2.0"			
+				attrs["stroke"] = "#000"
+			case "Point", "MultiPoint":
+				// something...
+			default:
+				// pass
+			}
+			
+			return attrs, nil
+		}
 
 		svg.FeatureToSVG(f, opts)
 	}
