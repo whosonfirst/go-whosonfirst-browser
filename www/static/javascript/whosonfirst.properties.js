@@ -2,7 +2,7 @@ var whosonfirst = whosonfirst || {};
 
 whosonfirst.properties = (function(){
 
-	var spelunker = "http://whosonfirst.mapzen.com/spelunker/";
+	var spelunker = "http://spelunker.whosonfirst.org";	// MAYBE NOT THE SPELUNKER BUT THE BROWSER...
 	
 	var self = {
 
@@ -66,13 +66,14 @@ whosonfirst.properties = (function(){
 				'sg.city': self.render_simplegeo_city,
 				'sg.postcode': self.render_simplegeo_postcode,
 				'sg.tags': self.render_simplegeo_tags,
-				'sg.classifier': self.render_simplegeo_classifiers,
+			    	'sg.classifier': self.render_simplegeo_classifiers,
+			    	'src.geom_alt': self.render_src_geom_alt,
 			};
 			
 			var text_renderers = function(d, ctx){
 
 				var test = ctx.replace(/\#\d+/, "")
-				
+
 				if ((possible_wof.indexOf(test) != -1) && (d > 0)){
 					return self.render_wof_id;
 				}
@@ -85,11 +86,12 @@ whosonfirst.properties = (function(){
 					return self.render_simplegeo_classifiers;
 				}
 				
-				else if (text_callbacks[ctx]){
-					return text_callbacks[ctx];
+				else if (text_callbacks[test]){
+					return text_callbacks[test];
 				}
 				
-				else {
+			    else {
+					// console.log("NOPE", test, text_callbacks);
 					return null;
 				}
 			};
@@ -161,7 +163,7 @@ whosonfirst.properties = (function(){
 				
 				return function(){
 					
-					if (ctx.match(/^geom/)){
+				        if (ctx.match(/^geom/)){
 						return true;
 					}
 					
@@ -402,7 +404,13 @@ whosonfirst.properties = (function(){
 			var link = root + "tags/" + encodeURIComponent(d) + "/";
 			return whosonfirst.render.render_link(link, d, ctx);
 		},
-		
+
+		'render_src_geom_alt': function(d, ctx){
+			var root = location.href;
+			var link = root + "-alt-" + encodeURIComponent(d) + "/";
+			return whosonfirst.render.render_link(link, d, ctx);
+		},
+	    
 	};
 	
 	return self;
