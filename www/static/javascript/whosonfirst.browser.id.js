@@ -230,31 +230,46 @@ whosonfirst.browser.id = (function(){
 		}
 
 		var wof_el = document.getElementById("whosonfirst-wof");
+		var src_el = document.getElementById("whosonfirst-src");
+		
 		var wof_props = {};
+		var src_props = {};
 		
 		for (k in props){
 
 		    var parts = k.split(":");
-
-		    if (parts[0] != "wof"){
-			continue;
-		    }
-
+		    var ns = parts[0];
 		    var label = parts[1];
-		    wof_props[k] = props[k];
+		    
+		    switch (ns){
+			case "src":
+			    src_props[k] = props[k];
+			    break;
+			case "wof":
+			    wof_props[k] = props[k];
+			    break;
+			default:
+			    continue;
+		    }
 		}
-		
-		var pretty = whosonfirst.properties.render(wof_props);
 
-		var details = pretty.getElementsByTagName("details");
-		var details_count = details.length;
+		var append = function(el, props){
+
+		    var pretty = whosonfirst.properties.render(props);
+		    el.appendChild(pretty);
+
+		    var details = pretty.getElementsByTagName("details");
+		    var details_count = details.length;
 		
-		for (var i=0; i < details_count; i++){		    
-		    var d = details[i];
-		    d.setAttribute("open", "true");
-		}
-		
-		wof_el.appendChild(pretty);
+		    for (var i=0; i < details_count; i++){		    
+			var d = details[i];
+			d.setAttribute("open", "true");
+		    }
+		    
+		};
+
+		append(src_el, src_props);
+		append(wof_el, wof_props);
 		
 		self.init_names();				
 	    };
