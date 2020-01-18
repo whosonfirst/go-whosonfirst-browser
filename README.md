@@ -433,14 +433,11 @@ There is preliminary support for updating geometries. To do so pass in a valid G
 
 ```
 $> go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -enable-updates \
-	-update-pattern 'geometry|properties(?:.[a-zA-Z0-9-_]+){1,}' \
 	-reader-source 'fs:///usr/local/data/sfomuseum-data-exhibition/data' \
 	-writer-source 'fs:///usr/local/data/sfomuseum-data-exhibition/data'
 	
 2019/12/31 11:32:04 Listening on http://localhost:8080
 ```
-
-Note the custom `-update-pattern` flag to include geometries as a valid pattern. Update patterns, in general, are still a moving target so these details may still change.
 
 And then:
 
@@ -453,6 +450,61 @@ $> curl -s -d '{ "geometry": { "type": "Point", "coordinates": [ -121.387939, 36
 ```
 
 As of this writing geometries are only validated against a JSON Scheme definition for geometries. Coordinate values and their relationship to one another (for example winding order) are not validated yet.
+
+### Creating new records
+
+Initial (and incomplete) support for creating new records is available if the `-enable-create` flag is enabled. For example:
+
+```
+$> go run -mod vendor cmd/whosonfirst-browser/main.go \
+	-reader-source 'fs:///usr/local/data/whosonfirst-data-admin-is/data' \
+	-writer-source 'fs:///usr/local/data/whosonfirst-data-admin-is/data' \
+	-enable-all \
+	-enable-updates \
+	-enable-create
+	
+2020/01/02 10:31:14 Listening on http://localhost:8080
+```
+
+And then:
+
+```
+$> curl -s -X PUT http://localhost:8080/create/ -d '{ "geometry": { "type": "Point", "coordinates": [ 0.0, 0.0 ] }, "properties": { "wof:name": "Test Place", "wof:placetype": "microhood", "wof:parent_id": -1, "wof:repo": "whosonfirst-data-debug", "wof:country": "XX", "src:geom": "unknown" }}'
+{
+  "id": 1511799781,
+  "type": "Feature",
+  "properties": {
+    "edtf:cessation": "uuuu",
+    "edtf:inception": "uuuu",
+    "geom:area": 0,
+    "geom:bbox": "0.000000,0.000000,0.000000,0.000000",
+    "geom:latitude": 0,
+    "geom:longitude": 0,
+    "src:geom": "unknown",
+    "wof:belongsto": [],
+    "wof:country": "XX",
+    "wof:created": 1577990055,
+    "wof:geomhash": "83e15ca7275cf883624bb6fa862e15fa",
+    "wof:id": 1511799781,
+    "wof:lastmodified": 1577990055,
+    "wof:name": "Test Place",
+    "wof:parent_id": -1,
+    "wof:placetype": "microhood",
+    "wof:repo": "whosonfirst-data-debug",
+    "wof:superseded_by": [],
+    "wof:supersedes": []
+  },
+  "bbox": [
+    0, 
+    0, 
+    0, 
+    0
+  ],
+  "geometry": {"coordinates":[0,0],"type":"Point"}
+}
+```
+
+See the way coordinates are still being encoded as integers, rather than floats? That's a bug.
 
 ## Lambda
 

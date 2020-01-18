@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/aaronland/go-artisanal-integers"
@@ -10,6 +11,12 @@ import (
 	"net/http"
 	"net/url"
 )
+
+func init() {
+	ctx := context.Background()
+	cl := NewAPIClient()
+	artisanalinteger.RegisterClient(ctx, "brooklynintegers", cl)
+}
 
 // this is basically just so we can preserve backwards compatibility
 // even though the artisanalinteger.Client interface is the new new

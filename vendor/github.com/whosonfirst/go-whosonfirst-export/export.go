@@ -14,7 +14,7 @@ type Feature struct {
 	Type       string      `json:"type"`
 	Id         int64       `json:"id"`
 	Properties interface{} `json:"properties"`
-	Bbox       interface{} `json:"bbox,omitempty"`
+	Bbox       []float64   `json:"bbox,omitempty"`
 	Geometry   interface{} `json:"geometry"`
 }
 
@@ -44,7 +44,7 @@ func Prepare(feature []byte, opts options.Options) ([]byte, error) {
 
 	var err error
 
-	feature, err = properties.EnsureWOFId(feature, opts.UIDProvider())
+	feature, err = properties.EnsureWOFId(feature, opts.IDProvider())
 
 	if err != nil {
 		return nil, err

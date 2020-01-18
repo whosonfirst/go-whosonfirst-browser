@@ -1,5 +1,60 @@
 package artisanalinteger
 
+import (
+	"context"
+	"github.com/aaronland/go-roster"
+	"net/url"
+)
+
+var clients roster.Roster
+
+func ensureClients() error {
+
+	if clients == nil {
+		
+		r, err := roster.NewDefaultRoster()
+
+		if err != nil {
+			return err
+		}
+
+		clients = r
+	}
+
+	return nil
+}
+
+func RegisterClient(ctx context.Context, name string, cl Client) error {
+
+	err := ensureClients()
+
+	if err != nil {
+		return err
+	}
+
+	return clients.Register(ctx, name, cl)
+}
+
+func NewClient(ctx context.Context, uri string) (Client, error) {
+
+	u, err := url.Parse(uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	scheme := u.Scheme
+
+	i, err := clients.Driver(ctx, scheme)
+
+	if err != nil {
+		return nil, err
+	}
+
+	cl := i.(Client)
+	return cl, nil
+}
+
 type Engine interface {
 	NextInt() (int64, error)
 	LastInt() (int64, error)

@@ -1,6 +1,8 @@
-# github.com/aaronland/go-artisanal-integers v0.1.0
+# github.com/aaronland/go-artisanal-integers v0.1.1
 github.com/aaronland/go-artisanal-integers
-# github.com/aaronland/go-brooklynintegers-api v1.0.1
+# github.com/aaronland/go-artisanal-integers-proxy v0.2.0
+github.com/aaronland/go-artisanal-integers-proxy/service
+# github.com/aaronland/go-brooklynintegers-api v1.1.0
 github.com/aaronland/go-brooklynintegers-api
 # github.com/aaronland/go-http-bootstrap v0.0.5
 github.com/aaronland/go-http-bootstrap
@@ -13,8 +15,16 @@ github.com/aaronland/go-http-rewrite
 github.com/aaronland/go-http-sanitize
 # github.com/aaronland/go-http-tangramjs v0.0.5
 github.com/aaronland/go-http-tangramjs
+# github.com/aaronland/go-pool v0.0.0-20191128211702-88306299c758
+github.com/aaronland/go-pool
 # github.com/aaronland/go-roster v0.0.1
 github.com/aaronland/go-roster
+# github.com/aaronland/go-string v0.1.1
+github.com/aaronland/go-string/random
+# github.com/aaronland/go-uid v0.0.2
+github.com/aaronland/go-uid
+# github.com/aaronland/go-uid-artisanal v0.0.0-20191128230022-67bc446aa49d
+github.com/aaronland/go-uid-artisanal
 # github.com/aws/aws-lambda-go v1.10.0
 github.com/aws/aws-lambda-go/events
 github.com/aws/aws-lambda-go/lambda
@@ -103,11 +113,10 @@ github.com/whosonfirst/go-reader-http
 github.com/whosonfirst/go-sanitize
 # github.com/whosonfirst/go-whosonfirst-cli v0.1.0
 github.com/whosonfirst/go-whosonfirst-cli/flags
-# github.com/whosonfirst/go-whosonfirst-export v0.1.1
+# github.com/whosonfirst/go-whosonfirst-export v0.3.0
 github.com/whosonfirst/go-whosonfirst-export
 github.com/whosonfirst/go-whosonfirst-export/options
 github.com/whosonfirst/go-whosonfirst-export/properties
-github.com/whosonfirst/go-whosonfirst-export/uid
 # github.com/whosonfirst/go-whosonfirst-flags v0.1.0
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
@@ -120,8 +129,12 @@ github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst
 github.com/whosonfirst/go-whosonfirst-geojson-v2/utils
 # github.com/whosonfirst/go-whosonfirst-hash v0.1.0
 github.com/whosonfirst/go-whosonfirst-hash
+# github.com/whosonfirst/go-whosonfirst-id v0.0.2
+github.com/whosonfirst/go-whosonfirst-id
 # github.com/whosonfirst/go-whosonfirst-image v0.0.1
 github.com/whosonfirst/go-whosonfirst-image
+# github.com/whosonfirst/go-whosonfirst-log v0.1.0
+github.com/whosonfirst/go-whosonfirst-log
 # github.com/whosonfirst/go-whosonfirst-placetypes v0.1.0
 github.com/whosonfirst/go-whosonfirst-placetypes
 github.com/whosonfirst/go-whosonfirst-placetypes/placetypes

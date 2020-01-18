@@ -70,7 +70,8 @@ func Start(ctx context.Context) error {
 	select_pattern := flag.String("select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
 
 	enable_updates := flag.Bool("enable-updates", false, "...")
-	update_pattern := flag.String("update-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for updateable properties.")
+	enable_create := flag.Bool("enable-create", false, "...")
+	update_pattern := flag.String("update-pattern", "geometry|properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for updateable properties.")
 
 	enable_html := flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
@@ -80,7 +81,12 @@ func Start(ctx context.Context) error {
 	path_spr := flag.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
 	path_select := flag.String("path-select", "/select/", "The path that 'select' requests should be served from.")
 
+	// maybe these should just be path_id and blah blah blah REST blah blah blah GET, POST, PUT
+	// today they are now (20200102/thisisaaronland)
+
 	path_update := flag.String("path-update", "/update/", "...")
+	path_create := flag.String("path-create", "/create/", "...")
+
 	path_deprecate := flag.String("path-deprecate", "/deprecate/", "...")
 	path_cessate := flag.String("path-cessate", "/cessate/", "...")
 
@@ -288,7 +294,10 @@ func Start(ctx context.Context) error {
 		mux.Handle(*path_select, select_handler)
 	}
 
-	if *enable_updates {
+	var cw writer.Writer
+	var ed *editor.Editor
+
+	if *enable_updates || *enable_create {
 
 		wr, err := writer.NewWriter(ctx, *writer_source)
 
@@ -296,23 +305,42 @@ func Start(ctx context.Context) error {
 			return err
 		}
 
-		cw, err := cachewriter.NewCacheWriter(wr, c)
+		w, err := cachewriter.NewCacheWriter(wr, c)
 
 		if err != nil {
 			return err
 		}
 
-		pat, err := regexp.Compile(*update_pattern)
+		cw = w
+
+		valid_paths, err := regexp.Compile(*update_pattern)
 
 		if err != nil {
 			return err
 		}
 
-		ed, err := editor.NewEditor(pat)
+		e, err := editor.NewEditor(valid_paths)
 
 		if err != nil {
 			return err
 		}
+
+		cw = w
+		ed = e
+	}
+
+	if *enable_create {
+
+		create_handler, err := http.CreateHandler(cr, cw, ed)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(*path_create, create_handler)
+	}
+
+	if *enable_updates {
 
 		update_handler, err := http.UpdateHandler(cr, cw, ed)
 
