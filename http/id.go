@@ -17,6 +17,8 @@ import (
 type IDHandlerOptions struct {
 	Templates *template.Template
 	Endpoints *Endpoints
+	EnableUpdates bool
+	EnableCreate bool
 }
 
 type IDVars struct {
@@ -26,6 +28,8 @@ type IDVars struct {
 	IsAlternate  bool
 	LastModified string
 	Endpoints    *Endpoints
+	EnableUpdates bool
+	EnableCreate bool	
 }
 
 func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
@@ -148,6 +152,8 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 			IsAlternate:  foo.IsAlternate,
 			LastModified: lastmod,
 			Endpoints:    opts.Endpoints,
+			EnableUpdates: opts.EnableUpdates,
+			EnableCreate: opts.EnableCreate,
 		}
 
 		t := id_t

@@ -12,6 +12,7 @@ whosonfirst.browser.id = (function(){
 	    self.init_endpoints();
 	    self.init_map();
 	    self.init_properties();
+	    self.init_update_controls();
 	    self.init_names();
 	},
 	
@@ -23,6 +24,49 @@ whosonfirst.browser.id = (function(){
 	    if (root){
 		whosonfirst.uri.endpoint(root);
 	    }			
+	},
+
+	'init_update_controls': function(){
+
+	    self.init_cessate_controls();
+	    self.init_deprecate_controls();	    
+	},
+
+	'init_cessate_controls': function(){
+
+	    var els = document.getElementsByClassName("cessate");
+	    var count = els.length;
+
+	    for (var i=0; i < count; i++){
+
+		var el = els[i];
+		el.onclick = function(e){
+
+		    var el = e.target;
+		    var wof_id = el.getAttribute("data-whosonfirst-id");
+
+		    console.log("CESSATE", wof_id);
+		};
+	    }
+	},
+
+	'init_deprecate_controls': function(){
+
+	    var els = document.getElementsByClassName("deprecate");
+	    var count = els.length;
+
+	    for (var i=0; i < count; i++){
+
+		var el = els[i];
+		el.onclick = function(e){
+
+		    var el = e.target;
+		    var wof_id = el.getAttribute("data-whosonfirst-id");
+
+		    console.log("DEPRECATE", wof_id);
+		};
+	    }
+	    
 	},
 	
 	'init_names': function() {

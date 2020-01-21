@@ -37,8 +37,12 @@
       <script src="/javascript/whosonfirst.leaflet.styles.js"></script>
       <script src="/javascript/whosonfirst.leaflet.handlers.js"></script> 	 	 
 
+      {{ if .EnableUpdates }}
+      <script src="/javascript/whosonfirst.browser.api.js"></script>
+      {{ end }}
+      
       <script src="/javascript/whosonfirst.browser.maps.js"></script>
-      <script src="/javascript/whosonfirst.browser.common.js"></script>	       
+      <script src="/javascript/whosonfirst.browser.common.js"></script>	      
       <script src="/javascript/whosonfirst.browser.id.js"></script>
       <script src="/javascript/whosonfirst.browser.id.init.js"></script>	 
       
@@ -53,18 +57,35 @@
       {{ template "inc_common_header" .}}
 
       <main class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-uri="{{ .URI }}" data-whosonfirst-is-alt="0" data-whosonfirst-path="{{ .SPR.Path }}" data-whosonfirst-parent-id="{{ .SPR.ParentId }}" data-latitude="{{ .SPR.Latitude }}" data-longitude="{{ .SPR.Longitude }}" data-min-latitude="{{ .SPR.MinLatitude}}" data-min-longitude="{{ .SPR.MinLongitude }}" data-max-latitude="{{ .SPR.MaxLatitude}}" data-max-longitude="{{ .SPR.MaxLongitude }}">
-x
+
 	  <div class="container">
 
+	      <div class="row">
+	      </div>
+	      
 	      <div id="map" class="row">
 		  <img src="{{ .Endpoints.Svg }}{{ .URI }}" style="width:inherit; height:inherit; max-height:90%; max-width:90%;" id="map-svg" />
 	      </div>
 
+	      {{ if .EnableUpdates }}
+	      <div class="row">
+		  <div class="btn-group btn-group-toggle float-right" data-toggle="buttons">
+		      
+		      {{ if eq .SPR.IsCeased.StringFlag "0"}}
+		      <button class="btn btn-outline-warning btn-sm cessate" id="cessate-{{ .SPR.Id }}" data-whosonfirst-id="{{ .SPR.Id }}">Cessate</button>
+		      {{ end }}
+		      {{ if eq .SPR.IsDeprecated.StringFlag "0"}}		      
+		      <button class="btn btn-outline-danger btn-sm deprecate" id="deprecate-{{ .SPR.Id }}" data-whosonfirst-id="{{ .SPR.Id }}">Deprecate</button>
+		      {{ end }}
+		  </div>
+	      </div>
+	      {{ end }}
+	      
 	      <div class="row">
 		  <h3>
 		      {{ .SPR.Name }}
 		      <small><code>{{ .URI }}</code></small>
-		  </h3>		  
+		  </h3>
 	      </div>
 	      
 	      <div class="row">		  

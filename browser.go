@@ -443,6 +443,8 @@ func Start(ctx context.Context) error {
 		id_opts := http.IDHandlerOptions{
 			Templates: t,
 			Endpoints: endpoints,
+			EnableUpdates: *enable_updates,
+			EnableCreate: *enable_create,			
 		}
 
 		id_handler, err := http.IDHandler(cr, id_opts)
