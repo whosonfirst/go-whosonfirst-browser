@@ -43,9 +43,39 @@ whosonfirst.browser.id = (function(){
 		el.onclick = function(e){
 
 		    var el = e.target;
+		    var parent = el.parentNode;
+		    
 		    var wof_id = el.getAttribute("data-whosonfirst-id");
+		    var wof_name = el.getAttribute("data-whosonfirst-name");
+		    
+		    if (! confirm("Are you sure you want to cessate " + wof_name  + " ?")){
+			return false;
+		    }
 
+		    // TO DO: ASSIGN CUSTOM DATE?
+				   
+		    var on_success = function(rsp){
+			
+			// TO DO: REDRAW PROPERTIES... or not?
+			// maybe just refreshing the page is the
+			// simplest dumbest thing?
+
+			// parent.removeChild(el);
+			
+			location.href = location.href;
+		    };
+
+		    var on_error = function(err){
+
+			// TO DO: WHERE DO ERRORS GET REPORTED/DISPLAYED?			
+			console.log("ERROR", err);
+		    };
+
+		    var parse_on_success = whosonfirst.browser.api.on_success_with_json(on_success, on_error);		    
+		    whosonfirst.browser.api.cessate(wof_id, {}, parse_on_success, on_error);
+		    
 		    console.log("CESSATE", wof_id);
+		    return false;
 		};
 	    }
 	},
@@ -61,9 +91,40 @@ whosonfirst.browser.id = (function(){
 		el.onclick = function(e){
 
 		    var el = e.target;
+		    var parent = el.parentNode;
+		    
 		    var wof_id = el.getAttribute("data-whosonfirst-id");
+		    var wof_name = el.getAttribute("data-whosonfirst-name");
+		    
+		    if (! confirm("Are you sure you want to deprecate " + wof_name  + " ?")){
+			return false;
+		    }
 
+		    // TO DO: ASSIGN CUSTOM DATE?
+		    
+		    var on_success = function(rsp){
+
+			// TO DO: REDRAW PROPERTIES... or not?
+			// maybe just refreshing the page is the
+			// simplest dumbest thing?
+			
+			// parent.removeChild(el);
+
+			location.href = location.href;
+		    };
+
+		    var on_error = function(err){
+
+			// TO DO: WHERE DO ERRORS GET REPORTED/DISPLAYED?
+			console.log("ERROR", err);
+		    };
+
+		    var parse_on_success = whosonfirst.browser.api.on_success_with_json(on_success, on_error);
+		    
+		    whosonfirst.browser.api.deprecate(wof_id, {}, parse_on_success, on_error);
+		    
 		    console.log("DEPRECATE", wof_id);
+		    return false;
 		};
 	    }
 	    

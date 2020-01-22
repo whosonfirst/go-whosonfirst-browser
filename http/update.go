@@ -33,7 +33,7 @@ func UpdateHandler(r reader.Reader, wr writer.Writer, ed *editor.Editor) (gohttp
 		}
 
 		f := foo.Feature
-		
+
 		var update_req *editor.UpdateRequest
 
 		decoder := json.NewDecoder(req.Body)

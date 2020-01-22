@@ -30,7 +30,7 @@ func CessationHandler(r reader.Reader, wr writer.Writer, ed *editor.Editor) (goh
 		}
 
 		f := foo.Feature
-		
+
 		err = req.ParseMultipartForm(1024) // something something something... maybe?
 
 		if err != nil {

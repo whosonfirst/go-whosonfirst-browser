@@ -15,21 +15,21 @@ import (
 )
 
 type IDHandlerOptions struct {
-	Templates *template.Template
-	Endpoints *Endpoints
+	Templates     *template.Template
+	Endpoints     *Endpoints
 	EnableUpdates bool
-	EnableCreate bool
+	EnableCreate  bool
 }
 
 type IDVars struct {
-	SPR          spr.StandardPlacesResult
-	URI          string
-	URIArgs      *uri.URIArgs
-	IsAlternate  bool
-	LastModified string
-	Endpoints    *Endpoints
+	SPR           spr.StandardPlacesResult
+	URI           string
+	URIArgs       *uri.URIArgs
+	IsAlternate   bool
+	LastModified  string
+	Endpoints     *Endpoints
 	EnableUpdates bool
-	EnableCreate bool	
+	EnableCreate  bool
 }
 
 func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
@@ -146,14 +146,14 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 		*/
 
 		vars := IDVars{
-			SPR:          s,
-			URI:          foo.URI,
-			URIArgs:      foo.URIArgs,
-			IsAlternate:  foo.IsAlternate,
-			LastModified: lastmod,
-			Endpoints:    opts.Endpoints,
+			SPR:           s,
+			URI:           foo.URI,
+			URIArgs:       foo.URIArgs,
+			IsAlternate:   foo.IsAlternate,
+			LastModified:  lastmod,
+			Endpoints:     opts.Endpoints,
 			EnableUpdates: opts.EnableUpdates,
-			EnableCreate: opts.EnableCreate,
+			EnableCreate:  opts.EnableCreate,
 		}
 
 		t := id_t

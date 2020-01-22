@@ -46,7 +46,7 @@ func DefaultIDService(ctx context.Context) (artisanalinteger.Service, error) {
 	}
 
 	svc_opts.Pool = pl
-	svc_opts.Minimum = 1
+	svc_opts.Minimum = 0 // PLEASE MAKE THIS A FLAG (20200122/thisisaaronland)
 
 	return service.NewProxyService(svc_opts, cl)
 }
@@ -376,7 +376,7 @@ func (ed *Editor) ensureValidProperty(ctx context.Context, abs_path string, valu
 	}
 
 	// if name:* check https://github.com/whosonfirst/go-whosonfirst-names
-	
+
 	return nil
 }
 

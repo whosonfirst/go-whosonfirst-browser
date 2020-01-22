@@ -23,14 +23,14 @@ func DeprecationHandler(r reader.Reader, wr writer.Writer, ed *editor.Editor) (g
 		}
 
 		foo, err, status := FeatureFromRequest(req, r)
-		
+
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
 
 		f := foo.Feature
-		
+
 		err = req.ParseMultipartForm(1024) // something something something... maybe?
 
 		if err != nil {
