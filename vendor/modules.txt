@@ -19,6 +19,12 @@ github.com/aws/aws-lambda-go/lambda/messages
 github.com/aws/aws-lambda-go/lambdacontext
 # github.com/go-ini/ini v1.42.0
 github.com/go-ini/ini
+# github.com/golang/protobuf v1.2.0
+github.com/golang/protobuf/proto
+# github.com/google/go-github v17.0.0+incompatible
+github.com/google/go-github/github
+# github.com/google/go-querystring v1.0.0
+github.com/google/go-querystring/query
 # github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-multierror v0.0.0-20171204182908-b7773ae21874
@@ -66,6 +72,8 @@ github.com/whosonfirst/go-cache
 github.com/whosonfirst/go-geojson-svg
 # github.com/whosonfirst/go-reader v0.0.4
 github.com/whosonfirst/go-reader
+# github.com/whosonfirst/go-reader-github v0.1.1
+github.com/whosonfirst/go-reader-github
 # github.com/whosonfirst/go-reader-http v0.0.1
 github.com/whosonfirst/go-reader-http
 # github.com/whosonfirst/go-sanitize v0.1.0
@@ -109,6 +117,11 @@ golang.org/x/image/vector
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
+golang.org/x/net/context/ctxhttp
+golang.org/x/net/context
+# golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
+golang.org/x/oauth2
+golang.org/x/oauth2/internal
 # golang.org/x/text v0.3.2
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
@@ -127,3 +140,11 @@ golang.org/x/text/runes
 golang.org/x/text/internal/language
 golang.org/x/text/internal/language/compact
 golang.org/x/text/internal/tag
+# google.golang.org/appengine v1.4.0
+google.golang.org/appengine/urlfetch
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/urlfetch
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/remote_api
