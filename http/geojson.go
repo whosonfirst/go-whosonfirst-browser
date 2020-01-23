@@ -9,14 +9,14 @@ func GeoJSONHandler(r reader.Reader) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		foo, err, status := FeatureFromRequest(req, r)
+		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
 
-		f := foo.Feature
+		f := uri.Feature
 
 		rsp.Header().Set("Content-Type", "application/json")
 		rsp.Header().Set("Access-Control-Allow-Origin", "*")

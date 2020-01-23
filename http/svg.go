@@ -58,14 +58,14 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		foo, err, status := FeatureFromRequest(req, r)
+		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
 
-		f := foo.Feature
+		f := uri.Feature
 
 		sn_opts := sanitize.DefaultOptions()
 
@@ -102,7 +102,7 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 
 		// to do: support for custom styles:
 		// https://github.com/whosonfirst/go-whosonfirst-browser/issues/19
-		
+
 		opts.StyleFunction = func(f geojson.Feature) (map[string]string, error) {
 
 			attrs := make(map[string]string)
