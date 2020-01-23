@@ -69,7 +69,7 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (gohttp.Handler, error)
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		foo, err, status := FeatureFromRequest(req, r)
+		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
@@ -110,7 +110,7 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (gohttp.Handler, error)
 		content_type := fmt.Sprintf("image/%s", opts.Format)
 		rsp.Header().Set("Content-Type", content_type)
 
-		f := foo.Feature
+		f := uri.Feature
 		image.FeatureToPNG(f, img_opts)
 	}
 

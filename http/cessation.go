@@ -22,14 +22,14 @@ func CessationHandler(r reader.Reader, wr writer.Writer, ed *editor.Editor) (goh
 			return
 		}
 
-		foo, err, status := FeatureFromRequest(req, r)
+		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
 
-		f := foo.Feature
+		f := uri.Feature
 
 		err = req.ParseMultipartForm(1024) // something something something... maybe?
 

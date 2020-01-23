@@ -77,7 +77,7 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 
-		foo, err, _ := FeatureFromRequest(req, r)
+		uri, err, _ := ParseURIFromRequest(req, r)
 
 		if err != nil {
 
@@ -91,7 +91,7 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 			return
 		}
 
-		f := foo.Feature
+		f := uri.Feature
 
 		path := req.URL.Path
 		ext := filepath.Ext(path)
@@ -147,9 +147,9 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 		vars := IDVars{
 			SPR:           s,
-			URI:           foo.URI,
-			URIArgs:       foo.URIArgs,
-			IsAlternate:   foo.IsAlternate,
+			URI:           uri.URI,
+			URIArgs:       uri.URIArgs,
+			IsAlternate:   uri.IsAlternate,
 			LastModified:  lastmod,
 			Endpoints:     opts.Endpoints,
 			EnableUpdates: opts.EnableUpdates,
@@ -158,7 +158,7 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 
 		t := id_t
 
-		if foo.IsAlternate {
+		if uri.IsAlternate {
 			t = alt_t
 		}
 

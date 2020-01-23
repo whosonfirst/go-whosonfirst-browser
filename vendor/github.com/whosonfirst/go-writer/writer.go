@@ -3,6 +3,7 @@ package writer
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/url"
 	"sort"
@@ -40,7 +41,7 @@ func NewWriter(ctx context.Context, uri string) (Writer, error) {
 	r, ok := writers[nrml_name]
 
 	if !ok {
-		return nil, errors.New("Unknown Writer")
+		return nil, errors.New(fmt.Sprintf("Unknown writer '%s' (normalized as '%s')", name, nrml_name))
 	}
 
 	err = r.Open(ctx, uri)

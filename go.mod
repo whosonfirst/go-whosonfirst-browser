@@ -19,8 +19,8 @@ require (
 	github.com/lestrrat-go/structinfo v0.0.0-20190212233437-acd51874663b // indirect
 	github.com/sfomuseum/go-http-tilezen v0.0.2
 	github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e // indirect
-	github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e // indirect
-	github.com/tidwall/gjson v1.3.5
+	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9 // indirect
+	github.com/tidwall/gjson v1.3.6
 	github.com/tidwall/sjson v1.0.4
 	github.com/whosonfirst/algnhsa v0.1.0
 	github.com/whosonfirst/go-bindata v0.1.0
@@ -37,9 +37,9 @@ require (
 	github.com/whosonfirst/go-whosonfirst-placetypes v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spr v0.1.0
 	github.com/whosonfirst/go-whosonfirst-svg v0.0.3
-	github.com/whosonfirst/go-whosonfirst-uri v0.1.0
-	github.com/whosonfirst/go-writer v0.0.3
+	github.com/whosonfirst/go-whosonfirst-uri v0.2.0
+	github.com/whosonfirst/go-writer v0.0.4
 	github.com/whosonfirst/go-writer-github v0.0.1
 	github.com/whosonfirst/warning v0.1.0
-	golang.org/x/image v0.0.0-20191214001246-9130b4cfad52 // indirect
+	golang.org/x/image v0.0.0-20200119044424-58c23975cae1 // indirect
 )
