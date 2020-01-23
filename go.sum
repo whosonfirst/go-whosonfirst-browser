@@ -153,6 +153,8 @@ github.com/whosonfirst/go-whosonfirst-svg v0.0.3 h1:DVEy/2det3ia6r7J01h1jdaDuQhS
 github.com/whosonfirst/go-whosonfirst-svg v0.0.3/go.mod h1:EbRk0lvJdpFt840g1Lp//5Dy1CgdSiCr+yVGaIlSgwE=
 github.com/whosonfirst/go-whosonfirst-uri v0.1.0 h1:JMlpam0x1hVrFBMTAPY3edIHz7azfMK8lLI2kM9BgbI=
 github.com/whosonfirst/go-whosonfirst-uri v0.1.0/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=
+github.com/whosonfirst/go-whosonfirst-uri v0.2.0 h1:iODHdyvW+8IXqHZTixZ/9GEZy1dVKGj6dMRg7fn0d2M=
+github.com/whosonfirst/go-whosonfirst-uri v0.2.0/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=
 github.com/whosonfirst/walk v0.0.0-20160802000000-c0a349674b73681a7272f5ce6ade8ea28055059f/go.mod h1:U/1VXxlMzNZbyylg18AzEeHkGi1RXiBCMKpaM2XR+tQ=
 github.com/whosonfirst/walk v0.0.0-20160803014805-c0a349674b73/go.mod h1:U/1VXxlMzNZbyylg18AzEeHkGi1RXiBCMKpaM2XR+tQ=
 github.com/whosonfirst/warning v0.1.0 h1:NgMa6a6Xv7FdDNgpqK5j/FDo6qrcFzFtidAExDqPfC0=
