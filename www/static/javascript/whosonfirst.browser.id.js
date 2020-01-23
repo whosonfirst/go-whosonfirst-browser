@@ -52,8 +52,26 @@ whosonfirst.browser.id = (function(){
 			return false;
 		    }
 
-		    // TO DO: ASSIGN CUSTOM DATE?
-				   
+		    var cessate_args = {};
+		    
+		    var str_date = prompt("Add a custom cessation date?")
+
+		    if (str_date){
+
+			var dt = new Date(str_date);
+
+			if (! dt){
+			    console.log("Invalid date");
+			    return false;
+			}
+
+			var iso_date = dt.toISOString();
+			var iso_parts = iso_date.split("T");
+			var ymd = iso_parts[0];
+			
+			cessate_args["edtf:cessation"] = ymd;
+		    }
+		    
 		    var on_success = function(rsp){
 			
 			// TO DO: REDRAW PROPERTIES... or not?
@@ -70,9 +88,9 @@ whosonfirst.browser.id = (function(){
 			// TO DO: WHERE DO ERRORS GET REPORTED/DISPLAYED?			
 			console.log("ERROR", err);
 		    };
-
+		    
 		    var parse_on_success = whosonfirst.browser.api.on_success_with_json(on_success, on_error);		    
-		    whosonfirst.browser.api.cessate(wof_id, {}, parse_on_success, on_error);
+		    whosonfirst.browser.api.cessate(wof_id, cessate_args, parse_on_success, on_error);
 		    
 		    console.log("CESSATE", wof_id);
 		    return false;
@@ -100,8 +118,6 @@ whosonfirst.browser.id = (function(){
 			return false;
 		    }
 
-		    // TO DO: ASSIGN CUSTOM DATE?
-		    
 		    var on_success = function(rsp){
 
 			// TO DO: REDRAW PROPERTIES... or not?

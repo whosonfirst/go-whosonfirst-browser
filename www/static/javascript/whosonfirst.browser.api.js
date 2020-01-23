@@ -54,7 +54,7 @@ whosonfirst.browser.api = (function(){
 	    var form_data = new FormData();
 		
 	    for (key in args){
-		form_data.append(key, data[key]);
+		form_data.append(key, args[key]);
 	    }
 	    
 	    var on_load = function(rsp){
