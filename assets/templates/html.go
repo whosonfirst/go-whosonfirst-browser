@@ -95,7 +95,7 @@ func wwwTemplatesHtmlAltHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/alt.html", size: 4146, mode: os.FileMode(420), modTime: time.Unix(1579802773, 0)}
+	info := bindataFileInfo{name: "www/templates/html/alt.html", size: 4146, mode: os.FileMode(420), modTime: time.Unix(1579803216, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -155,7 +155,7 @@ func wwwTemplatesHtmlIdHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/id.html", size: 4061, mode: os.FileMode(420), modTime: time.Unix(1579801806, 0)}
+	info := bindataFileInfo{name: "www/templates/html/id.html", size: 4061, mode: os.FileMode(420), modTime: time.Unix(1579804216, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
