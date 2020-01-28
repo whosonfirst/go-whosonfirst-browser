@@ -124,7 +124,7 @@ whosonfirst.browser.id = (function(){
 			return false;
 		    }
 
-		    var cessate_args = {};
+		    var props = {};
 		    
 		    var str_date = prompt("Add a custom cessation date?")
 
@@ -141,7 +141,7 @@ whosonfirst.browser.id = (function(){
 			var iso_parts = iso_date.split("T");
 			var ymd = iso_parts[0];
 			
-			cessate_args["edtf:cessation"] = ymd;
+			props["edtf:cessation"] = ymd;
 		    }
 		    
 		    var on_success = function(rsp){
@@ -159,7 +159,11 @@ whosonfirst.browser.id = (function(){
 			// TO DO: WHERE DO ERRORS GET REPORTED/DISPLAYED?			
 			console.log("ERROR", err);
 		    };
-		    
+
+		    var cessate_args = {
+			"properties": props,
+		    };
+				    
 		    var parse_on_success = whosonfirst.browser.api.on_success_with_json(on_success, on_error);		    
 		    whosonfirst.browser.api.cessate(wof_id, cessate_args, parse_on_success, on_error);
 		    

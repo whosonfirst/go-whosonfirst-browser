@@ -40,7 +40,7 @@ whosonfirst.browser.api = (function(){
 
 	'deprecate': function(id, args, on_success, on_error){
 	    var endpoint = "/deprecate/" + id;
-	    return self.execute_method('DELETE', endpoint, args, on_success, on_error);
+	    return self.execute_method('POST', endpoint, args, on_success, on_error);
 	},
 
 	'update': function(id, args, on_success, on_error){

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-browser/editor"
 	"github.com/whosonfirst/go-whosonfirst-browser/export"
@@ -31,19 +32,24 @@ func DeprecationHandler(r reader.Reader, wr writer.Writer, ed *editor.Editor) (g
 
 		f := uri.Feature
 
-		err = req.ParseMultipartForm(1024) // something something something... maybe?
+		var update_req *editor.UpdateRequest
+
+		decoder := json.NewDecoder(req.Body)
+		err = decoder.Decode(&update_req)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)
+			return
 		}
 
-		date := req.FormValue("edtf:deprecated")
+		date, _ := update_req.Properties["edtf:deprecated"]
 
 		var t time.Time
 
-		if date != "" {
+		if date != nil {
 
-			date_t, err := time.Parse("2006-01-02", date)
+			str_date := date.(string)
+			date_t, err := time.Parse("2006-01-02", str_date)
 
 			if err != nil {
 				gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)

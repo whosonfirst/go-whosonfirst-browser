@@ -365,14 +365,14 @@ $> go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -enable-update
 There is a general purpose `/update/` endpoint for updating WOF properties:
 
 ```
-$> curl -s -X POST -d '{"properties":{"wof:name": "BOB"}}' 'http://localhost:8080/update/101736545' | grep 'wof:name'
+$> curl -X POST -d '{"properties":{"wof:name": "BOB"}}' 'http://localhost:8080/update/101736545' | grep 'wof:name'
     "wof:name": "BOB",
 ```
 
 Properties are validated using the `wof-properties.json` JSON Schema definition in the [whosonfirst-json-schema](https://github.com/whosonfirst/whosonfirst-json-schema) package:
 
 ```
-$> curl -s -X POST -d '{"properties":{"wof:name": ["CAR", "BOB"]}}' 'http://localhost:8080/update/101736545'
+$> curl -X POST -d '{"properties":{"wof:name": ["CAR", "BOB"]}}' 'http://localhost:8080/update/101736545'
 'properties.wof:name' property failed validation: validator 0xc0002cea80 failed: could not validate against any of the constraints
 ```
 
@@ -381,12 +381,12 @@ $> curl -s -X POST -d '{"properties":{"wof:name": ["CAR", "BOB"]}}' 'http://loca
 There are also handy `/deprecate/` and `/cessate/` endpoints for deprecating and cessating records:
 
 ```
-$> curl -s -X POST 'http://localhost:8080/deprecate/101736545' | grep 'deprecated'
+$> curl -X POST 'http://localhost:8080/deprecate/101736545' | grep 'deprecated'
     "edtf:deprecated": "2019-12-27",
 ```
 
 ```
-$> curl -s -X POST 'http://localhost:8080/cessate/101736545' | grep 'edtf:'
+$> curl -X POST 'http://localhost:8080/cessate/101736545' | grep 'edtf:'
     "edtf:cessation": "2019-12-27",
     "edtf:inception": "1642-05-17",
 ```
@@ -394,14 +394,14 @@ $> curl -s -X POST 'http://localhost:8080/cessate/101736545' | grep 'edtf:'
 Or with a specific date:
 
 ```
-$> curl -s -F 'edtf:deprecated=2001-05-21' http://localhost:8080/deprecate/1108962799 | grep edtf
+$> curl -X POST -d '{"properties": {"edtf:deprecated":"2001-05-21"}}' http://localhost:8080/deprecate/1108962799 | grep edtf
     "edtf:cessation": "uuuu",
     "edtf:deprecated": "2001-05-21",
     "edtf:inception": "uuuu",
 ```    
 
 ```
-$> curl -s -F 'edtf:cessation=2018-06-22' http://localhost:8080/cessate/1108962799 | grep edtf
+$> curl -X POST -d '{"properties":{"edtf:cessation":"2018-06-22"}}' http://localhost:8080/cessate/1108962799 | grep edtf
     "edtf:cessation": "2018-06-22",
     "edtf:inception": "uuuu",
 ```
@@ -413,7 +413,7 @@ As of this writing only `YYYY-MM-DD` dates are supported.
 There is preliminary support for removing properties. To do so assing a `null` value to the path you want to delete. For example:
 
 ```
-$> curl -d '{ "properties": { "wof:hierarchy.0.neighbourhood_id": null }}' http://localhost:8080/update/1377462865
+$> curl -X POST -d '{ "properties": { "wof:hierarchy.0.neighbourhood_id": null }}' http://localhost:8080/update/1377462865
 ```
 
 There is also preliminary support for validating all properties using the Who's On First JSON schema. As of this writing errors are logged but do not stop features from being exported. For example:
