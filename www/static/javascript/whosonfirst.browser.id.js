@@ -28,10 +28,85 @@ whosonfirst.browser.id = (function(){
 
 	'init_update_controls': function(){
 
+	    self.init_current_controls();	    
 	    self.init_cessate_controls();
 	    self.init_deprecate_controls();	    
 	},
 
+	'init_current_controls': function(){
+
+	    var els = document.getElementsByClassName("current");
+	    var count = els.length;
+
+	    for (var i=0; i < count; i++){
+
+		var el = els[i];
+		el.onclick = function(e){
+
+		    var el = e.target;
+		    var parent = el.parentNode;
+		    
+		    var wof_id = el.getAttribute("data-whosonfirst-id");
+		    var wof_name = el.getAttribute("data-whosonfirst-name");
+		    
+		    if (! confirm("Are you sure you want to mark " + wof_name  + " as current ?")){
+			return false;
+		    }
+
+		    var props = {
+			"mz:is_current": 1,
+		    };
+		    
+		    var str_date = prompt("Add a custom inception date?")
+
+		    if (str_date){
+
+			var dt = new Date(str_date);
+
+			if (! dt){
+			    console.log("Invalid date");
+			    return false;
+			}
+
+			var iso_date = dt.toISOString();
+			var iso_parts = iso_date.split("T");
+			var ymd = iso_parts[0];
+			
+			props["edtf:inception"] = ymd;
+		    }
+
+		    var update_args = {
+			'properties': props,
+		    };
+
+		    console.log("UPDATE", update_args);
+		    
+		    var on_success = function(rsp){
+			
+			// TO DO: REDRAW PROPERTIES... or not?
+			// maybe just refreshing the page is the
+			// simplest dumbest thing?
+
+			// parent.removeChild(el);
+			
+			location.href = location.href;
+		    };
+
+		    var on_error = function(err){
+
+			// TO DO: WHERE DO ERRORS GET REPORTED/DISPLAYED?			
+			console.log("ERROR", err);
+		    };
+		    
+		    var parse_on_success = whosonfirst.browser.api.on_success_with_json(on_success, on_error);		    
+		    whosonfirst.browser.api.update(wof_id, update_args, parse_on_success, on_error);
+		    
+		    console.log("CESSATE", wof_id);
+		    return false;
+		};
+	    }
+	},
+	
 	'init_cessate_controls': function(){
 
 	    var els = document.getElementsByClassName("cessate");

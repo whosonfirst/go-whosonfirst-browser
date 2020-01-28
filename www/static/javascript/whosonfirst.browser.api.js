@@ -51,10 +51,23 @@ whosonfirst.browser.api = (function(){
 
 	'execute_method': function(method, endpoint, args, on_success, on_error){
 
-	    var form_data = new FormData();
-		
-	    for (key in args){
-		form_data.append(key, args[key]);
+	    var form_data;
+
+	    switch(method){
+		case "GET":
+		    form_data = new FormData();
+
+		    for (key in args){
+			form_data.append(key, args[key]);
+		    }
+		    
+		    break;
+		case "POST":
+		    form_data = JSON.stringify(args);
+		case "PUT":
+		    form_data = JSON.stringify(args);
+		default:
+		    //
 	    }
 	    
 	    var on_load = function(rsp){

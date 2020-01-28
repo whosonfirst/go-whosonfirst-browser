@@ -15,7 +15,7 @@ type UpdateRequestGeometry struct {
 }
 
 type UpdateRequest struct {
-	Geometry   *UpdateRequestGeometry `json:"geometry"`
+	Geometry   *UpdateRequestGeometry `json:"geometry,omitempty"`
 	Properties map[string]interface{} `json:"properties"`
 }
 

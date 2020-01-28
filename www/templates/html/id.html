@@ -70,12 +70,16 @@
 	      {{ if .EnableUpdates }}
 	      <div class="row" style="margin-bottom:1rem;margin-right:1rem;float:right;">
 		  <div class="btn-group btn-group-toggle float-right" data-toggle="buttons">
+
+		      {{ if eq .SPR.IsCurrent.StringFlag "-1" }}
+		      <button class="btn btn-outline-info btn-sm current" id="current-{{ .SPR.Id }}" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-name="{{ .SPR.Name }}">current</button>
+		      {{ end }}
 		      
 		      {{ if ne .SPR.IsCeased.StringFlag "1"}}
-		      <button class="btn btn-outline-warning btn-sm cessate" id="cessate-{{ .SPR.Id }}" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-name="{{ .SPR.Name }}">Cessate</button>
+		      <button class="btn btn-outline-warning btn-sm cessate" id="cessate-{{ .SPR.Id }}" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-name="{{ .SPR.Name }}">no longer current</button>
 		      {{ end }}
 		      {{ if ne .SPR.IsDeprecated.StringFlag "1"}}		      
-		      <button class="btn btn-outline-danger btn-sm deprecate" id="deprecate-{{ .SPR.Id }}" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-name="{{ .SPR.Name }}">Deprecate</button>
+		      <button class="btn btn-outline-danger btn-sm deprecate" id="deprecate-{{ .SPR.Id }}" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-name="{{ .SPR.Name }}">deprecated</button>
 		      {{ end }}
 		  </div>
 	      </div>
