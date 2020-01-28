@@ -287,6 +287,9 @@ whosonfirst.browser.id = (function(){
 		// (20171224/thisisaaronland)
 		
 		var props = feature["properties"];
+		self.draw_properties(props);
+		
+		/*
 		var props_str = JSON.stringify(props, null, "\t");
 		
 		var props_raw = document.createElement("pre");
@@ -334,7 +337,6 @@ whosonfirst.browser.id = (function(){
 		catch (e) {
 		    raw_el.appendChild(button_raw);				
 		    raw_el.appendChild(props_raw);
-		    console.log("PRETTY", "ERR", e);
 		}
 
 		var wof_el = document.getElementById("whosonfirst-wof");
@@ -379,7 +381,8 @@ whosonfirst.browser.id = (function(){
 		append(src_el, src_props);
 		append(wof_el, wof_props);
 		
-		self.init_names();				
+		self.init_names();
+		*/
 	    };
 	    
 	    var on_error = function(rsp){
@@ -391,6 +394,102 @@ whosonfirst.browser.id = (function(){
 	    };
 	    
 	    whosonfirst.net.fetch(data_url, on_success, on_error);
+	},
+
+	'draw_properties': function(props){
+
+		var props_str = JSON.stringify(props, null, "\t");
+		
+		var props_raw = document.createElement("pre");
+		props_raw.appendChild(document.createTextNode(props_str));
+		
+		var raw_el = document.getElementById("whosonfirst-properties-raw");
+		var pretty_el = document.getElementById("whosonfirst-properties-pretty");
+		
+		var button_raw = document.createElement("button");
+		button_raw.setAttribute("class", "raw-pretty");
+		button_raw.appendChild(document.createTextNode("show pretty"));
+		
+		button_raw.onclick = function(){
+		    raw_el.style.display = "none";
+		    pretty_el.style.display = "block";					
+		};
+		
+		var button_pretty = document.createElement("button");
+		button_pretty.setAttribute("class", "raw-pretty");				
+		button_pretty.appendChild(document.createTextNode("show raw"));
+		
+		button_pretty.onclick = function(){
+		    pretty_el.style.display = "none";
+		    raw_el.style.display = "block";					
+		};
+		
+		try {
+		    var props_pretty = whosonfirst.properties.render(props);
+		    
+		    if (props_pretty){
+			raw_el.style.display = "none";
+			
+			raw_el.appendChild(button_raw);
+			raw_el.appendChild(props_raw);
+			
+			pretty_el.appendChild(button_pretty);
+			pretty_el.appendChild(props_pretty);
+		    }
+		    
+		    else {
+			throw "Failed to generate pretty properties";
+		    }
+		}
+		
+		catch (e) {
+		    raw_el.appendChild(button_raw);				
+		    raw_el.appendChild(props_raw);
+		}
+
+		var wof_el = document.getElementById("whosonfirst-wof");
+		var src_el = document.getElementById("whosonfirst-src");
+		
+		var wof_props = {};
+		var src_props = {};
+		
+		for (k in props){
+
+		    var parts = k.split(":");
+		    var ns = parts[0];
+		    var label = parts[1];
+		    
+		    switch (ns){
+			case "src":
+			    src_props[k] = props[k];
+			    break;
+			case "wof":
+			    wof_props[k] = props[k];
+			    break;
+			default:
+			    continue;
+		    }
+		}
+
+		var append = function(el, props){
+
+		    var pretty = whosonfirst.properties.render(props);
+		    el.appendChild(pretty);
+
+		    var details = pretty.getElementsByTagName("details");
+		    var details_count = details.length;
+		
+		    for (var i=0; i < details_count; i++){		    
+			var d = details[i];
+			d.setAttribute("open", "true");
+		    }
+		    
+		};
+
+		append(src_el, src_props);
+		append(wof_el, wof_props);
+		
+		self.init_names();
 	}
     }
     
