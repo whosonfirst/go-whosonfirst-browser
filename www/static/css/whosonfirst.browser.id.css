@@ -16,10 +16,10 @@ table td ul li {
 }
 
 #map {
-    height: 350px;
-    width: 100%;
-    border: solid 3px #000;
-    margin-bottom:1em;
+	height: 350px;
+	// width: 100%;
+	border: solid 3px #000;
+	margin-bottom:1em;
 }
 
 #whosonfirst-basics {
@@ -114,4 +114,19 @@ details-menu {
 	padding-top:1rem;
 }
 
+#existential-controls {
+	margin-bottom:1rem;
+	margin-right:1rem;
+	float:right;
+}
+
+@media (max-width: 500px) {
+
+	#map {
+		height: 200px !important;
+	}
 	
+	#existential-controls {
+		float:none !important;
+	}
+}
