@@ -44,6 +44,8 @@ github.com/paulmach/orb/maptile
 github.com/paulmach/orb
 github.com/paulmach/orb/project
 github.com/paulmach/orb/internal/mercator
+# github.com/sfomuseum/go-geojson-ld v0.0.0-20200206214150-786bbdc99e9e
+github.com/sfomuseum/go-geojson-ld
 # github.com/sfomuseum/go-http-tilezen v0.0.2
 github.com/sfomuseum/go-http-tilezen/http
 # github.com/sfomuseum/go-tilezen v0.0.1
@@ -54,12 +56,14 @@ github.com/skelterjohn/geom
 github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
 github.com/srwiley/rasterx
-# github.com/tidwall/gjson v1.3.5
+# github.com/tidwall/gjson v1.3.6
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.1
 github.com/tidwall/match
 # github.com/tidwall/pretty v1.0.0
 github.com/tidwall/pretty
+# github.com/tidwall/sjson v1.0.4
+github.com/tidwall/sjson
 # github.com/whosonfirst/algnhsa v0.1.0
 github.com/whosonfirst/algnhsa
 # github.com/whosonfirst/go-bindata v0.1.0
