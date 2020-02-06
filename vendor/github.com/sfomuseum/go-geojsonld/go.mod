@@ -1,4 +1,4 @@
-module github.com/sfomuseum/go-geojson-ld
+module github.com/sfomuseum/go-geojsonld
 
 go 1.12
 

@@ -74,6 +74,8 @@ github.com/sfomuseum/go-geojson-ld v0.0.0-20200206213525-73a57adac3a3 h1:e7IhOIO
 github.com/sfomuseum/go-geojson-ld v0.0.0-20200206213525-73a57adac3a3/go.mod h1:E/t5IFwrG+0StnAM1ZJtr3oNR5JcDaeLQzKnyORsuKo=
 github.com/sfomuseum/go-geojson-ld v0.0.0-20200206214150-786bbdc99e9e h1:ucZ2K9lFMsqgXrttijJGgjr5zczHT5sHNsy9VacUSw4=
 github.com/sfomuseum/go-geojson-ld v0.0.0-20200206214150-786bbdc99e9e/go.mod h1:1HLDlQsNn7JLcQXH8Q6ABhB9uAorJ20eSixTE9qlde8=
+github.com/sfomuseum/go-geojsonld v0.0.0-20200206221640-63232bedd85c h1:J/RXRjGRQ1hlXTsz9Vi9cDtiu/so5h14ABhC4/19QMk=
+github.com/sfomuseum/go-geojsonld v0.0.0-20200206221640-63232bedd85c/go.mod h1:0BuNLxByr9eSuWi0PwjMwdHklZXu4K/yGRb+JGfNgsw=
 github.com/sfomuseum/go-http-tilezen v0.0.2 h1:pKqyTtA2v9wZkfWt/L8aXyihi7upSwtbwTMxKF6Ey7U=
 github.com/sfomuseum/go-http-tilezen v0.0.2/go.mod h1:SpWQAUmPnJhjaQuwAT0qbsxBFMUjDhaxsvALFO9IGg0=
 github.com/sfomuseum/go-tilezen v0.0.1 h1:U8PoDuuFJmy+d9q1n4wzgcgyBzjMxlDNQkvkqr4PnqE=

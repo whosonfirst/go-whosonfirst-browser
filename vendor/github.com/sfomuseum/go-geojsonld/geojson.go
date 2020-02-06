@@ -1,4 +1,4 @@
-package geojson
+package geojsonld
 
 import (
 	"context"

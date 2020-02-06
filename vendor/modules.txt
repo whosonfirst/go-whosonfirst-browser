@@ -44,8 +44,8 @@ github.com/paulmach/orb/maptile
 github.com/paulmach/orb
 github.com/paulmach/orb/project
 github.com/paulmach/orb/internal/mercator
-# github.com/sfomuseum/go-geojson-ld v0.0.0-20200206214150-786bbdc99e9e
-github.com/sfomuseum/go-geojson-ld
+# github.com/sfomuseum/go-geojsonld v0.0.0-20200206221640-63232bedd85c
+github.com/sfomuseum/go-geojsonld
 # github.com/sfomuseum/go-http-tilezen v0.0.2
 github.com/sfomuseum/go-http-tilezen/http
 # github.com/sfomuseum/go-tilezen v0.0.1
