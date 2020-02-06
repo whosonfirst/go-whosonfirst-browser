@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	_ "github.com/whosonfirst/go-reader-github"
 	_ "github.com/whosonfirst/go-reader-http"
-	_ "github.com/whosonfirst/go-reader-github"	
 	"github.com/whosonfirst/go-whosonfirst-browser"
 	"log"
 )

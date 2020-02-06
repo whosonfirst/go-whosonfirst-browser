@@ -1,8 +1,8 @@
 package http
 
 import (
-	"github.com/whosonfirst/go-reader"
 	"github.com/sfomuseum/go-geojsonld"
+	"github.com/whosonfirst/go-reader"
 	gohttp "net/http"
 )
 
@@ -21,14 +21,14 @@ func GeoJSONLDHandler(r reader.Reader) (gohttp.Handler, error) {
 		body := f.Bytes()
 
 		ctx := req.Context()
-		
+
 		body, err = geojsonld.AsGeoJSONLD(ctx, body)
 
 		if err != nil {
 			gohttp.Error(rsp, err.Error(), status)
 			return
 		}
-		
+
 		rsp.Header().Set("Content-Type", "application/geo+json")
 		rsp.Header().Set("Access-Control-Allow-Origin", "*")
 

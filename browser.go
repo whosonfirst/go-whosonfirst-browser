@@ -59,6 +59,7 @@ func Start(ctx context.Context) error {
 	enable_svg := flag.Bool("enable-svg", false, "Enable the 'svg' output handler.")
 
 	enable_geojson := flag.Bool("enable-geojson", true, "Enable the 'geojson' output handler.")
+	enable_geojsonld := flag.Bool("enable-geojson-ld", true, "Enable the 'geojson-ld' output handler.")
 	enable_spr := flag.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
 	enable_select := flag.Bool("enable-select", false, "Enable the 'select' output handler.")
 
@@ -69,6 +70,7 @@ func Start(ctx context.Context) error {
 	path_png := flag.String("path-png", "/png/", "The path that PNG requests should be served from.")
 	path_svg := flag.String("path-svg", "/svg/", "The path that SVG requests should be served from.")
 	path_geojson := flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
+	path_geojsonld := flag.String("path-geojson-ld", "/geojson-ld/", "The path that GeoJSON-LD requests should be served from.")
 	path_spr := flag.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
 	path_select := flag.String("path-select", "/select/", "The path that 'select' requests should be served from.")
 
@@ -96,6 +98,7 @@ func Start(ctx context.Context) error {
 
 	if *enable_data {
 		*enable_geojson = true
+		*enable_geojsonld = true
 		*enable_spr = true
 		*enable_select = true
 	}
@@ -249,6 +252,17 @@ func Start(ctx context.Context) error {
 		}
 
 		mux.Handle(*path_geojson, geojson_handler)
+	}
+
+	if *enable_geojsonld {
+
+		geojsonld_handler, err := http.GeoJSONLDHandler(cr)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(*path_geojsonld, geojsonld_handler)
 	}
 
 	if *enable_select {
