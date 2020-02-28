@@ -15,9 +15,24 @@ import (
 
 func init() {
 
-	r := NewGitHubReader()
+	ctx := context.Background()
+	err := wof_reader.RegisterReader(ctx, "github", initializeGitHubReader)
 
-	wof_reader.Register("github", r)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func initializeGitHubReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
+
+	r := NewGitHubReader()
+	err := r.Open(ctx, uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
 }
 
 type GitHubReader struct {

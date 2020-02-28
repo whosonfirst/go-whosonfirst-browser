@@ -8,8 +8,25 @@ import (
 )
 
 func init() {
+
+	ctx := context.Background()
+	err := RegisterReader(ctx, "null", initializeNullReader)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func initializeNullReader(ctx context.Context, uri string) (Reader, error) {
+
 	r := NewNullReader()
-	Register("null", r)
+	err := r.Open(ctx, uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
 }
 
 type NullReader struct {
@@ -17,7 +34,6 @@ type NullReader struct {
 }
 
 func NewNullReader() Reader {
-
 	r := NullReader{}
 	return &r
 }

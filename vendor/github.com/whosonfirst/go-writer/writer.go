@@ -2,28 +2,72 @@ package writer
 
 import (
 	"context"
-	"errors"
-	"fmt"
+	"github.com/aaronland/go-roster"
 	"io"
 	"net/url"
-	"sort"
-	"strings"
-	"sync"
 )
 
-var (
-	writersMu sync.RWMutex
-	writers   = make(map[string]Writer)
-)
+var writer_roster roster.Roster
 
-type Driver interface {
-	Open(string) error
-}
+type WriterInitializationFunc func(ctx context.Context, uri string) (Writer, error)
 
 type Writer interface {
 	Open(context.Context, string) error
 	Write(context.Context, string, io.ReadCloser) error
 	URI(string) string
+}
+
+func NewService(ctx context.Context, uri string) (Writer, error) {
+
+	err := ensureWriterRoster()
+
+	if err != nil {
+		return nil, err
+	}
+
+	parsed, err := url.Parse(uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	scheme := parsed.Scheme
+
+	i, err := writer_roster.Driver(ctx, scheme)
+
+	if err != nil {
+		return nil, err
+	}
+
+	init_func := i.(WriterInitializationFunc)
+	return init_func(ctx, uri)
+}
+
+func RegisterWriter(ctx context.Context, scheme string, init_func WriterInitializationFunc) error {
+
+	err := ensureWriterRoster()
+
+	if err != nil {
+		return err
+	}
+
+	return writer_roster.Register(ctx, scheme, init_func)
+}
+
+func ensureWriterRoster() error {
+
+	if writer_roster == nil {
+
+		r, err := roster.NewDefaultRoster()
+
+		if err != nil {
+			return err
+		}
+
+		writer_roster = r
+	}
+
+	return nil
 }
 
 func NewWriter(ctx context.Context, uri string) (Writer, error) {
@@ -34,65 +78,19 @@ func NewWriter(ctx context.Context, uri string) (Writer, error) {
 		return nil, err
 	}
 
-	name := u.Scheme
+	scheme := u.Scheme
 
-	nrml_name := normalizeName(name)
-
-	r, ok := writers[nrml_name]
-
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("Unknown writer '%s' (normalized as '%s')", name, nrml_name))
-	}
-
-	err = r.Open(ctx, uri)
+	i, err := writer_roster.Driver(ctx, scheme)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return r, nil
-}
-
-func Register(name string, writer Writer) {
-
-	writersMu.Lock()
-	defer writersMu.Unlock()
-
-	if writer == nil {
-		panic("go-whosonfirst-Writer: Register writer is nil")
-
-	}
-
-	nrml_name := normalizeName(name)
-
-	if _, dup := writers[nrml_name]; dup {
-		panic("go-whosonfirst-writer: Register called twice for writer " + name)
-	}
-
-	writers[nrml_name] = writer
-}
-
-func normalizeName(name string) string {
-	return strings.ToUpper(name)
-}
-
-func unregisterAllWriters() {
-	writersMu.Lock()
-	defer writersMu.Unlock()
-	writers = make(map[string]Writer)
+	init_func := i.(WriterInitializationFunc)
+	return init_func(ctx, uri)
 }
 
 func Writers() []string {
-
-	writersMu.RLock()
-	defer writersMu.RUnlock()
-
-	var list []string
-
-	for name := range writers {
-		list = append(list, name)
-	}
-
-	sort.Strings(list)
-	return list
+	ctx := context.Background()
+	return writer_roster.Drivers(ctx)
 }

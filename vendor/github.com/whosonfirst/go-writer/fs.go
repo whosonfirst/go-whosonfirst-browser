@@ -12,9 +12,25 @@ import (
 )
 
 func init() {
+
+	ctx := context.Background()
+	err := RegisterWriter(ctx, "fs", initializeFSWriter)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func initializeFSWriter(ctx context.Context, uri string) (Writer, error) {
+
 	wr := NewFSWriter()
-	Register("fs", wr)	
-	Register("local", wr)
+	err := wr.Open(ctx, uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return wr, nil
 }
 
 type FSWriter struct {

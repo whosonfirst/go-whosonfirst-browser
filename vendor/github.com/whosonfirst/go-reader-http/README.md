@@ -1,6 +1,8 @@
 # go-reader-http
 
-Work in progress. This will replace [go-whosonfirst-readwrite](https://github.com/whosonfirst/go-whosonfirst-readwrite).
+HTTP and HTTPS support for the go-reader Reader interface.
+
+_This is work in progress and documentation will follow._
 
 ## See also
 

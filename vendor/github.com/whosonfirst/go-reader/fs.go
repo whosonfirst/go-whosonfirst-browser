@@ -10,23 +10,38 @@ import (
 )
 
 func init() {
-	r := NewFSRader()
-	Register("local", r)	// deprecated but backwards compatibility and all that
-	Register("fs", r)	
+
+	ctx := context.Background()
+	err := RegisterReader(ctx, "fs", initializeFSReader)
+
+	if err != nil {
+		panic(err)
+	}
 }
 
-type FSRader struct {
+func initializeFSReader(ctx context.Context, uri string) (Reader, error) {
+
+	r := NewFSReader()
+	err := r.Open(ctx, uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+type FSReader struct {
 	Reader
 	root string
 }
 
-func NewFSRader() Reader {
-
-	r := FSRader{}
+func NewFSReader() Reader {
+	r := FSReader{}
 	return &r
 }
 
-func (r *FSRader) Open(ctx context.Context, uri string) error {
+func (r *FSReader) Open(ctx context.Context, uri string) error {
 
 	u, err := url.Parse(uri)
 
@@ -49,7 +64,7 @@ func (r *FSRader) Open(ctx context.Context, uri string) error {
 	return nil
 }
 
-func (r *FSRader) Read(ctx context.Context, path string) (io.ReadCloser, error) {
+func (r *FSReader) Read(ctx context.Context, path string) (io.ReadCloser, error) {
 
 	abs_path := r.URI(path)
 
@@ -62,6 +77,6 @@ func (r *FSRader) Read(ctx context.Context, path string) (io.ReadCloser, error) 
 	return os.Open(abs_path)
 }
 
-func (r *FSRader) URI(path string) string {
+func (r *FSReader) URI(path string) string {
 	return filepath.Join(r.root, path)
 }

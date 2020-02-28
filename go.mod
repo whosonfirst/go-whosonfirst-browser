@@ -26,9 +26,9 @@ require (
 	github.com/whosonfirst/go-bindata v0.1.0
 	github.com/whosonfirst/go-bindata-assetfs v1.0.1
 	github.com/whosonfirst/go-cache v0.0.2
-	github.com/whosonfirst/go-reader v0.0.4
-	github.com/whosonfirst/go-reader-github v0.1.1
-	github.com/whosonfirst/go-reader-http v0.0.1
+	github.com/whosonfirst/go-reader v0.1.1
+	github.com/whosonfirst/go-reader-github v0.1.2
+	github.com/whosonfirst/go-reader-http v0.0.2
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-cli v0.1.0
 	github.com/whosonfirst/go-whosonfirst-export v0.3.0
@@ -38,8 +38,8 @@ require (
 	github.com/whosonfirst/go-whosonfirst-spr v0.1.0
 	github.com/whosonfirst/go-whosonfirst-svg v0.0.3
 	github.com/whosonfirst/go-whosonfirst-uri v0.2.0
-	github.com/whosonfirst/go-writer v0.0.4
-	github.com/whosonfirst/go-writer-github v0.0.1
+	github.com/whosonfirst/go-writer v0.1.0
+	github.com/whosonfirst/go-writer-github v0.0.2
 	github.com/whosonfirst/warning v0.1.0
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1 // indirect
 )

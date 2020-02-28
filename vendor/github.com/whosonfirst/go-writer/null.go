@@ -7,8 +7,25 @@ import (
 )
 
 func init() {
+
+	ctx := context.Background()
+	err := RegisterWriter(ctx, "null", initializeNullWriter)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func initializeNullWriter(ctx context.Context, uri string) (Writer, error) {
+
 	wr := NewNullWriter()
-	Register("null", wr)
+	err := wr.Open(ctx, uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return wr, nil
 }
 
 type NullWriter struct {

@@ -14,10 +14,33 @@ import (
 
 func init() {
 
-	r := NewHTTPReader()
+	ctx := context.Background()
 
-	wof_reader.Register("http", r)
-	wof_reader.Register("https", r)	
+	schemes := []string{
+		"http",
+		"https",			
+	}
+
+	for _, s := range schemes {
+	
+		err := wof_reader.RegisterReader(ctx, s, initializeHTTPReader)	
+
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func initializeHTTPReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
+
+	r := NewHTTPReader()
+	err := r.Open(ctx, uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
 }
 
 type HTTPReader struct {

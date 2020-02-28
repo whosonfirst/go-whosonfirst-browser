@@ -7,8 +7,25 @@ import (
 )
 
 func init() {
+
+	ctx := context.Background()
+	err := RegisterWriter(ctx, "stdout", initializeStdoutWriter)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func initializeStdoutWriter(ctx context.Context, uri string) (Writer, error) {
+
 	wr := NewStdoutWriter()
-	Register("stdout", wr)
+	err := wr.Open(ctx, uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return wr, nil
 }
 
 type StdoutWriter struct {

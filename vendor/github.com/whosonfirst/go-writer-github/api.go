@@ -17,8 +17,22 @@ import (
 )
 
 func init() {
+
+	ctx := context.Background()
+	wof_writer.RegisterWriter(ctx, "githubapi", initializeGitHubAPIWriter)
+}
+
+func initializeGitHubAPIWriter(ctx context.Context, uri string) (wof_writer.Writer, error) {
+
 	wr := NewGitHubAPIWriter()
-	wof_writer.Register("githubapi", wr)
+
+	err := wr.Open(ctx, uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return wr, nil
 }
 
 type GitHubAPIWriterCommitTemplates struct {

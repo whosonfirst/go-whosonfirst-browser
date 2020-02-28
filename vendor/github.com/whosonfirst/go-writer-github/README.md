@@ -69,3 +69,4 @@ The following query parameters are supported for `go-writer-github` writers:
 
 * https://github.com/whosonfirst/go-writer
 * https://github.com/google/go-github
+* https://developer.github.com/v3/#authentication
