@@ -2,27 +2,72 @@ package reader
 
 import (
 	"context"
-	"errors"
+	"github.com/aaronland/go-roster"
 	"io"
 	"net/url"
-	"sort"
-	"strings"
-	"sync"
 )
 
-var (
-	readersMu sync.RWMutex
-	readers   = make(map[string]Reader)
-)
+var reader_roster roster.Roster
 
-type Driver interface {
-	Open(string) error
-}
+type ReaderInitializationFunc func(ctx context.Context, uri string) (Reader, error)
 
 type Reader interface {
 	Open(context.Context, string) error
 	Read(context.Context, string) (io.ReadCloser, error)
 	URI(string) string
+}
+
+func NewService(ctx context.Context, uri string) (Reader, error) {
+
+	err := ensureReaderRoster()
+
+	if err != nil {
+		return nil, err
+	}
+
+	parsed, err := url.Parse(uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	scheme := parsed.Scheme
+
+	i, err := reader_roster.Driver(ctx, scheme)
+
+	if err != nil {
+		return nil, err
+	}
+
+	init_func := i.(ReaderInitializationFunc)
+	return init_func(ctx, uri)
+}
+
+func RegisterReader(ctx context.Context, scheme string, init_func ReaderInitializationFunc) error {
+
+	err := ensureReaderRoster()
+
+	if err != nil {
+		return err
+	}
+
+	return reader_roster.Register(ctx, scheme, init_func)
+}
+
+func ensureReaderRoster() error {
+
+	if reader_roster == nil {
+
+		r, err := roster.NewDefaultRoster()
+
+		if err != nil {
+			return err
+		}
+
+		reader_roster = r
+	}
+
+	return nil
 }
 
 func NewReader(ctx context.Context, uri string) (Reader, error) {
@@ -33,65 +78,19 @@ func NewReader(ctx context.Context, uri string) (Reader, error) {
 		return nil, err
 	}
 
-	name := u.Scheme
+	scheme := u.Scheme
 
-	nrml_name := normalizeName(name)
-
-	r, ok := readers[nrml_name]
-
-	if !ok {
-		return nil, errors.New("Unknown reader")
-	}
-
-	err = r.Open(ctx, uri)
+	i, err := reader_roster.Driver(ctx, scheme)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return r, nil
-}
-
-func Register(name string, reader Reader) {
-
-	readersMu.Lock()
-	defer readersMu.Unlock()
-
-	if reader == nil {
-		panic("go-whosonfirst-reader: Register reader is nil")
-
-	}
-
-	nrml_name := normalizeName(name)
-
-	if _, dup := readers[nrml_name]; dup {
-		panic("go-whosonfirst-reader: Register called twice for reader " + name)
-	}
-
-	readers[nrml_name] = reader
-}
-
-func normalizeName(name string) string {
-	return strings.ToUpper(name)
-}
-
-func unregisterAllReaders() {
-	readersMu.Lock()
-	defer readersMu.Unlock()
-	readers = make(map[string]Reader)
+	init_func := i.(ReaderInitializationFunc)
+	return init_func(ctx, uri)
 }
 
 func Readers() []string {
-
-	readersMu.RLock()
-	defer readersMu.RUnlock()
-
-	var list []string
-
-	for name := range readers {
-		list = append(list, name)
-	}
-
-	sort.Strings(list)
-	return list
+	ctx := context.Background()
+	return reader_roster.Drivers(ctx)
 }

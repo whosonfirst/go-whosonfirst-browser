@@ -1,6 +1,8 @@
 # go-reader-github
 
-Work in progress. This will replace [go-whosonfirst-readwrite](https://github.com/whosonfirst/go-whosonfirst-readwrite).
+GitHub and GitHub API support for the go-reader.Reader interface.
+
+_Documentation to follow. For now have a look at the [tests](tests)._
 
 ## See also
 
