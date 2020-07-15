@@ -19,8 +19,6 @@ github.com/aws/aws-lambda-go/lambda
 github.com/aws/aws-lambda-go/lambda/handlertrace
 github.com/aws/aws-lambda-go/lambda/messages
 github.com/aws/aws-lambda-go/lambdacontext
-# github.com/go-ini/ini v1.42.0
-github.com/go-ini/ini
 # github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
 # github.com/google/go-github v17.0.0+incompatible
@@ -46,6 +44,8 @@ github.com/paulmach/orb/geojson
 github.com/paulmach/orb/internal/mercator
 github.com/paulmach/orb/maptile
 github.com/paulmach/orb/project
+# github.com/sfomuseum/go-flags v0.3.1
+github.com/sfomuseum/go-flags/flagset
 # github.com/sfomuseum/go-geojsonld v0.0.0-20200206221640-63232bedd85c
 github.com/sfomuseum/go-geojsonld
 # github.com/sfomuseum/go-http-tilezen v0.0.4
@@ -84,8 +84,6 @@ github.com/whosonfirst/go-reader-github
 github.com/whosonfirst/go-reader-http
 # github.com/whosonfirst/go-sanitize v0.1.0
 github.com/whosonfirst/go-sanitize
-# github.com/whosonfirst/go-whosonfirst-cli v0.1.0
-github.com/whosonfirst/go-whosonfirst-cli/flags
 # github.com/whosonfirst/go-whosonfirst-flags v0.1.0
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential

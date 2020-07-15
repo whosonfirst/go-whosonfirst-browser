@@ -82,6 +82,8 @@ github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
+github.com/sfomuseum/go-flags v0.3.1 h1:6QZwQz1Dgy6t8ty+S7aR3iBSq8+0UR5/R3SNXHC8xxI=
+github.com/sfomuseum/go-flags v0.3.1/go.mod h1:54KCZIGmvZkIOrSCHSNMvgSTKH2gJRJyISH+AiI+55w=
 github.com/sfomuseum/go-geojson-ld v0.0.0-20200206213525-73a57adac3a3 h1:e7IhOIOy+Mybv+GP+lTwn5oiIl32Nv9BvqMnoDi6yM0=
 github.com/sfomuseum/go-geojson-ld v0.0.0-20200206213525-73a57adac3a3/go.mod h1:E/t5IFwrG+0StnAM1ZJtr3oNR5JcDaeLQzKnyORsuKo=
 github.com/sfomuseum/go-geojson-ld v0.0.0-20200206214150-786bbdc99e9e h1:ucZ2K9lFMsqgXrttijJGgjr5zczHT5sHNsy9VacUSw4=

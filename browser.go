@@ -3,18 +3,17 @@ package browser
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"github.com/aaronland/go-http-bootstrap"
-	"github.com/aaronland/go-http-server"	
+	"github.com/aaronland/go-http-server"
 	"github.com/aaronland/go-http-tangramjs"
+	"github.com/sfomuseum/go-flags/flagset"
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-browser/assets/templates"
 	"github.com/whosonfirst/go-whosonfirst-browser/cachereader" // eventually this will become a real go-reader thing...
 	"github.com/whosonfirst/go-whosonfirst-browser/http"
-	"github.com/whosonfirst/go-whosonfirst-cli/flags"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -30,53 +29,55 @@ import (
 
 func Start(ctx context.Context) error {
 
-	server_uri := flag.String("server-uri", "http://localhost:8080", "A valid aaronland/go-http-server URI.")
-	
-	static_prefix := flag.String("static-prefix", "", "Prepend this prefix to URLs for static assets.")
+	fs := flagset.NewFlagSet("browser")
 
-	path_templates := flag.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
+	server_uri := fs.String("server-uri", "http://localhost:8080", "A valid aaronland/go-http-server URI.")
 
-	data_source := flag.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
-	cache_source := flag.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
+	static_prefix := fs.String("static-prefix", "", "Prepend this prefix to URLs for static assets.")
 
-	nextzen_api_key := flag.String("nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
-	nextzen_style_url := flag.String("nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
-	nextzen_tile_url := flag.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
+	path_templates := fs.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
 
-	proxy_tiles := flag.Bool("proxy-tiles", false, "Proxy (and cache) Nextzen tiles.")
-	proxy_tiles_url := flag.String("proxy-tiles-url", "/tiles/", "The URL (a relative path) for proxied tiles.")
-	proxy_tiles_cache := flag.String("proxy-tiles-cache", "gocache://", "A valid tile proxy DSN string.")
-	proxy_tiles_timeout := flag.Int("proxy-tiles-timeout", 30, "The maximum number of seconds to allow for fetching a tile from the proxy.")
+	data_source := fs.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
+	cache_source := fs.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
 
-	enable_all := flag.Bool("enable-all", false, "Enable all the available output handlers.")
-	enable_graphics := flag.Bool("enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
-	enable_data := flag.Bool("enable-data", false, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
+	nextzen_api_key := fs.String("nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
+	nextzen_style_url := fs.String("nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
+	nextzen_tile_url := fs.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
 
-	enable_png := flag.Bool("enable-png", false, "Enable the 'png' output handler.")
-	enable_svg := flag.Bool("enable-svg", false, "Enable the 'svg' output handler.")
+	proxy_tiles := fs.Bool("proxy-tiles", false, "Proxy (and cache) Nextzen tiles.")
+	proxy_tiles_url := fs.String("proxy-tiles-url", "/tiles/", "The URL (a relative path) for proxied tiles.")
+	proxy_tiles_cache := fs.String("proxy-tiles-cache", "gocache://", "A valid tile proxy DSN string.")
+	proxy_tiles_timeout := fs.Int("proxy-tiles-timeout", 30, "The maximum number of seconds to allow for fetching a tile from the proxy.")
 
-	enable_geojson := flag.Bool("enable-geojson", true, "Enable the 'geojson' output handler.")
-	enable_geojsonld := flag.Bool("enable-geojson-ld", true, "Enable the 'geojson-ld' output handler.")
-	enable_spr := flag.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
-	enable_select := flag.Bool("enable-select", false, "Enable the 'select' output handler.")
+	enable_all := fs.Bool("enable-all", false, "Enable all the available output handlers.")
+	enable_graphics := fs.Bool("enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
+	enable_data := fs.Bool("enable-data", false, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
 
-	select_pattern := flag.String("select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
+	enable_png := fs.Bool("enable-png", false, "Enable the 'png' output handler.")
+	enable_svg := fs.Bool("enable-svg", false, "Enable the 'svg' output handler.")
 
-	enable_html := flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
+	enable_geojson := fs.Bool("enable-geojson", true, "Enable the 'geojson' output handler.")
+	enable_geojsonld := fs.Bool("enable-geojson-ld", true, "Enable the 'geojson-ld' output handler.")
+	enable_spr := fs.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
+	enable_select := fs.Bool("enable-select", false, "Enable the 'select' output handler.")
 
-	path_png := flag.String("path-png", "/png/", "The path that PNG requests should be served from.")
-	path_svg := flag.String("path-svg", "/svg/", "The path that SVG requests should be served from.")
-	path_geojson := flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
-	path_geojsonld := flag.String("path-geojson-ld", "/geojson-ld/", "The path that GeoJSON-LD requests should be served from.")
-	path_spr := flag.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
-	path_select := flag.String("path-select", "/select/", "The path that 'select' requests should be served from.")
+	select_pattern := fs.String("select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
 
-	path_id := flag.String("path-id", "/id/", "The that Who's On First documents should be served from.")
-	// path_alt := flag.String("path-alt", "/alt/", "The that Who's On First alternative geometry documents should be served from.")
+	enable_html := fs.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
-	flag.Parse()
+	path_png := fs.String("path-png", "/png/", "The path that PNG requests should be served from.")
+	path_svg := fs.String("path-svg", "/svg/", "The path that SVG requests should be served from.")
+	path_geojson := fs.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
+	path_geojsonld := fs.String("path-geojson-ld", "/geojson-ld/", "The path that GeoJSON-LD requests should be served from.")
+	path_spr := fs.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
+	path_select := fs.String("path-select", "/select/", "The path that 'select' requests should be served from.")
 
-	err := flags.SetFlagsFromEnvVars("BROWSER")
+	path_id := fs.String("path-id", "/id/", "The that Who's On First documents should be served from.")
+	// path_alt := fs.String("path-alt", "/alt/", "The that Who's On First alternative geometry documents should be served from.")
+
+	flagset.Parse(fs)
+
+	err := flagset.SetFlagsFromEnvVarsWithFeedback(fs, "BROWSER", true)
 
 	if err != nil {
 		return err
