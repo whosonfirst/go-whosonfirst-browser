@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/aaronland/go-http-bootstrap"
+	"github.com/aaronland/go-http-server"	
 	"github.com/aaronland/go-http-tangramjs"
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
 	"github.com/whosonfirst/go-cache"
@@ -13,13 +14,11 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/assets/templates"
 	"github.com/whosonfirst/go-whosonfirst-browser/cachereader" // eventually this will become a real go-reader thing...
 	"github.com/whosonfirst/go-whosonfirst-browser/http"
-	"github.com/whosonfirst/go-whosonfirst-browser/server"
 	"github.com/whosonfirst/go-whosonfirst-cli/flags"
 	"html/template"
 	"io/ioutil"
 	"log"
 	gohttp "net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -31,10 +30,8 @@ import (
 
 func Start(ctx context.Context) error {
 
-	proto := flag.String("protocol", "http", "The protocol for wof-staticd server to listen on. Valid protocols are: http, lambda.")
-	host := flag.String("host", "localhost", "The hostname to listen for requests on")
-	port := flag.Int("port", 8080, "The port number to listen for requests on")
-
+	server_uri := flag.String("server-uri", "http://localhost:8080", "A valid aaronland/go-http-server URI.")
+	
 	static_prefix := flag.String("static-prefix", "", "Prepend this prefix to URLs for static assets.")
 
 	path_templates := flag.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
@@ -417,15 +414,7 @@ func Start(ctx context.Context) error {
 
 	}
 
-	address := fmt.Sprintf("http://%s:%d", *host, *port)
-
-	u, err := url.Parse(address)
-
-	if err != nil {
-		return err
-	}
-
-	s, err := server.NewStaticServer(*proto, u)
+	s, err := server.NewServer(ctx, *server_uri)
 
 	if err != nil {
 		return err
@@ -433,5 +422,5 @@ func Start(ctx context.Context) error {
 
 	log.Printf("Listening on %s\n", s.Address())
 
-	return s.ListenAndServe(mux)
+	return s.ListenAndServe(ctx, mux)
 }
