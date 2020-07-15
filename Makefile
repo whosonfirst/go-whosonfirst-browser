@@ -10,6 +10,16 @@ debug:
 	@make bake
 	go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -proxy-tiles -nextzen-api-key $(APIKEY)
 
+lambda:
+	@make lambda-browser
+
+lambda-browser:
+	if test -f main; then rm -f main; fi
+	if test -f browser.zip; then rm -f browser.zip; fi
+	GOOS=linux go build -mod vendor -o main cmd/whosonfirst-browser/main.go
+	zip browser.zip main
+	rm -f main
+
 bake: bake-static bake-templates
 
 bake-static:
