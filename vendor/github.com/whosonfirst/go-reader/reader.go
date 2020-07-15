@@ -12,7 +12,6 @@ var reader_roster roster.Roster
 type ReaderInitializationFunc func(ctx context.Context, uri string) (Reader, error)
 
 type Reader interface {
-	Open(context.Context, string) error
 	Read(context.Context, string) (io.ReadCloser, error)
 	URI(string) string
 }

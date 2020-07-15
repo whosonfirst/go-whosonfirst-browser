@@ -5,9 +5,11 @@ import (
 	"bytes"
 	"golang.org/x/net/html"
 	"io"
+	_ "log"
 	go_http "net/http"
 	go_httptest "net/http/httptest"
 	"strconv"
+	"strings"
 )
 
 type RewriteHTMLFunc func(node *html.Node, writer io.Writer)
@@ -19,9 +21,38 @@ func RewriteHTMLHandler(prev go_http.Handler, rewrite_func RewriteHTMLFunc) go_h
 		rec := go_httptest.NewRecorder()
 		prev.ServeHTTP(rec, req)
 
-		body := rec.Body.Bytes()
-		reader := bytes.NewReader(body)
-		doc, err := html.Parse(reader)
+		prev_rsp := rec.Result()
+		prev_headers := prev_rsp.Header
+
+		defer prev_rsp.Body.Close()
+
+		content_type := prev_headers.Get("Content-Type")
+
+		if content_type != "" {
+
+			parts := strings.Split(content_type, ";")
+
+			if parts[0] != "text/html" {
+
+				for k, v := range prev_headers {
+
+					for _, vv := range v {
+						rsp.Header().Set(k, vv)
+					}
+				}
+
+				_, err := io.Copy(rsp, prev_rsp.Body)
+
+				if err != nil {
+					go_http.Error(rsp, err.Error(), go_http.StatusInternalServerError)
+					return
+				}
+
+				return
+			}
+		}
+
+		doc, err := html.Parse(prev_rsp.Body)
 
 		if err != nil {
 			go_http.Error(rsp, err.Error(), go_http.StatusInternalServerError)

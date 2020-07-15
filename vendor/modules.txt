@@ -1,15 +1,15 @@
 # github.com/aaronland/go-http-bootstrap v0.0.5
 github.com/aaronland/go-http-bootstrap
 github.com/aaronland/go-http-bootstrap/resources
-# github.com/aaronland/go-http-leaflet v0.0.2
+# github.com/aaronland/go-http-leaflet v0.0.3
 github.com/aaronland/go-http-leaflet
-# github.com/aaronland/go-http-rewrite v0.0.4
+# github.com/aaronland/go-http-rewrite v0.0.5
 github.com/aaronland/go-http-rewrite
 # github.com/aaronland/go-http-sanitize v0.0.4
 github.com/aaronland/go-http-sanitize
-# github.com/aaronland/go-http-tangramjs v0.0.5
+# github.com/aaronland/go-http-tangramjs v0.0.6
 github.com/aaronland/go-http-tangramjs
-# github.com/aaronland/go-roster v0.0.1
+# github.com/aaronland/go-roster v0.0.2
 github.com/aaronland/go-roster
 # github.com/aws/aws-lambda-go v1.10.0
 github.com/aws/aws-lambda-go/events
@@ -37,7 +37,7 @@ github.com/mmcloughlin/geohash
 github.com/patrickmn/go-cache
 # github.com/paulmach/go.geojson v1.4.0
 github.com/paulmach/go.geojson
-# github.com/paulmach/orb v0.1.5
+# github.com/paulmach/orb v0.1.6
 github.com/paulmach/orb
 github.com/paulmach/orb/clip
 github.com/paulmach/orb/geojson
@@ -46,17 +46,17 @@ github.com/paulmach/orb/maptile
 github.com/paulmach/orb/project
 # github.com/sfomuseum/go-geojsonld v0.0.0-20200206221640-63232bedd85c
 github.com/sfomuseum/go-geojsonld
-# github.com/sfomuseum/go-http-tilezen v0.0.2
+# github.com/sfomuseum/go-http-tilezen v0.0.4
 github.com/sfomuseum/go-http-tilezen/http
-# github.com/sfomuseum/go-tilezen v0.0.1
+# github.com/sfomuseum/go-tilezen v0.0.3
 github.com/sfomuseum/go-tilezen
 # github.com/skelterjohn/geom v0.0.0-20180103142417-96f3e8a219c5
 github.com/skelterjohn/geom
-# github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e
+# github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 github.com/srwiley/oksvg
-# github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
+# github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 github.com/srwiley/rasterx
-# github.com/tidwall/gjson v1.3.6
+# github.com/tidwall/gjson v1.6.0
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.1
 github.com/tidwall/match
@@ -70,15 +70,15 @@ github.com/whosonfirst/algnhsa
 github.com/whosonfirst/go-bindata
 # github.com/whosonfirst/go-bindata-assetfs v1.0.1
 github.com/whosonfirst/go-bindata-assetfs
-# github.com/whosonfirst/go-cache v0.0.2
+# github.com/whosonfirst/go-cache v0.2.0
 github.com/whosonfirst/go-cache
 # github.com/whosonfirst/go-geojson-svg v0.0.3
 github.com/whosonfirst/go-geojson-svg
-# github.com/whosonfirst/go-reader v0.1.1
+# github.com/whosonfirst/go-reader v0.2.0
 github.com/whosonfirst/go-reader
-# github.com/whosonfirst/go-reader-github v0.1.2
+# github.com/whosonfirst/go-reader-github v0.2.0
 github.com/whosonfirst/go-reader-github
-# github.com/whosonfirst/go-reader-http v0.0.2
+# github.com/whosonfirst/go-reader-http v0.1.0
 github.com/whosonfirst/go-reader-http
 # github.com/whosonfirst/go-sanitize v0.1.0
 github.com/whosonfirst/go-sanitize
@@ -87,7 +87,7 @@ github.com/whosonfirst/go-whosonfirst-cli/flags
 # github.com/whosonfirst/go-whosonfirst-flags v0.1.0
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
-# github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.2
+# github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.3
 github.com/whosonfirst/go-whosonfirst-geojson-v2
 github.com/whosonfirst/go-whosonfirst-geojson-v2/feature
 github.com/whosonfirst/go-whosonfirst-geojson-v2/geometry
@@ -111,13 +111,13 @@ github.com/whosonfirst/go-whosonfirst-spr/util
 github.com/whosonfirst/go-whosonfirst-svg
 # github.com/whosonfirst/go-whosonfirst-uri v0.2.0
 github.com/whosonfirst/go-whosonfirst-uri
-# github.com/whosonfirst/warning v0.1.0
+# github.com/whosonfirst/warning v0.1.1
 github.com/whosonfirst/warning
-# golang.org/x/image v0.0.0-20191214001246-9130b4cfad52
+# golang.org/x/image v0.0.0-20200618115811-c13761719519
 golang.org/x/image/colornames
 golang.org/x/image/math/fixed
 golang.org/x/image/vector
-# golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
+# golang.org/x/net v0.0.0-20200519113804-d87ec0cfa476
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/html

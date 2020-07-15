@@ -15,28 +15,6 @@ import (
 	"time"
 )
 
-func init() {
-
-	ctx := context.Background()
-	err := wof_reader.RegisterReader(ctx, "githubapi", initializeGitHubAPIReader)
-
-	if err != nil {
-		panic(err)
-	}
-}
-
-func initializeGitHubAPIReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
-
-	r := NewGitHubAPIReader()
-	err := r.Open(ctx, uri)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return r, nil
-}
-
 type GitHubAPIReader struct {
 	wof_reader.Reader
 	owner    string
@@ -47,24 +25,29 @@ type GitHubAPIReader struct {
 	throttle <-chan time.Time
 }
 
-func NewGitHubAPIReader() wof_reader.Reader {
+func init() {
 
-	rate := time.Second / 3
-	throttle := time.Tick(rate)
+	ctx := context.Background()
+	err := wof_reader.RegisterReader(ctx, "githubapi", NewGitHubAPIReader)
 
-	r := GitHubAPIReader{
-		throttle: throttle,
+	if err != nil {
+		panic(err)
 	}
-
-	return &r
 }
 
-func (r *GitHubAPIReader) Open(ctx context.Context, uri string) error {
+func NewGitHubAPIReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
 
 	u, err := url.Parse(uri)
 
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	rate := time.Second / 3
+	throttle := time.Tick(rate)
+
+	r := &GitHubAPIReader{
+		throttle: throttle,
 	}
 
 	r.owner = u.Host
@@ -73,7 +56,7 @@ func (r *GitHubAPIReader) Open(ctx context.Context, uri string) error {
 	parts := strings.Split(path, "/")
 
 	if len(parts) != 1 {
-		return errors.New("Invalid path")
+		return nil, errors.New("Invalid path")
 	}
 
 	r.repo = parts[0]
@@ -85,7 +68,7 @@ func (r *GitHubAPIReader) Open(ctx context.Context, uri string) error {
 	branch := q.Get("branch")
 
 	if token == "" {
-		return errors.New("Missing access token")
+		return nil, errors.New("Missing access token")
 	}
 
 	if branch != "" {
@@ -104,7 +87,7 @@ func (r *GitHubAPIReader) Open(ctx context.Context, uri string) error {
 	prefix := q.Get("prefix")
 	r.prefix = prefix
 
-	return nil
+	return r, nil
 }
 
 func (r *GitHubAPIReader) Read(ctx context.Context, uri string) (io.ReadCloser, error) {

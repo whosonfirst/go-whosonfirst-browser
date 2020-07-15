@@ -13,9 +13,23 @@ import (
 	"time"
 )
 
+func init() {
+	ctx := context.Background()
+	RegisterCache(ctx, "gocache", NewGoCache)
+}
+
 type GoCacheOptions struct {
 	DefaultExpiration time.Duration
 	CleanupInterval   time.Duration
+}
+
+type GoCache struct {
+	Cache
+	cache     *gocache.Cache
+	hits      int64
+	misses    int64
+	evictions int64
+	keys      int64
 }
 
 func DefaultGoCacheOptions() (*GoCacheOptions, error) {
@@ -28,40 +42,12 @@ func DefaultGoCacheOptions() (*GoCacheOptions, error) {
 	return &opts, nil
 }
 
-type GoCache struct {
-	Cache
-	Options   *GoCacheOptions
-	cache     *gocache.Cache
-	hits      int64
-	misses    int64
-	evictions int64
-	keys      int64
-}
-
-func init() {
-	ctx := context.Background()
-	c := NewGoCache()
-	RegisterCache(ctx, "gocache", c)
-}
-
-func NewGoCache() Cache {
-
-	c := &GoCache{
-		hits:      int64(0),
-		misses:    int64(0),
-		evictions: int64(0),
-		keys:      0,
-	}
-
-	return c
-}
-
-func (c *GoCache) Open(ctx context.Context, uri string) error {
+func NewGoCache(ctx context.Context, uri string) (Cache, error) {
 
 	u, err := url.Parse(uri)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	q := u.Query()
@@ -78,7 +64,7 @@ func (c *GoCache) Open(ctx context.Context, uri string) error {
 		exp, err := strconv.Atoi(str_exp)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		opts.DefaultExpiration = time.Duration(exp) * time.Second
@@ -91,7 +77,7 @@ func (c *GoCache) Open(ctx context.Context, uri string) error {
 		cleanup, err := strconv.Atoi(str_cleanup)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		opts.CleanupInterval = time.Duration(cleanup) * time.Second
@@ -99,10 +85,15 @@ func (c *GoCache) Open(ctx context.Context, uri string) error {
 
 	gc := gocache.New(opts.DefaultExpiration, opts.CleanupInterval)
 
-	c.Options = opts
-	c.cache = gc
+	c := &GoCache{
+		hits:      int64(0),
+		misses:    int64(0),
+		evictions: int64(0),
+		keys:      0,
+		cache:     gc,
+	}
 
-	return nil
+	return c, nil
 }
 
 func (c *GoCache) Close(ctx context.Context) error {

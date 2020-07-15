@@ -1,6 +1,6 @@
 # go-http-tangramjs
 
-Go HTTP middleware for TangramJS (v0.19.0)
+Go HTTP middleware for TangramJS (v0.20.1)
 
 ## Important
 

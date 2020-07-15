@@ -13,19 +13,14 @@ type NullCache struct {
 
 func init() {
 	ctx := context.Background()
-	c := NewNullCache()
-	RegisterCache(ctx, "null", c)
+	RegisterCache(ctx, "null", NewNullCache)
 }
 
-func NewNullCache() Cache {
+func NewNullCache(ctx context.Context, uri string) (Cache, error) {
 	c := &NullCache{
 		misses: int64(0),
 	}
-	return c
-}
-
-func (c *NullCache) Open(ctx context.Context, uri string) error {
-	return nil
+	return c, nil
 }
 
 func (c *NullCache) Close(ctx context.Context) error {

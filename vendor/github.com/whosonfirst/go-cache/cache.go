@@ -9,7 +9,6 @@ import (
 )
 
 type Cache interface {
-	Open(context.Context, string) error
 	Close(context.Context) error
 	Name() string
 	Get(context.Context, string) (io.ReadCloser, error)
@@ -21,6 +20,8 @@ type Cache interface {
 	Size() int64
 	SizeWithContext(context.Context) int64
 }
+
+type CacheInitializationFunc func(ctx context.Context, uri string) (Cache, error)
 
 var caches roster.Roster
 
@@ -40,7 +41,7 @@ func ensureRoster() error {
 	return nil
 }
 
-func RegisterCache(ctx context.Context, name string, c Cache) error {
+func RegisterCache(ctx context.Context, name string, c CacheInitializationFunc) error {
 
 	err := ensureRoster()
 
@@ -67,9 +68,8 @@ func NewCache(ctx context.Context, uri string) (Cache, error) {
 		return nil, err
 	}
 
-	c := i.(Cache)
-
-	err = c.Open(ctx, uri)
+	init := i.(CacheInitializationFunc)
+	c, err := init(ctx, uri)
 
 	if err != nil {
 		return nil, err

@@ -2,6 +2,8 @@ github.com/aaronland/go-http-leaflet v0.0.1 h1:2DVlwwvZ6r75sJ7zKCuIwpZD0Z9HRBaOT
 github.com/aaronland/go-http-leaflet v0.0.1/go.mod h1:jUzEnGKezjceuNtQJIZWy2nXMhuteRSK0BPIjSSniBw=
 github.com/aaronland/go-http-leaflet v0.0.2 h1:UWRCfHCnknsDkd8jXmMkBcRV40qb0EkGYXn9ReqT+NU=
 github.com/aaronland/go-http-leaflet v0.0.2/go.mod h1:jUzEnGKezjceuNtQJIZWy2nXMhuteRSK0BPIjSSniBw=
+github.com/aaronland/go-http-leaflet v0.0.3 h1:moAjSThtakdpdZ9zr6po11XeIyksYfe+BaH+tfdrnsM=
+github.com/aaronland/go-http-leaflet v0.0.3/go.mod h1:jUzEnGKezjceuNtQJIZWy2nXMhuteRSK0BPIjSSniBw=
 github.com/aaronland/go-http-rewrite v0.0.4 h1:lI8cDF/nINjuSPrYpwvlJLa1cC32h1nvmBwRRHs9sow=
 github.com/aaronland/go-http-rewrite v0.0.4/go.mod h1:g62jjXpsArD0lzJLs9bVLR9Locdt3f4OmqFkkJL2rQU=
 github.com/whosonfirst/go-bindata v0.1.0 h1:SIjIa/+blKoda8iTaWqxzwFtEc00jNcB2M9dRwGemrg=
