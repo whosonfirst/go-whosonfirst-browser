@@ -363,14 +363,14 @@ For example the command line flag `-protocol` would be mapped to the `BROWSER_PR
 BROWSER_SERVER_URI = lambda://
 ```
 
-Minimal viable Lambda environment variables
+Minimal viable Lambda environment variables:
 
 | Name | Value | Notes |
 | --- | --- | --- |
 | BROWSER_ENABLE_ALL | true | You don't have to enable all outputs, it's just the easiest example |
 | BROWSER_NEXTZEN_API_KEY| *** | You can signup for a Nextzen API key at [developers.nextzen.org](https://developers.nextzen.org/) |
 | BROWSER_READER_SOURCE | https://data.whosonfirst.org | |
-| BROWSER_SERVER_URI | lambda:///?binary_type=image/png&binary_type=application/zip ||
+| BROWSER_SERVER_URI | lambda://?binary_type=image/png&binary_type=application/zip | The query parameters are necessary if you want output images (see below). |
 
 ### Lambda, API Gateway and images
 
@@ -420,6 +420,7 @@ $> docker run -it -p 8080:8080 whosonfirst-browser \
 * https://github.com/whosonfirst/go-cache
 * https://github.com/aaronland/go-http-bootstrap
 * https://github.com/aaronland/go-http-tangramjs
+* https://github.com/aaronland/go-http-server
 * https://github.com/sfomuseum/go-http-tilezen
 * https://github.com/whosonfirst/go-whosonfirst-svg
 * https://github.com/whosonfirst/go-whosonfirst-image
