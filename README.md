@@ -407,7 +407,7 @@ And then:
 ```
 $> docker run -it -p 8080:8080 whosonfirst-browser \
 	/usr/local/bin/whosonfirst-browser \
-	-host '0.0.0.0' \
+	-server-uri 'http://0.0.0.0:8080' \
 	-enable-all \
 	-nextzen-api-key {NEXTZEN_APIKEY}
 	
