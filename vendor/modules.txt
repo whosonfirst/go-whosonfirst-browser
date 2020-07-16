@@ -7,7 +7,7 @@ github.com/aaronland/go-http-leaflet
 github.com/aaronland/go-http-rewrite
 # github.com/aaronland/go-http-sanitize v0.0.4
 github.com/aaronland/go-http-sanitize
-# github.com/aaronland/go-http-server v0.0.4
+# github.com/aaronland/go-http-server v0.0.5
 github.com/aaronland/go-http-server
 # github.com/aaronland/go-http-tangramjs v0.0.6
 github.com/aaronland/go-http-tangramjs

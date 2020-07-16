@@ -6,7 +6,7 @@ require (
 	github.com/aaronland/go-http-bootstrap v0.0.5
 	github.com/aaronland/go-http-rewrite v0.0.5
 	github.com/aaronland/go-http-sanitize v0.0.4
-	github.com/aaronland/go-http-server v0.0.4
+	github.com/aaronland/go-http-server v0.0.5
 	github.com/aaronland/go-http-tangramjs v0.0.6
 	github.com/sfomuseum/go-flags v0.3.1
 	github.com/sfomuseum/go-geojsonld v0.0.0-20200206221640-63232bedd85c

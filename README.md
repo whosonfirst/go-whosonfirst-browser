@@ -370,7 +370,7 @@ Minimal viable Lambda environment variables
 | BROWSER_ENABLE_ALL | true | You don't have to enable all outputs, it's just the easiest example |
 | BROWSER_NEXTZEN_API_KEY| *** | You can signup for a Nextzen API key at [developers.nextzen.org](https://developers.nextzen.org/) |
 | BROWSER_READER_SOURCE | https://data.whosonfirst.org | |
-| BROWSER_SERVER_URI | lambda:// ||
+| BROWSER_SERVER_URI | lambda:///?binary_type=image/png&binary_type=application/zip ||
 
 ### Lambda, API Gateway and images
 
@@ -392,10 +392,6 @@ the CloudFront behaviour that points to your gateway):
 3. Make sure you pass an `Accept: image/png` header when you request the PNG rendering.
 
 3a. **Or:** make sure you specify a `Origin Custom Headers` header in your CloudFront origin settings (specifically `Accept: image/png`)
-
-4. If you add another image (or binary) handler to this package you'll need to
-repeat steps 1-3 _and_ update the `BinaryContentTypes` dictionary in
-[server/lambda.go](server/lambda.go) code accordingly. Good times...
 
 ## Docker
 
