@@ -357,21 +357,20 @@ Your `wof-staticd` function should be configured with (Lambda) environment varia
 * All instances of `-` are replaced with `_`
 * Each flag is prefixed with `BROWSER`
 
-For example the command line flag `-protocol` would be mapped to the `BROWSER_PROTOCOL` environment variable. Which is a good example because it is the one environment variable you _must_ to specify for `wof-staticd` to work as a Lambda function. Specifically you need to define the protocol as... "lambda". For example
+For example the command line flag `-protocol` would be mapped to the `BROWSER_PROTOCOL` environment variable. Which is a good example because it is the one environment variable you _must_ to specify for `wof-staticd` to work as a Lambda function. Specifically you need to define the `server-uri` as... "lambda://". For example
 
 ```
-BROWSER_PROTOCOL = lambda
+BROWSER_SERVER_URI = lambda://
 ```
 
-In reality you'll need to specify other flags, like `BROWSER_SOURCE` and `BROWSER_SOURCE_DSN`. For example here's how you might configure your function to render all the data and graphics formats (but not static HTML webpages) for your data:
+Minimal viable Lambda environment variables
 
-```
-BROWSER_CACHE_SOURCE = gocache://
-BROWSER_READER_SOURCE = s3://{BUCKET}?prefix={PREFIX}&region={REGION}
-BROWSER_ENABLE_HTML = false
-BROWSER_ENABLE_GRAPHICS = true
-BROWSER_ENABLE_DATA = true
-```
+| Name | Value | Notes |
+| --- | --- | --- |
+| BROWSER_ENABLE_ALL | true | You don't have to enable all outputs, it's just the easiest example |
+| BROWSER_NEXTZEN_API_KEY| *** | You can signup for a Nextzen API key at [developers.nextzen.org](https://developers.nextzen.org/) |
+| BROWSER_READER_SOURCE | https://data.whosonfirst.org | |
+| BROWSER_SERVER_URI | lambda:// ||
 
 ### Lambda, API Gateway and images
 
