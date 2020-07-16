@@ -3,10 +3,11 @@ package browser
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"github.com/aaronland/go-http-bootstrap"
+	"github.com/aaronland/go-http-server"
 	"github.com/aaronland/go-http-tangramjs"
+	"github.com/sfomuseum/go-flags/flagset"
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
@@ -15,14 +16,11 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/cachewriter" // eventually this will become a real go-writer thing...
 	"github.com/whosonfirst/go-whosonfirst-browser/editor"
 	"github.com/whosonfirst/go-whosonfirst-browser/http"
-	"github.com/whosonfirst/go-whosonfirst-browser/server"
-	"github.com/whosonfirst/go-whosonfirst-cli/flags"
 	"github.com/whosonfirst/go-writer"
 	"html/template"
 	"io/ioutil"
 	"log"
 	gohttp "net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -34,68 +32,67 @@ import (
 
 func Start(ctx context.Context) error {
 
-	proto := flag.String("protocol", "http", "The protocol for wof-staticd server to listen on. Valid protocols are: http, lambda.")
-	host := flag.String("host", "localhost", "The hostname to listen for requests on")
-	port := flag.Int("port", 8080, "The port number to listen for requests on")
+	fs := flagset.NewFlagSet("browser")
 
-	static_prefix := flag.String("static-prefix", "", "Prepend this prefix to URLs for static assets.")
+	server_uri := fs.String("server-uri", "http://localhost:8080", "A valid aaronland/go-http-server URI.")
 
-	path_templates := flag.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
+	static_prefix := fs.String("static-prefix", "", "Prepend this prefix to URLs for static assets.")
 
-	data_source := flag.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
-	writer_source := flag.String("writer-source", "null://", "")
+	data_source := fs.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
+	writer_source := fs.String("writer-source", "null://", "")
 
-	cache_source := flag.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
+	cache_source := fs.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
 
-	nextzen_api_key := flag.String("nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
-	nextzen_style_url := flag.String("nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
-	nextzen_tile_url := flag.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
+	path_templates := fs.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
 
-	proxy_tiles := flag.Bool("proxy-tiles", false, "Proxy (and cache) Nextzen tiles.")
-	proxy_tiles_url := flag.String("proxy-tiles-url", "/tiles/", "The URL (a relative path) for proxied tiles.")
-	proxy_tiles_cache := flag.String("proxy-tiles-cache", "gocache://", "A valid tile proxy DSN string.")
-	proxy_tiles_timeout := flag.Int("proxy-tiles-timeout", 30, "The maximum number of seconds to allow for fetching a tile from the proxy.")
+	nextzen_api_key := fs.String("nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
+	nextzen_style_url := fs.String("nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
+	nextzen_tile_url := fs.String("nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
 
-	enable_all := flag.Bool("enable-all", false, "Enable all the available output handlers.")
-	enable_graphics := flag.Bool("enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
-	enable_data := flag.Bool("enable-data", false, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
+	proxy_tiles := fs.Bool("proxy-tiles", false, "Proxy (and cache) Nextzen tiles.")
+	proxy_tiles_url := fs.String("proxy-tiles-url", "/tiles/", "The URL (a relative path) for proxied tiles.")
+	proxy_tiles_cache := fs.String("proxy-tiles-cache", "gocache://", "A valid tile proxy DSN string.")
+	proxy_tiles_timeout := fs.Int("proxy-tiles-timeout", 30, "The maximum number of seconds to allow for fetching a tile from the proxy.")
 
-	enable_png := flag.Bool("enable-png", false, "Enable the 'png' output handler.")
-	enable_svg := flag.Bool("enable-svg", false, "Enable the 'svg' output handler.")
+	enable_all := fs.Bool("enable-all", false, "Enable all the available output handlers.")
+	enable_graphics := fs.Bool("enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
+	enable_data := fs.Bool("enable-data", false, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
 
-	enable_geojson := flag.Bool("enable-geojson", true, "Enable the 'geojson' output handler.")
-	enable_spr := flag.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
-	enable_select := flag.Bool("enable-select", false, "Enable the 'select' output handler.")
+	enable_png := fs.Bool("enable-png", false, "Enable the 'png' output handler.")
+	enable_svg := fs.Bool("enable-svg", false, "Enable the 'svg' output handler.")
 
-	select_pattern := flag.String("select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
+	enable_geojson := fs.Bool("enable-geojson", true, "Enable the 'geojson' output handler.")
+	enable_geojsonld := fs.Bool("enable-geojson-ld", true, "Enable the 'geojson-ld' output handler.")
+	enable_spr := fs.Bool("enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
+	enable_select := fs.Bool("enable-select", false, "Enable the 'select' output handler.")
 
-	enable_updates := flag.Bool("enable-updates", false, "...")
-	enable_create := flag.Bool("enable-create", false, "...")
-	update_pattern := flag.String("update-pattern", "geometry|properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for updateable properties.")
+	enable_updates := fs.Bool("enable-updates", false, "...")
+	enable_create := fs.Bool("enable-create", false, "...")
+	update_pattern := fs.String("update-pattern", "geometry|properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for updateable properties.")
 
-	enable_html := flag.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
+	enable_html := fs.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
-	path_png := flag.String("path-png", "/png/", "The path that PNG requests should be served from.")
-	path_svg := flag.String("path-svg", "/svg/", "The path that SVG requests should be served from.")
-	path_geojson := flag.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
-	path_spr := flag.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
-	path_select := flag.String("path-select", "/select/", "The path that 'select' requests should be served from.")
+	select_pattern := fs.String("select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
 
-	// maybe these should just be path_id and blah blah blah REST blah blah blah GET, POST, PUT
-	// today they are now (20200102/thisisaaronland)
+	path_deprecate := fs.String("path-deprecate", "/deprecate/", "...")
+	path_cessate := fs.String("path-cessate", "/cessate/", "...")
 
-	path_update := flag.String("path-update", "/update/", "...")
-	path_create := flag.String("path-create", "/create/", "...")
+	path_id := fs.String("path-id", "/id/", "The that Who's On First documents should be served from.")
+	// path_alt := fs.String("path-alt", "/alt/", "The that Who's On First alternative geometry documents should be served from.")
 
-	path_deprecate := flag.String("path-deprecate", "/deprecate/", "...")
-	path_cessate := flag.String("path-cessate", "/cessate/", "...")
+	path_png := fs.String("path-png", "/png/", "The path that PNG requests should be served from.")
+	path_svg := fs.String("path-svg", "/svg/", "The path that SVG requests should be served from.")
+	path_geojson := fs.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
+	path_geojsonld := fs.String("path-geojson-ld", "/geojson-ld/", "The path that GeoJSON-LD requests should be served from.")
+	path_spr := fs.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
+	path_select := fs.String("path-select", "/select/", "The path that 'select' requests should be served from.")
 
-	path_id := flag.String("path-id", "/id/", "The that Who's On First documents should be served from.")
-	// path_alt := flag.String("path-alt", "/alt/", "The that Who's On First alternative geometry documents should be served from.")
+	path_update := fs.String("path-update", "/update/", "The that Who's On First documents should be served from.")
+	path_create := fs.String("path-create", "/create/", "The that Who's On First documents should be served from.")
 
-	flag.Parse()
+	flagset.Parse(fs)
 
-	err := flags.SetFlagsFromEnvVars("BROWSER")
+	err := flagset.SetFlagsFromEnvVarsWithFeedback(fs, "BROWSER", true)
 
 	if err != nil {
 		return err
@@ -114,6 +111,7 @@ func Start(ctx context.Context) error {
 
 	if *enable_data {
 		*enable_geojson = true
+		*enable_geojsonld = true
 		*enable_spr = true
 		*enable_select = true
 	}
@@ -267,6 +265,17 @@ func Start(ctx context.Context) error {
 		}
 
 		mux.Handle(*path_geojson, geojson_handler)
+	}
+
+	if *enable_geojsonld {
+
+		geojsonld_handler, err := http.GeoJSONLDHandler(cr)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(*path_geojsonld, geojsonld_handler)
 	}
 
 	if *enable_select {
@@ -496,15 +505,7 @@ func Start(ctx context.Context) error {
 
 	}
 
-	address := fmt.Sprintf("http://%s:%d", *host, *port)
-
-	u, err := url.Parse(address)
-
-	if err != nil {
-		return err
-	}
-
-	s, err := server.NewStaticServer(*proto, u)
+	s, err := server.NewServer(ctx, *server_uri)
 
 	if err != nil {
 		return err
@@ -512,5 +513,5 @@ func Start(ctx context.Context) error {
 
 	log.Printf("Listening on %s\n", s.Address())
 
-	return s.ListenAndServe(mux)
+	return s.ListenAndServe(ctx, mux)
 }

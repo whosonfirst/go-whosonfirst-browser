@@ -12,18 +12,24 @@ import (
 	"time"
 )
 
+type HTTPReader struct {
+	wof_reader.Reader
+	url      *url.URL
+	throttle <-chan time.Time
+}
+
 func init() {
 
 	ctx := context.Background()
 
 	schemes := []string{
 		"http",
-		"https",			
+		"https",
 	}
 
 	for _, s := range schemes {
-	
-		err := wof_reader.RegisterReader(ctx, s, initializeHTTPReader)	
+
+		err := wof_reader.RegisterReader(ctx, s, NewHTTPReader)
 
 		if err != nil {
 			panic(err)
@@ -31,46 +37,23 @@ func init() {
 	}
 }
 
-func initializeHTTPReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
+func NewHTTPReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
 
-	r := NewHTTPReader()
-	err := r.Open(ctx, uri)
+	u, err := url.Parse(uri)
 
 	if err != nil {
 		return nil, err
 	}
-
-	return r, nil
-}
-
-type HTTPReader struct {
-	wof_reader.Reader
-	url *url.URL
-	throttle <-chan time.Time
-}
-
-func NewHTTPReader() wof_reader.Reader {
 
 	rate := time.Second / 3
 	throttle := time.Tick(rate)
 
 	r := HTTPReader{
 		throttle: throttle,
+		url:      u,
 	}
 
-	return &r
-}
-
-func (r *HTTPReader) Open(ctx context.Context, uri string) error {
-
-	u, err := url.Parse(uri)
-
-	if err != nil {
-		return err
-	}
-
-	r.url = u
-	return nil
+	return &r, nil
 }
 
 func (r *HTTPReader) Read(ctx context.Context, uri string) (io.ReadCloser, error) {
@@ -79,7 +62,7 @@ func (r *HTTPReader) Read(ctx context.Context, uri string) (io.ReadCloser, error
 
 	u, _ := url.Parse(r.url.String())
 	u.Path = filepath.Join(u.Path, uri)
-	
+
 	url := u.String()
 
 	rsp, err := http.Get(url)

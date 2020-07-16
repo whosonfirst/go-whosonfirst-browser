@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"github.com/aaronland/go-artisanal-integers"
 	"github.com/tidwall/gjson"
+	"go.uber.org/ratelimit"
 	"io/ioutil"
-	_ "log"
+	"log"
 	"net/http"
 	"net/url"
+	"github.com/cenkalti/backoff/v4"
 )
 
 func init() {
@@ -35,6 +37,7 @@ type APIClient struct {
 	Scheme                 string
 	Host                   string
 	Endpoint               string
+	rate_limiter           ratelimit.Limiter
 }
 
 type APIError struct {
@@ -108,12 +111,14 @@ func (rsp *APIResponse) Error() error {
 func NewAPIClient() artisanalinteger.Client {
 
 	http_client := &http.Client{}
+	rl := ratelimit.New(10)		// please make this configurable
 
 	return &APIClient{
-		Scheme:      "https",
-		Host:        "api.brooklynintegers.com",
-		Endpoint:    "rest/",
-		http_client: http_client,
+		Scheme:       "https",
+		Host:         "api.brooklynintegers.com",
+		Endpoint:     "rest/",
+		http_client:  http_client,
+		rate_limiter: rl,
 	}
 }
 
@@ -126,16 +131,41 @@ func (client *APIClient) NextInt() (int64, error) {
 	params := url.Values{}
 	method := "brooklyn.integers.create"
 
-	rsp, err := client.ExecuteMethod(method, &params)
+	var next_id int64
+
+	cb := func() error {
+
+		rsp, err := client.ExecuteMethod(method, &params)
+
+		if err != nil {
+			return err
+		}
+
+		i, err := rsp.Int()
+		
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+
+		next_id = i
+		return nil
+	}
+
+	bo := backoff.NewExponentialBackOff()
+	
+	err := backoff.Retry(cb, bo)
 
 	if err != nil {
 		return -1, err
 	}
 
-	return rsp.Int()
+	return next_id, nil
 }
 
 func (client *APIClient) ExecuteMethod(method string, params *url.Values) (*APIResponse, error) {
+
+	client.rate_limiter.Take()
 
 	url := client.Scheme + "://" + client.Host + "/" + client.Endpoint
 

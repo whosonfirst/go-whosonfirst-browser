@@ -12,7 +12,6 @@ var writer_roster roster.Roster
 type WriterInitializationFunc func(ctx context.Context, uri string) (Writer, error)
 
 type Writer interface {
-	Open(context.Context, string) error
 	Write(context.Context, string, io.ReadCloser) error
 	URI(string) string
 }

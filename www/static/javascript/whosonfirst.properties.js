@@ -411,10 +411,12 @@ whosonfirst.properties = (function(){
 		'render_src_geom_alt': function(d, ctx){
 		        var root = location.href;
 
-		    	if (root.endsWith("/")){
-			    root = root.substr(0, root.length-1);
-		        }
+		    	// bandaids to account for possible bunk data
+		    	// (20200124/thisisaaronland)
 		    
+		        root = root.replace(/^alt-/, "");
+		    	root = root.replace(/\/$/, "");		    
+		    		    
 			var link = root + "-alt-" + encodeURIComponent(d) + "/";
 			return whosonfirst.render.render_link(link, d, ctx);
 		},

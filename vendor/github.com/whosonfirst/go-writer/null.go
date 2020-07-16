@@ -6,40 +6,24 @@ import (
 	"io/ioutil"
 )
 
+type NullWriter struct {
+	Writer
+}
+
 func init() {
 
 	ctx := context.Background()
-	err := RegisterWriter(ctx, "null", initializeNullWriter)
+	err := RegisterWriter(ctx, "null", NewNullWriter)
 
 	if err != nil {
 		panic(err)
 	}
 }
 
-func initializeNullWriter(ctx context.Context, uri string) (Writer, error) {
+func NewNullWriter(ctx context.Context, uri string) (Writer, error) {
 
-	wr := NewNullWriter()
-	err := wr.Open(ctx, uri)
-
-	if err != nil {
-		return nil, err
-	}
-
+	wr := &NullWriter{}
 	return wr, nil
-}
-
-type NullWriter struct {
-	Writer
-}
-
-func NewNullWriter() Writer {
-
-	wr := NullWriter{}
-	return &wr
-}
-
-func (wr *NullWriter) Open(ctx context.Context, uri string) error {
-	return nil
 }
 
 func (wr *NullWriter) Write(ctx context.Context, uri string, fh io.ReadCloser) error {

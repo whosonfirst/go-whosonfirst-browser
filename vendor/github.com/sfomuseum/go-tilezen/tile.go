@@ -81,7 +81,7 @@ func IsOverZoom(z int) bool {
 
 func ParseURI(uri string) (*Tile, error) {
 
-	re_path, err := regexp.Compile(`(.*)/?(\d+)/(\d+)/(\d+).(\w+)$`)
+	re_path, err := regexp.Compile(`(?:(.*)/)?(\d+)/(\d+)/(\d+).(\w+)$`)
 
 	if err != nil {
 		return nil, err

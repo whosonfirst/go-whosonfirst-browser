@@ -9,59 +9,45 @@ import (
 	"path/filepath"
 )
 
+type FSReader struct {
+	Reader
+	root string
+}
+
 func init() {
 
 	ctx := context.Background()
-	err := RegisterReader(ctx, "fs", initializeFSReader)
+	err := RegisterReader(ctx, "fs", NewFSReader)
 
 	if err != nil {
 		panic(err)
 	}
 }
 
-func initializeFSReader(ctx context.Context, uri string) (Reader, error) {
-
-	r := NewFSReader()
-	err := r.Open(ctx, uri)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return r, nil
-}
-
-type FSReader struct {
-	Reader
-	root string
-}
-
-func NewFSReader() Reader {
-	r := FSReader{}
-	return &r
-}
-
-func (r *FSReader) Open(ctx context.Context, uri string) error {
+func NewFSReader(ctx context.Context, uri string) (Reader, error) {
 
 	u, err := url.Parse(uri)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	root := u.Path
 	info, err := os.Stat(root)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !info.IsDir() {
-		return errors.New("root is not a directory")
+		return nil, errors.New("root is not a directory")
 	}
 
-	r.root = root
-	return nil
+	r := &FSReader{
+		root: root,
+	}
+
+	return r, nil
 }
 
 func (r *FSReader) Read(ctx context.Context, path string) (io.ReadCloser, error) {

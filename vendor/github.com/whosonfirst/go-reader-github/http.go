@@ -13,28 +13,6 @@ import (
 	"time"
 )
 
-func init() {
-
-	ctx := context.Background()
-	err := wof_reader.RegisterReader(ctx, "github", initializeGitHubReader)
-
-	if err != nil {
-		panic(err)
-	}
-}
-
-func initializeGitHubReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
-
-	r := NewGitHubReader()
-	err := r.Open(ctx, uri)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return r, nil
-}
-
 type GitHubReader struct {
 	wof_reader.Reader
 	owner    string
@@ -43,24 +21,29 @@ type GitHubReader struct {
 	throttle <-chan time.Time
 }
 
-func NewGitHubReader() wof_reader.Reader {
+func init() {
+
+	ctx := context.Background()
+	err := wof_reader.RegisterReader(ctx, "github", NewGitHubReader)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+func NewGitHubReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
 
 	rate := time.Second / 3
 	throttle := time.Tick(rate)
 
-	r := GitHubReader{
-		throttle: throttle,
-	}
-
-	return &r
-}
-
-func (r *GitHubReader) Open(ctx context.Context, uri string) error {
-
 	u, err := url.Parse(uri)
 
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	r := &GitHubReader{
+		throttle: throttle,
 	}
 
 	r.owner = u.Host
@@ -69,7 +52,7 @@ func (r *GitHubReader) Open(ctx context.Context, uri string) error {
 	parts := strings.Split(path, "/")
 
 	if len(parts) != 1 {
-		return errors.New("Invalid path")
+		return nil, errors.New("Invalid path")
 	}
 
 	r.repo = parts[0]
@@ -83,7 +66,7 @@ func (r *GitHubReader) Open(ctx context.Context, uri string) error {
 		r.branch = branch
 	}
 
-	return nil
+	return r, nil
 }
 
 func (r *GitHubReader) Read(ctx context.Context, uri string) (io.ReadCloser, error) {

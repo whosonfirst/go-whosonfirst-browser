@@ -12,4 +12,4 @@ tools:
 	go build -o bin/wof-placetype-descendants cmd/wof-placetype-descendants/main.go
 
 spec:
-	go run cmd/mk-spec.main.go > placetypes/spec.go
+	go run cmd/mk-spec/main.go > placetypes/spec.go

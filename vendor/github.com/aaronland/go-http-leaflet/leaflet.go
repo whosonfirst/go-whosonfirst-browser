@@ -18,9 +18,11 @@ func DefaultLeafletOptions() *LeafletOptions {
 	opts := &LeafletOptions{
 		CSS: []string{
 			"/css/leaflet.css",
+			"/css/leaflet.fullscreen.css",			
 		},
 		JS: []string{
 			"/javascript/leaflet.js",
+			"/javascript/leaflet.fullscreen.min.js",			
 			"/javascript/leaflet-hash.js",
 		},
 	}

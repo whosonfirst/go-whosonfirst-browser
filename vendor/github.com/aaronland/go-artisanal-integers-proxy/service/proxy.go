@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/aaronland/go-artisanal-integers"
-	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/aaronland/go-pool"
+	"github.com/whosonfirst/go-whosonfirst-log"
 	"math/rand"
 	"sync"
 	"time"
@@ -22,6 +22,7 @@ type ProxyServiceOptions struct {
 	Pool    pool.Pool
 	Minimum int
 	Logger  *log.WOFLogger
+	Workers int
 }
 
 func DefaultProxyServiceOptions() (*ProxyServiceOptions, error) {
@@ -39,6 +40,7 @@ func DefaultProxyServiceOptions() (*ProxyServiceOptions, error) {
 		Pool:    pl,
 		Logger:  logger,
 		Minimum: 10,
+		Workers: 0,
 	}
 
 	return &opts, nil
@@ -123,7 +125,12 @@ func (p *ProxyService) refillPool() {
 	// aren't going to do that now...
 
 	todo := int64(p.options.Minimum) - p.options.Pool.Length()
-	workers := int(p.options.Minimum / 2)
+
+	workers := p.options.Workers
+
+	if workers == 0 {
+		workers = int(p.options.Minimum / 2)
+	}
 
 	if workers == 0 {
 		workers = 1

@@ -16,25 +16,6 @@ import (
 	"time"
 )
 
-func init() {
-
-	ctx := context.Background()
-	wof_writer.RegisterWriter(ctx, "githubapi", initializeGitHubAPIWriter)
-}
-
-func initializeGitHubAPIWriter(ctx context.Context, uri string) (wof_writer.Writer, error) {
-
-	wr := NewGitHubAPIWriter()
-
-	err := wr.Open(ctx, uri)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return wr, nil
-}
-
 type GitHubAPIWriterCommitTemplates struct {
 	New    string
 	Update string
@@ -52,51 +33,45 @@ type GitHubAPIWriter struct {
 	templates *GitHubAPIWriterCommitTemplates
 }
 
-func NewGitHubAPIWriter() wof_writer.Writer {
+func init() {
 
-	rate := time.Second / 3
-	throttle := time.Tick(rate)
-
-	wr := GitHubAPIWriter{
-		throttle: throttle,
-	}
-
-	return &wr
+	ctx := context.Background()
+	wof_writer.RegisterWriter(ctx, "githubapi", NewGitHubAPIWriter)
 }
 
-func (wr *GitHubAPIWriter) Open(ctx context.Context, uri string) error {
+func NewGitHubAPIWriter(ctx context.Context, uri string) (wof_writer.Writer, error) {
 
 	u, err := url.Parse(uri)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	wr.owner = u.Host
-	
 	path := strings.TrimLeft(u.Path, "/")
 	parts := strings.Split(path, "/")
 
 	if len(parts) != 1 {
-		return errors.New("Invalid path")
+		return nil, errors.New("Invalid path")
 	}
 
-	wr.repo = parts[0]
-	wr.branch = "master"
+	repo := parts[0]
+	branch := "master"
 
 	q := u.Query()
 
 	token := q.Get("access_token")
-	branch := q.Get("branch")	
+
+	prefix := q.Get("prefix")
+	q_branch := q.Get("branch")
 
 	if token == "" {
-		return errors.New("Missing access token")
+		return nil, errors.New("Missing access token")
 	}
 
-	if branch != "" {
-		wr.branch = branch
+	if q_branch != "" {
+		branch = q_branch
 	}
-	
+
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -108,7 +83,7 @@ func (wr *GitHubAPIWriter) Open(ctx context.Context, uri string) error {
 	user, _, err := users.Get(ctx, "")
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	new_template := q.Get("new")
@@ -121,20 +96,27 @@ func (wr *GitHubAPIWriter) Open(ctx context.Context, uri string) error {
 	if update_template == "" {
 		update_template = "Updated %s"
 	}
-	
+
 	templates := &GitHubAPIWriterCommitTemplates{
 		New:    new_template,
 		Update: update_template,
 	}
 
-	wr.client = client
-	wr.user = user
-	wr.templates = templates
+	rate := time.Second / 3
+	throttle := time.Tick(rate)
 
-	prefix := q.Get("prefix")
-	wr.prefix = prefix
+	wr := &GitHubAPIWriter{
+		client:    client,
+		owner:     u.Host,
+		user:      user,
+		repo:      repo,
+		branch:    branch,
+		prefix:    prefix,
+		templates: templates,
+		throttle:  throttle,
+	}
 
-	return nil
+	return wr, nil
 }
 
 func (wr *GitHubAPIWriter) Write(ctx context.Context, uri string, fh io.ReadCloser) error {
