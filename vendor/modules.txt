@@ -1,15 +1,15 @@
-# github.com/aaronland/go-http-bootstrap v0.0.5
+# github.com/aaronland/go-http-bootstrap v0.0.6
 github.com/aaronland/go-http-bootstrap
 github.com/aaronland/go-http-bootstrap/resources
 # github.com/aaronland/go-http-leaflet v0.0.3
 github.com/aaronland/go-http-leaflet
-# github.com/aaronland/go-http-rewrite v0.0.5
+# github.com/aaronland/go-http-rewrite v0.0.6
 github.com/aaronland/go-http-rewrite
 # github.com/aaronland/go-http-sanitize v0.0.4
 github.com/aaronland/go-http-sanitize
 # github.com/aaronland/go-http-server v0.0.5
 github.com/aaronland/go-http-server
-# github.com/aaronland/go-http-tangramjs v0.0.6
+# github.com/aaronland/go-http-tangramjs v0.0.7
 github.com/aaronland/go-http-tangramjs
 # github.com/aaronland/go-roster v0.0.2
 github.com/aaronland/go-roster
@@ -44,7 +44,7 @@ github.com/paulmach/orb/geojson
 github.com/paulmach/orb/internal/mercator
 github.com/paulmach/orb/maptile
 github.com/paulmach/orb/project
-# github.com/sfomuseum/go-flags v0.3.1
+# github.com/sfomuseum/go-flags v0.4.2
 github.com/sfomuseum/go-flags/flagset
 # github.com/sfomuseum/go-geojsonld v0.0.0-20200206221640-63232bedd85c
 github.com/sfomuseum/go-geojsonld
@@ -58,11 +58,11 @@ github.com/skelterjohn/geom
 github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 github.com/srwiley/rasterx
-# github.com/tidwall/gjson v1.6.0
+# github.com/tidwall/gjson v1.6.3
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.1
 github.com/tidwall/match
-# github.com/tidwall/pretty v1.0.0
+# github.com/tidwall/pretty v1.0.2
 github.com/tidwall/pretty
 # github.com/tidwall/sjson v1.0.4
 github.com/tidwall/sjson
@@ -82,6 +82,8 @@ github.com/whosonfirst/go-reader
 github.com/whosonfirst/go-reader-github
 # github.com/whosonfirst/go-reader-http v0.1.0
 github.com/whosonfirst/go-reader-http
+# github.com/whosonfirst/go-reader-whosonfirst-data v1.0.0
+github.com/whosonfirst/go-reader-whosonfirst-data
 # github.com/whosonfirst/go-sanitize v0.1.0
 github.com/whosonfirst/go-sanitize
 # github.com/whosonfirst/go-whosonfirst-flags v0.1.0
@@ -113,11 +115,11 @@ github.com/whosonfirst/go-whosonfirst-svg
 github.com/whosonfirst/go-whosonfirst-uri
 # github.com/whosonfirst/warning v0.1.1
 github.com/whosonfirst/warning
-# golang.org/x/image v0.0.0-20200618115811-c13761719519
+# golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
 golang.org/x/image/colornames
 golang.org/x/image/math/fixed
 golang.org/x/image/vector
-# golang.org/x/net v0.0.0-20200519113804-d87ec0cfa476
+# golang.org/x/net v0.0.0-20201002202402-0a1ea396d57c
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/html

@@ -18,8 +18,8 @@ bake-templates:
 bake-assets:	
 	go build -o bin/go-bindata cmd/go-bindata/main.go
 	go build -o bin/go-bindata-assetfs cmd/go-bindata-assetfs/main.go
-	rm -f static/*~ static/css/*~ static/tangram/*~ static/javascript/*~
-	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -pkg tangramjs -o assets.go static static/javascript static/css static/tangram
+	rm -f static/*~ static/tangram/*~ static/javascript/*~
+	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -pkg tangramjs -o assets.go static static/javascript static/tangram
 
 debug:
 	@make bake

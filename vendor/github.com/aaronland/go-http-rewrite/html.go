@@ -26,6 +26,25 @@ func RewriteHTMLHandler(prev go_http.Handler, rewrite_func RewriteHTMLFunc) go_h
 
 		defer prev_rsp.Body.Close()
 
+		location := prev_headers.Get("Location")
+
+		if location != "" {
+			
+			for k, v := range prev_headers {
+
+				if k == "Location" {
+					continue
+				}
+				
+				for _, vv := range v {
+					rsp.Header().Set(k, vv)
+				}
+			}
+			
+			go_http.Redirect(rsp, req, location, 303)
+			return
+		}
+		
 		content_type := prev_headers.Get("Content-Type")
 
 		if content_type != "" {

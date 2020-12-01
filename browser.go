@@ -37,7 +37,7 @@ func Start(ctx context.Context) error {
 
 	path_templates := fs.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
 
-	data_source := fs.String("reader-source", "https://data.whosonfirst.org", "A valid go-reader Reader URI string.")
+	data_source := fs.String("reader-source", "whosonfirst-data://", "A valid go-reader Reader URI string.")
 	cache_source := fs.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
 
 	nextzen_api_key := fs.String("nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")

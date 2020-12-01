@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	_ "github.com/whosonfirst/go-reader-github"
+	_ "github.com/whosonfirst/go-reader-whosonfirst-data"
 	_ "github.com/whosonfirst/go-reader-http"
 	"github.com/whosonfirst/go-whosonfirst-browser"
 	"log"

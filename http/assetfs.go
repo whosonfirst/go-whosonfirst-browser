@@ -258,7 +258,7 @@ func staticJavascriptWhosonfirstBrowserIdJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.browser.id.js", size: 5156, mode: os.FileMode(420), modTime: time.Unix(1594853734, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.browser.id.js", size: 5156, mode: os.FileMode(420), modTime: time.Unix(1594859184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -438,7 +438,7 @@ func staticJavascriptWhosonfirstPropertiesJs() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/javascript/whosonfirst.properties.js", size: 13648, mode: os.FileMode(420), modTime: time.Unix(1594853734, 0)}
+	info := bindataFileInfo{name: "static/javascript/whosonfirst.properties.js", size: 13648, mode: os.FileMode(420), modTime: time.Unix(1594858811, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -538,7 +538,7 @@ func staticCssWhosonfirstBrowserIdCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "static/css/whosonfirst.browser.id.css", size: 1614, mode: os.FileMode(420), modTime: time.Unix(1594853734, 0)}
+	info := bindataFileInfo{name: "static/css/whosonfirst.browser.id.css", size: 1614, mode: os.FileMode(420), modTime: time.Unix(1594859184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
