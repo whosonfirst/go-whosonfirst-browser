@@ -112,7 +112,7 @@ Usage of ./bin/whosonfirst-browser:
   -proxy-tiles-url string
     	The URL (a relative path) for proxied tiles. (default "/tiles/")
   -reader-source string
-    	A valid go-reader Reader URI string. (default "https://data.whosonfirst.org")
+    	A valid go-reader Reader URI string. (default "whosonfirst-data://")
   -select-pattern string
     	A valid regular expression for sanitizing select parameters. (default "properties(?:.[a-zA-Z0-9-_]+){1,}")
   -static-prefix string
@@ -240,7 +240,7 @@ package main
 
 import (
 	"context"
-	_ "github.com/whosonfirst/go-reader-http"
+	_ "github.com/whosonfirst/go-reader-whosonfirst-data"
 	"github.com/whosonfirst/go-whosonfirst-browser"
 )
 
@@ -250,7 +250,7 @@ func main() {
 }
 ```
 
-The default settings for `go-whosonfirst-browser` are to fetch data from the `https://data.whosonfirst.org` servers and to cache those looks in an ephemeral in-memory [go-cache](https://github.com/patrickmn/go-cache) cache.
+The default settings for `go-whosonfirst-browser` are to fetch data from the [https://github.com/whosonfirst-data](https://github.com/whosonfirst-data) repositories using the [go-reader-whosonfirst-data](https://github.com/whosonfirst/go-reader-whosonfirst-data) package and to cache those looks in an ephemeral in-memory [go-cache](https://github.com/patrickmn/go-cache) cache.
 
 If you wanted, instead, to read data from the local filesystem you would start the browser like this:
 
