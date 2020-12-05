@@ -1,5 +1,8 @@
 CWD=$(shell pwd)
 
+cli:
+	go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
+
 go-bindata:
 	mkdir -p cmd/go-bindata
 	mkdir -p cmd/go-bindata-assetfs
