@@ -1,4 +1,4 @@
-module github.com/whosonfirst/go-whosonfirst-browser
+module github.com/whosonfirst/go-whosonfirst-browser/v3
 
 go 1.12
 
@@ -18,9 +18,11 @@ require (
 	github.com/whosonfirst/go-bindata-assetfs v1.0.1
 	github.com/whosonfirst/go-cache v0.2.0
 	github.com/whosonfirst/go-reader v0.2.0
+	github.com/whosonfirst/go-reader-cachereader v0.1.0
 	github.com/whosonfirst/go-reader-http v0.1.0
 	github.com/whosonfirst/go-reader-whosonfirst-data v1.0.0
 	github.com/whosonfirst/go-sanitize v0.1.0
+	github.com/whosonfirst/go-whosonfirst-browser v1.0.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.14.1
 	github.com/whosonfirst/go-whosonfirst-image v0.0.1
 	github.com/whosonfirst/go-whosonfirst-spr v0.1.0

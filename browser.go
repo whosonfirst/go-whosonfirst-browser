@@ -1,3 +1,4 @@
+
 package browser
 
 import (
@@ -11,13 +12,14 @@ import (
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/assets/templates"
-	"github.com/whosonfirst/go-whosonfirst-browser/cachereader" // eventually this will become a real go-reader thing...
-	"github.com/whosonfirst/go-whosonfirst-browser/http"
+	"github.com/whosonfirst/go-whosonfirst-browser/v3/assets/templates"
+	_ "github.com/whosonfirst/go-reader-cachereader"
+	"github.com/whosonfirst/go-whosonfirst-browser/v3/http"
 	"html/template"
 	"io/ioutil"
 	"log"
 	gohttp "net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -123,19 +125,15 @@ func Start(ctx context.Context) error {
 		*cache_source = fmt.Sprintf("fs://%s", tempdir)
 	}
 
-	r, err := reader.NewReader(ctx, *data_source)
+	cr_q := url.Values{}
+	cr_q.Set("reader", *data_source)
+	cr_q.Set("cache", *cache_source)
+	
+	cr_uri := url.URL{}
+	cr_uri.Scheme = "cachereader"
+	cr_uri.RawQuery = cr_q.Encode()
 
-	if err != nil {
-		return err
-	}
-
-	c, err := cache.NewCache(ctx, *cache_source)
-
-	if err != nil {
-		return err
-	}
-
-	cr, err := cachereader.NewCacheReader(r, c)
+	cr, err := reader.NewReader(ctx, cr_uri.String())
 
 	if err != nil {
 		return err

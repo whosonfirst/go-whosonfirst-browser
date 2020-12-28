@@ -4,7 +4,7 @@ import (
 	"context"
 	_ "github.com/whosonfirst/go-reader-whosonfirst-data"
 	_ "github.com/whosonfirst/go-reader-http"
-	"github.com/whosonfirst/go-whosonfirst-browser"
+	"github.com/whosonfirst/go-whosonfirst-browser/v3"
 	"log"
 )
 
