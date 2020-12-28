@@ -1,5 +1,8 @@
 CWD=$(shell pwd)
 
+cli:
+	go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
+
 go-bindata:
 	mkdir -p cmd/go-bindata
 	mkdir -p cmd/go-bindata-assetfs
@@ -23,8 +26,8 @@ lambda-browser:
 bake: bake-static bake-templates
 
 bake-static:
-	go build -o bin/go-bindata cmd/go-bindata/main.go
-	go build -o bin/go-bindata-assetfs cmd/go-bindata-assetfs/main.go
+	go build -mod vendor -o bin/go-bindata cmd/go-bindata/main.go
+	go build -mod vendor -o bin/go-bindata-assetfs cmd/go-bindata-assetfs/main.go
 	rm -f www/static/*~ www/static/css/*~ www/static/javascript/*~
 	@PATH=$(PATH):$(CWD)/bin bin/go-bindata-assetfs -prefix www -pkg http www/static/javascript www/static/css www/static/fonts
 
