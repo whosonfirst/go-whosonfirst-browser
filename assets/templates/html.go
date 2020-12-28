@@ -5,7 +5,6 @@
 // www/templates/html/example.html
 // www/templates/html/id.html
 // www/templates/html/inc_alt_basics.html
-// www/templates/html/inc_alt_basics.html~
 // www/templates/html/inc_common_css.html
 // www/templates/html/inc_common_footer.html
 // www/templates/html/inc_common_header.html
@@ -96,7 +95,7 @@ func wwwTemplatesHtmlAltHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/alt.html", size: 4146, mode: os.FileMode(420), modTime: time.Unix(1602172431, 0)}
+	info := bindataFileInfo{name: "www/templates/html/alt.html", size: 4146, mode: os.FileMode(420), modTime: time.Unix(1579803216, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -116,7 +115,7 @@ func wwwTemplatesHtmlErrorHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/error.html", size: 439, mode: os.FileMode(420), modTime: time.Unix(1576773902, 0)}
+	info := bindataFileInfo{name: "www/templates/html/error.html", size: 439, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -136,7 +135,7 @@ func wwwTemplatesHtmlExampleHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/example.html", size: 339, mode: os.FileMode(420), modTime: time.Unix(1576773902, 0)}
+	info := bindataFileInfo{name: "www/templates/html/example.html", size: 339, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -156,7 +155,7 @@ func wwwTemplatesHtmlIdHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/id.html", size: 4061, mode: os.FileMode(420), modTime: time.Unix(1579371623, 0)}
+	info := bindataFileInfo{name: "www/templates/html/id.html", size: 4061, mode: os.FileMode(420), modTime: time.Unix(1594859184, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -176,27 +175,7 @@ func wwwTemplatesHtmlInc_alt_basicsHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_alt_basics.html", size: 967, mode: os.FileMode(420), modTime: time.Unix(1579371623, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
-var _wwwTemplatesHtmlInc_alt_basicsHtml2 = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xd4\x96\x4d\x6f\xe3\x36\x10\x86\xcf\xc9\xaf\x18\x68\x17\xc8\x65\x6d\x35\xdd\x3d\x05\x8a\x0e\xdd\xc5\x02\x06\xfa\x11\x6c\x5a\xec\x31\xa0\xc4\xb1\x34\x28\x45\xb2\xe4\x28\x8e\x61\xe8\xbf\x17\x94\x64\x7d\x24\xf2\x36\x4d\xdb\x00\xbd\x18\x36\x3d\x7c\xf9\xce\xc3\xe1\x90\x87\x83\xc4\x2d\x69\x84\x88\x74\x7e\x47\xf2\x2e\x13\x9e\x72\x1f\x35\xcd\x79\x22\xe9\x1e\x48\x5e\x47\xbb\xd2\x78\xa3\xb7\xe4\x3c\xaf\x24\xb2\x20\xe5\xa3\xf4\xfc\x1c\x00\xa0\xfd\x38\x1c\x80\xb6\x80\x7f\xc0\xfa\xf6\xe6\xcb\x7a\xe3\x3f\xa1\x75\x98\x0b\x46\xb9\xbe\x65\x47\xba\xf8\xac\x44\x01\xd1\x65\x04\x4d\xd3\x4e\x48\xbc\x15\x1a\x72\x25\xbc\x9f\xab\x7b\x16\x5c\xfb\x95\x1c\x04\xa2\xf4\xd7\x92\x3c\x38\xcc\x8d\x93\x50\x0a\x0f\x19\xa2\x86\x4a\xb8\xdf\x51\x82\xf0\x30\x86\xae\x93\x38\xc8\xa6\x47\x4b\xa8\xe5\x71\xbd\x45\x97\xb7\xb5\x45\xe7\x51\x2e\xba\x3c\x03\x18\x26\x2e\x3a\xf0\xc3\x6c\xc8\xf6\xc0\x25\xc2\xd6\x28\x65\x76\xa4\x8b\x3e\xd6\x5f\x75\xb9\xd6\x6a\x29\x53\x6b\x48\x33\xba\x00\xf2\xec\x70\x00\x27\x74\x81\xf0\x96\xde\xc1\x5b\x0f\x57\xd7\x9d\xc7\xd1\xe1\x0f\xfb\xd6\x54\xa2\x28\x4d\x04\x94\x0e\xb7\xd7\x51\x4c\x32\x3e\x1c\x42\x7c\xd3\x44\x4b\x4b\x90\x84\xe9\x4f\x2d\x2a\xda\xee\x23\x90\x82\xc5\x6a\x1e\x77\x1d\x0d\x42\xe9\xf1\x5b\x12\x8b\x34\x89\x15\x75\xfe\x26\x30\x93\xb8\x56\x1d\xe4\xf5\x0c\x6e\x1f\x32\x25\x77\x0a\x39\xe9\xe2\x44\x65\x3c\x01\x3e\x70\xf6\xff\x35\x64\xff\xbf\x41\x9c\xc4\x92\xee\xd3\x40\x7a\xf9\x8c\xf6\x47\xb8\x53\x48\x6c\x58\xaf\x4d\xf5\x67\x51\x21\x34\xcd\x85\x87\xaf\xa5\xb9\xf0\xf0\x8b\x86\xcf\x61\x02\x6c\x3e\x01\xf9\xd3\xa7\x92\x64\x34\x68\x6c\x64\x6b\xbc\x3d\x69\x20\xb4\x04\xe2\xb0\x57\x4a\x30\xdd\x23\xfc\xf6\x65\xf3\x4d\x25\x87\xca\x0a\x2e\x47\xb9\x1b\xc1\xe5\x28\xb8\x4e\x62\xdb\x37\x96\xc4\xa6\xe7\x67\x1b\x0e\x6a\xe2\xb4\x9e\x55\x22\x47\xde\x5b\x9c\x28\x1e\x87\x26\x3e\x49\xcf\x25\xc6\xe8\x8f\xa6\xd6\xec\xf6\xa3\x83\x53\xfd\xe2\x46\x38\xd4\xbc\x91\x10\xad\x3e\x0c\xd5\x3a\x29\xd4\x0b\x0f\xb6\x0d\x39\xc2\xcc\x8d\xc4\x74\xf5\x21\x89\xdb\x2f\xb0\x2b\x29\x2f\x81\xb4\xa4\xd0\xac\x3c\x10\xb7\xbd\x64\x28\xb5\x37\x25\xa1\x13\x2e\x2f\xf7\x51\x5a\xd5\x8a\xc9\x2a\xec\x15\x7d\xa8\x13\xc8\x30\x17\xb5\xc7\x71\x46\xc9\x6c\xfd\x55\x1c\x17\xc4\x65\x9d\xad\x73\x53\xc5\x13\x34\xf1\x0c\x93\x33\x16\x1d\x13\xfa\x98\x1d\x62\x5c\x09\xcf\xe8\xe2\xc9\xf0\xce\x6c\xdf\x74\xab\xdd\x85\xdd\x6e\xdd\x59\x8b\xda\x83\x37\x15\x32\x55\xd8\xba\x58\x0f\x95\xa8\x3c\x9e\xc0\xf3\xbe\x6b\xa0\x7f\xcd\xe6\xfd\x9c\x4d\x85\x42\xb7\x5c\x2a\x2a\x4a\x06\x85\x05\x31\x55\x82\x51\xed\xa1\x14\xf7\xf8\x02\x56\x16\x4d\xf8\xeb\x55\x90\x09\x57\xd4\x08\x22\x33\x35\x03\x87\xdc\xbd\x71\x0c\x66\x1b\x7e\xe8\xe2\xb9\xf0\xbe\xff\x1b\xb5\x75\xb9\xc4\x6f\x87\x2d\x2c\x7d\xc1\x90\x19\x2e\xd1\xa1\x04\x76\xfb\xd0\x31\xd9\x80\x25\x0d\xd2\xec\x74\xe7\x70\x50\x5f\x24\x4b\x55\x85\x92\x04\x1f\xd1\xbe\x7e\x15\x2a\xda\x62\xc8\x37\x37\x95\x55\xed\xb9\x91\xc1\xc4\x33\x30\x5e\x7e\xbb\x06\x37\x4f\x19\x06\x7a\x01\xd2\x0e\x41\xb8\x57\xca\xaf\xd6\x39\x3a\x16\xa4\x5b\xb4\xdd\x2e\xf6\xd7\x5e\x5f\xcd\xdd\x3e\x19\x8d\xf3\xda\x09\xb9\x75\xbd\xb1\x8b\xeb\x1e\x21\x8f\xaf\xad\x19\x94\x7f\xe7\x02\x7b\x2c\x99\x3e\xbd\x48\x9e\x46\xcd\x6b\xbf\xbb\xc2\xfa\x6b\xce\xa6\x63\xbf\x4d\x6c\xba\x61\x0f\x99\xa9\x75\x78\x20\x40\x66\x1e\xda\x62\x1f\x6a\x73\x31\x81\x02\x43\x7f\x72\x7b\x58\x1a\x5c\x1d\xc5\x32\xf3\x30\xf6\xfc\x9f\x48\xff\x28\x98\xb8\x96\xd8\x34\xef\x60\x3a\x6c\x74\xd1\x8e\xc3\xec\x0f\xf1\xb0\x18\x2f\x1e\xa6\xf1\xdd\x65\x3e\xb9\xbe\x42\x32\xd6\x91\xce\xc9\x0a\x05\x39\x6a\x76\x86\xe4\x3f\x4e\xe9\x28\x34\xe6\x73\x34\x37\x33\xfd\xd8\x5a\x7f\xb5\x26\x36\x5d\x7c\x99\x7d\xac\x5d\xd8\xae\x17\xbe\xd7\xf3\x6e\x76\x94\x7e\x45\xc8\x50\x11\xde\xe3\xb4\xc3\x84\xce\x93\x21\xf4\x51\x4f\xde\xe9\x8f\x8e\xf1\xb2\x99\xef\x9e\x6d\x46\x1b\x9e\x19\xd2\x06\x94\xd1\x05\xba\x17\x5a\xeb\x97\x1d\x6a\xb7\x7d\x76\x0d\x1b\x7d\x7c\x8c\x1d\x0e\xa8\x65\xd3\x9c\xff\x19\x00\x00\xff\xff\xf6\x5c\x1e\xac\x50\x0d\x00\x00")
-
-func wwwTemplatesHtmlInc_alt_basicsHtml2Bytes() ([]byte, error) {
-	return bindataRead(
-		_wwwTemplatesHtmlInc_alt_basicsHtml2,
-		"www/templates/html/inc_alt_basics.html~",
-	)
-}
-
-func wwwTemplatesHtmlInc_alt_basicsHtml2() (*asset, error) {
-	bytes, err := wwwTemplatesHtmlInc_alt_basicsHtml2Bytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "www/templates/html/inc_alt_basics.html~", size: 3408, mode: os.FileMode(420), modTime: time.Unix(1579364955, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_alt_basics.html", size: 967, mode: os.FileMode(420), modTime: time.Unix(1579628589, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -216,7 +195,7 @@ func wwwTemplatesHtmlInc_common_cssHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_common_css.html", size: 213, mode: os.FileMode(420), modTime: time.Unix(1576773902, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_common_css.html", size: 213, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -236,7 +215,7 @@ func wwwTemplatesHtmlInc_common_footerHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_common_footer.html", size: 150, mode: os.FileMode(420), modTime: time.Unix(1576773902, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_common_footer.html", size: 150, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -256,7 +235,7 @@ func wwwTemplatesHtmlInc_common_headerHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_common_header.html", size: 571, mode: os.FileMode(420), modTime: time.Unix(1576773902, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_common_header.html", size: 571, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -276,7 +255,7 @@ func wwwTemplatesHtmlInc_common_metaHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_common_meta.html", size: 500, mode: os.FileMode(420), modTime: time.Unix(1576773902, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_common_meta.html", size: 500, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -296,7 +275,7 @@ func wwwTemplatesHtmlInc_id_basicsHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_id_basics.html", size: 3408, mode: os.FileMode(420), modTime: time.Unix(1579364955, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_id_basics.html", size: 3408, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -316,7 +295,7 @@ func wwwTemplatesHtmlInc_id_statusHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/inc_id_status.html", size: 2121, mode: os.FileMode(420), modTime: time.Unix(1579371623, 0)}
+	info := bindataFileInfo{name: "www/templates/html/inc_id_status.html", size: 2121, mode: os.FileMode(420), modTime: time.Unix(1579628589, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -336,7 +315,7 @@ func wwwTemplatesHtmlIndexHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/index.html", size: 405, mode: os.FileMode(420), modTime: time.Unix(1576773902, 0)}
+	info := bindataFileInfo{name: "www/templates/html/index.html", size: 405, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -356,7 +335,7 @@ func wwwTemplatesHtmlNotfoundHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "www/templates/html/notfound.html", size: 434, mode: os.FileMode(420), modTime: time.Unix(1576773902, 0)}
+	info := bindataFileInfo{name: "www/templates/html/notfound.html", size: 434, mode: os.FileMode(420), modTime: time.Unix(1576865520, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -418,7 +397,6 @@ var _bindata = map[string]func() (*asset, error){
 	"www/templates/html/example.html": wwwTemplatesHtmlExampleHtml,
 	"www/templates/html/id.html": wwwTemplatesHtmlIdHtml,
 	"www/templates/html/inc_alt_basics.html": wwwTemplatesHtmlInc_alt_basicsHtml,
-	"www/templates/html/inc_alt_basics.html~": wwwTemplatesHtmlInc_alt_basicsHtml2,
 	"www/templates/html/inc_common_css.html": wwwTemplatesHtmlInc_common_cssHtml,
 	"www/templates/html/inc_common_footer.html": wwwTemplatesHtmlInc_common_footerHtml,
 	"www/templates/html/inc_common_header.html": wwwTemplatesHtmlInc_common_headerHtml,
@@ -477,7 +455,6 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				"example.html": &bintree{wwwTemplatesHtmlExampleHtml, map[string]*bintree{}},
 				"id.html": &bintree{wwwTemplatesHtmlIdHtml, map[string]*bintree{}},
 				"inc_alt_basics.html": &bintree{wwwTemplatesHtmlInc_alt_basicsHtml, map[string]*bintree{}},
-				"inc_alt_basics.html~": &bintree{wwwTemplatesHtmlInc_alt_basicsHtml2, map[string]*bintree{}},
 				"inc_common_css.html": &bintree{wwwTemplatesHtmlInc_common_cssHtml, map[string]*bintree{}},
 				"inc_common_footer.html": &bintree{wwwTemplatesHtmlInc_common_footerHtml, map[string]*bintree{}},
 				"inc_common_header.html": &bintree{wwwTemplatesHtmlInc_common_headerHtml, map[string]*bintree{}},
