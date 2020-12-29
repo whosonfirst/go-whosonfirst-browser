@@ -22,7 +22,9 @@ For the time being though they are separate beasts.
 
 ### This is not a search engine.
 
-This is a tool that is primarily geared towards displaying _known_ Who's On First IDs. It does not maintain an index, or a list of known records, before it displays them.
+This is a tool that is primarily geared towards displaying _known_ Who's On First IDs. This is slowly changing but by default, it does not maintain an index, or a list of known records, before it displays them.
+
+There is experimental support for data sources that implement the [go-whosonfirst-search fulltext interfaces](https://github.com/whosonfirst/go-whosonfirst-search). As of this writing there is only one such provider: The [go-whosonfirst-search-sqlite]((https://github.com/whosonfirst/go-whosonfirst-search-sqlite) package which queries the `search` tables created by the [go-whosonfirst-sqlite-features](https://github.com/whosonfirst/go-whosonfirst-sqlite-features) package (or tools that use it to produce SQLite databases).
 
 It would be easy enough to add flags to use an external instance of the [Pelias Placeholder API](https://millsfield.sfomuseum.org/blog/2019/11/04/placeholder/) for basic search functionality so we'll add that to the list of features for a "2.x" release.
 
@@ -49,16 +51,15 @@ You will need to have the `Go` programming language (specifically version [1.12]
 
 ### whosonfirst-browser
 
-To build the browser use the handy `go build` tool, like this:
+To build binary versions of these tools run the `cli` Makefile target. For example:
 
 ```
-go build -mod vendor cmd/whosonfirst-browser/main.go bin/whosonfirst-browser
+$> make cli
+go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 ```
 
 ```
-$> bin/whosonfirst-browser -h
-Usage of ./bin/whosonfirst-browser:
-
+$> ./bin/whosonfirst-browser -h
   -cache-source string
     	A valid go-cache Cache URI string. (default "gocache://")
   -enable-all
@@ -67,42 +68,52 @@ Usage of ./bin/whosonfirst-browser:
     	Enable the 'geojson' and 'spr' and 'select' output handlers.
   -enable-geojson
     	Enable the 'geojson' output handler. (default true)
+  -enable-geojson-ld
+    	Enable the 'geojson-ld' output handler. (default true)
   -enable-graphics
     	Enable the 'png' and 'svg' output handlers.
   -enable-html
     	Enable the 'html' (or human-friendly) output handlers. (default true)
   -enable-png
     	Enable the 'png' output handler.
+  -enable-search
+    	Enable both the API and human-friendly search handlers.
+  -enable-search-api
+    	Enable the (API) search handlers. (default true)
+  -enable-search-api-geojson
+    	Enable the (API) search handlers to return results as GeoJSON.
+  -enable-search-html
+    	Enable the (human-friendly) search handlers. (default true)
   -enable-select
     	Enable the 'select' output handler.
   -enable-spr
     	Enable the 'spr' (or "standard places response") output handler. (default true)
   -enable-svg
     	Enable the 'svg' output handler.
-  -host string
-    	The hostname to listen for requests on (default "localhost")
   -nextzen-api-key string
-    	A valid Nextzen API key (https://developers.nextzen.org/). (default "xxxxxxx")
+    	A valid Nextzen API key (https://developers.nextzen.org/).
   -nextzen-style-url string
     	A valid Tangram scene file URL. (default "/tangram/refill-style.zip")
   -nextzen-tile-url string
     	A valid Nextzen MVT tile URL. (default "https://{s}.tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
   -path-geojson string
     	The path that GeoJSON requests should be served from. (default "/geojson/")
+  -path-geojson-ld string
+    	The path that GeoJSON-LD requests should be served from. (default "/geojson-ld/")
   -path-id string
     	The that Who's On First documents should be served from. (default "/id/")
   -path-png string
     	The path that PNG requests should be served from. (default "/png/")
+  -path-search-api string
+    	The path that API 'search' requests should be served from. (default "/search/spr/")
+  -path-search-html string
+    	The path that API 'search' requests should be served from. (default "/search/")
   -path-select string
     	The path that 'select' requests should be served from. (default "/select/")
   -path-spr string
     	The path that SPR requests should be served from. (default "/spr/")
   -path-svg string
     	The path that SVG requests should be served from. (default "/svg/")
-  -port int
-    	The port number to listen for requests on (default 8080)
-  -protocol string
-    	The protocol for wof-staticd server to listen on. Valid protocols are: http, lambda. (default "http")
   -proxy-tiles
     	Proxy (and cache) Nextzen tiles.
   -proxy-tiles-cache string
@@ -113,8 +124,12 @@ Usage of ./bin/whosonfirst-browser:
     	The URL (a relative path) for proxied tiles. (default "/tiles/")
   -reader-source string
     	A valid go-reader Reader URI string. (default "whosonfirst-data://")
+  -search-database-uri string
+    	A valid whosonfirst/go-whosonfist-search/fulltext URI.
   -select-pattern string
     	A valid regular expression for sanitizing select parameters. (default "properties(?:.[a-zA-Z0-9-_]+){1,}")
+  -server-uri string
+    	A valid aaronland/go-http-server URI. (default "http://localhost:8080")
   -static-prefix string
     	Prepend this prefix to URLs for static assets.
   -templates string
@@ -162,7 +177,39 @@ A PNG-encoded representation of the geometry for a given WOF ID. For example:
 
 `http://localhost:8080/png/101736545`
 
-### "select"
+### Search
+
+#### HTML
+
+A responsive HTML form for querying search terms and displaying the results as a list.
+
+![](docs/images/wof-browser-montreal-search.png)
+
+`http://localhost:8080/search/?term=مونتريال`
+
+#### "API"
+
+A machine-readable endpoint for querying search terms and results the results as [standard places results](#) (SPR).
+
+![](docs/images/wof-browser-montreal-search-spr.png)
+
+`http://localhost:8080/search/spr/?term=ferryland`
+
+![](docs/images/wof-browser-montreal-search-geojson.png)
+
+If the `-enable-search-api-geojson` flags is enabled then you can also return results as a GeoJSON `FeatureCollection`.
+
+`http://localhost:8080/search/spr/?term=フェアリーランド&format=geojson`
+
+#### Notes
+
+* As of this writing the "search" endpoints lack pagination.
+
+* The rules by which terms are queried are governed by the Go package that implements the `go-whosonfirst-search.FullTextDatabase` interface, as defined by the `-search-database-uri` flag.
+
+* In order to support GeoJSON output the search handler depends a data source for looking up GeoJSON records. By default this is assumed to be the provider defined by the `-data-source` flag.
+
+### "Select"
 
 A JSON-encoded slice of a Who's On First (WOF) GeoJSON document matching a query pattern. For example:
 
