@@ -18,10 +18,25 @@
 
 	      <h2>Query results for <q>{{ .Query }}</q></h2>
 
+	      <ul id="search-results">
 	      {{ range $i, $s := .Results }}	      
-	      <li><code>{{ $s.Id }}</code> <a href="">{{ $s.Name }}</a>, <small>{{ $s.Placetype }}</small></li>
+		  <li class="search-result {{ if eq $s.IsCurrent.StringFlag "0" }}not-current{{ end }} {{ if eq $s.IsSuperseded.StringFlag "1" }}superseded{{ end }}" data-whosonfirst-id="{{ $s.Id }}" data-parent-id="{{ $s.ParentId }}" data-latitude="{{ $s.Latitude }}" data-longitude="{{ $s.Longitude }}">
+		      <code>{{ $s.Id }}</code>
+		      <a href="{{ $.Endpoints.Id }}{{ $s.Id }}">{{ $s.Name }}</a> ({{ $s.Country }}),
+		      <small>
+			  is a {{ $s.Placetype }}.
+			  {{ if eq $s.IsCurrent.StringFlag "0" }}
+			  {{ if eq $s.IsDeprecated.StringFlag "1" }}
+			  This record has been deprecated.			  
+			  {{ else }}
+			  This record has been flagged as <q>not current</q>.
+			  {{ end }}
+			  {{ if eq $s.IsSuperseded.StringFlag "1" }} It has also been superseded.{{ end }}
+			  {{ end }}			  
+		      </small>
+		  </li>
 	      {{ end }}
-	      
+	      </ul>
 	      {{ end }} 
 	  </main>
       
