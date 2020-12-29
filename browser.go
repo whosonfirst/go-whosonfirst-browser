@@ -1,4 +1,3 @@
-
 package browser
 
 import (
@@ -12,8 +11,8 @@ import (
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/v3/assets/templates"
 	_ "github.com/whosonfirst/go-reader-cachereader"
+	"github.com/whosonfirst/go-whosonfirst-browser/v3/assets/templates"
 	"github.com/whosonfirst/go-whosonfirst-browser/v3/http"
 	"html/template"
 	"io/ioutil"
@@ -128,7 +127,7 @@ func Start(ctx context.Context) error {
 	cr_q := url.Values{}
 	cr_q.Set("reader", *data_source)
 	cr_q.Set("cache", *cache_source)
-	
+
 	cr_uri := url.URL{}
 	cr_uri.Scheme = "cachereader"
 	cr_uri.RawQuery = cr_q.Encode()

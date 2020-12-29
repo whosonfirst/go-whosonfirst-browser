@@ -28,7 +28,7 @@ func ParseURIFromRequest(req *gohttp.Request, r reader.Reader) (*URI, error, int
 	wofid, uri_args, err := uri.ParseURI(path)
 
 	// log.Println("PARSE", path, wofid, uri_args, err)
-	
+
 	if err != nil || wofid == -1 {
 
 		q := req.URL.Query()
@@ -45,7 +45,7 @@ func ParseURIFromRequest(req *gohttp.Request, r reader.Reader) (*URI, error, int
 		}
 
 		wofid = id
-		
+
 		uri_args = &uri.URIArgs{
 			IsAlternate: false,
 		}

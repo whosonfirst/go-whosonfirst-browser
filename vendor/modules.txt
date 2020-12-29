@@ -64,7 +64,7 @@ github.com/tidwall/gjson
 github.com/tidwall/match
 # github.com/tidwall/pretty v1.0.2
 github.com/tidwall/pretty
-# github.com/tidwall/sjson v1.0.4
+# github.com/tidwall/sjson v1.1.2
 github.com/tidwall/sjson
 # github.com/whosonfirst/algnhsa v0.1.0
 github.com/whosonfirst/algnhsa
@@ -88,9 +88,11 @@ github.com/whosonfirst/go-reader-http
 github.com/whosonfirst/go-reader-whosonfirst-data
 # github.com/whosonfirst/go-sanitize v0.1.0
 github.com/whosonfirst/go-sanitize
-# github.com/whosonfirst/go-whosonfirst-flags v0.1.0
+# github.com/whosonfirst/go-whosonfirst-flags v0.2.0
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
+github.com/whosonfirst/go-whosonfirst-flags/geometry
+github.com/whosonfirst/go-whosonfirst-flags/placetypes
 # github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.14.1
 github.com/whosonfirst/go-whosonfirst-geojson-v2
 github.com/whosonfirst/go-whosonfirst-geojson-v2/feature
@@ -102,9 +104,12 @@ github.com/whosonfirst/go-whosonfirst-geojson-v2/utils
 github.com/whosonfirst/go-whosonfirst-hash
 # github.com/whosonfirst/go-whosonfirst-image v0.0.1
 github.com/whosonfirst/go-whosonfirst-image
-# github.com/whosonfirst/go-whosonfirst-placetypes v0.1.0
+# github.com/whosonfirst/go-whosonfirst-placetypes v0.2.4
 github.com/whosonfirst/go-whosonfirst-placetypes
 github.com/whosonfirst/go-whosonfirst-placetypes/placetypes
+# github.com/whosonfirst/go-whosonfirst-search v0.0.0-20201229000818-9b155980f9e9
+github.com/whosonfirst/go-whosonfirst-search/filter
+github.com/whosonfirst/go-whosonfirst-search/fulltext
 # github.com/whosonfirst/go-whosonfirst-sources v0.1.0
 github.com/whosonfirst/go-whosonfirst-sources
 github.com/whosonfirst/go-whosonfirst-sources/sources
