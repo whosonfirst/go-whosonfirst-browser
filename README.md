@@ -49,14 +49,14 @@ You will need to have the `Go` programming language (specifically version [1.12]
 
 ## Tools
 
-### whosonfirst-browser
-
 To build binary versions of these tools run the `cli` Makefile target. For example:
 
 ```
 $> make cli
 go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 ```
+
+### whosonfirst-browser
 
 ```
 $> ./bin/whosonfirst-browser -h
@@ -183,7 +183,7 @@ A PNG-encoded representation of the geometry for a given WOF ID. For example:
 
 A responsive HTML form for querying search terms and displaying the results as a list.
 
-![](docs/images/wof-browser-montreal-search.png)
+![](docs/images/wof-browser-search.png)
 
 `http://localhost:8080/search/?term=مونتريال`
 
@@ -191,11 +191,11 @@ A responsive HTML form for querying search terms and displaying the results as a
 
 A machine-readable endpoint for querying search terms and results the results as [standard places results](#) (SPR).
 
-![](docs/images/wof-browser-montreal-search-spr.png)
+![](docs/images/wof-browser-search-spr.png)
 
 `http://localhost:8080/search/spr/?term=ferryland`
 
-![](docs/images/wof-browser-montreal-search-geojson.png)
+![](docs/images/wof-browser-search-geojson.png)
 
 If the `-enable-search-api-geojson` flags is enabled then you can also return results as a GeoJSON `FeatureCollection`.
 
