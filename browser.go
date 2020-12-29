@@ -14,6 +14,7 @@ import (
 	_ "github.com/whosonfirst/go-reader-cachereader"
 	"github.com/whosonfirst/go-whosonfirst-browser/v3/assets/templates"
 	"github.com/whosonfirst/go-whosonfirst-browser/v3/http"
+	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -66,12 +67,16 @@ func Start(ctx context.Context) error {
 
 	enable_html := fs.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
+	enable_search := fs.Bool("enable-search", true, "Enable the (human-friendly) search handlers.")
+	search_database_uri := fs.String("search-database-uri", "", "A valid whosonfirst/go-whosonfist-search/fulltext URI.")
+
 	path_png := fs.String("path-png", "/png/", "The path that PNG requests should be served from.")
 	path_svg := fs.String("path-svg", "/svg/", "The path that SVG requests should be served from.")
 	path_geojson := fs.String("path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
 	path_geojsonld := fs.String("path-geojson-ld", "/geojson-ld/", "The path that GeoJSON-LD requests should be served from.")
 	path_spr := fs.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
 	path_select := fs.String("path-select", "/select/", "The path that 'select' requests should be served from.")
+	path_search := fs.String("path-search", "/search/", "The path that 'search' requests should be served from.")
 
 	path_id := fs.String("path-id", "/id/", "The that Who's On First documents should be served from.")
 	// path_alt := fs.String("path-alt", "/alt/", "The that Who's On First alternative geometry documents should be served from.")
@@ -88,6 +93,7 @@ func Start(ctx context.Context) error {
 		*enable_graphics = true
 		*enable_data = true
 		*enable_html = true
+		*enable_search = true
 	}
 
 	if *enable_graphics {
@@ -100,6 +106,10 @@ func Start(ctx context.Context) error {
 		*enable_geojsonld = true
 		*enable_spr = true
 		*enable_select = true
+	}
+
+	if *enable_search {
+		*enable_html = true
 	}
 
 	if *enable_html {
@@ -373,6 +383,32 @@ func Start(ctx context.Context) error {
 		id_handler = tangramjs.AppendResourcesHandlerWithPrefix(id_handler, tangramjs_opts, *static_prefix)
 
 		mux.Handle(*path_id, id_handler)
+
+		if *enable_search {
+
+			search_db, err := fulltext.NewFullTextDatabase(ctx, *search_database_uri)
+
+			if err != nil {
+				return err
+			}
+
+			search_opts := http.SearchHandlerOptions{
+				Templates: t,
+				Endpoints: endpoints,
+				Database:  search_db,
+			}
+
+			search_handler, err := http.SearchHandler(search_opts)
+
+			if err != nil {
+				return err
+			}
+
+			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, *static_prefix)
+			search_handler = tangramjs.AppendResourcesHandlerWithPrefix(search_handler, tangramjs_opts, *static_prefix)
+
+			mux.Handle(*path_search, search_handler)
+		}
 
 		/*
 			alt_opts := http.AltHandlerOptions{

@@ -1,0 +1,33 @@
+{{ define "search" }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Who's On First</title>
+      {{template "inc_common_meta"}}
+      {{template "inc_common_css"}}
+
+  </head>
+  <body>
+
+      <div class="container">            
+      {{template "inc_common_header" .}}
+
+	  <main>
+
+	      {{ if .Query }}
+
+	      <h2>Query results for <q>{{ .Query }}</q></h2>
+
+	      {{ range $i, $s := .Results }}	      
+	      <li><code>{{ $s.Id }}</code> <a href="">{{ $s.Name }}</a>, <small>{{ $s.Placetype }}</small></li>
+	      {{ end }}
+	      
+	      {{ end }} 
+	  </main>
+      
+      {{template "inc_common_footer" .}}
+      </div>
+      
+  </body>
+</html>
+{{ end }}
