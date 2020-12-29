@@ -24,7 +24,7 @@ For the time being though they are separate beasts.
 
 This is a tool that is primarily geared towards displaying _known_ Who's On First IDs. This is slowly changing but by default, it does not maintain an index, or a list of known records, before it displays them.
 
-There is experimental support for data sources that implement the [go-whosonfirst-search fulltext interfaces](https://github.com/whosonfirst/go-whosonfirst-search). As of this writing there is only one such provider: The [go-whosonfirst-search-sqlite]((https://github.com/whosonfirst/go-whosonfirst-search-sqlite) package which queries the `search` tables created by the [go-whosonfirst-sqlite-features](https://github.com/whosonfirst/go-whosonfirst-sqlite-features) package (or tools that use it to produce SQLite databases).
+There is experimental support for data sources that implement the [go-whosonfirst-search fulltext interfaces](https://github.com/whosonfirst/go-whosonfirst-search). As of this writing there is only one such provider: The [go-whosonfirst-search-sqlite](https://github.com/whosonfirst/go-whosonfirst-search-sqlite) package which queries the `search` tables created by the [go-whosonfirst-sqlite-features](https://github.com/whosonfirst/go-whosonfirst-sqlite-features) package (or tools that use it to produce SQLite databases).
 
 It would be easy enough to add flags to use an external instance of the [Pelias Placeholder API](https://millsfield.sfomuseum.org/blog/2019/11/04/placeholder/) for basic search functionality so we'll add that to the list of features for a "2.x" release.
 
