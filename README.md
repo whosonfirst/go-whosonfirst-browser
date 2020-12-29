@@ -465,6 +465,7 @@ $> docker run -it -p 8080:8080 whosonfirst-browser \
 
 * https://github.com/whosonfirst/go-reader
 * https://github.com/whosonfirst/go-cache
+* https://github.com/whosonfirst/go-whosonfirst-search
 * https://github.com/aaronland/go-http-bootstrap
 * https://github.com/aaronland/go-http-tangramjs
 * https://github.com/aaronland/go-http-server
