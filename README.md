@@ -197,7 +197,7 @@ A machine-readable endpoint for querying search terms and results the results as
 
 ![](docs/images/wof-browser-search-geojson.png)
 
-If the `-enable-search-api-geojson` flags is enabled then you can also return results as a GeoJSON `FeatureCollection`.
+If the `-enable-search-api-geojson` flags is enabled then you can also return results as a GeoJSON `FeatureCollection` by passing the `?format=geojson` query parameter.
 
 `http://localhost:8080/search/spr/?term=フェアリーランド&format=geojson`
 

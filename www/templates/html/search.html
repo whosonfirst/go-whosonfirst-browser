@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-      <title>Who's On First</title>
+      <title>Who's On First Search</title>
       {{template "inc_common_meta"}}
       {{template "inc_common_css"}}
 
@@ -13,11 +13,24 @@
       {{template "inc_common_header" .}}
 
 	  <main>
-
+	      
 	      {{ if .Query }}
 
 	      <h2>Query results for <q>{{ .Query }}</q></h2>
 
+	      {{ $count_results := len .Results }}
+
+	      {{ if eq $count_results 0 }}
+
+	      <p>There aren't any records matching the term <q>{{ .Query }}</q>. Would you like to search for something else?</p>
+	      
+	      <form method="GET" action="{{ .Endpoints.Search }}" style="inline-block">	
+		  <input type="text" value="" id="term" name="term" placeholder="Lookup a Who's On First record" style="display:inline;"/>
+		  <button type="submit" style="background-color:#fff;border: none;max-width:2rem;display:inline;">🔍</button>
+	      </form>
+	      
+	      {{ else }}
+	      
 	      <ul id="search-results">
 	      {{ range $i, $s := .Results }}	      
 		  <li class="search-result {{ if eq $s.IsCurrent.StringFlag "0" }}not-current{{ end }} {{ if eq $s.IsSuperseded.StringFlag "1" }}superseded{{ end }}" data-whosonfirst-id="{{ $s.Id }}" data-parent-id="{{ $s.ParentId }}" data-latitude="{{ $s.Latitude }}" data-longitude="{{ $s.Longitude }}">
@@ -37,6 +50,17 @@
 		  </li>
 	      {{ end }}
 	      </ul>
+	      {{ end }}
+	      
+	      {{ else }}
+	      
+	      <h2>Search for Who's On First records</h2>
+
+	      <form method="GET" action="{{ .Endpoints.Search }}" style="inline-block">	
+		  <input type="text" value="" id="term" name="term" placeholder="Lookup a Who's On First record" style="display:inline;"/>
+		  <button type="submit" style="background-color:#fff;border: none;max-width:2rem;display:inline;">🔍</button>
+	      </form>
+	      
 	      {{ end }} 
 	  </main>
       
