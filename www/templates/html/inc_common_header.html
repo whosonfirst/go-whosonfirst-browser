@@ -6,10 +6,17 @@
 	<h4 class="nav-item"><a href="{{ .Endpoints.Index }}">Who's On First Browser</a></h4>
 	
 	<div class="nav-item" id="header-search">
+	    {{ if ne .Endpoints.Search "" }}
+	    <form method="GET" action="{{ .Endpoints.Search }}" style="inline-block">	
+		<input type="text" value="" id="term" name="term" placeholder="Lookup a Who's On First record" style="display:inline;"/>
+		<button type="submit" style="background-color:#fff;border: none;max-width:2rem;display:inline;">🔍</button>
+	    </form>
+	    {{ else }}
 	    <form method="GET" action="{{ .Endpoints.Id }}" style="inline-block">	
 		<input type="text" value="" id="id" name="id" placeholder="Lookup a Who's On First ID" style="display:inline;"/>
 		<button type="submit" style="background-color:#fff;border: none;max-width:2rem;display:inline;">🔍</button>
 	    </form>
+	    {{ end }}
 	</div>
 	
 	<br clear="all" />

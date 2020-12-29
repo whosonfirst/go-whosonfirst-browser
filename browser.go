@@ -67,7 +67,13 @@ func Start(ctx context.Context) error {
 
 	enable_html := fs.Bool("enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
-	enable_search := fs.Bool("enable-search", true, "Enable the (human-friendly) search handlers.")
+	enable_search_api := fs.Bool("enable-search-api", true, "Enable the (API) search handlers.")
+	enable_search_api_geojson := fs.Bool("enable-search-api-geojson", false, "Enable the (API) search handlers to return results as GeoJSON.")
+
+	enable_search_html := fs.Bool("enable-search-html", true, "Enable the (human-friendly) search handlers.")
+
+	enable_search := fs.Bool("enable-search", false, "Enable both the API and human-friendly search handlers.")
+
 	search_database_uri := fs.String("search-database-uri", "", "A valid whosonfirst/go-whosonfist-search/fulltext URI.")
 
 	path_png := fs.String("path-png", "/png/", "The path that PNG requests should be served from.")
@@ -76,10 +82,11 @@ func Start(ctx context.Context) error {
 	path_geojsonld := fs.String("path-geojson-ld", "/geojson-ld/", "The path that GeoJSON-LD requests should be served from.")
 	path_spr := fs.String("path-spr", "/spr/", "The path that SPR requests should be served from.")
 	path_select := fs.String("path-select", "/select/", "The path that 'select' requests should be served from.")
-	path_search := fs.String("path-search", "/search/", "The path that 'search' requests should be served from.")
+
+	path_search_api := fs.String("path-search-api", "/search/spr/", "The path that API 'search' requests should be served from.")
+	path_search_html := fs.String("path-search-html", "/search/", "The path that API 'search' requests should be served from.")
 
 	path_id := fs.String("path-id", "/id/", "The that Who's On First documents should be served from.")
-	// path_alt := fs.String("path-alt", "/alt/", "The that Who's On First alternative geometry documents should be served from.")
 
 	flagset.Parse(fs)
 
@@ -96,6 +103,12 @@ func Start(ctx context.Context) error {
 		*enable_search = true
 	}
 
+	if *enable_search {
+		*enable_search_api = true
+		*enable_search_api_geojson = true
+		*enable_search_html = true
+	}
+
 	if *enable_graphics {
 		*enable_png = true
 		*enable_svg = true
@@ -108,7 +121,7 @@ func Start(ctx context.Context) error {
 		*enable_select = true
 	}
 
-	if *enable_search {
+	if *enable_search_html {
 		*enable_html = true
 	}
 
@@ -295,6 +308,52 @@ func Start(ctx context.Context) error {
 		mux.Handle(*path_select, select_handler)
 	}
 
+	if *enable_search_api {
+
+		search_db, err := fulltext.NewFullTextDatabase(ctx, *search_database_uri)
+
+		if err != nil {
+			return err
+		}
+
+		search_opts := http.SearchAPIHandlerOptions{
+			Database: search_db,
+		}
+
+		if *enable_search_api_geojson {
+
+			search_opts.EnableGeoJSON = true
+
+			geojson_reader, err := reader.NewReader(ctx, *data_source)
+
+			if err != nil {
+				return err
+			}
+
+			search_opts.GeoJSONReader = geojson_reader
+
+			/*
+				if resolver_uri != "" {
+
+				resolver_func, err := geojson.NewSPRPathResolverFunc(ctx, resolver_uri)
+
+				if err != nil {
+					return err
+				}
+
+				api_pip_opts.SPRPathResolver = resolver_func
+			*/
+		}
+
+		search_handler, err := http.SearchAPIHandler(search_opts)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(*path_search_api, search_handler)
+	}
+
 	if *enable_html {
 
 		if *proxy_tiles {
@@ -353,6 +412,10 @@ func Start(ctx context.Context) error {
 			Index: "/",
 		}
 
+		if *enable_search_html {
+			endpoints.Search = *path_search_html
+		}
+
 		index_opts := http.IndexHandlerOptions{
 			Templates: t,
 			Endpoints: endpoints,
@@ -384,7 +447,7 @@ func Start(ctx context.Context) error {
 
 		mux.Handle(*path_id, id_handler)
 
-		if *enable_search {
+		if *enable_search_html {
 
 			search_db, err := fulltext.NewFullTextDatabase(ctx, *search_database_uri)
 
@@ -407,26 +470,8 @@ func Start(ctx context.Context) error {
 			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, *static_prefix)
 			search_handler = tangramjs.AppendResourcesHandlerWithPrefix(search_handler, tangramjs_opts, *static_prefix)
 
-			mux.Handle(*path_search, search_handler)
+			mux.Handle(*path_search_html, search_handler)
 		}
-
-		/*
-			alt_opts := http.AltHandlerOptions{
-				Templates: t,
-				Endpoints: endpoints,
-			}
-
-			alt_handler, err := http.AltHandler(cr, alt_opts)
-
-			if err != nil {
-				return err
-			}
-
-			alt_handler = bootstrap.AppendResourcesHandlerWithPrefix(alt_handler, bootstrap_opts, *static_prefix)
-			alt_handler = tangramjs.AppendResourcesHandlerWithPrefix(alt_handler, tangramjs_opts, *static_prefix)
-
-			mux.Handle(*path_alt, alt_handler)
-		*/
 
 		err = bootstrap.AppendAssetHandlersWithPrefix(mux, *static_prefix)
 

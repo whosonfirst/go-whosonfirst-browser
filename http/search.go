@@ -108,7 +108,7 @@ func SearchAPIHandler(opts SearchAPIHandlerOptions) (gohttp.Handler, error) {
 				gohttp.Error(rsp, "GeoJSON output is not enabled.", gohttp.StatusBadRequest)
 				return
 			}
-			
+
 		default:
 			// pass
 		}

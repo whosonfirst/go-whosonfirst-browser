@@ -1,12 +1,13 @@
 package http
 
 type Endpoints struct {
-	Index string
-	Id    string
-	Data  string
-	Png   string
-	Svg   string
-	Spr   string
+	Index  string
+	Id     string
+	Data   string
+	Png    string
+	Svg    string
+	Spr    string
+	Search string
 }
 
 type ErrorVars struct {
