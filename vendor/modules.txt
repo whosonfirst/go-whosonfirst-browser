@@ -116,6 +116,8 @@ github.com/whosonfirst/go-whosonfirst-sources/sources
 # github.com/whosonfirst/go-whosonfirst-spr v0.1.0
 github.com/whosonfirst/go-whosonfirst-spr
 github.com/whosonfirst/go-whosonfirst-spr/util
+# github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.3
+github.com/whosonfirst/go-whosonfirst-spr-geojson
 # github.com/whosonfirst/go-whosonfirst-svg v0.0.3
 github.com/whosonfirst/go-whosonfirst-svg
 # github.com/whosonfirst/go-whosonfirst-uri v0.2.0
