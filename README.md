@@ -1,6 +1,6 @@
 # go-whosonfirst-browser
 
-`go-whosonfirst-browser` is a Go package for rendering known [Who's On First](https://whosonfirst.org/) (WOF) IDs in a number of formats including HTML, SVG, PNG and GeoJSON.
+`go-whosonfirst-browser` is a Go package for browsing and rendering [Who's On First](https://whosonfirst.org/) (WOF) records in a number of formats including HTML, SVG, PNG and GeoJSON.
 
 ![](docs/images/wof-browser-montreal.png)
 
