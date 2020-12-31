@@ -107,7 +107,7 @@ github.com/whosonfirst/go-whosonfirst-image
 # github.com/whosonfirst/go-whosonfirst-placetypes v0.2.4
 github.com/whosonfirst/go-whosonfirst-placetypes
 github.com/whosonfirst/go-whosonfirst-placetypes/placetypes
-# github.com/whosonfirst/go-whosonfirst-search v0.0.0-20201229000818-9b155980f9e9
+# github.com/whosonfirst/go-whosonfirst-search v0.0.1
 github.com/whosonfirst/go-whosonfirst-search/filter
 github.com/whosonfirst/go-whosonfirst-search/fulltext
 # github.com/whosonfirst/go-whosonfirst-sources v0.1.0

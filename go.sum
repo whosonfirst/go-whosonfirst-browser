@@ -234,6 +234,8 @@ github.com/whosonfirst/go-whosonfirst-placetypes v0.2.4 h1:hl6BgQ6ozmrCAbw0if0Et
 github.com/whosonfirst/go-whosonfirst-placetypes v0.2.4/go.mod h1:yl0zZ5tfK80C0kl34pJcPB3mZC5XXR7ybQJ5OJyEcDU=
 github.com/whosonfirst/go-whosonfirst-search v0.0.0-20201229000818-9b155980f9e9 h1:Ivoh9lGYBaJrSSKccv44EyvdBaV/J0rSSPs5VSgZtCk=
 github.com/whosonfirst/go-whosonfirst-search v0.0.0-20201229000818-9b155980f9e9/go.mod h1:/tvtQaY7Z4KCorAqLT/v/gh74wxdT9fKKxmtglmN/qY=
+github.com/whosonfirst/go-whosonfirst-search v0.0.1 h1:5QoJ7qvotTXotkNT0EK585+EKiZ8Vr/uJbIFfVnpZyI=
+github.com/whosonfirst/go-whosonfirst-search v0.0.1/go.mod h1:/tvtQaY7Z4KCorAqLT/v/gh74wxdT9fKKxmtglmN/qY=
 github.com/whosonfirst/go-whosonfirst-sources v0.1.0 h1:JuKLa6KWke22jBfJ1pM9WQHoz1/3pbDv2C+aR+THPPQ=
 github.com/whosonfirst/go-whosonfirst-sources v0.1.0/go.mod h1:EUMHyGzUmqPPxlMmOp+28BFeoBdxxE0HCKRd67lkqGM=
 github.com/whosonfirst/go-whosonfirst-spatial v0.0.24/go.mod h1:8ZtZeTzxB3ZRhCyv1o0r+JrF1B4xW+yjw3lMwcm3OgA=

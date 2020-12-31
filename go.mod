@@ -22,10 +22,9 @@ require (
 	github.com/whosonfirst/go-reader-http v0.1.0
 	github.com/whosonfirst/go-reader-whosonfirst-data v1.0.0
 	github.com/whosonfirst/go-sanitize v0.1.0
-	github.com/whosonfirst/go-whosonfirst-browser v1.0.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.14.1
 	github.com/whosonfirst/go-whosonfirst-image v0.0.1
-	github.com/whosonfirst/go-whosonfirst-search v0.0.0-20201229000818-9b155980f9e9
+	github.com/whosonfirst/go-whosonfirst-search v0.0.1
 	github.com/whosonfirst/go-whosonfirst-spr v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.3
 	github.com/whosonfirst/go-whosonfirst-svg v0.0.3
