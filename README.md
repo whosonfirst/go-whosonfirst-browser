@@ -209,6 +209,8 @@ If the `-enable-search-api-geojson` flags is enabled then you can also return re
 
 * In order to support GeoJSON output the search handler depends a data source for looking up GeoJSON records. By default this is assumed to be the provider defined by the `-data-source` flag.
 
+* As of this writing only one package implements the [go-whosonfirst-search](https://github.com/whosonfirst/go-whosonfirst-search) interfaces necessary for enabling fulltext search. It is [go-whosonfirst-browser-sqlite](https://github.com/whosonfirst/go-whosonfirst-browser-sqlite).
+
 ### "Select"
 
 A JSON-encoded slice of a Who's On First (WOF) GeoJSON document matching a query pattern. For example:
