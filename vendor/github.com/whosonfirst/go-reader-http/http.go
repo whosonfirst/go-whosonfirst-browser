@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	wof_reader "github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-ioutil"
 	"io"
 	_ "log"
 	"net/http"
@@ -56,7 +57,7 @@ func NewHTTPReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
 	return &r, nil
 }
 
-func (r *HTTPReader) Read(ctx context.Context, uri string) (io.ReadCloser, error) {
+func (r *HTTPReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser, error) {
 
 	<-r.throttle
 
@@ -75,5 +76,15 @@ func (r *HTTPReader) Read(ctx context.Context, uri string) (io.ReadCloser, error
 		return nil, errors.New(rsp.Status)
 	}
 
-	return rsp.Body, nil
+	fh, err := ioutil.NewReadSeekCloser(rsp.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return fh, nil
+}
+
+func (r *HTTPReader) ReaderURI(ctx context.Context, uri string) string {
+	return uri
 }

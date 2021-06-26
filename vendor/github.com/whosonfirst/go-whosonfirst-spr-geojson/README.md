@@ -147,7 +147,7 @@ Internally it uses a [whosonfirst/go-reader](#) `Reader` instance to resolve SPR
 
 For example, here's how you might use the `as-geojson` tool in concert with a tool like [go-whosonfirst-spatial-sqlite](#)'s `query` which outputs SPR results as JSON and the `jq` tool for querying the final GeoJSON `FeatureCollection`.
 
-In this example the `query` tool is using a SQLite database to generate SPR results. The `as-geojson` is using a local filesystem reader to SPR paths to Who's On First records.
+In this example the `query` tool is using a SQLite database to generate SPR results. The `as-geojson` tool is using a local filesystem reader to resolve SPR paths in to Who's On First records.
 
 ```
 $> /usr/local/go-whosonfirst-spatial-sqlite/bin/query \

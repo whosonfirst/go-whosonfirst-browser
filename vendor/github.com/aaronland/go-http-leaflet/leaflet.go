@@ -1,39 +1,60 @@
 package leaflet
 
 import (
+	"fmt"
+	"github.com/aaronland/go-http-leaflet/static"
 	"github.com/aaronland/go-http-rewrite"
+	"io/fs"
 	_ "log"
 	"net/http"
 	"path/filepath"
 	"strings"
 )
 
+// LeafletOptions provides a list of JavaScript and CSS link to include with HTML output.
 type LeafletOptions struct {
 	JS  []string
 	CSS []string
 }
 
+// Append the Javascript and CSS URLs for the Leaflet.Fullscreen plugin.
+func (opts *LeafletOptions) EnableFullscreen() {
+	opts.CSS = append(opts.CSS, "/css/leaflet.fullscreen.css")
+	opts.JS = append(opts.JS, "/javascript/leaflet.fullscreen.min.js")
+}
+
+// Append the Javascript and CSS URLs for the Leaflet.Hash plugin.
+func (opts *LeafletOptions) EnableHash() {
+	opts.JS = append(opts.JS, "/javascript/leaflet-hash.js")
+}
+
+// Append the Javascript and CSS URLs for the Leaflet.Draw plugin.
+func (opts *LeafletOptions) EnableDraw() {
+	opts.CSS = append(opts.CSS, "/css/leaflet.draw.css")
+	opts.JS = append(opts.JS, "/javascript/leaflet.draw.js")
+}
+
+// Return a *LeafletOptions struct with default paths and URIs.
 func DefaultLeafletOptions() *LeafletOptions {
 
 	opts := &LeafletOptions{
 		CSS: []string{
 			"/css/leaflet.css",
-			"/css/leaflet.fullscreen.css",			
 		},
 		JS: []string{
 			"/javascript/leaflet.js",
-			"/javascript/leaflet.fullscreen.min.js",			
-			"/javascript/leaflet-hash.js",
 		},
 	}
 
 	return opts
 }
 
+// AppendResourcesHandler will rewrite any HTML produced by previous handler to include the necessary markup to load Leaflet JavaScript files and related assets.
 func AppendResourcesHandler(next http.Handler, opts *LeafletOptions) http.Handler {
 	return AppendResourcesHandlerWithPrefix(next, opts, "")
 }
 
+// AppendResourcesHandlerWithPrefix will rewrite any HTML produced by previous handler to include the necessary markup to load Leaflet JavaScript files and related assets ensuring that all URIs are prepended with a prefix.
 func AppendResourcesHandlerWithPrefix(next http.Handler, opts *LeafletOptions, prefix string) http.Handler {
 
 	js := opts.JS
@@ -58,12 +79,14 @@ func AppendResourcesHandlerWithPrefix(next http.Handler, opts *LeafletOptions, p
 	return rewrite.AppendResourcesHandler(next, ext_opts)
 }
 
+// AssetsHandler returns a net/http FS instance containing the embedded Leaflet assets that are included with this package.
 func AssetsHandler() (http.Handler, error) {
 
-	fs := assetFS()
-	return http.FileServer(fs), nil
+	http_fs := http.FS(static.FS)
+	return http.FileServer(http_fs), nil
 }
 
+// AssetsHandler returns a net/http FS instance containing the embedded Leaflet assets that are included with this package ensuring that all URLs are stripped of prefix.
 func AssetsHandlerWithPrefix(prefix string) (http.Handler, error) {
 
 	fs_handler, err := AssetsHandler()
@@ -87,10 +110,12 @@ func AssetsHandlerWithPrefix(prefix string) (http.Handler, error) {
 	return rewrite_handler, nil
 }
 
+// Append all the files in the net/http FS instance containing the embedded Protomaps assets to an *http.ServeMux instance.
 func AppendAssetHandlers(mux *http.ServeMux) error {
 	return AppendAssetHandlersWithPrefix(mux, "")
 }
 
+// Append all the files in the net/http FS instance containing the embedded Protomaps assets to an *http.ServeMux instance ensuring that all URLs are prepended with prefix.
 func AppendAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
 
 	asset_handler, err := AssetsHandlerWithPrefix(prefix)
@@ -99,18 +124,31 @@ func AppendAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
 		return nil
 	}
 
-	for _, path := range AssetNames() {
+	walk_func := func(path string, info fs.DirEntry, err error) error {
 
-		path := strings.Replace(path, "static", "", 1)
+		if path == "." {
+			return nil
+		}
+
+		if info.IsDir() {
+			return nil
+		}
 
 		if prefix != "" {
 			path = appendPrefix(prefix, path)
 		}
 
+		if !strings.HasPrefix(path, "/") {
+			path = fmt.Sprintf("/%s", path)
+		}
+
+		// log.Println("APPEND", path)
+
 		mux.Handle(path, asset_handler)
+		return nil
 	}
 
-	return nil
+	return fs.WalkDir(static.FS, ".", walk_func)
 }
 
 func appendPrefix(prefix string, path string) string {

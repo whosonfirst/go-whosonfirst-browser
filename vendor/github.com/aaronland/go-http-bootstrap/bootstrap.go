@@ -1,63 +1,84 @@
 package bootstrap
 
 import (
+	"fmt"
 	"github.com/aaronland/go-http-rewrite"	
-	"github.com/aaronland/go-http-bootstrap/resources"
+	"github.com/aaronland/go-http-bootstrap/static"
+	"io/fs"
 	_ "log"
 	"net/http"
 	"path/filepath"
 	"strings"
 )
 
+// BootstrapOptions provides a list of JavaScript and CSS link to include with HTML output.
 type BootstrapOptions struct {
+	// A list of relative Bootstrap Javascript URLs to append as resources in HTML output.
 	JS  []string
+	// A list of relative Bootstrap CSS URLs to append as resources in HTML output.	
 	CSS []string
 }
 
+// Return a *BootstrapOptions struct with default paths and URIs.
 func DefaultBootstrapOptions() *BootstrapOptions {
 
 	opts := &BootstrapOptions{
 		CSS: []string{"/css/bootstrap.min.css"},
-		JS:  []string{"/javascript/bootstrap.min.js"},
+		JS:  make([]string, 0),
 	}
 
 	return opts
 }
 
+// AppendResourcesHandler will rewrite any HTML produced by previous handler to include the necessary markup to load Bootstrap JavaScript files and related assets.
 func AppendResourcesHandler(next http.Handler, opts *BootstrapOptions) http.Handler {
 	return AppendResourcesHandlerWithPrefix(next, opts, "")
 }
 
+// AppendResourcesHandlerWithPrefix will rewrite any HTML produced by previous handler to include the necessary markup to load Bootstrap JavaScript files and related assets ensuring that all URIs are prepended with a prefix.
 func AppendResourcesHandlerWithPrefix(next http.Handler, opts *BootstrapOptions, prefix string) http.Handler {
 
-	js := opts.JS
-	css := opts.CSS
+	// We're doing this the long way because otherwise there is a
+	// risk of infinite-prefixing because of copy by reference issues
+	// (20210322/straup)
 
-	if prefix != "" {
+	js := make([]string, len(opts.JS))
+	css := make([]string, len(opts.CSS))
 
-		for i, path := range js {
-			js[i] = appendPrefix(prefix, path)
+	for idx, path := range opts.JS {
+
+		if prefix != "" {
+			path = appendPrefix(prefix, path)
 		}
 
-		for i, path := range css {
-			css[i] = appendPrefix(prefix, path)
+		js[idx] = path
+	}
+
+	for idx, path := range opts.CSS {
+
+		if prefix != "" {
+			path = appendPrefix(prefix, path)
 		}
+
+		css[idx] = path
 	}
 
-	ext_opts := &resources.AppendResourcesOptions{
-		JS:  js,
-		CSS: css,
+	rewrite_opts := &rewrite.AppendResourcesOptions{
+		JavaScript:  js,
+		Stylesheets: css,
 	}
 
-	return resources.AppendResourcesHandler(next, ext_opts)
+	return rewrite.AppendResourcesHandler(next, rewrite_opts)
 }
 
+// AssetsHandler returns a net/http FS instance containing the embedded Bootstrap assets that are included with this package.
 func AssetsHandler() (http.Handler, error) {
 
-	fs := assetFS()
-	return http.FileServer(fs), nil
+	http_fs := http.FS(static.FS)
+	return http.FileServer(http_fs), nil
 }
 
+// AssetsHandler returns a net/http FS instance containing the embedded Bootstrap assets that are included with this package ensuring that all URLs are stripped of prefix.
 func AssetsHandlerWithPrefix(prefix string) (http.Handler, error) {
 
 	fs_handler, err := AssetsHandler()
@@ -66,25 +87,16 @@ func AssetsHandlerWithPrefix(prefix string) (http.Handler, error) {
 		return nil, err
 	}
 
-	prefix = strings.TrimRight(prefix, "/")
-	
-	if prefix == "" {
-		return fs_handler, nil
-	}
-
-	rewrite_func := func(req *http.Request) (*http.Request, error){
-		req.URL.Path = strings.Replace(req.URL.Path, prefix, "", 1)
-		return req, nil
-	}
-
-	rewrite_handler := rewrite.RewriteRequestHandler(fs_handler, rewrite_func)
-	return rewrite_handler, nil
+	fs_handler = http.StripPrefix(prefix, fs_handler)
+	return fs_handler, nil
 }
 
+// Append all the files in the net/http FS instance containing the embedded Bootstrap assets to an *http.ServeMux instance.
 func AppendAssetHandlers(mux *http.ServeMux) error {
 	return AppendAssetHandlersWithPrefix(mux, "")
 }
 
+// Append all the files in the net/http FS instance containing the embedded Bootstrap assets to an *http.ServeMux instance ensuring that all URLs are prepended with prefix.
 func AppendAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
 
 	asset_handler, err := AssetsHandlerWithPrefix(prefix)
@@ -93,18 +105,29 @@ func AppendAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
 		return nil
 	}
 
-	for _, path := range AssetNames() {
+	walk_func := func(path string, info fs.DirEntry, err error) error {
 
-		path := strings.Replace(path, "static", "", 1)
+		if path == "." {
+			return nil
+		}
+
+		if info.IsDir() {
+			return nil
+		}
 
 		if prefix != "" {
 			path = appendPrefix(prefix, path)
 		}
 
+		if !strings.HasPrefix(path, "/") {
+			path = fmt.Sprintf("/%s", path)
+		}
+
 		mux.Handle(path, asset_handler)
+		return nil
 	}
 
-	return nil
+	return fs.WalkDir(static.FS, ".", walk_func)
 }
 
 func appendPrefix(prefix string, path string) string {

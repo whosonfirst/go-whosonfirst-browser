@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-ioutil"
 	"io"
 	"net/url"
 )
@@ -67,12 +68,13 @@ func NewCacheReader(ctx context.Context, uri string) (reader.Reader, error) {
 	return cr, nil
 }
 
-func (cr *CacheReader) Read(ctx context.Context, key string) (io.ReadCloser, error) {
+func (cr *CacheReader) Read(ctx context.Context, key string) (io.ReadSeekCloser, error) {
 
 	fh, err := cr.cache.Get(ctx, key)
 
 	if err == nil {
-		return fh, nil
+		// https://github.com/whosonfirst/go-cache/issues/1
+		return ioutil.NewReadSeekCloser(fh)
 	}
 
 	if !cache.IsCacheMiss(err) {
@@ -91,9 +93,10 @@ func (cr *CacheReader) Read(ctx context.Context, key string) (io.ReadCloser, err
 		return nil, err
 	}
 
-	return fh, nil
+	// https://github.com/whosonfirst/go-cache/issues/1
+	return ioutil.NewReadSeekCloser(fh)
 }
 
-func (cr *CacheReader) URI(key string) string {
-	return cr.reader.URI(key)
+func (cr *CacheReader) ReaderURI(ctx context.Context, key string) string {
+	return cr.reader.ReaderURI(ctx, key)
 }

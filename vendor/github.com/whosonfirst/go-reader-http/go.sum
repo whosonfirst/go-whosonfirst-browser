@@ -89,6 +89,8 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
+github.com/whosonfirst/go-ioutil v0.0.1 h1:cCrEYen6NDvHfjzV2q4u/VB21u2kTOwDnUGRlMI8Z9o=
+github.com/whosonfirst/go-ioutil v0.0.1/go.mod h1:2dS1vWdAIkiHDvDF8fYyjv6k2NISmwaIjJJeEDBEdvg=
 github.com/whosonfirst/go-reader v0.0.0-20191122213718-25d6c34f3bcc h1:iZZD21HSlqi8nOgGzGb8fXjnlEO/kdVAHkBNL/k58FA=
 github.com/whosonfirst/go-reader v0.0.0-20191122213718-25d6c34f3bcc/go.mod h1:k/U2jXarXsFWC2yh63kYgKIJzTEmc60lN/ipyrdT3W4=
 github.com/whosonfirst/go-reader v0.0.1 h1:8FAQgnOvvPBxb6PDuPF+DzYBNR8gl27ON3fY1zU2xY4=
@@ -103,6 +105,10 @@ github.com/whosonfirst/go-reader v0.1.1 h1:0fXoYQR/Yyh3PKk+9Huwoc6dCAt8l1tjg2dES
 github.com/whosonfirst/go-reader v0.1.1/go.mod h1:w0AeU+Ojyfmxb7r+rcSYyxpCxrhxlHv+D9EgEwQsqcM=
 github.com/whosonfirst/go-reader v0.2.0 h1:Et8rvkh+86msAo4Db4h88m1t2QDSMNr3rLy6RqJzeJc=
 github.com/whosonfirst/go-reader v0.2.0/go.mod h1:qUhz3OWefOUX/G1nzCEUzJskDjkF+l9oKPOM3K2fAJI=
+github.com/whosonfirst/go-reader v0.4.1 h1:gN73LR/gdtWtuCikOc84rtuMIbIu6fi7RPRZgssKL9I=
+github.com/whosonfirst/go-reader v0.4.1/go.mod h1:ffg8ww1158rNNqStFx64EGmDL5m5WZPsoMqR6wohOWE=
+github.com/whosonfirst/go-reader v0.5.0 h1:nx+ai0F6JXouw+7Dln34dmYglw+3sQ6sG4JZGOJ/sqA=
+github.com/whosonfirst/go-reader v0.5.0/go.mod h1:4ou/wZUss2CDZp27QK5ySDc8p98GVWvUiqqmwEprjgk=
 github.com/whosonfirst/go-whosonfirst-reader v0.0.0-20191122203133-047f20452865/go.mod h1:xYzBn6llLD/uS6Zhh0H4LAqddEJHXdQSUIxywTnhpOU=
 github.com/whosonfirst/go-whosonfirst-sources v0.1.0/go.mod h1:EUMHyGzUmqPPxlMmOp+28BFeoBdxxE0HCKRd67lkqGM=
 github.com/whosonfirst/go-whosonfirst-uri v0.1.0/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=

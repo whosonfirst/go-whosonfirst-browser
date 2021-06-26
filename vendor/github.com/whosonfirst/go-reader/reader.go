@@ -2,9 +2,12 @@ package reader
 
 import (
 	"context"
+	"fmt"
 	"github.com/aaronland/go-roster"
 	"io"
 	"net/url"
+	"sort"
+	"strings"
 )
 
 var reader_roster roster.Roster
@@ -12,8 +15,8 @@ var reader_roster roster.Roster
 type ReaderInitializationFunc func(ctx context.Context, uri string) (Reader, error)
 
 type Reader interface {
-	Read(context.Context, string) (io.ReadCloser, error)
-	URI(string) string
+	Read(context.Context, string) (io.ReadSeekCloser, error)
+	ReaderURI(context.Context, string) string
 }
 
 func NewService(ctx context.Context, uri string) (Reader, error) {
@@ -92,4 +95,24 @@ func NewReader(ctx context.Context, uri string) (Reader, error) {
 func Readers() []string {
 	ctx := context.Background()
 	return reader_roster.Drivers(ctx)
+}
+
+func Schemes() []string {
+
+	ctx := context.Background()
+	schemes := []string{}
+
+	err := ensureReaderRoster()
+
+	if err != nil {
+		return schemes
+	}
+
+	for _, dr := range reader_roster.Drivers(ctx) {
+		scheme := fmt.Sprintf("%s://", strings.ToLower(dr))
+		schemes = append(schemes, scheme)
+	}
+
+	sort.Strings(schemes)
+	return schemes
 }

@@ -1,6 +1,6 @@
 # go-reader
 
-There are many interfaces for reading files. This one is ours. It returns `io.ReadCloser` instances.
+There are many interfaces for reading files. This one is ours. It returns `io.ReadSeekCloser` instances.
 
 _This package supersedes the [go-whosonfirst-readwrite](https://github.com/whosonfirst/go-whosonfirst-readwrite) package._
 
@@ -63,8 +63,8 @@ func main() {
 ```
 type Reader interface {
 	Open(context.Context, string) error
-	Read(context.Context, string) (io.ReadCloser, error)
-	URI(string) string
+	Read(context.Context, string) (io.ReadSeekCloser, error)
+	ReaderURI(context.Context, string) string
 }
 ```
 
@@ -154,7 +154,7 @@ func (r *HTTPReader) Open(ctx context.Context, uri string) error {
 	return nil
 }
 
-func (r *HTTPReader) Read(ctx context.Context, uri string) (io.ReadCloser, error) {
+func (r *HTTPReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser, error) {
 
 	<-r.throttle
 

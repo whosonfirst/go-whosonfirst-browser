@@ -1,6 +1,10 @@
 package geojson
 
 import (
+	_ "github.com/whosonfirst/go-writer-featurecollection"
+)
+
+import (
 	"bufio"
 	"bytes"
 	"context"
@@ -8,7 +12,8 @@ import (
 	"fmt"
 	go_geojson "github.com/paulmach/go.geojson"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-spr"
+	"github.com/whosonfirst/go-whosonfirst-spr/v2"
+	"github.com/whosonfirst/go-writer"
 	"io"
 	_ "log"
 )
@@ -75,19 +80,20 @@ func ToFeatureCollectionWithJSON(ctx context.Context, body []byte, opts *ToFeatu
 func AsFeatureCollection(ctx context.Context, rsp spr.StandardPlacesResults, opts *AsFeatureCollectionOptions) error {
 
 	r := opts.Reader
-	wr := opts.Writer
 
-	fc, err := NewFeatureCollectionWriter(r, wr)
+	ctx, err := writer.SetIOWriterWithContext(ctx, opts.Writer)
+
+	if err != nil {
+		return err
+	}
+
+	wr, err := writer.NewWriter(ctx, "featurecollection://?writer=io://")
 
 	if err != nil {
 		return err
 	}
 
-	err = fc.Begin()
-
-	if err != nil {
-		return err
-	}
+	defer wr.Close(ctx)
 
 	for _, pl := range rsp.Results() {
 
@@ -111,20 +117,27 @@ func AsFeatureCollection(ctx context.Context, rsp spr.StandardPlacesResults, opt
 			return fmt.Errorf("Unable to determine path for ID '%s'", pl.Id())
 		}
 
-		err = fc.WriteFeature(ctx, path)
+		fh, err := r.Read(ctx, path)
+
+		if err != nil {
+			return err
+		}
+
+		defer fh.Close()
+
+		_, err = wr.Write(ctx, path, fh)
 
 		if err != nil {
 			return err
 		}
 	}
 
-	return fc.End()
+	return nil
 }
 
 func AsFeatureCollectionWithJSON(ctx context.Context, body []byte, opts *AsFeatureCollectionOptions) error {
 
 	r := opts.Reader
-	wr := opts.Writer
 
 	if opts.JSONPathResolver == nil {
 		return errors.New("Missing JSONPathResolver function")
@@ -136,26 +149,36 @@ func AsFeatureCollectionWithJSON(ctx context.Context, body []byte, opts *AsFeatu
 		return err
 	}
 
-	fc, err := NewFeatureCollectionWriter(r, wr)
+	ctx, err = writer.SetIOWriterWithContext(ctx, opts.Writer)
 
 	if err != nil {
-		return err
+		return nil
 	}
 
-	err = fc.Begin()
+	wr, err := writer.NewWriter(ctx, "featurecollection://?writer=io")
 
 	if err != nil {
-		return err
+		return nil
 	}
 
-	for _, p := range paths {
+	defer wr.Close(ctx)
 
-		err := fc.WriteFeature(ctx, p)
+	for _, path := range paths {
+
+		fh, err := r.Read(ctx, path)
+
+		if err != nil {
+			return err
+		}
+
+		defer fh.Close()
+
+		_, err = wr.Write(ctx, path, fh)
 
 		if err != nil {
 			return err
 		}
 	}
 
-	return fc.End()
+	return nil
 }

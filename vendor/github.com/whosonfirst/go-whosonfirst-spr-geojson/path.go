@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tidwall/gjson"
-	"github.com/whosonfirst/go-whosonfirst-spr"
+	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"net/url"
 )

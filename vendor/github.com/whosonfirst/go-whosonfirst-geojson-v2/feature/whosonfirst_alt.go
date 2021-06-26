@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/sfomuseum/go-edtf"
 	"github.com/skelterjohn/geom"
 	"github.com/whosonfirst/go-whosonfirst-flags"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/geometry"
 	props_wof "github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/utils"
-	"github.com/whosonfirst/go-whosonfirst-spr"
+	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/warning"
 	"strconv"
@@ -243,6 +244,14 @@ func (spr *WOFAltStandardPlacesResult) MaxLongitude() float64 {
 	return spr.MZMaxLongitude
 }
 
+func (spr *WOFAltStandardPlacesResult) Inception() *edtf.EDTFDate {
+	return nil
+}
+
+func (spr *WOFAltStandardPlacesResult) Cessation() *edtf.EDTFDate {
+	return nil
+}
+
 func (spr *WOFAltStandardPlacesResult) IsCurrent() flags.ExistentialFlag {
 	return existentialFlag(-1)
 }
@@ -268,6 +277,10 @@ func (spr *WOFAltStandardPlacesResult) SupersededBy() []int64 {
 }
 
 func (spr *WOFAltStandardPlacesResult) Supersedes() []int64 {
+	return []int64{}
+}
+
+func (spr *WOFAltStandardPlacesResult) BelongsTo() []int64 {
 	return []int64{}
 }
 

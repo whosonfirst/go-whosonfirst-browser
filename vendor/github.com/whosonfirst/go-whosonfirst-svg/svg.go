@@ -8,7 +8,7 @@ import (
 	geojson_svg "github.com/whosonfirst/go-geojson-svg"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/geometry"
-	"github.com/whosonfirst/go-whosonfirst-spr/util"
+	"github.com/whosonfirst/go-whosonfirst-spr/v2/util"
 	"io"
 	_ "log"
 	"os"

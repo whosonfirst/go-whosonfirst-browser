@@ -19,6 +19,14 @@ type AlternateGeometryFlag interface {
 	String() string
 }
 
+type DateFlag interface {
+	MatchesAll(...DateFlag) bool
+	MatchesAny(...DateFlag) bool
+	InnerRange() (*int64, *int64)
+	OuterRange() (*int64, *int64)
+	String() string
+}
+
 type PlacetypeFlag interface {
 	MatchesAny(...PlacetypeFlag) bool
 	MatchesAll(...PlacetypeFlag) bool

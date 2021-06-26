@@ -3,8 +3,8 @@ package reader
 import (
 	"bytes"
 	"context"
+	"github.com/whosonfirst/go-ioutil"
 	"io"
-	"io/ioutil"
 )
 
 type NullReader struct {
@@ -27,11 +27,11 @@ func NewNullReader(ctx context.Context, uri string) (Reader, error) {
 	return r, nil
 }
 
-func (r *NullReader) Read(ctx context.Context, uri string) (io.ReadCloser, error) {
+func (r *NullReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser, error) {
 	br := bytes.NewReader([]byte(uri))
-	return ioutil.NopCloser(br), nil
+	return ioutil.NewReadSeekCloser(br)
 }
 
-func (r *NullReader) URI(uri string) string {
+func (r *NullReader) ReaderURI(ctx context.Context, uri string) string {
 	return uri
 }
