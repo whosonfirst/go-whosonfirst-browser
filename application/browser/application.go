@@ -77,10 +77,10 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 
 	fs.BoolVar(&enable_html, "enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
-	fs.BoolVar(&enable_search_api, "enable-search-api", true, "Enable the (API) search handlers.")
+	fs.BoolVar(&enable_search_api, "enable-search-api", false, "Enable the (API) search handlers.")
 	fs.BoolVar(&enable_search_api_geojson, "enable-search-api-geojson", false, "Enable the (API) search handlers to return results as GeoJSON.")
 
-	fs.BoolVar(&enable_search_html, "enable-search-html", true, "Enable the (human-friendly) search handlers.")
+	fs.BoolVar(&enable_search_html, "enable-search-html", false, "Enable the (human-friendly) search handlers.")
 
 	fs.BoolVar(&enable_search, "enable-search", false, "Enable both the API and human-friendly search handlers.")
 
@@ -316,10 +316,14 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 	if enable_search_api {
 
+		if search_database_uri == "" {
+			return fmt.Errorf("-enable-search-api flag is true but -search-database-uri flag is empty.")
+		}
+
 		search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
 
 		if err != nil {
-			return fmt.Errorf("Failed to create fulltext database, %w", err)
+			return fmt.Errorf("Failed to create fulltext database for '%s', %w", search_database_uri, err)
 		}
 
 		search_opts := www.SearchAPIHandlerOptions{

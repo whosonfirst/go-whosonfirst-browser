@@ -4,7 +4,7 @@ cli:
 	go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 
 debug:
-	go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -proxy-tiles -nextzen-api-key $(APIKEY)
+	go run -mod vendor cmd/whosonfirst-browser/main.go -enable-graphics -enable-data -enable-html -proxy-tiles -nextzen-api-key $(APIKEY)
 
 lambda:
 	@make lambda-browser
