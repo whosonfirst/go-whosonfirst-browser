@@ -12,8 +12,8 @@ import (
 	"github.com/paulmach/orb/maptile"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-cache"
+	"github.com/whosonfirst/go-ioutil"	
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -123,7 +123,7 @@ func ParseURI(uri string) (*Tile, error) {
 	return tile, nil
 }
 
-func FetchTileWithCache(ctx context.Context, tile_cache cache.Cache, tile *Tile, opts *Options) (io.ReadCloser, error) {
+func FetchTileWithCache(ctx context.Context, tile_cache cache.Cache, tile *Tile, opts *Options) (io.ReadSeekCloser, error) {
 
 	cache_key := tile.URI()
 
@@ -151,7 +151,7 @@ func FetchTileWithCache(ctx context.Context, tile_cache cache.Cache, tile *Tile,
 	return t_rsp, nil
 }
 
-func FetchTile(t *Tile, opts *Options) (io.ReadCloser, error) {
+func FetchTile(t *Tile, opts *Options) (io.ReadSeekCloser, error) {
 
 	z := t.Z
 	x := t.X
@@ -275,7 +275,7 @@ func FetchTile(t *Tile, opts *Options) (io.ReadCloser, error) {
 		rsp_body = cropped_rsp
 	}
 
-	return rsp_body, nil
+	return ioutil.NewReadSeekCloser(rsp_body)
 }
 
 // crop all the elements in fh to the bounds of (z, x, y)
@@ -287,7 +287,7 @@ func CropTile(z int, x int, y int, fh io.ReadCloser) (io.ReadCloser, error) {
 
 	bounds := tl.Bound()
 
-	body, err := ioutil.ReadAll(fh)
+	body, err := io.ReadAll(fh)
 
 	if err != nil {
 		return nil, err
@@ -388,5 +388,5 @@ func CropTile(z int, x int, y int, fh io.ReadCloser) (io.ReadCloser, error) {
 	}
 
 	r := bytes.NewReader(cropped_body)
-	return ioutil.NopCloser(r), nil
+	return ioutil.NewReadSeekCloser(r)
 }

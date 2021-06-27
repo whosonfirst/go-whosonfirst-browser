@@ -10,8 +10,8 @@ require (
 	github.com/aaronland/go-http-server v0.0.6
 	github.com/aaronland/go-http-tangramjs v0.1.0
 	github.com/sfomuseum/go-flags v0.8.2
-	github.com/sfomuseum/go-geojsonld v0.0.0-20200206221640-63232bedd85c
-	github.com/sfomuseum/go-http-tilezen v0.0.5
+	github.com/sfomuseum/go-geojsonld v0.0.1
+	github.com/sfomuseum/go-http-tilezen v0.0.6
 	github.com/srwiley/oksvg v0.0.0-20210519022825-9fc0c575d5fe // indirect
 	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780 // indirect
 	github.com/tidwall/gjson v1.8.0
@@ -26,7 +26,6 @@ require (
 	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.3
 	github.com/whosonfirst/go-whosonfirst-image v0.0.1
 	github.com/whosonfirst/go-whosonfirst-search v0.0.1
-	github.com/whosonfirst/go-whosonfirst-spr v0.1.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.6
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.0.0
 	github.com/whosonfirst/go-whosonfirst-svg v0.0.4
