@@ -16,8 +16,7 @@ import (
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
-	_ "github.com/whosonfirst/go-whosonfirst-browser/v3/templates/html"
-	_ "github.com/whosonfirst/go-whosonfirst-browser/v3/static"	
+	"github.com/whosonfirst/go-whosonfirst-browser/v3/templates/html"
 	"github.com/whosonfirst/go-whosonfirst-browser/v3/www"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"html/template"
@@ -41,8 +40,6 @@ func Start(ctx context.Context) error {
 	server_uri := fs.String("server-uri", "http://localhost:8080", "A valid aaronland/go-http-server URI.")
 
 	static_prefix := fs.String("static-prefix", "", "Prepend this prefix to URLs for static assets.")
-
-	path_templates := fs.String("templates", "", "An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.")
 
 	data_source := fs.String("reader-source", "whosonfirst-data://", "A valid go-reader Reader URI string.")
 	cache_source := fs.String("cache-source", "gocache://", "A valid go-cache Cache URI string.")
@@ -174,30 +171,10 @@ func Start(ctx context.Context) error {
 		},
 	})
 
-	if *path_templates != "" {
+	t, err = t.ParseFS(html.FS)
 
-		t, err = t.ParseGlob(*path_templates)
-
-		if err != nil {
-			return err
-		}
-
-	} else {
-
-		for _, name := range templates.AssetNames() {
-
-			body, err := templates.Asset(name)
-
-			if err != nil {
-				return err
-			}
-
-			t, err = t.Parse(string(body))
-
-			if err != nil {
-				return err
-			}
-		}
+	if err != nil {
+		return err
 	}
 
 	// end of sudo put me in a package
