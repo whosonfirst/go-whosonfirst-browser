@@ -1,20 +1,30 @@
 package main
 
 import (
-	"context"
 	_ "github.com/whosonfirst/go-reader-http"
 	_ "github.com/whosonfirst/go-reader-whosonfirst-data"
-	"github.com/whosonfirst/go-whosonfirst-browser/v3"
+)
+
+import (
+	"context"
+	"github.com/whosonfirst/go-whosonfirst-browser/v3/application/browser"
 	"log"
 )
 
 func main() {
 
 	ctx := context.Background()
-	err := browser.Start(ctx)
+
+	app, err := browser.NewBrowserApplication(ctx)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to create browser application, %v", err)
+	}
+
+	err = app.Run(ctx)
+
+	if err != nil {
+		log.Fatalf("Failed to run browser application, %v", err)
 	}
 
 }
