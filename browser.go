@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-server"
+	"github.com/aaronland/go-http-ping"	
 	"github.com/aaronland/go-http-tangramjs"
 	"github.com/sfomuseum/go-flags/flagset"
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
@@ -208,7 +209,7 @@ func Start(ctx context.Context) error {
 
 	mux := gohttp.NewServeMux()
 
-	ping_handler, err := http.PingHandler()
+	ping_handler, err := ping.PingHandler()
 
 	if err != nil {
 		return err

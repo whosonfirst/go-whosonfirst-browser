@@ -14,6 +14,7 @@ github.com/aaronland/go-http-leaflet v0.0.3 h1:moAjSThtakdpdZ9zr6po11XeIyksYfe+B
 github.com/aaronland/go-http-leaflet v0.0.3/go.mod h1:jUzEnGKezjceuNtQJIZWy2nXMhuteRSK0BPIjSSniBw=
 github.com/aaronland/go-http-leaflet v0.1.0 h1:F9ofV2yRZdP9NCSW8GXfDNNbiQD5na0oylKLbbwG9u4=
 github.com/aaronland/go-http-leaflet v0.1.0/go.mod h1:M6Brt/UMWXsT+3qK5idwxr3y6kELHHi7OhgoiecMt6U=
+github.com/aaronland/go-http-ping v1.0.0 h1:ayR9n9YNnuGOhkaZhcy5Z/qSUOo0NUCu6gJ428omyXs=
 github.com/aaronland/go-http-ping v1.0.0/go.mod h1:zU9CSFLh2XzPlrFgoyCysNED+DoLRioCKaa2Kl+O6DA=
 github.com/aaronland/go-http-rewrite v0.0.3/go.mod h1:g62jjXpsArD0lzJLs9bVLR9Locdt3f4OmqFkkJL2rQU=
 github.com/aaronland/go-http-rewrite v0.0.4 h1:lI8cDF/nINjuSPrYpwvlJLa1cC32h1nvmBwRRHs9sow=
@@ -229,6 +230,8 @@ github.com/whosonfirst/go-cache v0.0.2 h1:O6DxFeSkHPSCxmXSmsTX5tXCY8m/FStEPgglR/
 github.com/whosonfirst/go-cache v0.0.2/go.mod h1:SUK9m5/Dh2WvYGCtlu1Uxo1h+6VUaRra1QHaPSOF+gI=
 github.com/whosonfirst/go-cache v0.2.0 h1:S1tKyS5aVCGkQyh9jQHi2u0i0tp0W/vW8CfX9BB6wJw=
 github.com/whosonfirst/go-cache v0.2.0/go.mod h1:M5Iche+26mVKFph49/pxS5W4ULZ9Dr01mebPqswG8QU=
+github.com/whosonfirst/go-cache v0.5.0 h1:s8o2FafYxI1TGJGqwi3G0XVD5yY1dvzwSe9dE5C+KfA=
+github.com/whosonfirst/go-cache v0.5.0/go.mod h1:YawO5K9kQa3XnrtdfwZ6OS4gwuO87S06FqIPblMqZf4=
 github.com/whosonfirst/go-geojson-svg v0.0.2 h1:198PG76+x7qdMtDg7VZQR9GDhTOmHAMQEIdkEg5hWrw=
 github.com/whosonfirst/go-geojson-svg v0.0.2/go.mod h1:9Ss1nPfGQailPzqzwg957XEuklQhU7rNgtqtY+c9IRM=
 github.com/whosonfirst/go-geojson-svg v0.0.3 h1:tN1AcMmLvhxweaoz/52GW1j0rPB0rfk7O59oWYOZkmA=

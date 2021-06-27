@@ -31,12 +31,12 @@ func (c *NullCache) Name() string {
 	return "null"
 }
 
-func (c *NullCache) Get(ctx context.Context, key string) (io.ReadCloser, error) {
+func (c *NullCache) Get(ctx context.Context, key string) (io.ReadSeekCloser, error) {
 	atomic.AddInt64(&c.misses, 1)
 	return nil, new(CacheMiss)
 }
 
-func (c *NullCache) Set(ctx context.Context, key string, fh io.ReadCloser) (io.ReadCloser, error) {
+func (c *NullCache) Set(ctx context.Context, key string, fh io.ReadSeekCloser) (io.ReadSeekCloser, error) {
 	return fh, nil
 }
 

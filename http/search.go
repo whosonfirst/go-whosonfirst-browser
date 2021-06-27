@@ -6,7 +6,7 @@ import (
 	"github.com/aaronland/go-http-sanitize"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
-	"github.com/whosonfirst/go-whosonfirst-spr"
+	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-spr-geojson"
 	"html/template"
 	_ "log"

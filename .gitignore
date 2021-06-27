@@ -11,3 +11,4 @@ bin
 testdata/*.txt
 *.cfg
 *.zip
+tmp

@@ -11,8 +11,8 @@ import (
 type Cache interface {
 	Close(context.Context) error
 	Name() string
-	Get(context.Context, string) (io.ReadCloser, error)
-	Set(context.Context, string, io.ReadCloser) (io.ReadCloser, error)
+	Get(context.Context, string) (io.ReadSeekCloser, error)
+	Set(context.Context, string, io.ReadSeekCloser) (io.ReadSeekCloser, error)
 	Unset(context.Context, string) error
 	Hits() int64
 	Misses() int64

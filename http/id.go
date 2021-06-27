@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
-	"github.com/whosonfirst/go-whosonfirst-spr"
+	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"html/template"
 	_ "log"

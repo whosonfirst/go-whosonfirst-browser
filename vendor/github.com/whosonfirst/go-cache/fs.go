@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"github.com/whosonfirst/go-ioutil"
 	"io"
 	_ "log"
 	"net/url"
@@ -81,7 +82,7 @@ func (c *FSCache) Name() string {
 	return "fs"
 }
 
-func (c *FSCache) Get(ctx context.Context, key string) (io.ReadCloser, error) {
+func (c *FSCache) Get(ctx context.Context, key string) (io.ReadSeekCloser, error) {
 
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -126,7 +127,7 @@ func (c *FSCache) Get(ctx context.Context, key string) (io.ReadCloser, error) {
 	return fh, nil
 }
 
-func (c *FSCache) Set(ctx context.Context, key string, fh io.ReadCloser) (io.ReadCloser, error) {
+func (c *FSCache) Set(ctx context.Context, key string, fh io.ReadSeekCloser) (io.ReadSeekCloser, error) {
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -173,7 +174,8 @@ func (c *FSCache) Set(ctx context.Context, key string, fh io.ReadCloser) (io.Rea
 		return nil, err
 	}
 
-	return NewReadCloser(b.Bytes()), nil
+	br := bytes.NewReader(b.Bytes())
+	return ioutil.NewReadSeekCloser(br)
 }
 
 func (c *FSCache) Unset(ctx context.Context, key string) error {

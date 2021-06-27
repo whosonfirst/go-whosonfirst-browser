@@ -1,6 +1,6 @@
 # go-cache
 
-There are many interfaces for caching things. This one is ours. It reads and writes `io.ReadCloser` instances.
+There are many interfaces for caching things. This one is ours. It reads and writes `io.ReadSeekCloser` instances.
 
 _This package supersedes [go-whosonfirst-cache](https://github.com/whosonfirst/go-whosonfirst-cache) which will be retired soon._
 
@@ -29,9 +29,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	str, _ := cache.SetString(c, "some-key", "some-value")
+	str, _ := cache.SetString(ctx, c, "some-key", "some-value")
 
-	str2, _ := cache.GetString(c, "some-key")
+	str2, _ := cache.GetString(ctx, c, "some-key")
 
 	log.Println(str2)
 }
@@ -41,7 +41,7 @@ Two things to note:
 
 * The use of the `fs://` scheme rather than the more conventional `file://`. This is deliberate so as not to overlap with the [Go Cloud](https://gocloud.dev/howto/blob/) `Blob` package's file handler.
 
-* The use of the `cache.GetString` and `cache.SetString` methods. The `cache.Cache` interface expects `io.ReadCloser` instances so these methods are shortcuts to hide the boilerplate code necessary to work with `io.ReadCloser` interfaces.
+* The use of the `cache.GetString` and `cache.SetString` methods. The `cache.Cache` interface expects `io.ReadSeekCloser` instances so these methods are shortcuts to hide the boilerplate code necessary to work with `io.ReadSeekCloser` interfaces.
 
 There is also a handy `null://` cache which doesn't do anything at all (expect implement the `cache.Cache` interface). For example:
 
@@ -58,8 +58,8 @@ There is also a handy `null://` cache which doesn't do anything at all (expect i
 type Cache interface {
      	Name() string
 	Close(context.Context) error
-	Get(context.Context, string) (io.ReadCloser, error)
-	Set(context.Context, string, io.ReadCloser) (io.ReadCloser, error)
+	Get(context.Context, string) (io.ReadSeekCloser, error)
+	Set(context.Context, string, io.ReadSeekCloser) (io.ReadSeekCloser, error)
 	Unset(context.Context, string) error
 	Hits() int64
 	Misses() int64

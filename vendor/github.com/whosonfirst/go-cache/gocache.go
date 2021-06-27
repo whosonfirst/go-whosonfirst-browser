@@ -3,10 +3,11 @@ package cache
 // https://godoc.org/github.com/patrickmn/go-cache
 
 import (
+	"bytes"
 	"context"
 	gocache "github.com/patrickmn/go-cache"
+	"github.com/whosonfirst/go-ioutil"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"strconv"
 	"sync/atomic"
@@ -104,7 +105,7 @@ func (c *GoCache) Name() string {
 	return "gocache"
 }
 
-func (c *GoCache) Get(ctx context.Context, key string) (io.ReadCloser, error) {
+func (c *GoCache) Get(ctx context.Context, key string) (io.ReadSeekCloser, error) {
 
 	// to do: timings that don't slow everything down the way
 	// go-whosonfirst-timer does now (20170915/thisisaaronland)
@@ -119,11 +120,12 @@ func (c *GoCache) Get(ctx context.Context, key string) (io.ReadCloser, error) {
 	atomic.AddInt64(&c.hits, 1)
 
 	body := data.([]byte)
+	br := bytes.NewReader(body)
 
-	return NewReadCloser(body), nil
+	return ioutil.NewReadSeekCloser(br)
 }
 
-func (c *GoCache) Set(ctx context.Context, key string, fh io.ReadCloser) (io.ReadCloser, error) {
+func (c *GoCache) Set(ctx context.Context, key string, fh io.ReadSeekCloser) (io.ReadSeekCloser, error) {
 
 	/*
 
@@ -137,7 +139,7 @@ func (c *GoCache) Set(ctx context.Context, key string, fh io.ReadCloser) (io.Rea
 
 	defer fh.Close()
 
-	body, err := ioutil.ReadAll(fh)
+	body, err := io.ReadAll(fh)
 
 	if err != nil {
 		return nil, err
@@ -146,7 +148,8 @@ func (c *GoCache) Set(ctx context.Context, key string, fh io.ReadCloser) (io.Rea
 	c.cache.Set(key, body, gocache.DefaultExpiration)
 	atomic.AddInt64(&c.keys, 1)
 
-	return NewReadCloser(body), nil
+	fh.Seek(0, 0)
+	return fh, nil
 }
 
 func (c *GoCache) Unset(ctx context.Context, key string) error {
