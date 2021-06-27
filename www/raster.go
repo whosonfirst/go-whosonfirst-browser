@@ -1,4 +1,4 @@
-package http
+package www
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-whosonfirst-image"
-	gohttp "net/http"
+	"net/http"
 )
 
 type RasterSize struct {
@@ -61,18 +61,18 @@ func NewDefaultRasterOptions() (*RasterOptions, error) {
 	return &opts, nil
 }
 
-func RasterHandler(r reader.Reader, opts *RasterOptions) (gohttp.Handler, error) {
+func RasterHandler(r reader.Reader, opts *RasterOptions) (http.Handler, error) {
 
 	if opts.Format != "png" {
 		return nil, errors.New("Invalid or unsupported raster format")
 	}
 
-	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), status)
+			http.Error(rsp, err.Error(), status)
 			return
 		}
 
@@ -86,7 +86,7 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (gohttp.Handler, error)
 		req_sz, err := sanitize.SanitizeString(query_sz, sn_opts)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), status)
+			http.Error(rsp, err.Error(), status)
 			return
 		}
 
@@ -97,7 +97,7 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (gohttp.Handler, error)
 		sz_info, ok := opts.Sizes[sz]
 
 		if !ok {
-			gohttp.Error(rsp, "Invalid output size", gohttp.StatusBadRequest)
+			http.Error(rsp, "Invalid output size", http.StatusBadRequest)
 			return
 		}
 
@@ -114,6 +114,6 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (gohttp.Handler, error)
 		image.FeatureToPNG(f, img_opts)
 	}
 
-	h := gohttp.HandlerFunc(fn)
+	h := http.HandlerFunc(fn)
 	return h, nil
 }

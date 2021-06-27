@@ -1,12 +1,12 @@
-package http
+package www
 
 import (
 	"errors"
-	gohttp "net/http"
+	"net/http"
 	"os"
 )
 
-func DataHandler(root string) (gohttp.Handler, error) {
+func DataHandler(root string) (http.Handler, error) {
 
 	info, err := os.Stat(root)
 
@@ -18,6 +18,6 @@ func DataHandler(root string) (gohttp.Handler, error) {
 		return nil, errors.New("Not a directory")
 	}
 
-	fs := gohttp.FileSystem(gohttp.Dir(root))
-	return gohttp.FileServer(fs), nil
+	fs := http.FileSystem(http.Dir(root))
+	return http.FileServer(fs), nil
 }

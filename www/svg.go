@@ -1,4 +1,4 @@
-package http
+package www
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-svg"
 	_ "log"
-	gohttp "net/http"
+	"net/http"
 )
 
 type SVGSize struct {
@@ -54,14 +54,14 @@ func NewDefaultSVGOptions() (*SVGOptions, error) {
 	return &opts, nil
 }
 
-func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, error) {
+func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (http.Handler, error) {
 
-	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), status)
+			http.Error(rsp, err.Error(), status)
 			return
 		}
 
@@ -77,7 +77,7 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 		req_sz, err := sanitize.SanitizeString(query_sz, sn_opts)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), status)
+			http.Error(rsp, err.Error(), status)
 			return
 		}
 
@@ -88,7 +88,7 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 		sz_info, ok := handler_opts.Sizes[sz]
 
 		if !ok {
-			gohttp.Error(rsp, "Invalid output size", gohttp.StatusBadRequest)
+			http.Error(rsp, "Invalid output size", http.StatusBadRequest)
 			return
 		}
 
@@ -135,6 +135,6 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (gohttp.Handler, erro
 		svg.FeatureToSVG(f, opts)
 	}
 
-	h := gohttp.HandlerFunc(fn)
+	h := http.HandlerFunc(fn)
 	return h, nil
 }

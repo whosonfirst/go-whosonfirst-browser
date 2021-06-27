@@ -1,18 +1,18 @@
-package http
+package www
 
 import (
 	"github.com/whosonfirst/go-reader"
-	gohttp "net/http"
+	"net/http"
 )
 
-func GeoJSONHandler(r reader.Reader) (gohttp.Handler, error) {
+func GeoJSONHandler(r reader.Reader) (http.Handler, error) {
 
-	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), status)
+			http.Error(rsp, err.Error(), status)
 			return
 		}
 
@@ -24,6 +24,6 @@ func GeoJSONHandler(r reader.Reader) (gohttp.Handler, error) {
 		rsp.Write(f.Bytes())
 	}
 
-	h := gohttp.HandlerFunc(fn)
+	h := http.HandlerFunc(fn)
 	return h, nil
 }

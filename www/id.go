@@ -1,4 +1,4 @@
-package http
+package www
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"html/template"
 	_ "log"
-	gohttp "net/http"
+	"net/http"
 	_ "net/url"
 	"path/filepath"
 	"time"
@@ -28,7 +28,7 @@ type IDVars struct {
 	Endpoints    *Endpoints
 }
 
-func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
+func IDHandler(r reader.Reader, opts IDHandlerOptions) (http.Handler, error) {
 
 	id_t := opts.Templates.Lookup("id")
 
@@ -54,7 +54,7 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 		return nil, errors.New("Missing notfound template")
 	}
 
-	handle_other := func(rsp gohttp.ResponseWriter, req *gohttp.Request, f geojson.Feature, endpoint string) {
+	handle_other := func(rsp http.ResponseWriter, req *http.Request, f geojson.Feature, endpoint string) {
 
 		if endpoint == "" {
 
@@ -67,11 +67,11 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 		}
 
 		url := filepath.Join(endpoint, f.Id())
-		gohttp.Redirect(rsp, req, url, gohttp.StatusMovedPermanently)
+		http.Redirect(rsp, req, url, http.StatusMovedPermanently)
 		return
 	}
 
-	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		uri, err, _ := ParseURIFromRequest(req, r)
 
@@ -160,6 +160,6 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (gohttp.Handler, error) {
 		return
 	}
 
-	h := gohttp.HandlerFunc(fn)
+	h := http.HandlerFunc(fn)
 	return h, nil
 }

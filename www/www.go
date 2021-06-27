@@ -1,4 +1,4 @@
-package http
+package www
 
 type Endpoints struct {
 	Index  string

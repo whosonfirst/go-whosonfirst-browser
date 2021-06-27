@@ -1,11 +1,11 @@
-package http
+package www
 
 import (
 	"encoding/json"
 	"github.com/aaronland/go-http-sanitize"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
-	gohttp "net/http"
+	"net/http"
 	"regexp"
 )
 
@@ -13,31 +13,31 @@ type SelectHandlerOptions struct {
 	Pattern *regexp.Regexp
 }
 
-func SelectHandler(r reader.Reader, opts *SelectHandlerOptions) (gohttp.Handler, error) {
+func SelectHandler(r reader.Reader, opts *SelectHandlerOptions) (http.Handler, error) {
 
-	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		query, err := sanitize.GetString(req, "select")
 
 		if err != nil {
-			gohttp.Error(rsp, "Invalid parameters", gohttp.StatusBadRequest)
+			http.Error(rsp, "Invalid parameters", http.StatusBadRequest)
 			return
 		}
 
 		if query == "" {
-			gohttp.Error(rsp, "Missing select", gohttp.StatusBadRequest)
+			http.Error(rsp, "Missing select", http.StatusBadRequest)
 			return
 		}
 
 		if !opts.Pattern.MatchString(query) {
-			gohttp.Error(rsp, "Invalid select", gohttp.StatusBadRequest)
+			http.Error(rsp, "Invalid select", http.StatusBadRequest)
 			return
 		}
 
 		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), status)
+			http.Error(rsp, err.Error(), status)
 			return
 		}
 
@@ -52,7 +52,7 @@ func SelectHandler(r reader.Reader, opts *SelectHandlerOptions) (gohttp.Handler,
 			enc, err := json.Marshal(query_rsp.Value())
 
 			if err != nil {
-				gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
@@ -65,6 +65,6 @@ func SelectHandler(r reader.Reader, opts *SelectHandlerOptions) (gohttp.Handler,
 		rsp.Write(rsp_body)
 	}
 
-	h := gohttp.HandlerFunc(fn)
+	h := http.HandlerFunc(fn)
 	return h, nil
 }

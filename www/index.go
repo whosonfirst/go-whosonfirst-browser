@@ -1,10 +1,10 @@
-package http
+package www
 
 import (
 	"errors"
 	"html/template"
 	_ "log"
-	gohttp "net/http"
+	"net/http"
 )
 
 type IndexHandlerOptions struct {
@@ -16,7 +16,7 @@ type IndexVars struct {
 	Endpoints *Endpoints
 }
 
-func IndexHandler(opts IndexHandlerOptions) (gohttp.Handler, error) {
+func IndexHandler(opts IndexHandlerOptions) (http.Handler, error) {
 
 	t := opts.Templates.Lookup("index")
 
@@ -24,7 +24,7 @@ func IndexHandler(opts IndexHandlerOptions) (gohttp.Handler, error) {
 		return nil, errors.New("Missing index template")
 	}
 
-	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		vars := IndexVars{
 			Endpoints: opts.Endpoints,
@@ -34,6 +34,6 @@ func IndexHandler(opts IndexHandlerOptions) (gohttp.Handler, error) {
 		return
 	}
 
-	h := gohttp.HandlerFunc(fn)
+	h := http.HandlerFunc(fn)
 	return h, nil
 }

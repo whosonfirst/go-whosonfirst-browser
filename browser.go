@@ -1,6 +1,10 @@
 package browser
 
 import (
+	_ "github.com/whosonfirst/go-reader-cachereader"
+)
+
+import (
 	"context"
 	"errors"
 	"fmt"
@@ -12,14 +16,14 @@ import (
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
-	_ "github.com/whosonfirst/go-reader-cachereader"
-	"github.com/whosonfirst/go-whosonfirst-browser/v3/assets/templates"
-	"github.com/whosonfirst/go-whosonfirst-browser/v3/http"
+	_ "github.com/whosonfirst/go-whosonfirst-browser/v3/templates/html"
+	_ "github.com/whosonfirst/go-whosonfirst-browser/v3/static"	
+	"github.com/whosonfirst/go-whosonfirst-browser/v3/www"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"html/template"
 	"io/ioutil"
 	"log"
-	gohttp "net/http"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -207,7 +211,7 @@ func Start(ctx context.Context) error {
 		}
 	}
 
-	mux := gohttp.NewServeMux()
+	mux := http.NewServeMux()
 
 	ping_handler, err := ping.PingHandler()
 
@@ -219,13 +223,13 @@ func Start(ctx context.Context) error {
 
 	if *enable_png {
 
-		png_opts, err := http.NewDefaultRasterOptions()
+		png_opts, err := www.NewDefaultRasterOptions()
 
 		if err != nil {
 			return err
 		}
 
-		png_handler, err := http.RasterHandler(cr, png_opts)
+		png_handler, err := www.RasterHandler(cr, png_opts)
 
 		if err != nil {
 			return err
@@ -236,13 +240,13 @@ func Start(ctx context.Context) error {
 
 	if *enable_svg {
 
-		svg_opts, err := http.NewDefaultSVGOptions()
+		svg_opts, err := www.NewDefaultSVGOptions()
 
 		if err != nil {
 			return err
 		}
 
-		svg_handler, err := http.SVGHandler(cr, svg_opts)
+		svg_handler, err := www.SVGHandler(cr, svg_opts)
 
 		if err != nil {
 			return err
@@ -253,7 +257,7 @@ func Start(ctx context.Context) error {
 
 	if *enable_spr {
 
-		spr_handler, err := http.SPRHandler(cr)
+		spr_handler, err := www.SPRHandler(cr)
 
 		if err != nil {
 			return err
@@ -264,7 +268,7 @@ func Start(ctx context.Context) error {
 
 	if *enable_geojson {
 
-		geojson_handler, err := http.GeoJSONHandler(cr)
+		geojson_handler, err := www.GeoJSONHandler(cr)
 
 		if err != nil {
 			return err
@@ -275,7 +279,7 @@ func Start(ctx context.Context) error {
 
 	if *enable_geojsonld {
 
-		geojsonld_handler, err := http.GeoJSONLDHandler(cr)
+		geojsonld_handler, err := www.GeoJSONLDHandler(cr)
 
 		if err != nil {
 			return err
@@ -296,11 +300,11 @@ func Start(ctx context.Context) error {
 			return err
 		}
 
-		select_opts := &http.SelectHandlerOptions{
+		select_opts := &www.SelectHandlerOptions{
 			Pattern: pat,
 		}
 
-		select_handler, err := http.SelectHandler(cr, select_opts)
+		select_handler, err := www.SelectHandler(cr, select_opts)
 
 		if err != nil {
 			return err
@@ -317,7 +321,7 @@ func Start(ctx context.Context) error {
 			return err
 		}
 
-		search_opts := http.SearchAPIHandlerOptions{
+		search_opts := www.SearchAPIHandlerOptions{
 			Database: search_db,
 		}
 
@@ -346,7 +350,7 @@ func Start(ctx context.Context) error {
 			*/
 		}
 
-		search_handler, err := http.SearchAPIHandler(search_opts)
+		search_handler, err := www.SearchAPIHandler(search_opts)
 
 		if err != nil {
 			return err
@@ -404,7 +408,7 @@ func Start(ctx context.Context) error {
 		tangramjs_opts.NextzenOptions.StyleURL = *nextzen_style_url
 		tangramjs_opts.NextzenOptions.TileURL = *nextzen_tile_url
 
-		endpoints := &http.Endpoints{
+		endpoints := &www.Endpoints{
 			Data:  *path_geojson,
 			Png:   *path_png,
 			Svg:   *path_svg,
@@ -417,12 +421,12 @@ func Start(ctx context.Context) error {
 			endpoints.Search = *path_search_html
 		}
 
-		index_opts := http.IndexHandlerOptions{
+		index_opts := www.IndexHandlerOptions{
 			Templates: t,
 			Endpoints: endpoints,
 		}
 
-		index_handler, err := http.IndexHandler(index_opts)
+		index_handler, err := www.IndexHandler(index_opts)
 
 		if err != nil {
 			return err
@@ -432,12 +436,12 @@ func Start(ctx context.Context) error {
 
 		mux.Handle("/", index_handler)
 
-		id_opts := http.IDHandlerOptions{
+		id_opts := www.IDHandlerOptions{
 			Templates: t,
 			Endpoints: endpoints,
 		}
 
-		id_handler, err := http.IDHandler(cr, id_opts)
+		id_handler, err := www.IDHandler(cr, id_opts)
 
 		if err != nil {
 			return err
@@ -456,13 +460,13 @@ func Start(ctx context.Context) error {
 				return err
 			}
 
-			search_opts := http.SearchHandlerOptions{
+			search_opts := www.SearchHandlerOptions{
 				Templates: t,
 				Endpoints: endpoints,
 				Database:  search_db,
 			}
 
-			search_handler, err := http.SearchHandler(search_opts)
+			search_handler, err := www.SearchHandler(search_opts)
 
 			if err != nil {
 				return err
@@ -486,7 +490,7 @@ func Start(ctx context.Context) error {
 			return err
 		}
 
-		err = http.AppendStaticAssetHandlersWithPrefix(mux, *static_prefix)
+		err = www.AppendStaticAssetHandlersWithPrefix(mux, *static_prefix)
 
 		if err != nil {
 			return err

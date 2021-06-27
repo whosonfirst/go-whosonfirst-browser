@@ -1,19 +1,19 @@
-package http
+package www
 
 import (
 	"encoding/json"
 	"github.com/whosonfirst/go-reader"
-	gohttp "net/http"
+	"net/http"
 )
 
-func SPRHandler(r reader.Reader) (gohttp.Handler, error) {
+func SPRHandler(r reader.Reader) (http.Handler, error) {
 
-	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), status)
+			http.Error(rsp, err.Error(), status)
 			return
 		}
 
@@ -21,14 +21,14 @@ func SPRHandler(r reader.Reader) (gohttp.Handler, error) {
 		s, err := f.SPR()
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		body, err := json.Marshal(s)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -38,6 +38,6 @@ func SPRHandler(r reader.Reader) (gohttp.Handler, error) {
 		rsp.Write(body)
 	}
 
-	h := gohttp.HandlerFunc(fn)
+	h := http.HandlerFunc(fn)
 	return h, nil
 }

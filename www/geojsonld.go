@@ -1,19 +1,19 @@
-package http
+package www
 
 import (
 	"github.com/sfomuseum/go-geojsonld"
 	"github.com/whosonfirst/go-reader"
-	gohttp "net/http"
+	"net/http"
 )
 
-func GeoJSONLDHandler(r reader.Reader) (gohttp.Handler, error) {
+func GeoJSONLDHandler(r reader.Reader) (http.Handler, error) {
 
-	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), status)
+			http.Error(rsp, err.Error(), status)
 			return
 		}
 
@@ -25,7 +25,7 @@ func GeoJSONLDHandler(r reader.Reader) (gohttp.Handler, error) {
 		body, err = geojsonld.AsGeoJSONLD(ctx, body)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), status)
+			http.Error(rsp, err.Error(), status)
 			return
 		}
 
@@ -35,6 +35,6 @@ func GeoJSONLDHandler(r reader.Reader) (gohttp.Handler, error) {
 		rsp.Write(body)
 	}
 
-	h := gohttp.HandlerFunc(fn)
+	h := http.HandlerFunc(fn)
 	return h, nil
 }

@@ -1,25 +1,25 @@
-package http
+package www
 
 import (
 	"github.com/aaronland/go-http-rewrite"
 	_ "log"
-	gohttp "net/http"
+	"net/http"
 	"path/filepath"
 	"strings"
 )
 
-func StaticFileSystem() (gohttp.FileSystem, error) {
+func StaticFileSystem() (http.FileSystem, error) {
 	fs := assetFS()
 	return fs, nil
 }
 
-func StaticAssetsHandler() (gohttp.Handler, error) {
+func StaticAssetsHandler() (http.Handler, error) {
 
 	fs := assetFS()
-	return gohttp.FileServer(fs), nil
+	return http.FileServer(fs), nil
 }
 
-func StaticAssetsHandlerWithPrefix(prefix string) (gohttp.Handler, error) {
+func StaticAssetsHandlerWithPrefix(prefix string) (http.Handler, error) {
 
 	fs_handler, err := StaticAssetsHandler()
 
@@ -33,7 +33,7 @@ func StaticAssetsHandlerWithPrefix(prefix string) (gohttp.Handler, error) {
 		return fs_handler, nil
 	}
 
-	rewrite_func := func(req *gohttp.Request) (*gohttp.Request, error) {
+	rewrite_func := func(req *http.Request) (*http.Request, error) {
 		req.URL.Path = strings.Replace(req.URL.Path, prefix, "", 1)
 		return req, nil
 	}
@@ -42,11 +42,11 @@ func StaticAssetsHandlerWithPrefix(prefix string) (gohttp.Handler, error) {
 	return rewrite_handler, nil
 }
 
-func AppendStaticAssetHandlers(mux *gohttp.ServeMux) error {
+func AppendStaticAssetHandlers(mux *http.ServeMux) error {
 	return AppendStaticAssetHandlersWithPrefix(mux, "")
 }
 
-func AppendStaticAssetHandlersWithPrefix(mux *gohttp.ServeMux, prefix string) error {
+func AppendStaticAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
 
 	asset_handler, err := StaticAssetsHandlerWithPrefix(prefix)
 

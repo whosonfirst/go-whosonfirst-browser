@@ -1,4 +1,4 @@
-package http
+package www
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"html/template"
 	_ "log"
-	gohttp "net/http"
+	"net/http"
 )
 
 type SearchAPIHandlerOptions struct {
@@ -32,7 +32,7 @@ type SearchVars struct {
 	Results   []spr.StandardPlacesResult
 }
 
-func SearchHandler(opts SearchHandlerOptions) (gohttp.Handler, error) {
+func SearchHandler(opts SearchHandlerOptions) (http.Handler, error) {
 
 	t := opts.Templates.Lookup("search")
 
@@ -40,7 +40,7 @@ func SearchHandler(opts SearchHandlerOptions) (gohttp.Handler, error) {
 		return nil, errors.New("Missing 'search' template.")
 	}
 
-	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		vars := SearchVars{
 			Endpoints: opts.Endpoints,
@@ -49,7 +49,7 @@ func SearchHandler(opts SearchHandlerOptions) (gohttp.Handler, error) {
 		term, err := sanitize.GetString(req, "term")
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)
+			http.Error(rsp, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -60,7 +60,7 @@ func SearchHandler(opts SearchHandlerOptions) (gohttp.Handler, error) {
 			results, err := opts.Database.QueryString(ctx, term)
 
 			if err != nil {
-				gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
@@ -74,30 +74,30 @@ func SearchHandler(opts SearchHandlerOptions) (gohttp.Handler, error) {
 		return
 	}
 
-	h := gohttp.HandlerFunc(fn)
+	h := http.HandlerFunc(fn)
 	return h, nil
 }
 
-func SearchAPIHandler(opts SearchAPIHandlerOptions) (gohttp.Handler, error) {
+func SearchAPIHandler(opts SearchAPIHandlerOptions) (http.Handler, error) {
 
-	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
+	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		term, err := sanitize.GetString(req, "term")
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)
+			http.Error(rsp, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		if term == "" {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)
+			http.Error(rsp, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		format, err := sanitize.GetString(req, "format")
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusBadRequest)
+			http.Error(rsp, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -105,7 +105,7 @@ func SearchAPIHandler(opts SearchAPIHandlerOptions) (gohttp.Handler, error) {
 		case "geojson":
 
 			if !opts.EnableGeoJSON {
-				gohttp.Error(rsp, "GeoJSON output is not enabled.", gohttp.StatusBadRequest)
+				http.Error(rsp, "GeoJSON output is not enabled.", http.StatusBadRequest)
 				return
 			}
 
@@ -118,7 +118,7 @@ func SearchAPIHandler(opts SearchAPIHandlerOptions) (gohttp.Handler, error) {
 		results, err := opts.Database.QueryString(ctx, term)
 
 		if err != nil {
-			gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -136,7 +136,7 @@ func SearchAPIHandler(opts SearchAPIHandlerOptions) (gohttp.Handler, error) {
 			err := geojson.AsFeatureCollection(ctx, results, as_opts)
 
 			if err != nil {
-				gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
@@ -146,7 +146,7 @@ func SearchAPIHandler(opts SearchAPIHandlerOptions) (gohttp.Handler, error) {
 			err = enc.Encode(results)
 
 			if err != nil {
-				gohttp.Error(rsp, err.Error(), gohttp.StatusInternalServerError)
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
 				return
 			}
 		}
@@ -154,6 +154,6 @@ func SearchAPIHandler(opts SearchAPIHandlerOptions) (gohttp.Handler, error) {
 		return
 	}
 
-	h := gohttp.HandlerFunc(fn)
+	h := http.HandlerFunc(fn)
 	return h, nil
 }
