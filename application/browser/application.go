@@ -6,7 +6,6 @@ import (
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"github.com/aaronland/go-http-bootstrap"
@@ -120,7 +119,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	err := flagset.SetFlagsFromEnvVarsWithFeedback(fs, "BROWSER", true)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to set flags from environment variables, %w", err)
 	}
 
 	if enable_all {
@@ -165,7 +164,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		tempdir, err := ioutil.TempDir("", prefix)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to derive tmp dir, %w", err)
 		}
 
 		log.Println(tempdir)
@@ -185,7 +184,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	cr, err := reader.NewReader(ctx, cr_uri.String())
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to create reader for '%s', %w", cr_uri.String(), err)
 	}
 
 	// start of sudo put me in a package
@@ -199,7 +198,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	t, err = t.ParseFS(html.FS, "*.html")
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to parse templates, %w", err)
 	}
 
 	// end of sudo put me in a package
@@ -209,7 +208,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		static_prefix = strings.TrimRight(static_prefix, "/")
 
 		if !strings.HasPrefix(static_prefix, "/") {
-			return errors.New("Invalid -static-prefix value")
+			return fmt.Errorf("Invalid -static-prefix value")
 		}
 	}
 
@@ -218,7 +217,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	ping_handler, err := ping.PingHandler()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to create ping handler, %w", err)
 	}
 
 	mux.Handle("/ping", ping_handler)
@@ -228,13 +227,13 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		png_opts, err := www.NewDefaultRasterOptions()
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create raster/png options, %w", err)
 		}
 
 		png_handler, err := www.RasterHandler(cr, png_opts)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create raster/png handler, %w", err)
 		}
 
 		mux.Handle(path_png, png_handler)
@@ -245,13 +244,13 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		svg_opts, err := www.NewDefaultSVGOptions()
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create SVG options, %w", err)
 		}
 
 		svg_handler, err := www.SVGHandler(cr, svg_opts)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create SVG handler, %w", err)
 		}
 
 		mux.Handle(path_svg, svg_handler)
@@ -262,7 +261,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		spr_handler, err := www.SPRHandler(cr)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create SPR handler, %w", err)
 		}
 
 		mux.Handle(path_spr, spr_handler)
@@ -273,7 +272,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		geojson_handler, err := www.GeoJSONHandler(cr)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create GeoJSON handler, %w", err)
 		}
 
 		mux.Handle(path_geojson, geojson_handler)
@@ -284,7 +283,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		geojsonld_handler, err := www.GeoJSONLDHandler(cr)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create GeoJSON LD handler, %w", err)
 		}
 
 		mux.Handle(path_geojsonld, geojsonld_handler)
@@ -293,13 +292,13 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	if enable_select {
 
 		if select_pattern == "" {
-			return errors.New("Missing -select-pattern parameter.")
+			return fmt.Errorf("Missing -select-pattern parameter.")
 		}
 
 		pat, err := regexp.Compile(select_pattern)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to compile select pattern (%s), %w", select_pattern, err)
 		}
 
 		select_opts := &www.SelectHandlerOptions{
@@ -309,7 +308,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		select_handler, err := www.SelectHandler(cr, select_opts)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create select handler, %w", err)
 		}
 
 		mux.Handle(path_select, select_handler)
@@ -320,7 +319,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create fulltext database, %w", err)
 		}
 
 		search_opts := www.SearchAPIHandlerOptions{
@@ -334,7 +333,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 			geojson_reader, err := reader.NewReader(ctx, data_source)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to create search reader for '%s', %w", data_source, err)
 			}
 
 			search_opts.GeoJSONReader = geojson_reader
@@ -355,7 +354,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		search_handler, err := www.SearchAPIHandler(search_opts)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create search handler, %w", err)
 		}
 
 		mux.Handle(path_search_api, search_handler)
@@ -368,7 +367,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 			tile_cache, err := cache.NewCache(ctx, proxy_tiles_cache)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to create proxy tiles cache for '%s', %w", proxy_tiles_cache, err)
 			}
 
 			timeout := time.Duration(proxy_tiles_timeout) * time.Second
@@ -381,7 +380,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 			proxy_handler, err := tzhttp.TilezenProxyHandler(proxy_opts)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to create proxy tiles handler, %w", err)
 			}
 
 			// the order here is important - we don't have a general-purpose "add to
@@ -431,7 +430,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		index_handler, err := www.IndexHandler(index_opts)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create index handler, %w", err)
 		}
 
 		index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, static_prefix)
@@ -446,7 +445,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		id_handler, err := www.IDHandler(cr, id_opts)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create ID handler, %w", err)
 		}
 
 		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, static_prefix)
@@ -459,7 +458,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 			search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to create fulltext database for '%s', %w", search_database_uri, err)
 			}
 
 			search_opts := www.SearchHandlerOptions{
@@ -471,7 +470,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 			search_handler, err := www.SearchHandler(search_opts)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to create search handler, %w", err)
 			}
 
 			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, static_prefix)
@@ -483,19 +482,19 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		err = bootstrap.AppendAssetHandlersWithPrefix(mux, static_prefix)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to append Bootstrap asset handlers, %w", err)
 		}
 
 		err = tangramjs.AppendAssetHandlersWithPrefix(mux, static_prefix)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to append Tangram.js asset handlers, %w", err)
 		}
 
 		err = www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to append static asset handlers, %w", err)
 		}
 
 	}
@@ -503,10 +502,16 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	s, err := server.NewServer(ctx, server_uri)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to create new search for '%s', %w", server_uri, err)
 	}
 
 	log.Printf("Listening on %s\n", s.Address())
 
-	return s.ListenAndServe(ctx, mux)
+	err = s.ListenAndServe(ctx, mux)
+
+	if err != nil {
+		return fmt.Errorf("Failed to serve requests, %w", err)
+	}
+
+	return nil
 }
