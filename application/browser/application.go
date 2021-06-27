@@ -1,1 +1,512 @@
 package browser
+
+import (
+	_ "github.com/whosonfirst/go-reader-cachereader"
+)
+
+import (
+	"context"
+	"errors"
+	"flag"
+	"fmt"
+	"github.com/aaronland/go-http-bootstrap"
+	"github.com/aaronland/go-http-ping"
+	"github.com/aaronland/go-http-server"
+	"github.com/aaronland/go-http-tangramjs"
+	"github.com/sfomuseum/go-flags/flagset"
+	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
+	"github.com/whosonfirst/go-cache"
+	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-browser/v3/application"
+	"github.com/whosonfirst/go-whosonfirst-browser/v3/templates/html"
+	"github.com/whosonfirst/go-whosonfirst-browser/v3/www"
+	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
+	"html/template"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"time"
+)
+
+type BrowserApplication struct {
+	application.Application
+}
+
+func NewBrowserApplication(ctx context.Context) (application.Application, error) {
+	app := &BrowserApplication{}
+	return app, nil
+}
+
+func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
+
+	fs := flagset.NewFlagSet("browser")
+
+	fs.StringVar(&server_uri, "server-uri", "http://localhost:8080", "A valid aaronland/go-http-server URI.")
+
+	fs.StringVar(&static_prefix, "static-prefix", "", "Prepend this prefix to URLs for static assets.")
+
+	fs.StringVar(&data_source, "reader-source", "whosonfirst-data://", "A valid go-reader Reader URI string.")
+	fs.StringVar(&cache_source, "cache-source", "gocache://", "A valid go-cache Cache URI string.")
+
+	fs.StringVar(&nextzen_api_key, "nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
+	fs.StringVar(&nextzen_style_url, "nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
+	fs.StringVar(&nextzen_tile_url, "nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
+
+	proxy_tiles := fs.BoolVar(&proxy_tiles, "proxy-tiles", false, "Proxy (and cache) Nextzen tiles.")
+	proxy_tiles_url := fs.StringVar(&proxy_tiles_urls, "proxy-tiles-url", "/tiles/", "The URL (a relative path) for proxied tiles.")
+	proxy_tiles_cache := fs.StringVar(&proxy_tiles_cache, "proxy-tiles-cache", "gocache://", "A valid tile proxy DSN string.")
+	proxy_tiles_timeout := fs.Int(&proxy_tiles_timeout, "proxy-tiles-timeout", 30, "The maximum number of seconds to allow for fetching a tile from the proxy.")
+
+	fs.BoolVar(&enable_all, "enable-all", false, "Enable all the available output handlers.")
+	fs.BoolVar(&enable_graphics, "enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
+	fs.BoolVar(&enable_data, "enable-data", false, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
+
+	fs.BoolVar(&enable_png, "enable-png", false, "Enable the 'png' output handler.")
+	fs.BoolVar(&enable_svg, "enable-svg", false, "Enable the 'svg' output handler.")
+
+	fs.BoolVar(&enable_geojson, "enable-geojson", true, "Enable the 'geojson' output handler.")
+	fs.BoolVar(&enable_geojsonld, "enable-geojson-ld", true, "Enable the 'geojson-ld' output handler.")
+	fs.BoolVar(&enable_spr, "enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
+	fs.BoolVar(&enable_select, "enable-select", false, "Enable the 'select' output handler.")
+
+	fs.StringVar(&select_pattern, "select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
+
+	fs.BoolVar(&enable_html, "enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
+
+	fs.BoolVar(&enable_search_api, "enable-search-api", true, "Enable the (API) search handlers.")
+	fs.BoolVar(&enable_search_api_geojson, "enable-search-api-geojson", false, "Enable the (API) search handlers to return results as GeoJSON.")
+
+	fs.BoolVar(&enable_search_html, "enable-search-html", true, "Enable the (human-friendly) search handlers.")
+
+	fs.BoolVar(&enable_search, "enable-search", false, "Enable both the API and human-friendly search handlers.")
+
+	fs.StringVar(&search_database_uri, "search-database-uri", "", "A valid whosonfirst/go-whosonfist-search/fulltext URI.")
+
+	fs.StringVar(&path_png, "path-png", "/png/", "The path that PNG requests should be served from.")
+	fs.StringVar(&path_svg, "path-svg", "/svg/", "The path that SVG requests should be served from.")
+	fs.StringVar(&path_geojson, "path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
+	fs.StringVar(&path_geojsonld, "path-geojson-ld", "/geojson-ld/", "The path that GeoJSON-LD requests should be served from.")
+	fs.StringVar(&path_spr, "path-spr", "/spr/", "The path that SPR requests should be served from.")
+	fs.StringVar(&path_select, "path-select", "/select/", "The path that 'select' requests should be served from.")
+
+	fs.StringVar(&path_search_api, "path-search-api", "/search/spr/", "The path that API 'search' requests should be served from.")
+	fs.StringVar(&path_search_html, "path-search-html", "/search/", "The path that API 'search' requests should be served from.")
+
+	fs.StringVar(&path_id, "path-id", "/id/", "The that Who's On First documents should be served from.")
+
+	return fs, nil
+}
+
+func (app *BrowserApplication) Run(ctx context.Context) error {
+
+	fs, err := app.DefaultFlagSet(ctx)
+
+	if err != nil {
+		return fmt.Errorf("Failed to create default flagset, %w", err)
+	}
+
+	return app.RunWithFlagSet(ctx, fs)
+}
+
+func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.FlagSet) error {
+
+	flagset.Parse(fs)
+
+	err := flagset.SetFlagsFromEnvVarsWithFeedback(fs, "BROWSER", true)
+
+	if err != nil {
+		return err
+	}
+
+	if enable_all {
+		enable_graphics = true
+		enable_data = true
+		enable_html = true
+		enable_search = true
+	}
+
+	if enable_search {
+		enable_search_api = true
+		enable_search_api_geojson = true
+		enable_search_html = true
+	}
+
+	if enable_graphics {
+		enable_png = true
+		enable_svg = true
+	}
+
+	if enable_data {
+		enable_geojson = true
+		enable_geojsonld = true
+		enable_spr = true
+		enable_select = true
+	}
+
+	if enable_search_html {
+		enable_html = true
+	}
+
+	if enable_html {
+		enable_geojson = true
+		enable_png = true
+	}
+
+	if cache_source == "tmp://" {
+
+		now := time.Now()
+		prefix := fmt.Sprintf("go-whosonfirst-browser-%d", now.Unix())
+
+		tempdir, err := ioutil.TempDir("", prefix)
+
+		if err != nil {
+			return err
+		}
+
+		log.Println(tempdir)
+		defer os.RemoveAll(tempdir)
+
+		cache_source = fmt.Sprintf("fs://%s", tempdir)
+	}
+
+	cr_q := url.Values{}
+	cr_q.Set("reader", data_source)
+	cr_q.Set("cache", cache_source)
+
+	cr_uri := url.URL{}
+	cr_uri.Scheme = "cachereader"
+	cr_uri.RawQuery = cr_q.Encode()
+
+	cr, err := reader.NewReader(ctx, cr_uri.String())
+
+	if err != nil {
+		return err
+	}
+
+	// start of sudo put me in a package
+
+	t := template.New("whosonfirst-browser").Funcs(template.FuncMap{
+		"Add": func(i int, offset int) int {
+			return i + offset
+		},
+	})
+
+	t, err = t.ParseFS(html.FS)
+
+	if err != nil {
+		return err
+	}
+
+	// end of sudo put me in a package
+
+	if static_prefix != "" {
+
+		static_prefix = strings.TrimRight(static_prefix, "/")
+
+		if !strings.HasPrefix(static_prefix, "/") {
+			return errors.New("Invalid -static-prefix value")
+		}
+	}
+
+	mux := http.NewServeMux()
+
+	ping_handler, err := ping.PingHandler()
+
+	if err != nil {
+		return err
+	}
+
+	mux.Handle("/ping", ping_handler)
+
+	if enable_png {
+
+		png_opts, err := www.NewDefaultRasterOptions()
+
+		if err != nil {
+			return err
+		}
+
+		png_handler, err := www.RasterHandler(cr, png_opts)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(path_png, png_handler)
+	}
+
+	if enable_svg {
+
+		svg_opts, err := www.NewDefaultSVGOptions()
+
+		if err != nil {
+			return err
+		}
+
+		svg_handler, err := www.SVGHandler(cr, svg_opts)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(path_svg, svg_handler)
+	}
+
+	if enable_spr {
+
+		spr_handler, err := www.SPRHandler(cr)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(path_spr, spr_handler)
+	}
+
+	if enable_geojson {
+
+		geojson_handler, err := www.GeoJSONHandler(cr)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(path_geojson, geojson_handler)
+	}
+
+	if enable_geojsonld {
+
+		geojsonld_handler, err := www.GeoJSONLDHandler(cr)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(path_geojsonld, geojsonld_handler)
+	}
+
+	if enable_select {
+
+		if select_pattern == "" {
+			return errors.New("Missing -select-pattern parameter.")
+		}
+
+		pat, err := regexp.Compile(select_pattern)
+
+		if err != nil {
+			return err
+		}
+
+		select_opts := &www.SelectHandlerOptions{
+			Pattern: pat,
+		}
+
+		select_handler, err := www.SelectHandler(cr, select_opts)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(path_select, select_handler)
+	}
+
+	if enable_search_api {
+
+		search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
+
+		if err != nil {
+			return err
+		}
+
+		search_opts := www.SearchAPIHandlerOptions{
+			Database: search_db,
+		}
+
+		if enable_search_api_geojson {
+
+			search_opts.EnableGeoJSON = true
+
+			geojson_reader, err := reader.NewReader(ctx, data_source)
+
+			if err != nil {
+				return err
+			}
+
+			search_opts.GeoJSONReader = geojson_reader
+
+			/*
+				if resolver_uri != "" {
+
+				resolver_func, err := geojson.NewSPRPathResolverFunc(ctx, resolver_uri)
+
+				if err != nil {
+					return err
+				}
+
+				api_pip_opts.SPRPathResolver = resolver_func
+			*/
+		}
+
+		search_handler, err := www.SearchAPIHandler(search_opts)
+
+		if err != nil {
+			return err
+		}
+
+		mux.Handle(path_search_api, search_handler)
+	}
+
+	if enable_html {
+
+		if proxy_tiles {
+
+			tile_cache, err := cache.NewCache(ctx, proxy_tiles_cache)
+
+			if err != nil {
+				return err
+			}
+
+			timeout := time.Duration(proxy_tiles_timeout) * time.Second
+
+			proxy_opts := &tzhttp.TilezenProxyHandlerOptions{
+				Cache:   tile_cache,
+				Timeout: timeout,
+			}
+
+			proxy_handler, err := tzhttp.TilezenProxyHandler(proxy_opts)
+
+			if err != nil {
+				return err
+			}
+
+			// the order here is important - we don't have a general-purpose "add to
+			// mux with prefix" function here, like we do in the tangram handler so
+			// we set the nextzen tile url with proxy_tiles_url and then update it
+			// (proxy_tiles_url) with a prefix if necessary (20190911/thisisaaronland)
+
+			nextzen_tile_url = fmt.Sprintf("%s{z}/{x}/{y}.mvt", proxy_tiles_url)
+
+			if static_prefix != "" {
+
+				proxy_tiles_url = filepath.Join(static_prefix, proxy_tiles_url)
+
+				if !strings.HasSuffix(proxy_tiles_url, "/") {
+					proxy_tiles_url = fmt.Sprintf("%s/", proxy_tiles_url)
+				}
+			}
+
+			mux.Handle(proxy_tiles_url, proxy_handler)
+		}
+
+		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
+
+		tangramjs_opts := tangramjs.DefaultTangramJSOptions()
+		tangramjs_opts.NextzenOptions.APIKey = nextzen_api_key
+		tangramjs_opts.NextzenOptions.StyleURL = nextzen_style_url
+		tangramjs_opts.NextzenOptions.TileURL = nextzen_tile_url
+
+		endpoints := &www.Endpoints{
+			Data:  path_geojson,
+			Png:   path_png,
+			Svg:   path_svg,
+			Spr:   path_spr,
+			Id:    path_id,
+			Index: "/",
+		}
+
+		if enable_search_html {
+			endpoints.Search = path_search_html
+		}
+
+		index_opts := www.IndexHandlerOptions{
+			Templates: t,
+			Endpoints: endpoints,
+		}
+
+		index_handler, err := www.IndexHandler(index_opts)
+
+		if err != nil {
+			return err
+		}
+
+		index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, static_prefix)
+
+		mux.Handle("/", index_handler)
+
+		id_opts := www.IDHandlerOptions{
+			Templates: t,
+			Endpoints: endpoints,
+		}
+
+		id_handler, err := www.IDHandler(cr, id_opts)
+
+		if err != nil {
+			return err
+		}
+
+		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, static_prefix)
+		id_handler = tangramjs.AppendResourcesHandlerWithPrefix(id_handler, tangramjs_opts, static_prefix)
+
+		mux.Handle(path_id, id_handler)
+
+		if enable_search_html {
+
+			search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
+
+			if err != nil {
+				return err
+			}
+
+			search_opts := www.SearchHandlerOptions{
+				Templates: t,
+				Endpoints: endpoints,
+				Database:  search_db,
+			}
+
+			search_handler, err := www.SearchHandler(search_opts)
+
+			if err != nil {
+				return err
+			}
+
+			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, static_prefix)
+			search_handler = tangramjs.AppendResourcesHandlerWithPrefix(search_handler, tangramjs_opts, static_prefix)
+
+			mux.Handle(path_search_html, search_handler)
+		}
+
+		err = bootstrap.AppendAssetHandlersWithPrefix(mux, static_prefix)
+
+		if err != nil {
+			return err
+		}
+
+		err = tangramjs.AppendAssetHandlersWithPrefix(mux, static_prefix)
+
+		if err != nil {
+			return err
+		}
+
+		err = www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
+
+		if err != nil {
+			return err
+		}
+
+	}
+
+	s, err := server.NewServer(ctx, server_uri)
+
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Listening on %s\n", s.Address())
+
+	return s.ListenAndServe(ctx, mux)
+}
