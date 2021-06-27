@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/whosonfirst/go-cache"
-	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-ioutil"
+	"github.com/whosonfirst/go-reader"
 	"io"
 	"net/url"
 )

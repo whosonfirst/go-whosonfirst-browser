@@ -72,18 +72,14 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 	fs.BoolVar(&enable_geojsonld, "enable-geojson-ld", true, "Enable the 'geojson-ld' output handler.")
 	fs.BoolVar(&enable_spr, "enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
 	fs.BoolVar(&enable_select, "enable-select", false, "Enable the 'select' output handler.")
-
 	fs.StringVar(&select_pattern, "select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
 
 	fs.BoolVar(&enable_html, "enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
 
 	fs.BoolVar(&enable_search_api, "enable-search-api", false, "Enable the (API) search handlers.")
 	fs.BoolVar(&enable_search_api_geojson, "enable-search-api-geojson", false, "Enable the (API) search handlers to return results as GeoJSON.")
-
 	fs.BoolVar(&enable_search_html, "enable-search-html", false, "Enable the (human-friendly) search handlers.")
-
 	fs.BoolVar(&enable_search, "enable-search", false, "Enable both the API and human-friendly search handlers.")
-
 	fs.StringVar(&search_database_uri, "search-database-uri", "", "A valid whosonfirst/go-whosonfist-search/fulltext URI.")
 
 	fs.StringVar(&path_png, "path-png", "/png/", "The path that PNG requests should be served from.")
@@ -183,6 +179,8 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 	cr, err := reader.NewReader(ctx, cr_uri.String())
 
+	log.Println("CACHE READER", cr_uri.String())
+	
 	if err != nil {
 		return fmt.Errorf("Failed to create reader for '%s', %w", cr_uri.String(), err)
 	}

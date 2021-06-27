@@ -6,7 +6,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/warning"
-	_ "log"
+	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -27,7 +27,7 @@ func ParseURIFromRequest(req *http.Request, r reader.Reader) (*URI, error, int) 
 
 	wofid, uri_args, err := uri.ParseURI(path)
 
-	// log.Println("PARSE", path, wofid, uri_args, err)
+	log.Println("PARSE", path, wofid, uri_args, err)
 
 	if err != nil || wofid == -1 {
 
@@ -53,6 +53,8 @@ func ParseURIFromRequest(req *http.Request, r reader.Reader) (*URI, error, int) 
 
 	rel_path, err := uri.Id2RelPath(wofid, uri_args)
 
+	log.Println("REL PATH", rel_path)
+		
 	if err != nil {
 		return nil, err, http.StatusBadRequest // StatusInternalServerError
 	}
@@ -61,12 +63,16 @@ func ParseURIFromRequest(req *http.Request, r reader.Reader) (*URI, error, int) 
 
 	fh, err := r.Read(ctx, rel_path)
 
+	log.Printf("READ FROM %T, %v\n", r, err)
+	
 	if err != nil {
 		return nil, err, http.StatusBadRequest // StatusInternalServerError
 	}
 
 	f, err := feature.LoadFeatureFromReader(fh)
 
+	log.Println("F", err)
+	
 	if err != nil && !warning.IsWarning(err) {
 		return nil, err, http.StatusInternalServerError
 	}

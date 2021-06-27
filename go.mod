@@ -15,11 +15,11 @@ require (
 	github.com/srwiley/oksvg v0.0.0-20210519022825-9fc0c575d5fe // indirect
 	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780 // indirect
 	github.com/tidwall/gjson v1.8.0
-	github.com/whosonfirst/go-bindata v0.1.0
-	github.com/whosonfirst/go-bindata-assetfs v1.0.1
+	github.com/whosonfirst/go-bindata v0.1.0 // indirect
+	github.com/whosonfirst/go-bindata-assetfs v1.0.1 // indirect
 	github.com/whosonfirst/go-cache v0.5.0
 	github.com/whosonfirst/go-reader v0.5.0
-	github.com/whosonfirst/go-reader-cachereader v0.2.1
+	github.com/whosonfirst/go-reader-cachereader v0.2.2
 	github.com/whosonfirst/go-reader-http v0.2.2
 	github.com/whosonfirst/go-reader-whosonfirst-data v1.0.1
 	github.com/whosonfirst/go-sanitize v0.1.0
