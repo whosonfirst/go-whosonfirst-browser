@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/google/go-github/github"
 	wof_reader "github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-ioutil"
 	"golang.org/x/oauth2"
 	"io"
-	"io/ioutil"
 	_ "log"
 	"net/url"
 	"path/filepath"
@@ -60,7 +60,7 @@ func NewGitHubAPIReader(ctx context.Context, uri string) (wof_reader.Reader, err
 	}
 
 	r.repo = parts[0]
-	r.branch = "master"
+	r.branch = DEFAULT_BRANCH
 
 	q := u.Query()
 
@@ -90,11 +90,11 @@ func NewGitHubAPIReader(ctx context.Context, uri string) (wof_reader.Reader, err
 	return r, nil
 }
 
-func (r *GitHubAPIReader) Read(ctx context.Context, uri string) (io.ReadCloser, error) {
+func (r *GitHubAPIReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser, error) {
 
 	<-r.throttle
 
-	url := r.URI(uri)
+	url := r.ReaderURI(ctx, uri)
 
 	opts := &github.RepositoryContentGetOptions{}
 
@@ -110,13 +110,17 @@ func (r *GitHubAPIReader) Read(ctx context.Context, uri string) (io.ReadCloser, 
 		return nil, err
 	}
 
-	br := strings.NewReader(body)
-	fh := ioutil.NopCloser(br)
+	sr := strings.NewReader(body)
+	fh, err := ioutil.NewReadSeekCloser(sr)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return fh, nil
 }
 
-func (r *GitHubAPIReader) URI(key string) string {
+func (r *GitHubAPIReader) ReaderURI(ctx context.Context, key string) string {
 
 	uri := key
 

@@ -33,7 +33,7 @@ github.com/aws/aws-lambda-go/lambdacontext
 github.com/golang/protobuf/proto
 # github.com/google/go-github v17.0.0+incompatible
 github.com/google/go-github/github
-# github.com/google/go-querystring v1.0.0
+# github.com/google/go-querystring v1.1.0
 github.com/google/go-querystring/query
 # github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
 github.com/hashicorp/errwrap
@@ -115,18 +115,18 @@ github.com/whosonfirst/go-reader
 # github.com/whosonfirst/go-reader-cachereader v0.2.1
 ## explicit
 github.com/whosonfirst/go-reader-cachereader
-# github.com/whosonfirst/go-reader-github v0.2.0
+# github.com/whosonfirst/go-reader-github v0.4.2
 github.com/whosonfirst/go-reader-github
 # github.com/whosonfirst/go-reader-http v0.2.2
 ## explicit
 github.com/whosonfirst/go-reader-http
-# github.com/whosonfirst/go-reader-whosonfirst-data v1.0.0
+# github.com/whosonfirst/go-reader-whosonfirst-data v1.0.1
 ## explicit
 github.com/whosonfirst/go-reader-whosonfirst-data
 # github.com/whosonfirst/go-sanitize v0.1.0
 ## explicit
 github.com/whosonfirst/go-sanitize
-# github.com/whosonfirst/go-whosonfirst-flags v0.4.2
+# github.com/whosonfirst/go-whosonfirst-flags v0.4.3
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
 github.com/whosonfirst/go-whosonfirst-flags/geometry
@@ -147,15 +147,13 @@ github.com/whosonfirst/go-whosonfirst-image
 # github.com/whosonfirst/go-whosonfirst-placetypes v0.3.0
 github.com/whosonfirst/go-whosonfirst-placetypes
 github.com/whosonfirst/go-whosonfirst-placetypes/placetypes
-# github.com/whosonfirst/go-whosonfirst-search v0.0.1
+# github.com/whosonfirst/go-whosonfirst-search v0.0.2
 ## explicit
 github.com/whosonfirst/go-whosonfirst-search/filter
 github.com/whosonfirst/go-whosonfirst-search/fulltext
 # github.com/whosonfirst/go-whosonfirst-sources v0.1.0
 github.com/whosonfirst/go-whosonfirst-sources
 github.com/whosonfirst/go-whosonfirst-sources/sources
-# github.com/whosonfirst/go-whosonfirst-spr v0.1.0
-github.com/whosonfirst/go-whosonfirst-spr
 # github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.6
 ## explicit
 github.com/whosonfirst/go-whosonfirst-spr-geojson
@@ -187,7 +185,7 @@ golang.org/x/net/context/ctxhttp
 golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
-# golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+# golang.org/x/oauth2 v0.0.0-20210622215436-a8dc77f794b6
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
 # golang.org/x/text v0.3.6
@@ -208,7 +206,7 @@ golang.org/x/text/internal/utf8internal
 golang.org/x/text/language
 golang.org/x/text/runes
 golang.org/x/text/transform
-# google.golang.org/appengine v1.4.0
+# google.golang.org/appengine v1.6.6
 google.golang.org/appengine/internal
 google.golang.org/appengine/internal/base
 google.golang.org/appengine/internal/datastore

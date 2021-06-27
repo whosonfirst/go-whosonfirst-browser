@@ -16,10 +16,12 @@ import (
 
 type WhosOnFirstDataReader struct {
 	wof_reader.Reader
-	throttle <-chan time.Time
-	repo     string
-	repos    *sync.Map
-	readers  *sync.Map
+	throttle     <-chan time.Time
+	provider     string
+	organization string
+	repo         string
+	repos        *sync.Map
+	readers      *sync.Map
 }
 
 func init() {
@@ -42,7 +44,17 @@ func NewWhosOnFirstDataReader(ctx context.Context, uri string) (wof_reader.Reade
 
 	q := u.Query()
 
+	provider := q.Get("provider")
+	org := q.Get("organization")
 	repo := q.Get("repo")
+
+	if provider == "" {
+		provider = "github"
+	}
+
+	if org == "" {
+		org = "whosonfirst-data"
+	}
 
 	rate := time.Second / 3
 	throttle := time.Tick(rate)
@@ -51,16 +63,18 @@ func NewWhosOnFirstDataReader(ctx context.Context, uri string) (wof_reader.Reade
 	readers := new(sync.Map)
 
 	r := &WhosOnFirstDataReader{
-		throttle: throttle,
-		repo:     repo,
-		repos:    repos,
-		readers:  readers,
+		throttle:     throttle,
+		provider:     provider,
+		organization: org,
+		repo:         repo,
+		repos:        repos,
+		readers:      readers,
 	}
 
 	return r, nil
 }
 
-func (r *WhosOnFirstDataReader) Read(ctx context.Context, uri string) (io.ReadCloser, error) {
+func (r *WhosOnFirstDataReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser, error) {
 
 	id, _, err := wof_uri.ParseURI(uri)
 
@@ -108,7 +122,7 @@ func (r *WhosOnFirstDataReader) getReader(ctx context.Context, repo string) (wof
 		return gh_r, nil
 	}
 
-	gh_uri := fmt.Sprintf("github://whosonfirst-data/%s", repo)
+	gh_uri := fmt.Sprintf("%s://%s/%s", r.provider, r.organization, repo)
 
 	gh_r, err := wof_reader.NewReader(ctx, gh_uri)
 

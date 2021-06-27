@@ -21,11 +21,11 @@ require (
 	github.com/whosonfirst/go-reader v0.5.0
 	github.com/whosonfirst/go-reader-cachereader v0.2.1
 	github.com/whosonfirst/go-reader-http v0.2.2
-	github.com/whosonfirst/go-reader-whosonfirst-data v1.0.0
+	github.com/whosonfirst/go-reader-whosonfirst-data v1.0.1
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.3
 	github.com/whosonfirst/go-whosonfirst-image v0.0.1
-	github.com/whosonfirst/go-whosonfirst-search v0.0.1
+	github.com/whosonfirst/go-whosonfirst-search v0.0.2
 	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.6
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.0.0
 	github.com/whosonfirst/go-whosonfirst-svg v0.0.4

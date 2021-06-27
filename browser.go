@@ -400,9 +400,9 @@ func Start(ctx context.Context) error {
 		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
 
 		tangramjs_opts := tangramjs.DefaultTangramJSOptions()
-		tangramjs_opts.Nextzen.APIKey = *nextzen_api_key
-		tangramjs_opts.Nextzen.StyleURL = *nextzen_style_url
-		tangramjs_opts.Nextzen.TileURL = *nextzen_tile_url
+		tangramjs_opts.NextzenOptions.APIKey = *nextzen_api_key
+		tangramjs_opts.NextzenOptions.StyleURL = *nextzen_style_url
+		tangramjs_opts.NextzenOptions.TileURL = *nextzen_tile_url
 
 		endpoints := &http.Endpoints{
 			Data:  *path_geojson,

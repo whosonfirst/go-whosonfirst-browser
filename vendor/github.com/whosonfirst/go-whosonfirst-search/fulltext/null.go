@@ -3,7 +3,7 @@ package fulltext
 import (
 	"context"
 	"errors"
-	"github.com/whosonfirst/go-whosonfirst-spr"
+	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/filter"	
 	wof_geojson "github.com/whosonfirst/go-whosonfirst-geojson-v2"	
 )

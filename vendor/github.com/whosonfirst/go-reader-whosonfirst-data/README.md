@@ -55,6 +55,13 @@ For example:
 
 ## Tools
 
+To build binary versions of these tools run the `cli` Makefile target. For example:
+
+```
+$> make cli
+go build -mod vendor -o bin/read cmd/read/main.go
+```
+
 ### read
 
 ```

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	wof_reader "github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-ioutil"
 	"io"
 	_ "log"
 	"net/http"
@@ -56,7 +57,7 @@ func NewGitHubReader(ctx context.Context, uri string) (wof_reader.Reader, error)
 	}
 
 	r.repo = parts[0]
-	r.branch = "master"
+	r.branch = DEFAULT_BRANCH
 
 	q := u.Query()
 
@@ -69,11 +70,11 @@ func NewGitHubReader(ctx context.Context, uri string) (wof_reader.Reader, error)
 	return r, nil
 }
 
-func (r *GitHubReader) Read(ctx context.Context, uri string) (io.ReadCloser, error) {
+func (r *GitHubReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser, error) {
 
 	<-r.throttle
 
-	url := r.URI(uri)
+	url := r.ReaderURI(ctx, uri)
 
 	rsp, err := http.Get(url)
 
@@ -85,10 +86,16 @@ func (r *GitHubReader) Read(ctx context.Context, uri string) (io.ReadCloser, err
 		return nil, errors.New(rsp.Status)
 	}
 
-	return rsp.Body, nil
+	fh, err := ioutil.NewReadSeekCloser(rsp.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return fh, nil
 }
 
-func (r *GitHubReader) URI(key string) string {
+func (r *GitHubReader) ReaderURI(ctx context.Context, key string) string {
 
 	return fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/data/%s", r.owner, r.repo, r.branch, key)
 }
