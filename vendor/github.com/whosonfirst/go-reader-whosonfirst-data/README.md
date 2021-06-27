@@ -100,6 +100,6 @@ $> ./bin/read 85633041 | jq '.properties["wof:name"]'
 ## See also
 
 * https://github.com/whosonfirst-data
-* https://data.whosonfirst.org/findingaid/
 * https://github.com/go-whosonfirst-reader
+* https://github.com/go-whosonfirst-findingaid
 * https://github.com/go-whosonfirst-reader-github

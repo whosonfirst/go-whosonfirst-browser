@@ -21,6 +21,8 @@ github.com/aaronland/go-http-server
 ## explicit
 github.com/aaronland/go-http-tangramjs
 github.com/aaronland/go-http-tangramjs/static
+# github.com/aaronland/go-json-query v0.1.0
+github.com/aaronland/go-json-query
 # github.com/aaronland/go-roster v0.0.2
 github.com/aaronland/go-roster
 # github.com/aws/aws-lambda-go v1.10.0
@@ -29,7 +31,7 @@ github.com/aws/aws-lambda-go/lambda
 github.com/aws/aws-lambda-go/lambda/handlertrace
 github.com/aws/aws-lambda-go/lambda/messages
 github.com/aws/aws-lambda-go/lambdacontext
-# github.com/golang/protobuf v1.5.0
+# github.com/golang/protobuf v1.5.2
 github.com/golang/protobuf/proto
 # github.com/google/go-github v17.0.0+incompatible
 github.com/google/go-github/github
@@ -96,10 +98,6 @@ github.com/tidwall/pretty
 github.com/tidwall/sjson
 # github.com/whosonfirst/algnhsa v0.1.0
 github.com/whosonfirst/algnhsa
-# github.com/whosonfirst/go-bindata v0.1.0
-## explicit
-# github.com/whosonfirst/go-bindata-assetfs v1.0.1
-## explicit
 # github.com/whosonfirst/go-cache v0.5.0
 ## explicit
 github.com/whosonfirst/go-cache
@@ -118,12 +116,17 @@ github.com/whosonfirst/go-reader-github
 # github.com/whosonfirst/go-reader-http v0.2.2
 ## explicit
 github.com/whosonfirst/go-reader-http
-# github.com/whosonfirst/go-reader-whosonfirst-data v1.0.1
+# github.com/whosonfirst/go-reader-whosonfirst-data v1.1.0
 ## explicit
 github.com/whosonfirst/go-reader-whosonfirst-data
 # github.com/whosonfirst/go-sanitize v0.1.0
 ## explicit
 github.com/whosonfirst/go-sanitize
+# github.com/whosonfirst/go-whosonfirst-crawl v0.2.1
+github.com/whosonfirst/go-whosonfirst-crawl
+# github.com/whosonfirst/go-whosonfirst-findingaid v0.0.4
+github.com/whosonfirst/go-whosonfirst-findingaid
+github.com/whosonfirst/go-whosonfirst-findingaid/repo
 # github.com/whosonfirst/go-whosonfirst-flags v0.4.3
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
@@ -142,6 +145,10 @@ github.com/whosonfirst/go-whosonfirst-hash
 # github.com/whosonfirst/go-whosonfirst-image v0.0.1
 ## explicit
 github.com/whosonfirst/go-whosonfirst-image
+# github.com/whosonfirst/go-whosonfirst-iterate v1.1.2
+github.com/whosonfirst/go-whosonfirst-iterate/emitter
+github.com/whosonfirst/go-whosonfirst-iterate/filters
+github.com/whosonfirst/go-whosonfirst-iterate/iterator
 # github.com/whosonfirst/go-whosonfirst-placetypes v0.3.0
 github.com/whosonfirst/go-whosonfirst-placetypes
 github.com/whosonfirst/go-whosonfirst-placetypes/placetypes
@@ -169,11 +176,12 @@ github.com/whosonfirst/go-whosonfirst-uri
 github.com/whosonfirst/go-writer
 # github.com/whosonfirst/go-writer-featurecollection v0.0.2
 github.com/whosonfirst/go-writer-featurecollection
+# github.com/whosonfirst/walk v0.0.1
+github.com/whosonfirst/walk
 # github.com/whosonfirst/warning v0.1.1
 ## explicit
 github.com/whosonfirst/warning
-# golang.org/x/image v0.0.0-20210622092929-e6eecd499c2c
-## explicit
+# golang.org/x/image v0.0.0-20190802002840-cff245a6509b
 golang.org/x/image/colornames
 golang.org/x/image/math/fixed
 golang.org/x/image/vector
@@ -204,7 +212,7 @@ golang.org/x/text/internal/utf8internal
 golang.org/x/text/language
 golang.org/x/text/runes
 golang.org/x/text/transform
-# google.golang.org/appengine v1.6.6
+# google.golang.org/appengine v1.6.7
 google.golang.org/appengine/internal
 google.golang.org/appengine/internal/base
 google.golang.org/appengine/internal/datastore

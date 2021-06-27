@@ -7,7 +7,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"html/template"
-	"log"
+	_ "log"
 	"net/http"
 	"path/filepath"
 	"time"
@@ -74,8 +74,6 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (http.Handler, error) {
 
 		uri, err, _ := ParseURIFromRequest(req, r)
 
-		log.Println("WHAT", uri)
-		
 		if err != nil {
 
 			vars := ErrorVars{
