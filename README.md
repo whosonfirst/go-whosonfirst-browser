@@ -173,6 +173,14 @@ A responsive HTML table and map for a given WOF ID. For example:
 
 `http://localhost:8080/id/101736545`
 
+### (IIIF) navPlace
+
+Returns a WOF record as a GeoJSON `FeatureCollection` document. This enables WOF records to be included in [IIIF navPlace](https://preview.iiif.io/api/navplace_extension/api/extension/navplace/) records as "reference" objects. For example:
+
+![](docs/images/wof-browser-sfo-navplace.png)
+
+`http://localhost:8080/navplace/102527513`
+
 ### PNG
 
 A PNG-encoded representation of the geometry for a given WOF ID. For example:
