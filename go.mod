@@ -4,7 +4,8 @@ go 1.16
 
 require (
 	github.com/aaronland/go-http-bootstrap v0.1.0
-	github.com/aaronland/go-http-ping v1.0.0
+	github.com/aaronland/go-http-ping v1.0.0 // indirect
+	github.com/aaronland/go-http-ping/v2 v2.0.0
 	github.com/aaronland/go-http-rewrite v0.0.7
 	github.com/aaronland/go-http-sanitize v0.0.5
 	github.com/aaronland/go-http-server v0.0.7

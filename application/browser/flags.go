@@ -25,6 +25,7 @@ var enable_svg bool
 
 var enable_geojson bool
 var enable_geojsonld bool
+var enable_navplace bool
 var enable_spr bool
 var enable_select bool
 
@@ -45,6 +46,7 @@ var path_png string
 var path_svg string
 var path_geojson string
 var path_geojsonld string
+var path_navplace string
 var path_spr string
 var path_select string
 

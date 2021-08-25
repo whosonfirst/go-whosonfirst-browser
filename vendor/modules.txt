@@ -7,7 +7,9 @@ github.com/aaronland/go-http-leaflet
 github.com/aaronland/go-http-leaflet/static
 # github.com/aaronland/go-http-ping v1.0.0
 ## explicit
-github.com/aaronland/go-http-ping
+# github.com/aaronland/go-http-ping/v2 v2.0.0
+## explicit
+github.com/aaronland/go-http-ping/v2
 # github.com/aaronland/go-http-rewrite v0.0.7
 ## explicit
 github.com/aaronland/go-http-rewrite

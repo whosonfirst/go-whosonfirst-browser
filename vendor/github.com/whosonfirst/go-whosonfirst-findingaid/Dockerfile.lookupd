@@ -1,0 +1,19 @@
+FROM golang:1.16-alpine as builder
+
+RUN mkdir /build
+
+COPY . /build/go-whosonfirst-findingaid
+
+RUN apk update && apk upgrade \
+    && apk add make libc-dev gcc git \
+    && cd /build/go-whosonfirst-findingaid \
+    && go build -mod vendor -o /usr/local/bin/lookupd cmd/lookupd/main.go    
+
+FROM alpine:latest
+
+COPY --from=builder /usr/local/bin/lookupd /usr/local/bin/
+
+RUN apk update && apk upgrade \
+    && apk add ca-certificates
+
+ENTRYPOINT ["/usr/local/bin/lookupd"]

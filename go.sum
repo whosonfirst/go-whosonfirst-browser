@@ -94,6 +94,8 @@ github.com/aaronland/go-http-leaflet v0.1.0 h1:F9ofV2yRZdP9NCSW8GXfDNNbiQD5na0oy
 github.com/aaronland/go-http-leaflet v0.1.0/go.mod h1:M6Brt/UMWXsT+3qK5idwxr3y6kELHHi7OhgoiecMt6U=
 github.com/aaronland/go-http-ping v1.0.0 h1:ayR9n9YNnuGOhkaZhcy5Z/qSUOo0NUCu6gJ428omyXs=
 github.com/aaronland/go-http-ping v1.0.0/go.mod h1:zU9CSFLh2XzPlrFgoyCysNED+DoLRioCKaa2Kl+O6DA=
+github.com/aaronland/go-http-ping/v2 v2.0.0 h1:PO/CfpNwxPSMqEuDAA+2/IzSoArAa/0deSHCmCuvfiA=
+github.com/aaronland/go-http-ping/v2 v2.0.0/go.mod h1:fXKuw0WvfXMyt09ibXILN4LzEIhCnxoAhmZqoC5iBm8=
 github.com/aaronland/go-http-rewrite v0.0.3/go.mod h1:g62jjXpsArD0lzJLs9bVLR9Locdt3f4OmqFkkJL2rQU=
 github.com/aaronland/go-http-rewrite v0.0.4 h1:lI8cDF/nINjuSPrYpwvlJLa1cC32h1nvmBwRRHs9sow=
 github.com/aaronland/go-http-rewrite v0.0.4/go.mod h1:g62jjXpsArD0lzJLs9bVLR9Locdt3f4OmqFkkJL2rQU=

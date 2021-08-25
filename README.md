@@ -74,6 +74,8 @@ $> ./bin/whosonfirst-browser -h
     	Enable the 'png' and 'svg' output handlers.
   -enable-html
     	Enable the 'html' (or human-friendly) output handlers. (default true)
+  -enable-navplace
+    	Enable the IIIF 'navPlace' output handler. (default true)	
   -enable-png
     	Enable the 'png' output handler.
   -enable-search
@@ -102,6 +104,8 @@ $> ./bin/whosonfirst-browser -h
     	The path that GeoJSON-LD requests should be served from. (default "/geojson-ld/")
   -path-id string
     	The that Who's On First documents should be served from. (default "/id/")
+  -path-navplace string
+    	The path that IIIF navPlace requests should be served from. (default "/navplace/")
   -path-png string
     	The path that PNG requests should be served from. (default "/png/")
   -path-search-api string
