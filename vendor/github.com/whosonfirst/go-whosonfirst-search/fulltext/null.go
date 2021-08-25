@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/filter"	
-	wof_geojson "github.com/whosonfirst/go-whosonfirst-geojson-v2"	
 )
 
 type NullFullTextDatabase struct {
@@ -27,7 +26,7 @@ func (ftdb *NullFullTextDatabase) Close(ctx context.Context) error {
 	return nil
 }
 
-func (ftdb *NullFullTextDatabase) IndexFeature(ctx context.Context, f wof_geojson.Feature) error {
+func (ftdb *NullFullTextDatabase) IndexFeature(ctx context.Context, f []byte) error {
 	return nil
 }
 

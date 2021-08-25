@@ -112,6 +112,28 @@ func (r *WhosOnFirstDataReader) Read(ctx context.Context, uri string) (io.ReadSe
 		// pass
 	}
 
+	gh_r, err := r.getReader(ctx, uri)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return gh_r.Read(ctx, uri)
+}
+
+func (r *WhosOnFirstDataReader) ReaderURI(ctx context.Context, uri string) string {
+
+	gh_r, err := r.getReader(ctx, uri)
+
+	if err != nil {
+		return "" // nil, fmt.Errorf("Failed to create reader for '%s' (%s), %w", uri, repo_name, err)
+	}
+
+	return gh_r.ReaderURI(ctx, uri)
+}
+
+func (r *WhosOnFirstDataReader) getReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
+
 	repo_name := r.repo
 
 	if repo_name == "" {
@@ -125,16 +147,16 @@ func (r *WhosOnFirstDataReader) Read(ctx context.Context, uri string) (io.ReadSe
 		repo_name = this_repo
 	}
 
-	gh_r, err := r.getReader(ctx, repo_name)
+	gh_r, err := r.getReaderWithRepo(ctx, repo_name)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create reader for '%s' (%s), %w", uri, repo_name, err)
 	}
 
-	return gh_r.Read(ctx, uri)
+	return gh_r, nil
 }
 
-func (r *WhosOnFirstDataReader) getReader(ctx context.Context, repo string) (wof_reader.Reader, error) {
+func (r *WhosOnFirstDataReader) getReaderWithRepo(ctx context.Context, repo string) (wof_reader.Reader, error) {
 
 	v, ok := r.readers.Load(repo)
 

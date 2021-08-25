@@ -19,32 +19,6 @@ type Reader interface {
 	ReaderURI(context.Context, string) string
 }
 
-func NewService(ctx context.Context, uri string) (Reader, error) {
-
-	err := ensureReaderRoster()
-
-	if err != nil {
-		return nil, err
-	}
-
-	parsed, err := url.Parse(uri)
-
-	if err != nil {
-		return nil, err
-	}
-
-	scheme := parsed.Scheme
-
-	i, err := reader_roster.Driver(ctx, scheme)
-
-	if err != nil {
-		return nil, err
-	}
-
-	init_func := i.(ReaderInitializationFunc)
-	return init_func(ctx, uri)
-}
-
 func RegisterReader(ctx context.Context, scheme string, init_func ReaderInitializationFunc) error {
 
 	err := ensureReaderRoster()

@@ -14,10 +14,10 @@ github.com/aaronland/go-http-rewrite
 # github.com/aaronland/go-http-sanitize v0.0.5
 ## explicit
 github.com/aaronland/go-http-sanitize
-# github.com/aaronland/go-http-server v0.0.6
+# github.com/aaronland/go-http-server v0.0.7
 ## explicit
 github.com/aaronland/go-http-server
-# github.com/aaronland/go-http-tangramjs v0.1.0
+# github.com/aaronland/go-http-tangramjs v0.1.1
 ## explicit
 github.com/aaronland/go-http-tangramjs
 github.com/aaronland/go-http-tangramjs/static
@@ -87,7 +87,7 @@ github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
 ## explicit
 github.com/srwiley/rasterx
-# github.com/tidwall/gjson v1.8.0
+# github.com/tidwall/gjson v1.8.1
 ## explicit
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.3
@@ -105,7 +105,7 @@ github.com/whosonfirst/go-cache
 github.com/whosonfirst/go-geojson-svg
 # github.com/whosonfirst/go-ioutil v1.0.0
 github.com/whosonfirst/go-ioutil
-# github.com/whosonfirst/go-reader v0.5.0
+# github.com/whosonfirst/go-reader v0.8.1
 ## explicit
 github.com/whosonfirst/go-reader
 # github.com/whosonfirst/go-reader-cachereader v0.2.2
@@ -116,7 +116,7 @@ github.com/whosonfirst/go-reader-github
 # github.com/whosonfirst/go-reader-http v0.2.2
 ## explicit
 github.com/whosonfirst/go-reader-http
-# github.com/whosonfirst/go-reader-whosonfirst-data v1.1.0
+# github.com/whosonfirst/go-reader-whosonfirst-data v1.2.2
 ## explicit
 github.com/whosonfirst/go-reader-whosonfirst-data
 # github.com/whosonfirst/go-sanitize v0.1.0
@@ -124,7 +124,7 @@ github.com/whosonfirst/go-reader-whosonfirst-data
 github.com/whosonfirst/go-sanitize
 # github.com/whosonfirst/go-whosonfirst-crawl v0.2.1
 github.com/whosonfirst/go-whosonfirst-crawl
-# github.com/whosonfirst/go-whosonfirst-findingaid v0.0.4
+# github.com/whosonfirst/go-whosonfirst-findingaid v0.0.7
 github.com/whosonfirst/go-whosonfirst-findingaid
 github.com/whosonfirst/go-whosonfirst-findingaid/repo
 # github.com/whosonfirst/go-whosonfirst-flags v0.4.3
@@ -145,14 +145,14 @@ github.com/whosonfirst/go-whosonfirst-hash
 # github.com/whosonfirst/go-whosonfirst-image v0.0.1
 ## explicit
 github.com/whosonfirst/go-whosonfirst-image
-# github.com/whosonfirst/go-whosonfirst-iterate v1.1.2
+# github.com/whosonfirst/go-whosonfirst-iterate v1.2.0
 github.com/whosonfirst/go-whosonfirst-iterate/emitter
 github.com/whosonfirst/go-whosonfirst-iterate/filters
 github.com/whosonfirst/go-whosonfirst-iterate/iterator
 # github.com/whosonfirst/go-whosonfirst-placetypes v0.3.0
 github.com/whosonfirst/go-whosonfirst-placetypes
 github.com/whosonfirst/go-whosonfirst-placetypes/placetypes
-# github.com/whosonfirst/go-whosonfirst-search v0.0.2
+# github.com/whosonfirst/go-whosonfirst-search v0.0.4
 ## explicit
 github.com/whosonfirst/go-whosonfirst-search/filter
 github.com/whosonfirst/go-whosonfirst-search/fulltext
@@ -169,7 +169,7 @@ github.com/whosonfirst/go-whosonfirst-spr/v2/util
 # github.com/whosonfirst/go-whosonfirst-svg v0.0.4
 ## explicit
 github.com/whosonfirst/go-whosonfirst-svg
-# github.com/whosonfirst/go-whosonfirst-uri v1.0.1
+# github.com/whosonfirst/go-whosonfirst-uri v1.1.0
 ## explicit
 github.com/whosonfirst/go-whosonfirst-uri
 # github.com/whosonfirst/go-writer v0.4.1

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-ioutil"
 	"github.com/whosonfirst/go-whosonfirst-findingaid"
@@ -43,28 +44,31 @@ func NewIndexer(ctx context.Context, uri string) (findingaid.Indexer, error) {
 	q := u.Query()
 
 	cache_uri := q.Get("cache")
-	iterator_uri := q.Get("indexer")
+	iterator_uri := q.Get("iterator")
 
 	if cache_uri == "" {
-		return nil, errors.New("Missing cache URI")
-	}
-
-	_, err = url.Parse(cache_uri)
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = url.Parse(iterator_uri)
-
-	if err != nil {
-		return nil, err
+		return nil, errors.New("Missing ?cache= parameter.")
 	}
 
 	c, err := cache.NewCache(ctx, cache_uri)
 
 	if err != nil {
 		return nil, err
+	}
+
+	if iterator_uri == "" {
+		return nil, errors.New("Missing ?iterator= parameter.")
+	}
+
+	// We defer creating the iterator until the 'IndexURIs' method is
+	// invoked because the iterator callback has a reference to this
+	// (findingaid indexer) instance which hasn't been created at this
+	// point.
+
+	_, err = url.Parse(iterator_uri)
+
+	if err != nil {
+		return nil, fmt.Errorf("Invalid ?iterator= parameter, %w", err)
 	}
 
 	fa := &Indexer{
@@ -77,10 +81,6 @@ func NewIndexer(ctx context.Context, uri string) (findingaid.Indexer, error) {
 
 // Index will index records defined by 'sources...' in the finding aid, using the whosonfirst/go-whosonfirst-iterate package.
 func (fa *Indexer) IndexURIs(ctx context.Context, sources ...string) error {
-
-	if fa.iterator_uri == "" {
-		return errors.New("Finding aid was not created with an indexer URI.")
-	}
 
 	cb := func(ctx context.Context, fh io.ReadSeeker, args ...interface{}) error {
 

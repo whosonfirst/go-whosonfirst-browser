@@ -4,11 +4,11 @@ There are many interfaces for reading files. This one is ours. It returns `io.Re
 
 _This package supersedes the [go-whosonfirst-readwrite](https://github.com/whosonfirst/go-whosonfirst-readwrite) package._
 
-## Important
+## Documentation
 
-There is a known bug where creating two different `Reader` instances with the same scheme but different details does not work as expected.
+[![Go Reference](https://pkg.go.dev/badge/github.com/whosonfirst/go-reader.svg)](https://pkg.go.dev/github.com/whosonfirst/go-reader)
 
-## Example
+### Example
 
 Readers are instantiated with the `reader.NewReader` method which takes as its arguments a `context.Context` instance and a URI string. The URI's scheme represents the type of reader it implements and the remaining (URI) properties are used by that reader type to instantiate itself.
 
@@ -26,14 +26,12 @@ import (
 
 func main() {
 	ctx := context.Background()
-	r, _ := reader.NewReader(ctx, "fs:///usr/local/data")
+	r, _ := reader.NewReader(ctx, "file:///usr/local/data")
 	fh, _ := r.Read(ctx, "example.txt")
 	defer fh.Close()
 	io.Copy(os.Stdout, fh)
 }
 ```
-
-Note the use of the `fs://` scheme rather than the more conventional `file://`. This is deliberate so as not to overlap with the [Go Cloud](https://gocloud.dev/howto/blob/) `Blob` package's file handler.
 
 There is also a handy "null" reader in case you need a "pretend" reader that doesn't actually do anything:
 
@@ -62,13 +60,10 @@ func main() {
 
 ```
 type Reader interface {
-	Open(context.Context, string) error
 	Read(context.Context, string) (io.ReadSeekCloser, error)
 	ReaderURI(context.Context, string) string
 }
 ```
-
-Should this interface have a `Close()` method? Maybe. We'll see.
 
 ## Custom readers
 
@@ -86,12 +81,20 @@ import (
 	"context"
 	"errors"
 	wof_reader "github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-ioutil"
 	"io"
+	_ "log"
 	"net/http"
 	"net/url"
 	"path/filepath"
 	"time"
 )
+
+type HTTPReader struct {
+	wof_reader.Reader
+	url      *url.URL
+	throttle <-chan time.Time
+}
 
 func init() {
 
@@ -99,12 +102,12 @@ func init() {
 
 	schemes := []string{
 		"http",
-		"https",			
+		"https",
 	}
 
 	for _, s := range schemes {
-	
-		err := wof_reader.RegisterReader(ctx, s, initializeHTTPReader)	
+
+		err := wof_reader.RegisterReader(ctx, s, NewHTTPReader)
 
 		if err != nil {
 			panic(err)
@@ -112,46 +115,23 @@ func init() {
 	}
 }
 
-func initializeHTTPReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
+func NewHTTPReader(ctx context.Context, uri string) (wof_reader.Reader, error) {
 
-	r := NewHTTPReader()
-	err := r.Open(ctx, uri)
+	u, err := url.Parse(uri)
 
 	if err != nil {
 		return nil, err
 	}
-
-	return r, nil
-}
-
-type HTTPReader struct {
-	wof_reader.Reader
-	url *url.URL
-	throttle <-chan time.Time
-}
-
-func NewHTTPReader() wof_reader.Reader {
 
 	rate := time.Second / 3
 	throttle := time.Tick(rate)
 
 	r := HTTPReader{
 		throttle: throttle,
+		url:      u,
 	}
 
-	return &r
-}
-
-func (r *HTTPReader) Open(ctx context.Context, uri string) error {
-
-	u, err := url.Parse(uri)
-
-	if err != nil {
-		return err
-	}
-
-	r.url = u
-	return nil
+	return &r, nil
 }
 
 func (r *HTTPReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser, error) {
@@ -160,7 +140,7 @@ func (r *HTTPReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser, e
 
 	u, _ := url.Parse(r.url.String())
 	u.Path = filepath.Join(u.Path, uri)
-	
+
 	url := u.String()
 
 	rsp, err := http.Get(url)
@@ -173,7 +153,17 @@ func (r *HTTPReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser, e
 		return nil, errors.New(rsp.Status)
 	}
 
-	return rsp.Body, nil
+	fh, err := ioutil.NewReadSeekCloser(rsp.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return fh, nil
+}
+
+func (r *HTTPReader) ReaderURI(ctx context.Context, uri string) string {
+	return uri
 }
 ```
 
@@ -284,7 +274,7 @@ func main() {
 
 * https://github.com/whosonfirst/go-reader-http
 
-### fs://
+### file://
 
 Read files from a local filesystem.
 
@@ -296,8 +286,14 @@ import (
 
 func main() {
 	ctx := context.Background()
-	r, _ := reader.NewReader(ctx, "fs://{PATH_TO_DIRECTORY}")
+	r, _ := reader.NewReader(ctx, "file://{PATH_TO_DIRECTORY}")
 }
+```
+
+If you are importing the `go-reader-blob` package and using the GoCloud's [fileblob](https://gocloud.dev/howto/blob/#local) driver then instantiating the `file://` scheme will fail since it will have already been registered. You can work around this by using the `fs://` scheme. For example:
+
+```
+r, _ := reader.NewReader(ctx, "fs://{PATH_TO_DIRECTORY}")
 ```
 
 * https://github.com/whosonfirst/go-reader
@@ -317,3 +313,36 @@ func main() {
 	r, _ := reader.NewReader(ctx, "null://")
 }
 ```
+
+## See also
+
+* https://github.com/whosonfirst/go-writer
+
+### stdin://
+
+Read "files" from `STDIN`
+
+```
+import (
+	"context"
+	"github.com/whosonfirst/go-reader"
+)
+
+func main() {
+	ctx := context.Background()
+	r, _ := reader.NewReader(ctx, "stdin://")
+}
+```
+
+And then to use, something like:
+
+```
+> cat README.md | ./bin/read -reader-uri stdin:// - | wc -l
+     339
+```
+
+Note the use of `-` for a URI. This is the convention (when reading from STDIN) but it can be whatever you want it to be.
+
+## See also
+
+* https://github.com/whosonfirst/go-writer

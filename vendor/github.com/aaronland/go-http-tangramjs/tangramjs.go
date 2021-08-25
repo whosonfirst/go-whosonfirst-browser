@@ -13,7 +13,7 @@ import (
 )
 
 // NEXTZEN_MVT_ENDPOINT is the default endpoint for Nextzen vector tiles
-const NEXTZEN_MVT_ENDPOINT string = "https://{s}.tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt"
+const NEXTZEN_MVT_ENDPOINT string = "https://tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt"
 
 // By default the go-http-tangramjs package will also include and reference Leaflet.js resources using the aaronland/go-http-leaflet package. If you want or need to disable this behaviour set this variable to false.
 var APPEND_LEAFLET_RESOURCES = true

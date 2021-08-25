@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/aaronland/go-roster"
-	wof_geojson "github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-search/filter"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"net/url"
@@ -13,7 +12,7 @@ import (
 )
 
 type FullTextDatabase interface {
-	IndexFeature(context.Context, wof_geojson.Feature) error
+	IndexFeature(context.Context, []byte) error
 	QueryString(context.Context, string, ...filter.Filter) (spr.StandardPlacesResults, error)
 	Close(context.Context) error
 }

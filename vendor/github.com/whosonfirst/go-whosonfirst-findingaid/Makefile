@@ -15,3 +15,6 @@ lambda-server:
 	GOOS=linux go build -mod vendor -o main cmd/lookupd/main.go
 	zip lookupd.zip main
 	rm -f main
+
+docker-lookupd:
+	docker build -f Dockerfile.lookupd -t findingaid-lookupd .		
