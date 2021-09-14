@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/aaronland/go-http-bootstrap v0.1.0
-	github.com/aaronland/go-http-ping v1.0.0 // indirect
 	github.com/aaronland/go-http-ping/v2 v2.0.0
 	github.com/aaronland/go-http-rewrite v0.0.7
 	github.com/aaronland/go-http-sanitize v0.0.5
@@ -15,9 +14,9 @@ require (
 	github.com/sfomuseum/go-http-tilezen v0.0.6
 	github.com/srwiley/oksvg v0.0.0-20210519022825-9fc0c575d5fe // indirect
 	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780 // indirect
-	github.com/tidwall/gjson v1.8.1
+	github.com/tidwall/gjson v1.9.0
 	github.com/whosonfirst/go-cache v0.5.0
-	github.com/whosonfirst/go-reader v0.8.1
+	github.com/whosonfirst/go-reader v0.9.0
 	github.com/whosonfirst/go-reader-cachereader v0.2.2
 	github.com/whosonfirst/go-reader-http v0.2.2
 	github.com/whosonfirst/go-reader-whosonfirst-data v1.2.2

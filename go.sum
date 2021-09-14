@@ -440,6 +440,8 @@ github.com/tidwall/gjson v1.8.0 h1:Qt+orfosKn0rbNTZqHYDqBrmm3UDA4KRkv70fDzG+PQ=
 github.com/tidwall/gjson v1.8.0/go.mod h1:5/xDoumyyDNerp2U36lyolv46b3uF/9Bu6OfyQ9GImk=
 github.com/tidwall/gjson v1.8.1 h1:8j5EE9Hrh3l9Od1OIEDAb7IpezNA20UdRngNAj5N0WU=
 github.com/tidwall/gjson v1.8.1/go.mod h1:5/xDoumyyDNerp2U36lyolv46b3uF/9Bu6OfyQ9GImk=
+github.com/tidwall/gjson v1.9.0 h1:+Od7AE26jAaMgVC31cQV/Ope5iKXulNMflrlB7k+F9E=
+github.com/tidwall/gjson v1.9.0/go.mod h1:5/xDoumyyDNerp2U36lyolv46b3uF/9Bu6OfyQ9GImk=
 github.com/tidwall/match v1.0.1 h1:PnKP62LPNxHKTwvHHZZzdOAOCtsJTjo6dZLCwpKm5xc=
 github.com/tidwall/match v1.0.1/go.mod h1:LujAq0jyVjBy028G1WhWfIzbpQfMO8bBZ6Tyb0+pL9E=
 github.com/tidwall/match v1.0.3 h1:FQUVvBImDutD8wJLN6c5eMzWtjgONK9MwIBCOrUJKeE=
@@ -495,6 +497,8 @@ github.com/whosonfirst/go-reader v0.5.0/go.mod h1:4ou/wZUss2CDZp27QK5ySDc8p98GVW
 github.com/whosonfirst/go-reader v0.7.0/go.mod h1:6byB+UfZFNLYFqgsC/EKxTnKY8ahNgGHhUJsTrv1Jig=
 github.com/whosonfirst/go-reader v0.8.1 h1:Z8YKT6Altu0lBnIuaO88S+dZWGooyfxJjFi5HyKmeH0=
 github.com/whosonfirst/go-reader v0.8.1/go.mod h1:6byB+UfZFNLYFqgsC/EKxTnKY8ahNgGHhUJsTrv1Jig=
+github.com/whosonfirst/go-reader v0.9.0 h1:u5PITZiAkPrpmZQHlkASdBEzF1pwby5vtgAmCEESWu4=
+github.com/whosonfirst/go-reader v0.9.0/go.mod h1:6byB+UfZFNLYFqgsC/EKxTnKY8ahNgGHhUJsTrv1Jig=
 github.com/whosonfirst/go-reader-cachereader v0.1.0 h1:rSkYd4jS2FhFboCUyHt7UH9JOOfA2d76V3b0b7q2050=
 github.com/whosonfirst/go-reader-cachereader v0.1.0/go.mod h1:bKhlrOSHEv7kG5bJIbLw3oxJlGsDvRDYzuTDLBMw2x8=
 github.com/whosonfirst/go-reader-cachereader v0.2.1 h1:tf2Y0Ao0eLGxvIbJ8ydFX1FQFqYW/xQ9SCbxnN3Z5uQ=

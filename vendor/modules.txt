@@ -5,8 +5,6 @@ github.com/aaronland/go-http-bootstrap/static
 # github.com/aaronland/go-http-leaflet v0.1.0
 github.com/aaronland/go-http-leaflet
 github.com/aaronland/go-http-leaflet/static
-# github.com/aaronland/go-http-ping v1.0.0
-## explicit
 # github.com/aaronland/go-http-ping/v2 v2.0.0
 ## explicit
 github.com/aaronland/go-http-ping/v2
@@ -89,7 +87,7 @@ github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
 ## explicit
 github.com/srwiley/rasterx
-# github.com/tidwall/gjson v1.8.1
+# github.com/tidwall/gjson v1.9.0
 ## explicit
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.3
@@ -107,7 +105,7 @@ github.com/whosonfirst/go-cache
 github.com/whosonfirst/go-geojson-svg
 # github.com/whosonfirst/go-ioutil v1.0.0
 github.com/whosonfirst/go-ioutil
-# github.com/whosonfirst/go-reader v0.8.1
+# github.com/whosonfirst/go-reader v0.9.0
 ## explicit
 github.com/whosonfirst/go-reader
 # github.com/whosonfirst/go-reader-cachereader v0.2.2

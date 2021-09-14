@@ -24,11 +24,6 @@ func init() {
 		panic(err)
 	}
 
-	err = RegisterReader(ctx, "file", NewFileReader)
-
-	if err != nil {
-		panic(err)
-	}
 }
 
 func NewFileReader(ctx context.Context, uri string) (Reader, error) {
