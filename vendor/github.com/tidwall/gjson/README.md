@@ -128,8 +128,7 @@ result.Str            // holds the string
 result.Num            // holds the float64 number
 result.Raw            // holds the raw json
 result.Index          // index of raw value in original json, zero means index unknown
-result.Indexes        // indexes of all the elements that match on a `#(...)#` query
-
+result.Indexes        // indexes of all the elements that match on a path containing the '#' query character.
 ```
 
 There are a variety of handy functions that work on a result:
@@ -201,6 +200,8 @@ There are currently the following built-in modifiers:
 - `@valid`: Ensure the json document is valid.
 - `@flatten`: Flattens an array.
 - `@join`: Joins multiple objects into a single object.
+- `@keys`: Returns an array of keys for an object.
+- `@values`: Returns an array of values for an object.
 
 ### Modifier arguments
 

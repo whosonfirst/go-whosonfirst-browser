@@ -11,7 +11,7 @@ github.com/aaronland/go-http-ping/v2
 # github.com/aaronland/go-http-rewrite v0.0.7
 ## explicit
 github.com/aaronland/go-http-rewrite
-# github.com/aaronland/go-http-sanitize v0.0.5
+# github.com/aaronland/go-http-sanitize v0.0.6
 ## explicit
 github.com/aaronland/go-http-sanitize
 # github.com/aaronland/go-http-server v0.0.7
@@ -71,7 +71,7 @@ github.com/sfomuseum/go-edtf/tests
 # github.com/sfomuseum/go-flags v0.8.2
 ## explicit
 github.com/sfomuseum/go-flags/flagset
-# github.com/sfomuseum/go-geojsonld v0.0.1
+# github.com/sfomuseum/go-geojsonld v1.0.0
 ## explicit
 github.com/sfomuseum/go-geojsonld
 # github.com/sfomuseum/go-http-tilezen v0.0.6
@@ -87,14 +87,14 @@ github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780
 ## explicit
 github.com/srwiley/rasterx
-# github.com/tidwall/gjson v1.9.0
+# github.com/tidwall/gjson v1.10.0
 ## explicit
 github.com/tidwall/gjson
-# github.com/tidwall/match v1.0.3
+# github.com/tidwall/match v1.1.1
 github.com/tidwall/match
 # github.com/tidwall/pretty v1.2.0
 github.com/tidwall/pretty
-# github.com/tidwall/sjson v1.1.7
+# github.com/tidwall/sjson v1.2.2
 github.com/tidwall/sjson
 # github.com/whosonfirst/algnhsa v0.1.0
 github.com/whosonfirst/algnhsa

@@ -18,7 +18,11 @@ func GetInt64(req *go_http.Request, param string) (int64, error) {
 	str_value, err := GetString(req, param)
 
 	if err != nil {
-		return -1, err
+		return 0, err
+	}
+
+	if str_value == "" {
+		return 0, nil
 	}
 
 	return strconv.ParseInt(str_value, 10, 64)
