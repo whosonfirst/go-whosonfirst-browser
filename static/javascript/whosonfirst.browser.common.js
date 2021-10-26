@@ -12,12 +12,7 @@ whosonfirst.browser.common = (function(){
 	    var api_key = document.body.getAttribute("data-nextzen-api-key");
 	    var style_url = document.body.getAttribute("data-nextzen-style-url");
 	    var tile_url = document.body.getAttribute("data-nextzen-tile-url");    
-	    
-	    if (! api_key){
-		console.log("Missing API key");
-		return;
-	    }
-	    
+	    	    
 	    if (! style_url){
 		console.log("Missing style URL");
 		return;
@@ -83,12 +78,12 @@ whosonfirst.browser.common = (function(){
 	    };
 	    
 	    map = whosonfirst.browser.maps.getMap(map_el, map_args);
-	    
+
 	    if (! map){
 		console.log("Failed to get map");
 		return false;
 	    }
-	    
+
 	    if ((minlat == maxlat) && (minlon == maxlon)){
 		map.setView(sw, 15);
 	    }

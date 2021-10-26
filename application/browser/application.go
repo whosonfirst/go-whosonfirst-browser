@@ -14,14 +14,14 @@ import (
 	"github.com/aaronland/go-http-tangramjs"
 	"github.com/sfomuseum/go-flags/flagset"
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
+	tiles_http "github.com/tilezen/go-tilepacks/http"
+	"github.com/tilezen/go-tilepacks/tilepack"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-browser/v3/application"
 	"github.com/whosonfirst/go-whosonfirst-browser/v3/templates/html"
 	"github.com/whosonfirst/go-whosonfirst-browser/v3/www"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
-	tiles_http "github.com/tilezen/go-tilepacks/http"
-	"github.com/tilezen/go-tilepacks/tilepack"	
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -36,7 +36,7 @@ import (
 
 // type BrowserApplication implements the application.Application and provides a web-based application for browsing Who's On First records in different formats.
 type BrowserApplication struct {
-	application.Application	
+	application.Application
 }
 
 // NewBrowserApplication will return a new application.Application instance implementing the BrowserApplication application.
@@ -62,7 +62,7 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 
 	fs.StringVar(&tilepack_db, "nextzen-tilepack-database", "", "The path to a valid MBTiles database (tilepack) containing Nextzen MVT tiles.")
 	fs.StringVar(&tilepack_uri, "nextzen-tilepack-uri", "/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt", "The relative URI to serve Nextzen MVT tiles from a MBTiles database (tilepack).")
-	
+
 	fs.BoolVar(&proxy_tiles, "proxy-tiles", false, "Proxy (and cache) Nextzen tiles.")
 	fs.StringVar(&proxy_tiles_url, "proxy-tiles-url", "/tiles/", "The URL (a relative path) for proxied tiles.")
 	fs.StringVar(&proxy_tiles_cache, "proxy-tiles-cache", "gocache://", "A valid tile proxy DSN string.")
@@ -77,7 +77,7 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 
 	fs.BoolVar(&enable_geojson, "enable-geojson", true, "Enable the 'geojson' output handler.")
 	fs.BoolVar(&enable_geojsonld, "enable-geojson-ld", true, "Enable the 'geojson-ld' output handler.")
-	fs.BoolVar(&enable_navplace, "enable-navplace", true, "Enable the IIIF 'navPlace' output handler.")	
+	fs.BoolVar(&enable_navplace, "enable-navplace", true, "Enable the IIIF 'navPlace' output handler.")
 	fs.BoolVar(&enable_spr, "enable-spr", true, "Enable the 'spr' (or \"standard places response\") output handler.")
 	fs.BoolVar(&enable_select, "enable-select", false, "Enable the 'select' output handler.")
 	fs.StringVar(&select_pattern, "select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
@@ -94,7 +94,7 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 	fs.StringVar(&path_svg, "path-svg", "/svg/", "The path that SVG requests should be served from.")
 	fs.StringVar(&path_geojson, "path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
 	fs.StringVar(&path_geojsonld, "path-geojson-ld", "/geojson-ld/", "The path that GeoJSON-LD requests should be served from.")
-	fs.StringVar(&path_navplace, "path-navplace", "/navplace/", "The path that IIIF navPlace requests should be served from.")	
+	fs.StringVar(&path_navplace, "path-navplace", "/navplace/", "The path that IIIF navPlace requests should be served from.")
 	fs.StringVar(&path_spr, "path-spr", "/spr/", "The path that SPR requests should be served from.")
 	fs.StringVar(&path_select, "path-select", "/select/", "The path that 'select' requests should be served from.")
 
@@ -148,7 +148,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	if enable_data {
 		enable_geojson = true
 		enable_geojsonld = true
-		enable_navplace = true		
+		enable_navplace = true
 		enable_spr = true
 		enable_select = true
 	}
@@ -305,7 +305,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 		mux.Handle(path_navplace, navplace_handler)
 	}
-	
+
 	if enable_select {
 
 		if select_pattern == "" {
@@ -433,7 +433,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		if tilepack_db != "" {
 			tangramjs_opts.NextzenOptions.TileURL = tilepack_uri
 		}
-		
+
 		endpoints := &www.Endpoints{
 			Data:  path_geojson,
 			Png:   path_png,
@@ -529,15 +529,15 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 			if err != nil {
 				return fmt.Errorf("Failed to load tilepack, %v", err)
 			}
-			
+
 			u := strings.TrimLeft(tilepack_uri, "/")
 			p := strings.Split(u, "/")
 			path_tiles := fmt.Sprintf("/%s/", p[0])
-			
+
 			tiles_handler := tiles_http.MbtilesHandler(tiles_reader)
 			mux.Handle(path_tiles, tiles_handler)
 		}
-		
+
 	}
 
 	s, err := server.NewServer(ctx, server_uri)

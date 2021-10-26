@@ -15,10 +15,6 @@ whosonfirst.browser.maps = (function(){
 		args = {};
 	    }
 
-	    if (! args["api_key"]){
-		return null;
-	    }
-
 	    var api_key = args["api_key"];
 	    
 	    var map_id = map_el.getAttribute("id");
@@ -31,7 +27,7 @@ whosonfirst.browser.maps = (function(){
 		return maps[map_id];
 	    }
 	    
-	    var tangram_opts = self.getTangramOptions(args);	   
+	    var tangram_opts = self.getTangramOptions(args);
 	    var tangramLayer = Tangram.leafletLayer(tangram_opts);
 
 	    var map = L.map("map");	    
@@ -47,10 +43,6 @@ whosonfirst.browser.maps = (function(){
 
 	    if (! args){
 		args = {};
-	    }
-
-	    if (! args["api_key"]){
-		return null;
 	    }
 
 	    /*
