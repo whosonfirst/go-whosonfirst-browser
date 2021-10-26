@@ -16,6 +16,9 @@ var proxy_tiles_url string
 var proxy_tiles_cache string
 var proxy_tiles_timeout int
 
+var tilepack_db string
+var tilepack_uri string
+
 var enable_all bool
 var enable_graphics bool
 var enable_data bool

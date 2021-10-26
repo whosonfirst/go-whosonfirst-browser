@@ -63,7 +63,7 @@ $> ./bin/whosonfirst-browser -h
   -cache-source string
     	A valid go-cache Cache URI string. (default "gocache://")
   -enable-all
-    	Enable all the available output handlers.
+    	Enable all the available output handlers EXCEPT the search handlers which need to be explicitly enable using the -enable-search* flags.
   -enable-data
     	Enable the 'geojson' and 'spr' and 'select' output handlers.
   -enable-geojson
@@ -98,6 +98,10 @@ $> ./bin/whosonfirst-browser -h
     	A valid Tangram scene file URL. (default "/tangram/refill-style.zip")
   -nextzen-tile-url string
     	A valid Nextzen MVT tile URL. (default "https://{s}.tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
+  -nextzen-tilepack-database string
+    	The path to a valid MBTiles database (tilepack) containing Nextzen MVT tiles.
+  -nextzen-tilepack-uri string
+    	The relative URI to serve Nextzen MVT tiles from a MBTiles database (tilepack). (default "/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
   -path-geojson string
     	The path that GeoJSON requests should be served from. (default "/geojson/")
   -path-geojson-ld string

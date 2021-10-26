@@ -20,6 +20,8 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v3/templates/html"
 	"github.com/whosonfirst/go-whosonfirst-browser/v3/www"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
+	tiles_http "github.com/tilezen/go-tilepacks/http"
+	"github.com/tilezen/go-tilepacks/tilepack"	
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -32,10 +34,12 @@ import (
 	"time"
 )
 
+// type BrowserApplication implements the application.Application and provides a web-based application for browsing Who's On First records in different formats.
 type BrowserApplication struct {
-	application.Application
+	application.Application	
 }
 
+// NewBrowserApplication will return a new application.Application instance implementing the BrowserApplication application.
 func NewBrowserApplication(ctx context.Context) (application.Application, error) {
 	app := &BrowserApplication{}
 	return app, nil
@@ -56,12 +60,15 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 	fs.StringVar(&nextzen_style_url, "nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
 	fs.StringVar(&nextzen_tile_url, "nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
 
+	fs.StringVar(&tilepack_db, "nextzen-tilepack-database", "", "The path to a valid MBTiles database (tilepack) containing Nextzen MVT tiles.")
+	fs.StringVar(&tilepack_uri, "nextzen-tilepack-uri", "/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt", "The relative URI to serve Nextzen MVT tiles from a MBTiles database (tilepack).")
+	
 	fs.BoolVar(&proxy_tiles, "proxy-tiles", false, "Proxy (and cache) Nextzen tiles.")
 	fs.StringVar(&proxy_tiles_url, "proxy-tiles-url", "/tiles/", "The URL (a relative path) for proxied tiles.")
 	fs.StringVar(&proxy_tiles_cache, "proxy-tiles-cache", "gocache://", "A valid tile proxy DSN string.")
 	fs.IntVar(&proxy_tiles_timeout, "proxy-tiles-timeout", 30, "The maximum number of seconds to allow for fetching a tile from the proxy.")
 
-	fs.BoolVar(&enable_all, "enable-all", false, "Enable all the available output handlers.")
+	fs.BoolVar(&enable_all, "enable-all", false, "Enable all the available output handlers EXCEPT the search handlers which need to be explicitly enable using the -enable-search* flags.")
 	fs.BoolVar(&enable_graphics, "enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
 	fs.BoolVar(&enable_data, "enable-data", false, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
 
@@ -124,7 +131,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		enable_graphics = true
 		enable_data = true
 		enable_html = true
-		enable_search = true
+		// enable_search = true
 	}
 
 	if enable_search {
@@ -423,6 +430,10 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		tangramjs_opts.NextzenOptions.StyleURL = nextzen_style_url
 		tangramjs_opts.NextzenOptions.TileURL = nextzen_tile_url
 
+		if tilepack_db != "" {
+			tangramjs_opts.NextzenOptions.TileURL = tilepack_uri
+		}
+		
 		endpoints := &www.Endpoints{
 			Data:  path_geojson,
 			Png:   path_png,
@@ -511,6 +522,22 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 			return fmt.Errorf("Failed to append static asset handlers, %w", err)
 		}
 
+		if tilepack_db != "" {
+
+			tiles_reader, err := tilepack.NewMbtilesReader(tilepack_db)
+
+			if err != nil {
+				return fmt.Errorf("Failed to load tilepack, %v", err)
+			}
+			
+			u := strings.TrimLeft(tilepack_uri, "/")
+			p := strings.Split(u, "/")
+			path_tiles := fmt.Sprintf("/%s/", p[0])
+			
+			tiles_handler := tiles_http.MbtilesHandler(tiles_reader)
+			mux.Handle(path_tiles, tiles_handler)
+		}
+		
 	}
 
 	s, err := server.NewServer(ctx, server_uri)
