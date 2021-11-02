@@ -2,6 +2,7 @@ package browser
 
 import (
 	_ "github.com/whosonfirst/go-reader-cachereader"
+	_ "github.com/whosonfirst/go-reader-findingaid"	
 )
 
 import (
@@ -53,8 +54,8 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 
 	fs.StringVar(&static_prefix, "static-prefix", "", "Prepend this prefix to URLs for static assets.")
 
-	fs.StringVar(&data_source, "reader-source", "whosonfirst-data://?branch=master", "A valid go-reader Reader URI string.")
-	fs.StringVar(&cache_source, "cache-source", "gocache://", "A valid go-cache Cache URI string.")
+	fs.StringVar(&reader_uri, "reader-uri", "whosonfirst-data://?branch=master", "A valid go-reader Reader URI string.")
+	fs.StringVar(&cache_uri, "cache-uri", "gocache://", "A valid go-cache Cache URI string.")
 
 	fs.StringVar(&nextzen_api_key, "nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
 	fs.StringVar(&nextzen_style_url, "nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
@@ -162,7 +163,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		enable_png = true
 	}
 
-	if cache_source == "tmp://" {
+	if cache_uri == "tmp://" {
 
 		now := time.Now()
 		prefix := fmt.Sprintf("go-whosonfirst-browser-%d", now.Unix())
@@ -176,12 +177,12 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 		log.Println(tempdir)
 		defer os.RemoveAll(tempdir)
 
-		cache_source = fmt.Sprintf("fs://%s", tempdir)
+		cache_uri = fmt.Sprintf("fs://%s", tempdir)
 	}
 
 	cr_q := url.Values{}
-	cr_q.Set("reader", data_source)
-	cr_q.Set("cache", cache_source)
+	cr_q.Set("reader", reader_uri)
+	cr_q.Set("cache", cache_uri)
 
 	cr_uri := url.URL{}
 	cr_uri.Scheme = "cachereader"
@@ -351,10 +352,10 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 			search_opts.EnableGeoJSON = true
 
-			geojson_reader, err := reader.NewReader(ctx, data_source)
+			geojson_reader, err := reader.NewReader(ctx, reader_uri)
 
 			if err != nil {
-				return fmt.Errorf("Failed to create search reader for '%s', %w", data_source, err)
+				return fmt.Errorf("Failed to create search reader for '%s', %w", reader_uri, err)
 			}
 
 			search_opts.GeoJSONReader = geojson_reader

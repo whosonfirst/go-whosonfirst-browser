@@ -19,6 +19,7 @@ require (
 	github.com/whosonfirst/go-cache v0.5.0
 	github.com/whosonfirst/go-reader v0.9.0
 	github.com/whosonfirst/go-reader-cachereader v0.2.2
+	github.com/whosonfirst/go-reader-findingaid v0.9.0
 	github.com/whosonfirst/go-reader-http v0.2.2
 	github.com/whosonfirst/go-reader-whosonfirst-data v1.2.2
 	github.com/whosonfirst/go-sanitize v0.1.0

@@ -99,7 +99,7 @@ github.com/hashicorp/go-multierror
 github.com/jmespath/go-jmespath
 # github.com/jtacoma/uritemplates v1.0.0
 github.com/jtacoma/uritemplates
-# github.com/mattn/go-sqlite3 v1.14.8
+# github.com/mattn/go-sqlite3 v1.14.9
 github.com/mattn/go-sqlite3
 # github.com/mmcloughlin/geohash v0.10.0
 github.com/mmcloughlin/geohash
@@ -173,6 +173,9 @@ github.com/whosonfirst/go-reader
 # github.com/whosonfirst/go-reader-cachereader v0.2.2
 ## explicit
 github.com/whosonfirst/go-reader-cachereader
+# github.com/whosonfirst/go-reader-findingaid v0.9.0
+## explicit
+github.com/whosonfirst/go-reader-findingaid
 # github.com/whosonfirst/go-reader-github v0.4.2
 github.com/whosonfirst/go-reader-github
 # github.com/whosonfirst/go-reader-http v0.2.2

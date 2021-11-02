@@ -331,6 +331,8 @@ github.com/mattn/go-isatty v0.0.12/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Ky
 github.com/mattn/go-sqlite3 v1.10.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
 github.com/mattn/go-sqlite3 v1.14.8 h1:gDp86IdQsN/xWjIEmr9MF6o9mpksUgh0fu+9ByFxzIU=
 github.com/mattn/go-sqlite3 v1.14.8/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
+github.com/mattn/go-sqlite3 v1.14.9 h1:10HX2Td0ocZpYEjhilsuo6WWtUqttj2Kb0KtD86/KYA=
+github.com/mattn/go-sqlite3 v1.14.9/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTSsCt+hzestvNj0=
 github.com/mitchellh/mapstructure v1.3.3/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
@@ -528,6 +530,8 @@ github.com/whosonfirst/go-reader-cachereader v0.2.1 h1:tf2Y0Ao0eLGxvIbJ8ydFX1FQF
 github.com/whosonfirst/go-reader-cachereader v0.2.1/go.mod h1:mYXn4i6YGqapA0VFhzYioFwW6owVWKqnfuBU9kexxaA=
 github.com/whosonfirst/go-reader-cachereader v0.2.2 h1:gqgmu4biwzS7EoD7QETxIu+yPuBWPobYCTe+oZa1K5k=
 github.com/whosonfirst/go-reader-cachereader v0.2.2/go.mod h1:00o+cy8z475vtsf+b4UCJDPdNOSMr+pE4U92f2S2GUg=
+github.com/whosonfirst/go-reader-findingaid v0.9.0 h1:marZ9uU8Mm42WloBe4Thcailf1mpwv+fP42XR8HfFIU=
+github.com/whosonfirst/go-reader-findingaid v0.9.0/go.mod h1:08nMrNSYwLvtONRF84ZgtGVnNpEn1ER6u4aSXsn7Tg8=
 github.com/whosonfirst/go-reader-github v0.1.1 h1:xz1HMPDkqlkQcf0CkUtl+a/XfdBVJ4LIgAJp9pIpK38=
 github.com/whosonfirst/go-reader-github v0.1.1/go.mod h1:q66VDCSNA6BR9lG8c4L7wSEVx+jMEeuIC1AE/S5uGYM=
 github.com/whosonfirst/go-reader-github v0.1.2 h1:c7M7BDot/ewnvW6q+jbQEwx0ryzKgtmLrb9Yew1OShA=
