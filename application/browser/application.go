@@ -54,7 +54,7 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 
 	fs.StringVar(&static_prefix, "static-prefix", "", "Prepend this prefix to URLs for static assets.")
 
-	fs.StringVar(&reader_uri, "reader-uri", "whosonfirst-data://?branch=master", "A valid go-reader Reader URI string.")
+	fs.StringVar(&reader_uri, "reader-uri", "", "A valid go-reader Reader URI string.")
 	fs.StringVar(&cache_uri, "cache-uri", "gocache://", "A valid go-cache Cache URI string.")
 
 	fs.StringVar(&nextzen_api_key, "nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
