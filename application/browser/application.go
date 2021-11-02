@@ -2,7 +2,7 @@ package browser
 
 import (
 	_ "github.com/whosonfirst/go-reader-cachereader"
-	_ "github.com/whosonfirst/go-reader-findingaid"	
+	_ "github.com/whosonfirst/go-reader-findingaid"			
 )
 
 import (
