@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/whosonfirst/go-whosonfirst-browser/v3/application/browser"
+	"github.com/whosonfirst/go-whosonfirst-browser/v4/application/browser"
 	"log"
 )
 

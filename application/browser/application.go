@@ -2,7 +2,7 @@ package browser
 
 import (
 	_ "github.com/whosonfirst/go-reader-cachereader"
-	_ "github.com/whosonfirst/go-reader-findingaid"			
+	_ "github.com/whosonfirst/go-reader-findingaid"
 )
 
 import (
@@ -19,9 +19,9 @@ import (
 	"github.com/tilezen/go-tilepacks/tilepack"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/v3/application"
-	"github.com/whosonfirst/go-whosonfirst-browser/v3/templates/html"
-	"github.com/whosonfirst/go-whosonfirst-browser/v3/www"
+	"github.com/whosonfirst/go-whosonfirst-browser/v4/application"
+	"github.com/whosonfirst/go-whosonfirst-browser/v4/templates/html"
+	"github.com/whosonfirst/go-whosonfirst-browser/v4/www"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"html/template"
 	"io/ioutil"
@@ -46,6 +46,7 @@ func NewBrowserApplication(ctx context.Context) (application.Application, error)
 	return app, nil
 }
 
+// DefaultFlagSet returns a `flag.FlagSet` instance with flags and defaults values assigned for use with `app`.
 func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs := flagset.NewFlagSet("browser")
@@ -107,6 +108,7 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 	return fs, nil
 }
 
+// Run will run the `app` (BrowserApplication) using default flags and values.
 func (app *BrowserApplication) Run(ctx context.Context) error {
 
 	fs, err := app.DefaultFlagSet(ctx)
@@ -118,6 +120,7 @@ func (app *BrowserApplication) Run(ctx context.Context) error {
 	return app.RunWithFlagSet(ctx, fs)
 }
 
+// Run will run the `app` (BrowserApplication) using a custom `flag.FlagSet` instance.
 func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.FlagSet) error {
 
 	flagset.Parse(fs)

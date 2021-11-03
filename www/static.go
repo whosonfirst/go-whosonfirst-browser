@@ -3,7 +3,7 @@ package www
 import (
 	"fmt"
 	"github.com/aaronland/go-http-rewrite"
-	"github.com/whosonfirst/go-whosonfirst-browser/v3/static"
+	"github.com/whosonfirst/go-whosonfirst-browser/v4/static"
 	"io/fs"
 	_ "log"
 	"net/http"

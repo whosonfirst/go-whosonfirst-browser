@@ -1,4 +1,4 @@
-module github.com/whosonfirst/go-whosonfirst-browser/v3
+module github.com/whosonfirst/go-whosonfirst-browser/v4
 
 go 1.16
 
