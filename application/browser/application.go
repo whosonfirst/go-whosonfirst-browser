@@ -56,7 +56,6 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 	fs.StringVar(&static_prefix, "static-prefix", "", "Prepend this prefix to URLs for static assets.")
 
 	fs.Var(&reader_uris, "reader-uri", "One or more valid go-reader Reader URI strings.")
-	// fs.StringVar(&reader_uri, "reader-uri", "", "A valid go-reader Reader URI string.")
 	fs.StringVar(&cache_uri, "cache-uri", "gocache://", "A valid go-cache Cache URI string.")
 
 	fs.StringVar(&nextzen_api_key, "nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
@@ -185,9 +184,11 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	}
 
 	cr_q := url.Values{}
-	// cr_q.Set("reader", reader_uri)
 
+	// go-reader-cachereader is configured to accept multiple readers
+	// and to manage them all using reader.NewMultiReader
 	cr_q["reader"] = reader_uris
+
 	cr_q.Set("cache", cache_uri)
 
 	cr_uri := url.URL{}
@@ -358,13 +359,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 			search_opts.EnableGeoJSON = true
 
-			geojson_reader, err := reader.NewReader(ctx, reader_uri)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create search reader for '%s', %w", reader_uri, err)
-			}
-
-			search_opts.GeoJSONReader = geojson_reader
+			search_opts.GeoJSONReader = cr
 
 			/*
 				if resolver_uri != "" {
