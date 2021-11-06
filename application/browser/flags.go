@@ -1,8 +1,14 @@
 package browser
 
+import (
+	"github.com/sfomuseum/go-flags/multi"
+)
+
 var server_uri string
 
 var static_prefix string
+
+var reader_uris multi.MultiString
 
 var reader_uri string
 var cache_uri string

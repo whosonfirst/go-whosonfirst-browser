@@ -203,6 +203,7 @@ github.com/sfomuseum/go-edtf/tests
 # github.com/sfomuseum/go-flags v0.8.2
 ## explicit
 github.com/sfomuseum/go-flags/flagset
+github.com/sfomuseum/go-flags/multi
 # github.com/sfomuseum/go-geojsonld v1.0.0
 ## explicit
 github.com/sfomuseum/go-geojsonld
