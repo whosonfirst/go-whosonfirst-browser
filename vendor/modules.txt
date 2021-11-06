@@ -239,12 +239,12 @@ github.com/whosonfirst/algnhsa
 github.com/whosonfirst/go-cache
 # github.com/whosonfirst/go-geojson-svg v0.0.3
 github.com/whosonfirst/go-geojson-svg
-# github.com/whosonfirst/go-ioutil v1.0.0
+# github.com/whosonfirst/go-ioutil v1.0.1
 github.com/whosonfirst/go-ioutil
 # github.com/whosonfirst/go-reader v0.9.0
 ## explicit
 github.com/whosonfirst/go-reader
-# github.com/whosonfirst/go-reader-cachereader v0.2.2
+# github.com/whosonfirst/go-reader-cachereader v0.2.3
 ## explicit
 github.com/whosonfirst/go-reader-cachereader
 # github.com/whosonfirst/go-reader-findingaid v0.9.1

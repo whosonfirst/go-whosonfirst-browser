@@ -2,7 +2,7 @@ package cachereader
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-ioutil"
 	"github.com/whosonfirst/go-reader"
@@ -36,22 +36,18 @@ func NewCacheReader(ctx context.Context, uri string) (reader.Reader, error) {
 
 	q := u.Query()
 
-	reader_uri := q.Get("reader")
-
-	if reader_uri == "" {
-		return nil, errors.New("Missing ?reader= parameter")
-	}
-
 	cache_uri := q.Get("cache")
 
 	if cache_uri == "" {
-		return nil, errors.New("Missing ?cache= parameter")
+		return nil, fmt.Errorf("Missing ?cache= parameter")
 	}
 
-	r, err := reader.NewReader(ctx, reader_uri)
+	reader_uris := q["reader"]
+
+	r, err := reader.NewMultiReaderFromURIs(ctx, reader_uris...)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to create reader, %w", err)
 	}
 
 	c, err := cache.NewCache(ctx, cache_uri)

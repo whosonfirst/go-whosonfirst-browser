@@ -33,8 +33,8 @@ func NewReadSeekCloser(fh interface{}) (io.ReadSeekCloser, error) {
 	switch fh.(type) {
 	case io.ReadSeekCloser:
 		return fh.(io.ReadSeekCloser), nil
-	case io.Reader:
-		// pass
+	case io.Closer:
+		closer = true		
 	case io.ReadCloser:
 		closer = true
 	case io.ReadSeeker:

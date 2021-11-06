@@ -18,7 +18,7 @@ require (
 	github.com/tilezen/go-tilepacks v0.0.0-20210818174005-d960bc00ff89
 	github.com/whosonfirst/go-cache v0.5.0
 	github.com/whosonfirst/go-reader v0.9.0
-	github.com/whosonfirst/go-reader-cachereader v0.2.2
+	github.com/whosonfirst/go-reader-cachereader v0.2.3
 	github.com/whosonfirst/go-reader-findingaid v0.9.1
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.3
