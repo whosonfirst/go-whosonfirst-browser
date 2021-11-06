@@ -631,6 +631,8 @@ github.com/whosonfirst/go-reader-findingaid v0.9.0 h1:marZ9uU8Mm42WloBe4Thcailf1
 github.com/whosonfirst/go-reader-findingaid v0.9.0/go.mod h1:08nMrNSYwLvtONRF84ZgtGVnNpEn1ER6u4aSXsn7Tg8=
 github.com/whosonfirst/go-reader-findingaid v0.9.1 h1:y9Ea7A2yAl4m358XUpsD23lQDcF3o9MClJstQdabr1U=
 github.com/whosonfirst/go-reader-findingaid v0.9.1/go.mod h1:sfdouauAr24qhoY5zb9+KoXqPQRXr5kccKsjwLq5HnM=
+github.com/whosonfirst/go-reader-findingaid v0.9.2 h1:NnCa2Es7Ewrtnf0RSdv6nyIQaNFJ0Paromtn7n5pKxA=
+github.com/whosonfirst/go-reader-findingaid v0.9.2/go.mod h1:sfdouauAr24qhoY5zb9+KoXqPQRXr5kccKsjwLq5HnM=
 github.com/whosonfirst/go-reader-github v0.1.1 h1:xz1HMPDkqlkQcf0CkUtl+a/XfdBVJ4LIgAJp9pIpK38=
 github.com/whosonfirst/go-reader-github v0.1.1/go.mod h1:q66VDCSNA6BR9lG8c4L7wSEVx+jMEeuIC1AE/S5uGYM=
 github.com/whosonfirst/go-reader-github v0.1.2 h1:c7M7BDot/ewnvW6q+jbQEwx0ryzKgtmLrb9Yew1OShA=

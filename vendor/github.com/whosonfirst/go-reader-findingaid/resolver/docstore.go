@@ -1,4 +1,4 @@
-package finder
+package resolver
 
 /*
 
@@ -27,9 +27,9 @@ import (
 	"strings"
 )
 
-// type DocstoreFinder implements the `Finder` interface for data stored in a gocloud.dev/docstore compatible collection.
-type DocstoreFinder struct {
-	Finder
+// type DocstoreResolver implements the `Resolver` interface for data stored in a gocloud.dev/docstore compatible collection.
+type DocstoreResolver struct {
+	Resolver
 	// A Docstore `sql.DB` instance containing Who's On First finding aid data.
 	collection *docstore.Collection
 }
@@ -38,11 +38,11 @@ func init() {
 
 	ctx := context.Background()
 
-	RegisterFinder(ctx, "awsdynamodb", NewDocstoreFinder)
+	RegisterResolver(ctx, "awsdynamodb", NewDocstoreResolver)
 
 	for _, scheme := range docstore.DefaultURLMux().CollectionSchemes() {
 
-		err := RegisterFinder(ctx, scheme, NewDocstoreFinder)
+		err := RegisterResolver(ctx, scheme, NewDocstoreResolver)
 
 		if err != nil {
 			panic(err)
@@ -50,9 +50,9 @@ func init() {
 	}
 }
 
-// NewDocstoreFinder will return a new `Finder` instance for resolving repository names
+// NewDocstoreResolver will return a new `Resolver` instance for resolving repository names
 // and IDs stored in a gocloud.dev/docstore Collection.
-func NewDocstoreFinder(ctx context.Context, uri string) (Finder, error) {
+func NewDocstoreResolver(ctx context.Context, uri string) (Resolver, error) {
 
 	u, err := url.Parse(uri)
 
@@ -110,7 +110,7 @@ func NewDocstoreFinder(ctx context.Context, uri string) (Finder, error) {
 		return nil, fmt.Errorf("Failed to open collection, %w", err)
 	}
 
-	f := &DocstoreFinder{
+	f := &DocstoreResolver{
 		collection: collection,
 	}
 
@@ -118,7 +118,7 @@ func NewDocstoreFinder(ctx context.Context, uri string) (Finder, error) {
 }
 
 // GetRepo returns the name of the repository associated with this ID in a Who's On First finding aid.
-func (r *DocstoreFinder) GetRepo(ctx context.Context, id int64) (string, error) {
+func (r *DocstoreResolver) GetRepo(ctx context.Context, id int64) (string, error) {
 
 	// TBD: Import whosonfirst/go-whosonfirst-findingaid/producer/docstore CatalogRecord?
 

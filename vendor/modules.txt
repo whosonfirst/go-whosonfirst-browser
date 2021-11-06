@@ -248,10 +248,10 @@ github.com/whosonfirst/go-reader
 # github.com/whosonfirst/go-reader-cachereader v0.2.3
 ## explicit
 github.com/whosonfirst/go-reader-cachereader
-# github.com/whosonfirst/go-reader-findingaid v0.9.1
+# github.com/whosonfirst/go-reader-findingaid v0.9.2
 ## explicit
 github.com/whosonfirst/go-reader-findingaid
-github.com/whosonfirst/go-reader-findingaid/finder
+github.com/whosonfirst/go-reader-findingaid/resolver
 # github.com/whosonfirst/go-reader-http v0.2.2
 github.com/whosonfirst/go-reader-http
 # github.com/whosonfirst/go-sanitize v0.1.0

@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"github.com/jtacoma/uritemplates"
 	wof_reader "github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-reader-findingaid/finder"
+	"github.com/whosonfirst/go-reader-findingaid/resolver"
 	wof_uri "github.com/whosonfirst/go-whosonfirst-uri"
 	"io"
 	"net/url"
@@ -26,7 +26,7 @@ type FindingAidReader struct {
 	db *sql.DB
 	// A compiled `uritemplates.UriTemplate` to use resolving Who's On First finding aid URIs.
 	template *uritemplates.UriTemplate
-	finder   finder.Finder
+	resolver   resolver.Resolver
 }
 
 func init() {
@@ -51,10 +51,10 @@ func NewFindingAidReader(ctx context.Context, uri string) (wof_reader.Reader, er
 
 	f_uri := fu.String()
 
-	f, err := finder.NewFinder(ctx, f_uri)
+	f, err := resolver.NewResolver(ctx, f_uri)
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create finder, %w", err)
+		return nil, fmt.Errorf("Failed to create resolver, %w", err)
 	}
 
 	q := u.Query()
@@ -72,7 +72,7 @@ func NewFindingAidReader(ctx context.Context, uri string) (wof_reader.Reader, er
 	}
 
 	r := &FindingAidReader{
-		finder:   f,
+		resolver:   f,
 		template: t,
 	}
 
@@ -127,7 +127,7 @@ func (r *FindingAidReader) getReaderURIAndPath(ctx context.Context, uri string) 
 		return "", "", fmt.Errorf("Failed to parse URI, %w", err)
 	}
 
-	repo, err := r.finder.GetRepo(ctx, id)
+	repo, err := r.resolver.GetRepo(ctx, id)
 
 	if err != nil {
 		return "", "", fmt.Errorf("Failed to derive repo, %w", err)

@@ -1,4 +1,4 @@
-package finder
+package resolver
 
 import (
 	"context"
@@ -8,22 +8,22 @@ import (
 	"net/url"
 )
 
-// type SQLiteFinder implements the `Finder` interface for data stored in a SQLite database..
-type SQLiteFinder struct {
-	Finder
+// type SQLiteResolver implements the `Resolver` interface for data stored in a SQLite database..
+type SQLiteResolver struct {
+	Resolver
 	// A SQLite `sql.DB` instance containing Who's On First finding aid data.
 	db *sql.DB
 }
 
 func init() {
 	ctx := context.Background()
-	RegisterFinder(ctx, "sqlite", NewSQLiteFinder)
-	RegisterFinder(ctx, "sqlite3", NewSQLiteFinder)
+	RegisterResolver(ctx, "sqlite", NewSQLiteResolver)
+	RegisterResolver(ctx, "sqlite3", NewSQLiteResolver)
 }
 
-// NewSQLiteFinder will return a new `Finder` instance for resolving repository names
+// NewSQLiteResolver will return a new `Resolver` instance for resolving repository names
 // and IDs stored in a SQLite database.
-func NewSQLiteFinder(ctx context.Context, uri string) (Finder, error) {
+func NewSQLiteResolver(ctx context.Context, uri string) (Resolver, error) {
 
 	u, err := url.Parse(uri)
 
@@ -41,7 +41,7 @@ func NewSQLiteFinder(ctx context.Context, uri string) (Finder, error) {
 		return nil, fmt.Errorf("Failed to open database, %w", err)
 	}
 
-	f := &SQLiteFinder{
+	f := &SQLiteResolver{
 		db: db,
 	}
 
@@ -49,7 +49,7 @@ func NewSQLiteFinder(ctx context.Context, uri string) (Finder, error) {
 }
 
 // GetRepo returns the name of the repository associated with this ID in a Who's On First finding aid.
-func (r *SQLiteFinder) GetRepo(ctx context.Context, id int64) (string, error) {
+func (r *SQLiteResolver) GetRepo(ctx context.Context, id int64) (string, error) {
 
 	var repo string
 
