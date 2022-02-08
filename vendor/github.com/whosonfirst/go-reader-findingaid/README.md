@@ -4,9 +4,9 @@ Go package implementing the whosonfirst/go-reader interface for use with Who's O
 
 ## Important
 
-This package targets "version 2" of the `whosonfirst/go-whosonfirst-findingaid` package which is not finalized yet:
+This package targets "version 2" of the `whosonfirst/go-whosonfirst-findingaid` package:
 
-https://github.com/whosonfirst/go-whosonfirst-findingaid/tree/v2
+https://github.com/whosonfirst/go-whosonfirst-findingaid/
 
 ## Documentation
 
@@ -81,7 +81,7 @@ This package _does not produce Who's On First finding aids_, it only consumes th
 Finding aid URIs take the form of:
 
 ```
-findingaid://?{QUERY_PARAMETERS}
+findingaid://{RESOLVER}?{QUERY_PARAMETERS}
 ```
 
 Valid finding aid query parameters are:
@@ -94,7 +94,7 @@ Valid finding aid query parameters are:
 For example:
 
 ```
-findingaid://?dsn=/usr/local/data/findingaids/wof.db
+findingaid://sqlite?dsn=/usr/local/data/findingaids/wof.db
 ```
 
 Note: Although it is possible to produce Who's On First finding aids that are not SQLite database this package _only_ works with SQLite-based finding aids.
@@ -110,7 +110,7 @@ Third, the Who's On First ID derived in step (1) is then expanded in to it neste
 Fourth, the repository name derived in step (2) is used to expand a URI template used to create a new internal `go-reader.Reader` instance. The default URI template points the `https://github.com/whosonfirst-data` repositories but you can define your own. For example:
 
 ```
-findingaid_uri := "findingaid://?dsn=fa.db&template=https://raw.githubusercontent.com/sfomuseum-data/{repo}/main/data/"
+findingaid_uri := "findingaid://sqlite?dsn=fa.db&template=https://raw.githubusercontent.com/sfomuseum-data/{repo}/main/data/"
 
 ctx := context.Background()
 r, _ := reader.NewReader(ctx, findingaid_uri)
@@ -145,7 +145,7 @@ For example:
 
 ```
 $> ./bin/read \
-	-reader-uri 'findingaid://?dsn=/usr/local/data/findingaids/wof.db' \
+	-reader-uri 'findingaid://sqlite?dsn=/usr/local/data/findingaids/wof.db' \
 	102527513 \
 	
 | jq '.["properties"]["wof:name"]'
@@ -157,4 +157,4 @@ $> ./bin/read \
 
 * https://github.com/whosonfirst/go-whosonfirst-reader
 * https://github.com/whosonfirst/go-whosonfirst-reader-http
-* https://github.com/whosonfirst/go-whosonfirst-findingaid/tree/v2
+* https://github.com/whosonfirst/go-whosonfirst-findingaid

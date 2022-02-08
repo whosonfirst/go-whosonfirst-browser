@@ -10,10 +10,12 @@ import (
 	"fmt"
 	"github.com/jtacoma/uritemplates"
 	wof_reader "github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-reader-findingaid/resolver"
+	"github.com/whosonfirst/go-whosonfirst-findingaid/v2/resolver"
 	wof_uri "github.com/whosonfirst/go-whosonfirst-uri"
 	"io"
+	_ "log"
 	"net/url"
+	"strings"
 )
 
 // WHOSONFIRST_DATA_TEMPLATE is a URL template for the root `data` directory in Who's On First data repositories.
@@ -26,7 +28,8 @@ type FindingAidReader struct {
 	db *sql.DB
 	// A compiled `uritemplates.UriTemplate` to use resolving Who's On First finding aid URIs.
 	template *uritemplates.UriTemplate
-	resolver   resolver.Resolver
+	// A resolver.Resolver instance used to derive the Who's On First repository name for an ID.
+	resolver resolver.Resolver
 }
 
 func init() {
@@ -44,19 +47,6 @@ func NewFindingAidReader(ctx context.Context, uri string) (wof_reader.Reader, er
 		return nil, fmt.Errorf("Failed to parse URL, %w", err)
 	}
 
-	fu := url.URL{}
-	fu.Scheme = u.Host
-	fu.Path = u.Path
-	fu.RawQuery = u.RawQuery
-
-	f_uri := fu.String()
-
-	f, err := resolver.NewResolver(ctx, f_uri)
-
-	if err != nil {
-		return nil, fmt.Errorf("Failed to create resolver, %w", err)
-	}
-
 	q := u.Query()
 
 	uri_template := WHOSONFIRST_DATA_TEMPLATE
@@ -71,8 +61,57 @@ func NewFindingAidReader(ctx context.Context, uri string) (wof_reader.Reader, er
 		return nil, fmt.Errorf("Failed to parse URI template, %w", err)
 	}
 
+	q.Del("template")
+	u.RawQuery = q.Encode()
+
+	// findingaid://sqlite?dsn={DSN}
+	// findingaid://awsdynamo/{TABLENAME}
+	// findingaid://http(s)/{HOST}/{PATH}
+
+	// Set up resolver
+
+	var ru *url.URL
+
+	switch u.Host {
+	case "http", "https":
+
+		path := u.Path
+		path = strings.TrimLeft(path, "/")
+
+		parts := strings.Split(path, "/")
+
+		ru = &url.URL{}
+		ru.Scheme = u.Host
+		ru.Host = parts[0]
+
+		if len(parts) > 1 {
+			path = strings.Join(parts[1:], "/")
+			ru.Path = fmt.Sprintf("/%s", path)
+		}
+
+		ru.RawQuery = u.RawQuery
+
+	default:
+
+		path := u.Path
+		path = strings.TrimLeft(path, "/")
+
+		ru = &url.URL{}
+		ru.Scheme = u.Host
+		ru.Host = path
+		ru.RawQuery = u.RawQuery
+	}
+
+	r_uri := ru.String()
+
+	f, err := resolver.NewResolver(ctx, r_uri)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create resolver, %w", err)
+	}
+
 	r := &FindingAidReader{
-		resolver:   f,
+		resolver: f,
 		template: t,
 	}
 
@@ -88,7 +127,13 @@ func (r *FindingAidReader) Read(ctx context.Context, uri string) (io.ReadSeekClo
 		return nil, fmt.Errorf("Failed to derive reader and path, %w", err)
 	}
 
-	return new_r.Read(ctx, rel_path)
+	fh, err := new_r.Read(ctx, rel_path)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to read %s (%s), %w", uri, rel_path, err)
+	}
+
+	return fh, nil
 }
 
 // ReaderURI returns final URI resolved by `uri` for this reader.

@@ -12,16 +12,16 @@ require (
 	github.com/sfomuseum/go-flags v0.8.2
 	github.com/sfomuseum/go-geojsonld v1.0.0
 	github.com/sfomuseum/go-http-tilezen v0.0.6
-	github.com/srwiley/oksvg v0.0.0-20210519022825-9fc0c575d5fe // indirect
-	github.com/srwiley/rasterx v0.0.0-20210519020934-456a8d69b780 // indirect
-	github.com/tidwall/gjson v1.11.0
+	github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44 // indirect
+	github.com/srwiley/rasterx v0.0.0-20220128185129-2efea2b9ea41 // indirect
+	github.com/tidwall/gjson v1.14.0
 	github.com/tilezen/go-tilepacks v0.0.0-20210818174005-d960bc00ff89
 	github.com/whosonfirst/go-cache v0.5.0
-	github.com/whosonfirst/go-reader v0.9.0
+	github.com/whosonfirst/go-reader v0.10.0
 	github.com/whosonfirst/go-reader-cachereader v0.2.3
-	github.com/whosonfirst/go-reader-findingaid v0.9.2
+	github.com/whosonfirst/go-reader-findingaid v0.11.1
 	github.com/whosonfirst/go-sanitize v0.1.0
-	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.3
+	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.4
 	github.com/whosonfirst/go-whosonfirst-image v0.0.1
 	github.com/whosonfirst/go-whosonfirst-search v0.0.4
 	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.6
@@ -29,5 +29,4 @@ require (
 	github.com/whosonfirst/go-whosonfirst-svg v0.0.4
 	github.com/whosonfirst/go-whosonfirst-uri v1.1.0
 	github.com/whosonfirst/warning v0.1.1
-	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 )

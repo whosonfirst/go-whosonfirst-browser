@@ -77,7 +77,7 @@ func NewDocstoreResolver(ctx context.Context, uri string) (Resolver, error) {
 		}
 
 		u, _ := url.Parse(uri)
-		table_name := u.Path
+		table_name := u.Host
 
 		table_name = strings.TrimLeft(table_name, "/")
 

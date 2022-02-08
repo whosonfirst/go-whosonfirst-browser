@@ -227,7 +227,7 @@ func main() {
 	r, _ := reader.NewReader(ctx, "github://{GITHUB_OWNER}/{GITHUB_REPO}")
 
 	// to specify a specific branch you would do this:
-	// r, _ := reader.NewReader(ctx, "github://{GITHUB_OWNER}/{GITHUB_REPO}/{GITHUB_BRANCH}")
+	// r, _ := reader.NewReader(ctx, "github://{GITHUB_OWNER}/{GITHUB_REPO}?branch={GITHUB_BRANCH}")
 }
 ```
 
@@ -311,6 +311,24 @@ import (
 func main() {
 	ctx := context.Background()
 	r, _ := reader.NewReader(ctx, "null://")
+}
+```
+
+### repo://
+
+This is a convenience scheme for working with Who's On First data repositories.
+
+It will update a URI by appending a `data` directory to its path and changing its scheme to `fs://` before invoking `reader.NewReader` with the updated URI.
+
+```
+import (
+	"context"
+	"github.com/whosonfirst/go-reader"
+)
+
+func main() {
+	ctx := context.Background()
+	r, _ := reader.NewReader(ctx, "repo:///usr/local/data/whosonfirst-data-admin-ca")
 }
 ```
 
