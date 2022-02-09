@@ -4,6 +4,7 @@ package www
 
 import (
 	"github.com/whosonfirst/go-reader"
+	"log"
 	"net/http"
 )
 
@@ -16,6 +17,9 @@ func NavPlaceHandler(r reader.Reader) (http.Handler, error) {
 		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
+
+			log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+
 			http.Error(rsp, err.Error(), status)
 			return
 		}

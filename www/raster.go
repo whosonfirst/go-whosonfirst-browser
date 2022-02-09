@@ -6,6 +6,7 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-whosonfirst-image"
+	"log"
 	"net/http"
 )
 
@@ -72,6 +73,9 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (http.Handler, error) {
 		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
+
+			log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+
 			http.Error(rsp, err.Error(), status)
 			return
 		}

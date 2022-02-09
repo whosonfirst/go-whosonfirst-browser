@@ -5,6 +5,7 @@ import (
 	"github.com/aaronland/go-http-sanitize"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
+	"log"
 	"net/http"
 	"regexp"
 )
@@ -37,6 +38,9 @@ func SelectHandler(r reader.Reader, opts *SelectHandlerOptions) (http.Handler, e
 		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
+
+			log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+
 			http.Error(rsp, err.Error(), status)
 			return
 		}

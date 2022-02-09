@@ -1,6 +1,7 @@
 package www
 
 import (
+	"fmt"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
@@ -33,13 +34,13 @@ func ParseURIFromRequest(req *http.Request, r reader.Reader) (*URI, error, int) 
 		str_id := q.Get("id")
 
 		if str_id == "" {
-			return nil, err, http.StatusNotFound
+			return nil, fmt.Errorf("Failed to parse %s and ?id parameter is empty, %w", err), http.StatusNotFound
 		}
 
 		id, err := strconv.ParseInt(str_id, 10, 64)
 
 		if err != nil {
-			return nil, err, http.StatusBadRequest
+			return nil, fmt.Errorf("Failed to parse %s and ?id=%s is invalid, %w", err), http.StatusBadRequest
 		}
 
 		wofid = id
@@ -52,7 +53,7 @@ func ParseURIFromRequest(req *http.Request, r reader.Reader) (*URI, error, int) 
 	rel_path, err := uri.Id2RelPath(wofid, uri_args)
 
 	if err != nil {
-		return nil, err, http.StatusBadRequest // StatusInternalServerError
+		return nil, fmt.Errorf("Failed to derive relative path from %d (%s), %w", wofid, path, err), http.StatusBadRequest // StatusInternalServerError
 	}
 
 	ctx := req.Context()
@@ -60,19 +61,19 @@ func ParseURIFromRequest(req *http.Request, r reader.Reader) (*URI, error, int) 
 	fh, err := r.Read(ctx, rel_path)
 
 	if err != nil {
-		return nil, err, http.StatusBadRequest // StatusInternalServerError
+		return nil, fmt.Errorf("Failed to read %s, %w", rel_path, err), http.StatusBadRequest // StatusInternalServerError
 	}
 
 	f, err := feature.LoadFeatureFromReader(fh)
 
 	if err != nil && !warning.IsWarning(err) {
-		return nil, err, http.StatusInternalServerError
+		return nil, fmt.Errorf("Failed to read feature for %s, %w", rel_path, err), http.StatusInternalServerError
 	}
 
 	fname, err := uri.Id2Fname(wofid, uri_args)
 
 	if err != nil {
-		return nil, err, http.StatusInternalServerError
+		return nil, fmt.Errorf("Failed to derive filename from %d (%s), %w", wofid, path, err), http.StatusInternalServerError
 	}
 
 	ext := filepath.Ext(fname)

@@ -7,7 +7,7 @@ import (
 	"github.com/whosonfirst/go-sanitize"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-svg"
-	_ "log"
+	"log"
 	"net/http"
 )
 
@@ -61,6 +61,9 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (http.Handler, error)
 		uri, err, status := ParseURIFromRequest(req, r)
 
 		if err != nil {
+
+			log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+
 			http.Error(rsp, err.Error(), status)
 			return
 		}
