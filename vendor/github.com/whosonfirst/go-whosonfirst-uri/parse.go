@@ -1,7 +1,7 @@
 package uri
 
 import (
-	"errors"
+	"fmt"
 	_ "log"
 	"path/filepath"
 	"regexp"
@@ -19,13 +19,25 @@ func init() {
 	re_uri = regexp.MustCompile(URI_REGEXP)
 }
 
+// IsAlternateGeometry returns a boolean value indicating whether 'path' is considered by an alternate geometry URI.
+func IsAlternateGeometry(path string) (bool, error) {
+
+	_, uri_args, err := ParseURI(path)
+
+	if err != nil {
+		return false, fmt.Errorf("Failed to parse '%s', %w", path, err)
+	}
+
+	return uri_args.IsAlternate, nil
+}
+
 // ParseURI will parse a Who's On First URI into its unique ID and any optional "alternate" geometry information.
 func ParseURI(path string) (int64, *URIArgs, error) {
 
 	abs_path, err := filepath.Abs(path)
 
 	if err != nil {
-		return -1, nil, err
+		return -1, nil, fmt.Errorf("Failed to derive absolute path for %s, %w", path, err)
 	}
 
 	fname := filepath.Base(abs_path)
@@ -35,11 +47,11 @@ func ParseURI(path string) (int64, *URIArgs, error) {
 	// log.Println(fname, match)
 
 	if len(match) == 0 {
-		return -1, nil, errors.New("Unable to parse WOF ID")
+		return -1, nil, fmt.Errorf("Unable to parse WOF ID for %s", path)
 	}
 
 	if len(match) < 2 {
-		return -1, nil, errors.New("Unable to parse WOF ID")
+		return -1, nil, fmt.Errorf("Unable to parse WOF ID for %s", path)
 	}
 
 	str_id := match[1]
@@ -48,7 +60,7 @@ func ParseURI(path string) (int64, *URIArgs, error) {
 	wofid, err := strconv.ParseInt(str_id, 10, 64)
 
 	if err != nil {
-		return -1, nil, err
+		return -1, nil, fmt.Errorf("Failed to parse %s, %w", str_id, err)
 	}
 
 	args := &URIArgs{
@@ -117,11 +129,11 @@ func AltGeomFromPath(path string) (*AltGeom, error) {
 	_, uri_args, err := ParseURI(path)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to parse URI, %w", err)
 	}
 
 	if !uri_args.IsAlternate {
-		return nil, errors.New("Not an alternate geometry")
+		return nil, fmt.Errorf("%s is not an alternate geometry", path)
 	}
 
 	return uri_args.AltGeom, nil
@@ -131,7 +143,12 @@ func AltGeomFromPath(path string) (*AltGeom, error) {
 func IdFromPath(path string) (int64, error) {
 
 	id, _, err := ParseURI(path)
-	return id, err
+
+	if err != nil {
+		return 0, fmt.Errorf("Failed to parse URI, %w", err)
+	}
+
+	return id, nil
 }
 
 // RepoFromPath parses a path and if it is a valid whosonfirst-data Who's On First URI returns a GitHub repository name.
@@ -140,7 +157,7 @@ func WhosOnFirstDataRepoFromPath(path string) (string, error) {
 	abs_path, err := filepath.Abs(path)
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Failed to derive absolute path for %s, %w", path, err)
 	}
 
 	wofid, err := IdFromPath(abs_path)
@@ -180,7 +197,7 @@ func WhosOnFirstDataRepoFromPath(path string) (string, error) {
 	}
 
 	if repo == "" {
-		return "", errors.New("Unable to determine repo from path")
+		return "", fmt.Errorf("Unable to determine repo from %s", path)
 	}
 
 	return repo, nil

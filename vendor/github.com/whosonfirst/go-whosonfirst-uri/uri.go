@@ -1,7 +1,7 @@
 package uri
 
 import (
-	"errors"
+	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-sources"
 	_ "log"
 	"net/url"
@@ -36,7 +36,7 @@ func (a *AltGeom) String() (string, error) {
 	source := a.Source
 
 	if a.Strict && source == "" {
-		return "", errors.New("Missing source argument for alternate geometry")
+		return "", fmt.Errorf("Missing source argument for alternate geometry")
 	}
 
 	if source == "" {
@@ -45,7 +45,7 @@ func (a *AltGeom) String() (string, error) {
 	}
 
 	if a.Strict && !sources.IsValidSource(source) {
-		return "", errors.New("Invalid or unknown source argument for alternate geometry")
+		return "", fmt.Errorf("Invalid or unknown source argument for alternate geometry")
 	}
 
 	parts := []string{

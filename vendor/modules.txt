@@ -296,7 +296,7 @@ github.com/whosonfirst/go-whosonfirst-spr/v2/util
 # github.com/whosonfirst/go-whosonfirst-svg v0.0.4
 ## explicit
 github.com/whosonfirst/go-whosonfirst-svg
-# github.com/whosonfirst/go-whosonfirst-uri v1.1.0
+# github.com/whosonfirst/go-whosonfirst-uri v1.2.0
 ## explicit
 github.com/whosonfirst/go-whosonfirst-uri
 # github.com/whosonfirst/go-writer v0.4.1

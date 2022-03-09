@@ -805,6 +805,8 @@ github.com/whosonfirst/go-whosonfirst-uri v1.0.1 h1:hVEDRuW9WhqvTksDi092OO9UecX7
 github.com/whosonfirst/go-whosonfirst-uri v1.0.1/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=
 github.com/whosonfirst/go-whosonfirst-uri v1.1.0 h1:kNYOmKSm3u2asUOeq7yXL1Q8gFKkPIl8A0qinKrGV/8=
 github.com/whosonfirst/go-whosonfirst-uri v1.1.0/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=
+github.com/whosonfirst/go-whosonfirst-uri v1.2.0 h1:lhmRsIhcpTr5HAo+kXKRGsSt76HTh3Ko/oTR2jpCm/o=
+github.com/whosonfirst/go-whosonfirst-uri v1.2.0/go.mod h1:CuVygTCUpMG945MMvqHyqxvc/L5YkDaMrrVpRFr7ZxY=
 github.com/whosonfirst/go-writer v0.4.0/go.mod h1:kFzhremCFtnkJdmviwJEPLFYKQ5+vq6ocJPxt1bHPFY=
 github.com/whosonfirst/go-writer v0.4.1 h1:pAZ/cwaCM129PfwYy28ggCIRfL98OkrYxNnAxz2dksg=
 github.com/whosonfirst/go-writer v0.4.1/go.mod h1:kFzhremCFtnkJdmviwJEPLFYKQ5+vq6ocJPxt1bHPFY=

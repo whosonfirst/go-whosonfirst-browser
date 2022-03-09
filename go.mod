@@ -27,6 +27,6 @@ require (
 	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.6
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.0.0
 	github.com/whosonfirst/go-whosonfirst-svg v0.0.4
-	github.com/whosonfirst/go-whosonfirst-uri v1.1.0
+	github.com/whosonfirst/go-whosonfirst-uri v1.2.0
 	github.com/whosonfirst/warning v0.1.1
 )
