@@ -6,6 +6,8 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"log"
 	"net/http"
+	"path/filepath"
+	"strings"
 )
 
 // NavPlaceHandler will return a given record as a FeatureCollection for use by the IIIF navPlace extension,
@@ -14,24 +16,57 @@ func NavPlaceHandler(r reader.Reader) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		uri, err, status := ParseURIFromRequest(req, r)
+		ctx := req.Context()
+		
+		path := req.URL.Path
 
-		if err != nil {
+		base := filepath.Base(path)
+		base = strings.TrimLeft(base, "/")
+		base = strings.TrimRight(base, "/")
 
-			log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+		ids := strings.Split(base, ",")
 
-			http.Error(rsp, err.Error(), status)
-			return
+		uris := make([]*URI, len(ids))
+		
+		for idx, id := range ids {
+		
+			uri, err, status := ParseURIFromPath(ctx, id, r)
+
+			if err != nil {
+				
+				log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+				
+				http.Error(rsp, err.Error(), status)
+				return
+			}
+
+			uris[idx] = uri
 		}
 
-		f := uri.Feature
-		body := f.Bytes()
+		count := len(uris)
 
+		if count == 0 {
+			http.Error(rsp, "No IDs to include", http.StatusBadRequest)
+			return
+		}
+		
 		rsp.Header().Set("Content-Type", "application/geo+json")
 		rsp.Header().Set("Access-Control-Allow-Origin", "*")
 
 		rsp.Write([]byte(`{"type":"FeatureCollection", "features":[`))
-		rsp.Write(body)
+
+		for i, uri := range uris {
+
+			f := uri.Feature
+			body := f.Bytes()
+			
+			rsp.Write(body)
+
+			if i+1 < count {
+				rsp.Write([]byte(`,\n`))
+			}
+		}
+		
 		rsp.Write([]byte(`]}`))
 	}
 

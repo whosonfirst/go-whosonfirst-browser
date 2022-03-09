@@ -1,6 +1,7 @@
 package www
 
 import (
+	"context"
 	"fmt"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
@@ -10,7 +11,7 @@ import (
 	_ "log"
 	"net/http"
 	"path/filepath"
-	"strconv"
+	_ "strconv"
 	"strings"
 )
 
@@ -24,10 +25,17 @@ type URI struct {
 
 func ParseURIFromRequest(req *http.Request, r reader.Reader) (*URI, error, int) {
 
+	ctx := req.Context()	
 	path := req.URL.Path
 
+	return ParseURIFromPath(ctx, path, r)
+}
+
+func ParseURIFromPath(ctx context.Context, path string, r reader.Reader) (*URI, error, int) {
+		
 	wofid, uri_args, err := uri.ParseURI(path)
 
+	/*
 	if err != nil || wofid == -1 {
 
 		q := req.URL.Query()
@@ -49,14 +57,13 @@ func ParseURIFromRequest(req *http.Request, r reader.Reader) (*URI, error, int) 
 			IsAlternate: false,
 		}
 	}
-
+	*/
+	
 	rel_path, err := uri.Id2RelPath(wofid, uri_args)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to derive relative path from %d (%s), %w", wofid, path, err), http.StatusBadRequest // StatusInternalServerError
 	}
-
-	ctx := req.Context()
 
 	fh, err := r.Read(ctx, rel_path)
 
