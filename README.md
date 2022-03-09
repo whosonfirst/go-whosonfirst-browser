@@ -92,6 +92,8 @@ $> ./bin/whosonfirst-browser -h
     	Enable the 'spr' (or "standard places response") output handler. (default true)
   -enable-svg
     	Enable the 'svg' output handler.
+  -navplace-max-features int
+    	The maximum number of features to allow in a /navplace/{ID} URI string. (default 3)	
   -nextzen-api-key string
     	A valid Nextzen API key (https://developers.nextzen.org/).
   -nextzen-style-url string
@@ -147,7 +149,7 @@ $> ./bin/whosonfirst-browser -h
 #### Example
 
 ```
-$> bin/browser -enable-all -nextzen-api-key {NEXTZEN_APIKEY}
+$> bin/browser -enable-all -nextzen-api-key {NEXTZEN_APIKEY} -reader-uri {READER_URI}
 2019/12/14 18:22:16 Listening on http://localhost:8080
 ```
 
@@ -184,6 +186,12 @@ Returns a WOF record as a GeoJSON `FeatureCollection` document. This enables WOF
 ![](docs/images/wof-browser-sfo-navplace.png)
 
 `http://localhost:8080/navplace/102527513`
+
+You can specify multiple `Feature` records to include in a response by passing a comma-separated list of IDs. For example:
+
+`http://localhost:8080/navplace/102527513,85922583,85688637`
+
+_Note: There is a limit on the number of records that may be specified which is set by the `-navplace-max-features` flag._
 
 ### PNG
 
