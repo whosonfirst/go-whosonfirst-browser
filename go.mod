@@ -19,7 +19,7 @@ require (
 	github.com/whosonfirst/go-cache v0.5.0
 	github.com/whosonfirst/go-reader v0.10.0
 	github.com/whosonfirst/go-reader-cachereader v0.2.3
-	github.com/whosonfirst/go-reader-findingaid v0.11.1
+	github.com/whosonfirst/go-reader-findingaid v0.12.0
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.4
 	github.com/whosonfirst/go-whosonfirst-image v0.0.1

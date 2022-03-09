@@ -10,9 +10,14 @@ import (
 	"strings"
 )
 
+type NavPlaceHandlerOptions struct {
+	Reader reader.Reader
+	MaxFeatures int
+}
+
 // NavPlaceHandler will return a given record as a FeatureCollection for use by the IIIF navPlace extension,
 // specifically as navPlace "reference" objects.
-func NavPlaceHandler(r reader.Reader) (http.Handler, error) {
+func NavPlaceHandler(opts *NavPlaceHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
@@ -30,7 +35,7 @@ func NavPlaceHandler(r reader.Reader) (http.Handler, error) {
 		
 		for idx, id := range ids {
 		
-			uri, err, status := ParseURIFromPath(ctx, id, r)
+			uri, err, status := ParseURIFromPath(ctx, id, opts.Reader)
 
 			if err != nil {
 				
@@ -49,6 +54,11 @@ func NavPlaceHandler(r reader.Reader) (http.Handler, error) {
 			http.Error(rsp, "No IDs to include", http.StatusBadRequest)
 			return
 		}
+
+		if count > opts.MaxFeatures {
+			http.Error(rsp, "Maximum number of IDs exceeded", http.StatusBadRequest)
+			return
+		}
 		
 		rsp.Header().Set("Content-Type", "application/geo+json")
 		rsp.Header().Set("Access-Control-Allow-Origin", "*")
@@ -63,7 +73,7 @@ func NavPlaceHandler(r reader.Reader) (http.Handler, error) {
 			rsp.Write(body)
 
 			if i+1 < count {
-				rsp.Write([]byte(`,\n`))
+				rsp.Write([]byte(`,`))
 			}
 		}
 		

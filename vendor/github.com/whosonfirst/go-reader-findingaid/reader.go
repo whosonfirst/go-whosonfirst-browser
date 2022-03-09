@@ -90,7 +90,7 @@ func NewFindingAidReader(ctx context.Context, uri string) (wof_reader.Reader, er
 		}
 
 		ru.RawQuery = u.RawQuery
-
+		
 	default:
 
 		path := u.Path
@@ -171,7 +171,7 @@ func (r *FindingAidReader) getReaderURIAndPath(ctx context.Context, uri string) 
 	if err != nil {
 		return "", "", fmt.Errorf("Failed to parse URI, %w", err)
 	}
-
+	
 	repo, err := r.resolver.GetRepo(ctx, id)
 
 	if err != nil {

@@ -105,6 +105,8 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 
 	fs.StringVar(&path_id, "path-id", "/id/", "The that Who's On First documents should be served from.")
 
+	fs.IntVar(&navplace_max_features, "navplace-max-features", 3, "The maximum number of features to allow in a /navplace/{ID} URI string.")
+	
 	return fs, nil
 }
 
@@ -195,6 +197,7 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	cr_uri.Scheme = "cachereader"
 	cr_uri.RawQuery = cr_q.Encode()
 
+	log.Println("DEBUG", cr_uri.String())
 	cr, err := reader.NewReader(ctx, cr_uri.String())
 
 	if err != nil {
@@ -305,7 +308,12 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 	if enable_navplace {
 
-		navplace_handler, err := www.NavPlaceHandler(cr)
+		navplace_opts := &www.NavPlaceHandlerOptions{
+			Reader: cr,
+			MaxFeatures: navplace_max_features,
+		}
+		
+		navplace_handler, err := www.NavPlaceHandler(navplace_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create IIIF navPlace handler, %w", err)

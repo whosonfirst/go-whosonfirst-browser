@@ -61,3 +61,5 @@ var path_search_api string
 var path_search_html string
 
 var path_id string
+
+var navplace_max_features int

@@ -2,7 +2,7 @@ cli:
 	go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 
 debug:
-	go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -proxy-tiles -nextzen-api-key $(APIKEY)
+	go run -mod vendor cmd/whosonfirst-browser/main.go -enable-all -proxy-tiles -nextzen-api-key $(APIKEY) -reader-uri $(READER)
 
 debug-tilepack:
 	make cli && bin/whosonfirst-browser -enable-all -nextzen-tilepack-database $(TILEPACK) -reader-uri $(READER)

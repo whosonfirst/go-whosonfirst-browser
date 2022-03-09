@@ -7,6 +7,7 @@ import (
 	_ "log"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
 )
 
@@ -47,10 +48,10 @@ func (r *HTTPResolver) GetRepo(ctx context.Context, id int64) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Failed to parse endpoint URL, %w", err)
 	}
-
+	
 	str_id := strconv.FormatInt(id, 10)
-	u.Path = fmt.Sprintf("/%s", str_id)
-
+	u.Path = filepath.Join(u.Path, str_id)
+	
 	rsp, err := http.Get(u.String())
 
 	if err != nil {
