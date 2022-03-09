@@ -25,40 +25,22 @@ type URI struct {
 
 func ParseURIFromRequest(req *http.Request, r reader.Reader) (*URI, error, int) {
 
-	ctx := req.Context()	
-	path := req.URL.Path
+	ctx := req.Context()
+
+	q := req.URL.Query()
+	path := q.Get("id")
+
+	if path == "" {
+		path = req.URL.Path
+	}
 
 	return ParseURIFromPath(ctx, path, r)
 }
 
 func ParseURIFromPath(ctx context.Context, path string, r reader.Reader) (*URI, error, int) {
-		
+
 	wofid, uri_args, err := uri.ParseURI(path)
 
-	/*
-	if err != nil || wofid == -1 {
-
-		q := req.URL.Query()
-		str_id := q.Get("id")
-
-		if str_id == "" {
-			return nil, fmt.Errorf("Failed to parse %s and ?id parameter is empty, %w", err), http.StatusNotFound
-		}
-
-		id, err := strconv.ParseInt(str_id, 10, 64)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to parse %s and ?id=%s is invalid, %w", err), http.StatusBadRequest
-		}
-
-		wofid = id
-
-		uri_args = &uri.URIArgs{
-			IsAlternate: false,
-		}
-	}
-	*/
-	
 	rel_path, err := uri.Id2RelPath(wofid, uri_args)
 
 	if err != nil {

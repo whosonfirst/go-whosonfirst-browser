@@ -11,7 +11,7 @@ import (
 )
 
 type NavPlaceHandlerOptions struct {
-	Reader reader.Reader
+	Reader      reader.Reader
 	MaxFeatures int
 }
 
@@ -22,25 +22,30 @@ func NavPlaceHandler(opts *NavPlaceHandlerOptions) (http.Handler, error) {
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		ctx := req.Context()
-		
-		path := req.URL.Path
 
-		base := filepath.Base(path)
-		base = strings.TrimLeft(base, "/")
-		base = strings.TrimRight(base, "/")
+		q := req.URL.Query()
+		base := q.Get("id")
+
+		if base == "" {
+			path := req.URL.Path
+			base = filepath.Base(path)
+
+			base = strings.TrimLeft(base, "/")
+			base = strings.TrimRight(base, "/")
+		}
 
 		ids := strings.Split(base, ",")
 
 		uris := make([]*URI, len(ids))
-		
+
 		for idx, id := range ids {
-		
+
 			uri, err, status := ParseURIFromPath(ctx, id, opts.Reader)
 
 			if err != nil {
-				
+
 				log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
-				
+
 				http.Error(rsp, err.Error(), status)
 				return
 			}
@@ -59,7 +64,7 @@ func NavPlaceHandler(opts *NavPlaceHandlerOptions) (http.Handler, error) {
 			http.Error(rsp, "Maximum number of IDs exceeded", http.StatusBadRequest)
 			return
 		}
-		
+
 		rsp.Header().Set("Content-Type", "application/geo+json")
 		rsp.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -69,14 +74,14 @@ func NavPlaceHandler(opts *NavPlaceHandlerOptions) (http.Handler, error) {
 
 			f := uri.Feature
 			body := f.Bytes()
-			
+
 			rsp.Write(body)
 
 			if i+1 < count {
 				rsp.Write([]byte(`,`))
 			}
 		}
-		
+
 		rsp.Write([]byte(`]}`))
 	}
 
