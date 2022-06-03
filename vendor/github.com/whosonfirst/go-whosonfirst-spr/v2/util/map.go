@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// SPRToMap converts 's' to a `map[string]string` instance.
 func SPRToMap(s spr.StandardPlacesResult) (map[string]string, error) {
 
 	attrs := make(map[string]string)

@@ -2,8 +2,6 @@
 
 There are many interfaces for reading files. This one is ours. It returns `io.ReadSeekCloser` instances.
 
-_This package supersedes the [go-whosonfirst-readwrite](https://github.com/whosonfirst/go-whosonfirst-readwrite) package._
-
 ## Documentation
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/whosonfirst/go-reader.svg)](https://pkg.go.dev/github.com/whosonfirst/go-reader)
@@ -331,10 +329,6 @@ func main() {
 	r, _ := reader.NewReader(ctx, "repo:///usr/local/data/whosonfirst-data-admin-ca")
 }
 ```
-
-## See also
-
-* https://github.com/whosonfirst/go-writer
 
 ### stdin://
 

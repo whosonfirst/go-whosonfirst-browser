@@ -9,6 +9,7 @@ import (
 	"sync"
 )
 
+// MultiReader is a struct that implements the `Reader` interface for reading documents from one or more `Reader` instances.
 type MultiReader struct {
 	Reader
 	readers []Reader
@@ -16,6 +17,8 @@ type MultiReader struct {
 	mu      *sync.RWMutex
 }
 
+// NewMultiReaderFromURIs returns a new `Reader` instance for reading documents from one or more `Reader` instances.
+// 'uris' is assumed to be a list of URIs each of which will be used to invoke the `NewReader` method.
 func NewMultiReaderFromURIs(ctx context.Context, uris ...string) (Reader, error) {
 
 	readers := make([]Reader, 0)
@@ -34,6 +37,7 @@ func NewMultiReaderFromURIs(ctx context.Context, uris ...string) (Reader, error)
 	return NewMultiReader(ctx, readers...)
 }
 
+// NewMultiReaderFromURIs returns a new `Reader` instance for reading documents from one or more `Reader` instances.
 func NewMultiReader(ctx context.Context, readers ...Reader) (Reader, error) {
 
 	lookup := make(map[string]int)
@@ -49,26 +53,28 @@ func NewMultiReader(ctx context.Context, readers ...Reader) (Reader, error) {
 	return &mr, nil
 }
 
-func (mr *MultiReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser, error) {
+// Read will open an `io.ReadSeekCloser` for a file matching 'path'. In the case of multiple underlying
+// `Reader` instances the first instance to successfully load 'path' will be returned.
+func (mr *MultiReader) Read(ctx context.Context, path string) (io.ReadSeekCloser, error) {
 
 	missing := errors.New("Unable to read URI")
 
 	mr.mu.RLock()
 
-	idx, ok := mr.lookup[uri]
+	idx, ok := mr.lookup[path]
 
 	mr.mu.RUnlock()
 
 	if ok {
 
-		// log.Printf("READ MULTIREADER LOOKUP INDEX FOR %s AS %d\n", uri, idx)
+		// log.Printf("READ MULTIREADER LOOKUP INDEX FOR %s AS %d\n", path, idx)
 
 		if idx == -1 {
 			return nil, missing
 		}
 
 		r := mr.readers[idx]
-		return r.Read(ctx, uri)
+		return r.Read(ctx, path)
 	}
 
 	var fh io.ReadSeekCloser
@@ -76,7 +82,7 @@ func (mr *MultiReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser,
 
 	for i, r := range mr.readers {
 
-		rsp, err := r.Read(ctx, uri)
+		rsp, err := r.Read(ctx, path)
 
 		if err == nil {
 
@@ -87,10 +93,10 @@ func (mr *MultiReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser,
 		}
 	}
 
-	// log.Printf("SET MULTIREADER LOOKUP INDEX FOR %s AS %d\n", uri, idx)
+	// log.Printf("SET MULTIREADER LOOKUP INDEX FOR %s AS %d\n", path, idx)
 
 	mr.mu.Lock()
-	mr.lookup[uri] = idx
+	mr.lookup[path] = idx
 	mr.mu.Unlock()
 
 	if fh == nil {
@@ -100,23 +106,27 @@ func (mr *MultiReader) Read(ctx context.Context, uri string) (io.ReadSeekCloser,
 	return fh, nil
 }
 
-func (mr *MultiReader) ReaderURI(ctx context.Context, uri string) string {
+// ReaderURI returns the absolute URL for 'path'. In the case of multiple underlying
+// `Reader` instances the first instance to successfully load 'path' will be returned.
+func (mr *MultiReader) ReaderURI(ctx context.Context, path string) string {
 
 	mr.mu.RLock()
 
-	idx, ok := mr.lookup[uri]
+	idx, ok := mr.lookup[path]
 
 	mr.mu.RUnlock()
 
 	if ok {
-		return mr.readers[idx].ReaderURI(ctx, uri)
+		return mr.readers[idx].ReaderURI(ctx, path)
 	}
 
-	_, err := mr.Read(ctx, uri)
+	r, err := mr.Read(ctx, path)
 
 	if err != nil {
-		return fmt.Sprintf("x-urn:go-reader:multi#%s", uri)
+		return fmt.Sprintf("x-urn:go-reader:multi#%s", path)
 	}
 
-	return mr.ReaderURI(ctx, uri)
+	defer r.Close()
+
+	return mr.ReaderURI(ctx, path)
 }

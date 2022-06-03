@@ -2,6 +2,10 @@
 
 Go package for the Who's On First "standard places responses" (SPR) interface.
 
+## Documentation
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/whosonfirst/go-whosonfirst-spr.svg)](https://pkg.go.dev/github.com/whosonfirst/go-whosonfirst-spr)
+
 ## Description
 
 The `StandardPlacesResult` (SPR) interface defines the _minimum_ set of methods that a system working with a collection of Who's On First (WOF) must implement for any given record. Not all records are the same so the SPR interface is meant to serve as a baseline for common data that describes every record.
@@ -11,44 +15,6 @@ The `StandardPlacesResults` takes the Flickr [standard photo response](https://c
 Being a [Go language interface type](https://www.alexedwards.net/blog/interfaces-explained) the SPR is _not_ designed as a data exchange method. Any given implementation of the SPR _may_ allow its internal data to be exported or serialized (for example, as JSON) but this is not a requirement.
 
 For a concrete example of a package that implements the `SPR` have a look at the [go-whosonfirst-sqlite-spr](https://github.com/whosonfirst/go-whosonfirst-sqlite-spr) package.
-
-## Usage
-
-```
-import "github.com/whosonfirst/go-whosonfirst-spr/v2"
-```
-
-## Interface
-
-```
-type StandardPlacesResult interface {
-	Id() string
-	ParentId() string
-	Name() string
-	Placetype() string
-	Country() string
-	Repo() string
-	Path() string
-	URI() string
-	Inception() *edtf.EDTFDate
-	Cessation() *edtf.EDTFDate	
-	Latitude() float64
-	Longitude() float64
-	MinLatitude() float64
-	MinLongitude() float64
-	MaxLatitude() float64
-	MaxLongitude() float64
-	IsCurrent() flags.ExistentialFlag
-	IsCeased() flags.ExistentialFlag
-	IsDeprecated() flags.ExistentialFlag
-	IsSuperseded() flags.ExistentialFlag
-	IsSuperseding() flags.ExistentialFlag
-	SupersededBy() []int64
-	Supersedes() []int64
-	BelongsTo() []int64
-	LastModified() int64
-}
-```
 
 ### Notes
 
