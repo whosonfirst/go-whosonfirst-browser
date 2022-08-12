@@ -45,9 +45,7 @@ func SelectHandler(r reader.Reader, opts *SelectHandlerOptions) (http.Handler, e
 			return
 		}
 
-		f := uri.Feature
-
-		query_rsp := gjson.GetBytes(f.Bytes(), query)
+		query_rsp := gjson.GetBytes(uri.Feature, query)
 
 		var rsp_body []byte
 

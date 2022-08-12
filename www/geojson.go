@@ -20,12 +20,8 @@ func GeoJSONHandler(r reader.Reader) (http.Handler, error) {
 			return
 		}
 
-		f := uri.Feature
-
 		rsp.Header().Set("Content-Type", "application/json")
-		rsp.Header().Set("Access-Control-Allow-Origin", "*")
-
-		rsp.Write(f.Bytes())
+		rsp.Write(uri.Feature)
 	}
 
 	h := http.HandlerFunc(fn)

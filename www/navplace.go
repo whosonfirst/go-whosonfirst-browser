@@ -66,16 +66,12 @@ func NavPlaceHandler(opts *NavPlaceHandlerOptions) (http.Handler, error) {
 		}
 
 		rsp.Header().Set("Content-Type", "application/geo+json")
-		rsp.Header().Set("Access-Control-Allow-Origin", "*")
 
 		rsp.Write([]byte(`{"type":"FeatureCollection", "features":[`))
 
 		for i, uri := range uris {
 
-			f := uri.Feature
-			body := f.Bytes()
-
-			rsp.Write(body)
+			rsp.Write(uri.Feature)
 
 			if i+1 < count {
 				rsp.Write([]byte(`,`))

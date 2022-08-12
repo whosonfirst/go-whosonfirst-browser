@@ -201,9 +201,6 @@ github.com/jtacoma/uritemplates
 # github.com/mattn/go-sqlite3 v1.14.14
 ## explicit; go 1.12
 github.com/mattn/go-sqlite3
-# github.com/mmcloughlin/geohash v0.10.0
-## explicit
-github.com/mmcloughlin/geohash
 # github.com/natefinch/atomic v1.0.1
 ## explicit; go 1.12
 github.com/natefinch/atomic
@@ -245,9 +242,6 @@ github.com/sfomuseum/go-http-tilezen/http
 # github.com/sfomuseum/go-tilezen v0.0.6
 ## explicit; go 1.16
 github.com/sfomuseum/go-tilezen
-# github.com/skelterjohn/geom v0.0.0-20180103142417-96f3e8a219c5
-## explicit
-github.com/skelterjohn/geom
 # github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76
 ## explicit; go 1.17
 github.com/srwiley/oksvg
@@ -273,8 +267,8 @@ github.com/tilezen/go-tilepacks/tilepack
 # github.com/whosonfirst/go-cache v0.5.1
 ## explicit; go 1.16
 github.com/whosonfirst/go-cache
-# github.com/whosonfirst/go-geojson-svg v0.0.4
-## explicit; go 1.12
+# github.com/whosonfirst/go-geojson-svg v0.0.5
+## explicit; go 1.16
 github.com/whosonfirst/go-geojson-svg
 # github.com/whosonfirst/go-ioutil v1.0.2
 ## explicit; go 1.16
@@ -308,16 +302,8 @@ github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
 github.com/whosonfirst/go-whosonfirst-flags/geometry
 github.com/whosonfirst/go-whosonfirst-flags/placetypes
-# github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.4
-## explicit; go 1.12
-github.com/whosonfirst/go-whosonfirst-geojson-v2
-github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/geometry
-github.com/whosonfirst/go-whosonfirst-geojson-v2/utils
-# github.com/whosonfirst/go-whosonfirst-hash v0.1.0
-## explicit; go 1.12
-github.com/whosonfirst/go-whosonfirst-hash
-# github.com/whosonfirst/go-whosonfirst-image v0.0.1
-## explicit
+# github.com/whosonfirst/go-whosonfirst-image v0.1.0
+## explicit; go 1.19
 github.com/whosonfirst/go-whosonfirst-image
 # github.com/whosonfirst/go-whosonfirst-placetypes v0.3.0
 ## explicit; go 1.12
@@ -338,7 +324,7 @@ github.com/whosonfirst/go-whosonfirst-spr-geojson
 ## explicit; go 1.16
 github.com/whosonfirst/go-whosonfirst-spr/v2
 github.com/whosonfirst/go-whosonfirst-spr/v2/util
-# github.com/whosonfirst/go-whosonfirst-svg v0.0.5
+# github.com/whosonfirst/go-whosonfirst-svg v0.1.0
 ## explicit; go 1.16
 github.com/whosonfirst/go-whosonfirst-svg
 # github.com/whosonfirst/go-whosonfirst-uri v1.2.0

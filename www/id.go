@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
@@ -77,8 +78,9 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (http.Handler, error) {
 
 			RenderTemplate(rsp, error_t, vars)
 		}
-		
-		url := filepath.Join(endpoint, id)
+
+		str_id := strconv.FormatInt(id, 10)
+		url := filepath.Join(endpoint, str_id)
 		http.Redirect(rsp, req, url, http.StatusMovedPermanently)
 		return
 	}
@@ -123,7 +125,7 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (http.Handler, error) {
 			// pass
 		}
 
-		s, err := f.SPR()
+		s, err := spr.WhosOnFirstSPR(f)
 
 		if err != nil {
 

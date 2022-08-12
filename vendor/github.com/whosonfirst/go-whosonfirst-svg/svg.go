@@ -3,19 +3,18 @@ package svg
 import (
 	"crypto/md5"
 	"encoding/hex"
-	_ "errors"
 	"fmt"
 	geojson_svg "github.com/whosonfirst/go-geojson-svg"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/geometry"
+	"github.com/whosonfirst/go-whosonfirst-feature/geometry"
+	"github.com/whosonfirst/go-whosonfirst-feature/properties"
+	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2/util"
 	"io"
-	_ "log"
 	"os"
 	"strings"
 )
 
-type StyleFunction func(f geojson.Feature) (map[string]string, error)
+type StyleFunction func(f []byte) (map[string]string, error)
 
 type Options struct {
 	Width         float64
@@ -42,7 +41,7 @@ func NewDefaultOptions() *Options {
 
 func NewDefaultStyleFunction() StyleFunction {
 
-	style_func := func(f geojson.Feature) (map[string]string, error) {
+	style_func := func(boyd []byte) (map[string]string, error) {
 		attrs := make(map[string]string)
 		return attrs, nil
 	}
@@ -54,7 +53,7 @@ func NewDopplrStyleFunction() StyleFunction {
 
 	default_styles := NewDefaultStyleFunction()
 
-	style_func := func(f geojson.Feature) (map[string]string, error) {
+	style_func := func(f []byte) (map[string]string, error) {
 
 		attrs, err := default_styles(f)
 
@@ -62,7 +61,11 @@ func NewDopplrStyleFunction() StyleFunction {
 			return nil, err
 		}
 
-		pt := f.Placetype()
+		pt, err := properties.Placetype(f)
+
+		if err != nil {
+			return nil, err
+		}
 
 		fill := fmt.Sprintf("fill: %s", str2hex(pt))
 
@@ -81,7 +84,7 @@ func NewFillStyleFunction(colour string) StyleFunction {
 
 	default_styles := NewDefaultStyleFunction()
 
-	style_func := func(f geojson.Feature) (map[string]string, error) {
+	style_func := func(f []byte) (map[string]string, error) {
 
 		attrs, err := default_styles(f)
 
@@ -98,18 +101,19 @@ func NewFillStyleFunction(colour string) StyleFunction {
 	return style_func
 }
 
-func FeatureToSVG(f geojson.Feature, opts *Options) error {
+func FeatureToSVG(f []byte, opts *Options) error {
 
-	bboxes, err := f.BoundingBoxes()
+	geom, err := geometry.Geometry(f)
 
 	if err != nil {
 		return err
 	}
 
-	mbr := bboxes.MBR()
+	orb_geom := geom.Geometry()
+	mbr := orb_geom.Bound()
 
-	mbr_w := mbr.Width()
-	mbr_h := mbr.Height()
+	mbr_w := mbr.Max[0] - mbr.Min[0]
+	mbr_h := mbr.Max[1] - mbr.Min[1]
 
 	w := opts.Width
 	h := opts.Height
@@ -122,7 +126,7 @@ func FeatureToSVG(f geojson.Feature, opts *Options) error {
 		w = w * (mbr_w / mbr_h)
 	}
 
-	geom, err := geometry.ToString(f)
+	enc_geom, err := geom.MarshalJSON()
 
 	if err != nil {
 		return err
@@ -131,19 +135,19 @@ func FeatureToSVG(f geojson.Feature, opts *Options) error {
 	s := geojson_svg.New()
 	s.Mercator = opts.Mercator
 
-	err = s.AddGeometry(geom)
+	err = s.AddGeometry(string(enc_geom))
 
 	if err != nil {
 		return err
 	}
 
-	spr, err := f.SPR()
+	wof_spr, err := spr.WhosOnFirstSPR(f)
 
 	if err != nil {
 		return err
 	}
 
-	attrs, err := util.SPRToMap(spr)
+	attrs, err := util.SPRToMap(wof_spr)
 
 	if err != nil {
 		return err
@@ -184,10 +188,22 @@ func FeatureToSVG(f geojson.Feature, opts *Options) error {
 
 	attrs["viewBox"] = fmt.Sprintf("0 0 %0.2f %0.2f", w, h)
 
-	id := fmt.Sprintf("wof-%s", f.Id())
+	wof_id, err := properties.Id(f)
+
+	if err != nil {
+		return err
+	}
+
+	wof_pt, err := properties.Placetype(f)
+
+	if err != nil {
+		return err
+	}
+
+	id := fmt.Sprintf("wof-%s", wof_id)
 	attrs["id"] = id
 
-	pt := fmt.Sprintf("wof-%s", f.Placetype())
+	pt := fmt.Sprintf("wof-%s", wof_pt)
 
 	class, _ := attrs["class"]
 	class = fmt.Sprintf("%s %s", class, pt)

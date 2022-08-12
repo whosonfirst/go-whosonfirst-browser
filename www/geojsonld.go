@@ -21,12 +21,9 @@ func GeoJSONLDHandler(r reader.Reader) (http.Handler, error) {
 			return
 		}
 
-		f := uri.Feature
-		body := f.Bytes()
-
 		ctx := req.Context()
 
-		body, err = geojsonld.AsGeoJSONLD(ctx, body)
+		body, err := geojsonld.AsGeoJSONLD(ctx, uri.Feature)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), status)
@@ -34,8 +31,6 @@ func GeoJSONLDHandler(r reader.Reader) (http.Handler, error) {
 		}
 
 		rsp.Header().Set("Content-Type", "application/geo+json")
-		rsp.Header().Set("Access-Control-Allow-Origin", "*")
-
 		rsp.Write(body)
 	}
 

@@ -3,7 +3,6 @@ package image
 import (
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-svg"
 	"image"
 	"image/png"
@@ -34,7 +33,7 @@ func NewDefaultOptions() *Options {
 	return &opts
 }
 
-func FeatureToPNG(f geojson.Feature, opts *Options) error {
+func FeatureToPNG(f []byte, opts *Options) error {
 
 	img, err := FeatureToImage(f, opts)
 
@@ -51,7 +50,7 @@ func FeatureToPNG(f geojson.Feature, opts *Options) error {
 	return nil
 }
 
-func FeatureToImage(f geojson.Feature, opts *Options) (image.Image, error) {
+func FeatureToImage(f []byte, opts *Options) (image.Image, error) {
 
 	tmpfile, err := ioutil.TempFile("", "svg")
 

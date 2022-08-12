@@ -3,6 +3,7 @@ package www
 import (
 	"encoding/json"
 	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-spr/v2"	
 	"log"
 	"net/http"
 )
@@ -21,8 +22,7 @@ func SPRHandler(r reader.Reader) (http.Handler, error) {
 			return
 		}
 
-		f := uri.Feature
-		s, err := f.SPR()
+		s, err := spr.WhosOnFirstSPR(uri.Feature)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
@@ -37,8 +37,6 @@ func SPRHandler(r reader.Reader) (http.Handler, error) {
 		}
 
 		rsp.Header().Set("Content-Type", "application/json")
-		rsp.Header().Set("Access-Control-Allow-Origin", "*")
-
 		rsp.Write(body)
 	}
 
