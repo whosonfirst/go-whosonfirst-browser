@@ -141,13 +141,25 @@ Usage:
     	A valid whosonfirst/go-reader-findingaid URI
 ```
 
-For example:
+For example, using the `whosonfirst/go-whosonfirst-findingaid` SQL resolver:
 
 ```
 $> ./bin/read \
 	-reader-uri 'findingaid://sqlite?dsn=/usr/local/data/findingaids/wof.db' \
 	102527513 \
 	
+| jq '.["properties"]["wof:name"]'
+
+"San Francisco International Airport"
+```
+
+Or, using the `whosonfirst/go-whosonfirst-findingaid` HTTP resolver:
+
+```
+$> ./bin/read \
+	-reader-uri 'findingaid://https/static.sfomuseum.org/findingaid/?template=https://raw.githubusercontent.com/sfomuseum-data/{repo}/main/data/' \
+	102527513 \
+
 | jq '.["properties"]["wof:name"]'
 
 "San Francisco International Airport"
