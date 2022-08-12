@@ -197,7 +197,6 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	cr_uri.Scheme = "cachereader"
 	cr_uri.RawQuery = cr_q.Encode()
 
-	log.Println("DEBUG", cr_uri.String())
 	cr, err := reader.NewReader(ctx, cr_uri.String())
 
 	if err != nil {
