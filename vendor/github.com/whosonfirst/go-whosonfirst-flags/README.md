@@ -1,7 +1,11 @@
 # go-whosonfirst-flags
 
-Go tools for working Who's On First flags.
+Go package defining interfaces for different classes of "flags" (or well-defined arguments) for querying or filtering Who's On First records.
+
+## Documentation
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/whosonfirst/go-whosonfirst-flags.svg)](https://pkg.go.dev/github.com/whosonfirst/go-whosonfirst-flags)
 
 ## Important
 
-Work in progress. Documentation to follow.
+Work in progress. Documentation is incomplete.

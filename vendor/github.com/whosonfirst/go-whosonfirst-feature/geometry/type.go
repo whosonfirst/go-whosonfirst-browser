@@ -5,6 +5,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// Type() returns the `geometry.type` property for 'body'.
 func Type(body []byte) (string, error) {
 
 	rsp := gjson.GetBytes(body, "geometry.type")

@@ -3,7 +3,7 @@ package www
 import (
 	"errors"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
+	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"html/template"
@@ -53,7 +53,7 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (http.Handler, error) {
 		return nil, errors.New("Missing notfound template")
 	}
 
-	handle_other := func(rsp http.ResponseWriter, req *http.Request, f geojson.Feature, endpoint string) {
+	handle_other := func(rsp http.ResponseWriter, req *http.Request, f []byte, endpoint string) {
 
 		if endpoint == "" {
 
@@ -65,7 +65,20 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (http.Handler, error) {
 			return
 		}
 
-		url := filepath.Join(endpoint, f.Id())
+		id, err := properties.Id(f)
+
+		if err != nil{
+			
+			vars := ErrorVars{
+				Error:     err,
+				Endpoints: opts.Endpoints,
+				// status...
+			}
+
+			RenderTemplate(rsp, error_t, vars)
+		}
+		
+		url := filepath.Join(endpoint, id)
 		http.Redirect(rsp, req, url, http.StatusMovedPermanently)
 		return
 	}

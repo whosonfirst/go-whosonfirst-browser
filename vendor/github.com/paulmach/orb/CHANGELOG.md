@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.7.1](https://github.com/paulmach/orb/compare/v0.7.0...v0.7.1) - 2022-05-16
+
+No changes
+
+The v0.7.0 tag was updated since it initially pointed to the wrong commit. This is causing caching issues.
+
+## [v0.7.0](https://github.com/paulmach/orb/compare/v0.6.0...v0.7.0) - 2022-05-10
+
+This tag is broken, please use v0.7.1 instead.
+
+### Breaking Changes
+
+-   tilecover now returns an error (vs. panicing) on non-closed 2d geometry by [@paulmach](https://github.com/paulmach) in https://github.com/paulmach/orb/pull/87
+
+    This changes the signature of many of the methods in the [maptile/tilecover](https://github.com/paulmach/orb/tree/master/maptile/tilecover) package.
+    To emulate the old behavior replace:
+
+        tiles := tilecover.Geometry(poly, zoom)
+
+    with
+
+        tiles, err := tilecover.Geometry(poly, zoom)
+        if err != nil {
+        	panic(err)
+        }
+
 ## [v0.6.0](https://github.com/paulmach/orb/compare/v0.5.0...v0.6.0) - 2022-05-04
 
 ### Added

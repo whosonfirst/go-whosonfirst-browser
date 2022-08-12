@@ -4,21 +4,17 @@ import (
 	"context"
 	"fmt"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-uri"
-	"github.com/whosonfirst/warning"
-	_ "log"
+	"io"
 	"net/http"
 	"path/filepath"
-	_ "strconv"
 	"strings"
 )
 
 type URI struct {
 	Id          int64
 	URI         string
-	Feature     geojson.Feature
+	Feature     []byte
 	URIArgs     *uri.URIArgs
 	IsAlternate bool
 }
@@ -53,9 +49,9 @@ func ParseURIFromPath(ctx context.Context, path string, r reader.Reader) (*URI, 
 		return nil, fmt.Errorf("Failed to read %s, %w", rel_path, err), http.StatusBadRequest // StatusInternalServerError
 	}
 
-	f, err := feature.LoadFeatureFromReader(fh)
+	f, err := io.ReadAll(fh)
 
-	if err != nil && !warning.IsWarning(err) {
+	if err != nil {
 		return nil, fmt.Errorf("Failed to read feature for %s, %w", rel_path, err), http.StatusInternalServerError
 	}
 

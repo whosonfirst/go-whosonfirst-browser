@@ -7,6 +7,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// Geometry() will return a `paulmach/orb/geojson.Geometry` instance derived from 'body'.
 func Geometry(body []byte) (*geojson.Geometry, error) {
 
 	rsp := gjson.GetBytes(body, "geometry")

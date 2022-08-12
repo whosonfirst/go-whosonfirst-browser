@@ -5,7 +5,6 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-svg"
 	"log"
 	"net/http"
@@ -106,11 +105,11 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (http.Handler, error)
 		// to do: support for custom styles:
 		// https://github.com/whosonfirst/go-whosonfirst-browser/issues/19
 
-		opts.StyleFunction = func(f geojson.Feature) (map[string]string, error) {
+		opts.StyleFunction = func(f []byte) (map[string]string, error) {
 
 			attrs := make(map[string]string)
 
-			type_rsp := gjson.GetBytes(f.Bytes(), "geometry.type")
+			type_rsp := gjson.GetBytes(f, "geometry.type")
 
 			if !type_rsp.Exists() {
 				return nil, errors.New("Missing geometry.type")
