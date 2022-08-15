@@ -68,8 +68,8 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (http.Handler, error) {
 
 		id, err := properties.Id(f)
 
-		if err != nil{
-			
+		if err != nil {
+
 			vars := ErrorVars{
 				Error:     err,
 				Endpoints: opts.Endpoints,

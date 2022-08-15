@@ -224,6 +224,9 @@ github.com/paulmach/orb/geojson
 github.com/paulmach/orb/internal/mercator
 github.com/paulmach/orb/maptile
 github.com/paulmach/orb/project
+# github.com/rs/cors v1.8.2
+## explicit; go 1.13
+github.com/rs/cors
 # github.com/sfomuseum/go-edtf v1.1.1
 ## explicit; go 1.12
 github.com/sfomuseum/go-edtf

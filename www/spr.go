@@ -3,7 +3,7 @@ package www
 import (
 	"encoding/json"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-spr/v2"	
+	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"log"
 	"net/http"
 )

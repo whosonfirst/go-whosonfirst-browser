@@ -13,6 +13,7 @@ import (
 	"github.com/aaronland/go-http-ping/v2"
 	"github.com/aaronland/go-http-server"
 	"github.com/aaronland/go-http-tangramjs"
+	"github.com/rs/cors"
 	"github.com/sfomuseum/go-flags/flagset"
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
 	tiles_http "github.com/tilezen/go-tilepacks/http"
@@ -107,6 +108,9 @@ func (app *BrowserApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSe
 
 	fs.IntVar(&navplace_max_features, "navplace-max-features", 3, "The maximum number of features to allow in a /navplace/{ID} URI string.")
 
+	fs.BoolVar(&enable_cors, "enable-cors", true, "A boolean flag to enable CORS headers")
+	fs.Var(&cors_origins, "cors-origin", "One or more hosts to restrict CORS support to on the API endpoint. If no origins are defined (and -cors is enabled) then the server will default to all hosts.")
+
 	return fs, nil
 }
 
@@ -166,6 +170,19 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 	if enable_html {
 		enable_geojson = true
 		enable_png = true
+	}
+
+	var cors_wrapper *cors.Cors
+
+	if enable_cors {
+
+		if len(cors_origins) == 0 {
+			cors_origins.Set("*")
+		}
+
+		cors_wrapper = cors.New(cors.Options{
+			AllowedOrigins: cors_origins,
+		})
 	}
 
 	if cache_uri == "tmp://" {
@@ -269,6 +286,10 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 			return fmt.Errorf("Failed to create SVG handler, %w", err)
 		}
 
+		if enable_cors {
+			svg_handler = cors_wrapper.Handler(svg_handler)
+		}
+
 		mux.Handle(path_svg, svg_handler)
 	}
 
@@ -278,6 +299,10 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 		if err != nil {
 			return fmt.Errorf("Failed to create SPR handler, %w", err)
+		}
+
+		if enable_cors {
+			spr_handler = cors_wrapper.Handler(spr_handler)
 		}
 
 		mux.Handle(path_spr, spr_handler)
@@ -291,6 +316,10 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 			return fmt.Errorf("Failed to create GeoJSON handler, %w", err)
 		}
 
+		if enable_cors {
+			geojson_handler = cors_wrapper.Handler(geojson_handler)
+		}
+
 		mux.Handle(path_geojson, geojson_handler)
 	}
 
@@ -300,6 +329,10 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 		if err != nil {
 			return fmt.Errorf("Failed to create GeoJSON LD handler, %w", err)
+		}
+
+		if enable_cors {
+			geojsonld_handler = cors_wrapper.Handler(geojsonld_handler)
 		}
 
 		mux.Handle(path_geojsonld, geojsonld_handler)
@@ -316,6 +349,10 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 		if err != nil {
 			return fmt.Errorf("Failed to create IIIF navPlace handler, %w", err)
+		}
+
+		if enable_cors {
+			navplace_handler = cors_wrapper.Handler(navplace_handler)
 		}
 
 		mux.Handle(path_navplace, navplace_handler)
@@ -341,6 +378,10 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 		if err != nil {
 			return fmt.Errorf("Failed to create select handler, %w", err)
+		}
+
+		if enable_cors {
+			select_handler = cors_wrapper.Handler(select_handler)
 		}
 
 		mux.Handle(path_select, select_handler)
@@ -385,6 +426,10 @@ func (app *BrowserApplication) RunWithFlagSet(ctx context.Context, fs *flag.Flag
 
 		if err != nil {
 			return fmt.Errorf("Failed to create search handler, %w", err)
+		}
+
+		if enable_cors {
+			search_handler = cors_wrapper.Handler(search_handler)
 		}
 
 		mux.Handle(path_search_api, search_handler)
