@@ -24,7 +24,7 @@ github.com/aaronland/go-http-sanitize
 # github.com/aaronland/go-http-server v1.0.0
 ## explicit; go 1.16
 github.com/aaronland/go-http-server
-# github.com/aaronland/go-http-tangramjs v0.1.2
+# github.com/aaronland/go-http-tangramjs v0.1.3
 ## explicit; go 1.16
 github.com/aaronland/go-http-tangramjs
 github.com/aaronland/go-http-tangramjs/static

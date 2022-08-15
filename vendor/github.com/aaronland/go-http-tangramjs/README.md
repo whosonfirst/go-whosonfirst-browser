@@ -173,6 +173,8 @@ func main() {
 }
 ```
 
+You can see a working example of this in the [aaronland/go-marc/cmd/marc-034d](https://github.com/aaronland/go-marc/blob/main/cmd/marc-034d/main.go) application.
+
 The creation of Nextzen vector tile "tilepack" databases is out of scope for this document. Please consult the documentation for the [go-tilepacks build tool](https://github.com/tilezen/go-tilepacks#build) for details on creating custom databases.
 
 It is currently only possible to serve tiles from a single "tilepack" database.
