@@ -14,24 +14,19 @@ package main
 
 import (
 	"context"
-	"github.com/whosonfirst/go-whosonfirst-browser/v4/application/browser"
+	"github.com/whosonfirst/go-whosonfirst-browser/v5/application/browser"
 	"log"
 )
 
 func main() {
 
 	ctx := context.Background()
+	logger := log.Default()
 
-	app, err := browser.NewBrowserApplication(ctx)
-
-	if err != nil {
-		log.Fatalf("Failed to create browser application, %v", err)
-	}
-
-	err = app.Run(ctx)
+	err := browser.Run(ctx, logger)
 
 	if err != nil {
-		log.Fatalf("Failed to run browser application, %v", err)
+		logger.Fatalf("Failed to run browser application, %v", err)
 	}
 
 }

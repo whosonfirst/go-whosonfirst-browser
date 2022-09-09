@@ -103,7 +103,7 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (http.Handler, error)
 		opts.Writer = rsp
 
 		// to do: support for custom styles:
-		// https://github.com/whosonfirst/go-whosonfirst-browser/issues/19
+		// https://github.com/whosonfirst/go-whosonfirst-browser/v5issues/19
 
 		opts.StyleFunction = func(f []byte) (map[string]string, error) {
 
@@ -126,7 +126,7 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (http.Handler, error)
 				attrs["stroke"] = "#000"
 			case "Point", "MultiPoint":
 				// something something something
-				// https://github.com/whosonfirst/go-whosonfirst-browser/issues/18
+				// https://github.com/whosonfirst/go-whosonfirst-browser/v5issues/18
 			default:
 				// pass
 			}

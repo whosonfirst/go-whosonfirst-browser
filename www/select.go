@@ -62,8 +62,6 @@ func SelectHandler(r reader.Reader, opts *SelectHandlerOptions) (http.Handler, e
 		}
 
 		rsp.Header().Set("Content-Type", "application/json")
-		rsp.Header().Set("Access-Control-Allow-Origin", "*")
-
 		rsp.Write(rsp_body)
 	}
 
