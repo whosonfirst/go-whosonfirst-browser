@@ -66,4 +66,4 @@ var navplace_max_features int
 
 var enable_cors bool
 
-var cors_origins multi.MultiString
+var cors_origins multi.MultiCSVString
