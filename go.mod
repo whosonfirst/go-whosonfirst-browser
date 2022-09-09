@@ -10,10 +10,10 @@ require (
 	github.com/aaronland/go-http-server v1.0.0
 	github.com/aaronland/go-http-tangramjs v0.1.3
 	github.com/rs/cors v1.8.2
-	github.com/sfomuseum/go-flags v0.8.3
+	github.com/sfomuseum/go-flags v0.9.0
 	github.com/sfomuseum/go-geojsonld v1.0.0
 	github.com/sfomuseum/go-http-tilezen v0.0.7
-	github.com/tidwall/gjson v1.14.2
+	github.com/tidwall/gjson v1.14.3
 	github.com/tilezen/go-tilepacks v0.0.0-20220729022432-5ee633f5bb6a
 	github.com/whosonfirst/go-cache v0.5.1
 	github.com/whosonfirst/go-reader v1.0.1
@@ -22,7 +22,7 @@ require (
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.24
 	github.com/whosonfirst/go-whosonfirst-image v0.1.0
-	github.com/whosonfirst/go-whosonfirst-search v0.0.4
+	github.com/whosonfirst/go-whosonfirst-search v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.7
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.2.1
 	github.com/whosonfirst/go-whosonfirst-svg v0.1.0
@@ -36,7 +36,7 @@ require (
 	github.com/aaronland/go-roster v1.0.0 // indirect
 	github.com/aaronland/go-string v1.0.0 // indirect
 	github.com/akrylysov/algnhsa v0.12.1 // indirect
-	github.com/aws/aws-lambda-go v1.10.0 // indirect
+	github.com/aws/aws-lambda-go v1.9.0 // indirect
 	github.com/aws/aws-sdk-go v1.44.65 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.16.2 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.15.3 // indirect
@@ -68,7 +68,7 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
-	github.com/tidwall/sjson v1.2.2 // indirect
+	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/whosonfirst/go-geojson-svg v0.0.5 // indirect
 	github.com/whosonfirst/go-ioutil v1.0.2 // indirect
 	github.com/whosonfirst/go-reader-http v0.3.1 // indirect

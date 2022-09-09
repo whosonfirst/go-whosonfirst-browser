@@ -37,7 +37,7 @@ github.com/aaronland/go-string/dsn
 # github.com/akrylysov/algnhsa v0.12.1
 ## explicit; go 1.12
 github.com/akrylysov/algnhsa
-# github.com/aws/aws-lambda-go v1.10.0
+# github.com/aws/aws-lambda-go v1.9.0
 ## explicit
 github.com/aws/aws-lambda-go/events
 github.com/aws/aws-lambda-go/lambda
@@ -238,7 +238,7 @@ github.com/sfomuseum/go-edtf/level2
 github.com/sfomuseum/go-edtf/parser
 github.com/sfomuseum/go-edtf/re
 github.com/sfomuseum/go-edtf/tests
-# github.com/sfomuseum/go-flags v0.8.3
+# github.com/sfomuseum/go-flags v0.9.0
 ## explicit; go 1.16
 github.com/sfomuseum/go-flags/flagset
 github.com/sfomuseum/go-flags/multi
@@ -257,7 +257,7 @@ github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 ## explicit; go 1.17
 github.com/srwiley/rasterx
-# github.com/tidwall/gjson v1.14.2
+# github.com/tidwall/gjson v1.14.3
 ## explicit; go 1.12
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.1.1
@@ -266,7 +266,7 @@ github.com/tidwall/match
 # github.com/tidwall/pretty v1.2.0
 ## explicit; go 1.16
 github.com/tidwall/pretty
-# github.com/tidwall/sjson v1.2.2
+# github.com/tidwall/sjson v1.2.5
 ## explicit; go 1.14
 github.com/tidwall/sjson
 # github.com/tilezen/go-tilepacks v0.0.0-20220729022432-5ee633f5bb6a
@@ -318,8 +318,8 @@ github.com/whosonfirst/go-whosonfirst-image
 ## explicit; go 1.12
 github.com/whosonfirst/go-whosonfirst-placetypes
 github.com/whosonfirst/go-whosonfirst-placetypes/placetypes
-# github.com/whosonfirst/go-whosonfirst-search v0.0.4
-## explicit; go 1.16
+# github.com/whosonfirst/go-whosonfirst-search v0.1.0
+## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-search/filter
 github.com/whosonfirst/go-whosonfirst-search/fulltext
 # github.com/whosonfirst/go-whosonfirst-sources v0.1.0
