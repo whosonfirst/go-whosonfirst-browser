@@ -12,8 +12,12 @@ var server_uri string
 
 var static_prefix string
 
-var reader_uris multi.MultiString
+var reader_uris multi.MultiCSVString
 var cache_uri string
+
+var exporter_uri string
+
+var writer_uris multi.MultiCSVString
 
 var nextzen_api_key string
 var nextzen_style_url string
@@ -52,6 +56,11 @@ var enable_search_html bool
 
 var enable_search bool
 
+var enable_api bool
+
+var path_api_deprecate string
+var path_api_cessate string
+
 var search_database_uri string
 
 var path_png string
@@ -73,6 +82,8 @@ var enable_cors bool
 
 var cors_origins multi.MultiCSVString
 
+var authenticator_uri string
+
 // DefaultFlagSet returns a `flag.FlagSet` instance with flags and defaults values assigned for use with `app`.
 func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
@@ -84,6 +95,10 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.Var(&reader_uris, "reader-uri", "One or more valid go-reader Reader URI strings.")
 	fs.StringVar(&cache_uri, "cache-uri", "gocache://", "A valid go-cache Cache URI string.")
+
+	fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
+
+	fs.StringVar(&exporter_uri, "exporter-uri", "whosonfirst://", "A valid whosonfirst/go-whosonfirst-export/v2 URI.")
 
 	fs.StringVar(&nextzen_api_key, "nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
 	fs.StringVar(&nextzen_style_url, "nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
@@ -137,6 +152,14 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.BoolVar(&enable_cors, "enable-cors", true, "A boolean flag to enable CORS headers")
 	fs.Var(&cors_origins, "cors-origin", "One or more hosts to restrict CORS support to on the API endpoint. If no origins are defined (and -cors is enabled) then the server will default to all hosts.")
+
+	fs.StringVar(&authenticator_uri, "authenticator-uri", "null://", "A valid sfomuseum/go-http-auth URI.")
+
+	fs.BoolVar(&enable_api, "enable-api", false, "Enable the API endpoints")
+
+	fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
+
+	fs.StringVar(&path_api_cessate, "path-api-cessate", "/api/cessate/", "...")
 
 	return fs, nil
 }

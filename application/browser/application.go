@@ -15,14 +15,18 @@ import (
 	"github.com/aaronland/go-http-tangramjs"
 	"github.com/rs/cors"
 	"github.com/sfomuseum/go-flags/flagset"
+	"github.com/sfomuseum/go-http-auth"
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
 	tiles_http "github.com/tilezen/go-tilepacks/http"
 	"github.com/tilezen/go-tilepacks/tilepack"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-browser/v5/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v5/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v5/templates/html"
+	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
+	"github.com/whosonfirst/go-writer/v2"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -162,6 +166,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		if !strings.HasPrefix(static_prefix, "/") {
 			return fmt.Errorf("Invalid -static-prefix value")
 		}
+	}
+
+	authenticator, err := auth.NewAuthenticator(ctx, authenticator_uri)
+
+	if err != nil {
+		return fmt.Errorf("Failed to create authenticator, %w", err)
 	}
 
 	mux := http.NewServeMux()
@@ -537,6 +547,65 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			tiles_handler := tiles_http.MbtilesHandler(tiles_reader)
 			mux.Handle(path_tiles, tiles_handler)
 		}
+
+	}
+
+	if enable_api {
+
+		ex, err := export.NewExporter(ctx, exporter_uri)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create new exporter, %w", err)
+		}
+
+		writers := make([]writer.Writer, len(writer_uris))
+
+		for idx, wr_uri := range writer_uris {
+
+			wr, err := writer.NewWriter(ctx, wr_uri)
+
+			if err != nil {
+				return fmt.Errorf("Failed to create writer for '%s', %w", wr_uri, err)
+			}
+
+			writers[idx] = wr
+		}
+
+		multi_wr := writer.NewMultiWriter(writers...)
+
+		deprecate_opts := &api.DeprecateFeatureHandlerOptions{
+			Reader:        cr,
+			Logger:        logger,
+			Authenticator: authenticator,
+			Exporter:      ex,
+			Writer:        multi_wr,
+		}
+
+		deprecate_handler, err := api.DeprecateFeatureHandler(deprecate_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create deprecate feature handler, %w", err)
+		}
+
+		deprecate_handler = authenticator.WrapHandler(deprecate_handler)
+		mux.Handle(path_api_deprecate, deprecate_handler)
+
+		cessate_opts := &api.CessateFeatureHandlerOptions{
+			Reader:        cr,
+			Logger:        logger,
+			Authenticator: authenticator,
+			Exporter:      ex,
+			Writer:        multi_wr,
+		}
+
+		cessate_handler, err := api.CessateFeatureHandler(cessate_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create cessate feature handler, %w", err)
+		}
+
+		cessate_handler = authenticator.WrapHandler(cessate_handler)
+		mux.Handle(path_api_cessate, cessate_handler)
 
 	}
 
