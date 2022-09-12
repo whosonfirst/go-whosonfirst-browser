@@ -44,9 +44,9 @@ func DeprecateFeatureHandler(opts *DeprecateFeatureHandlerOptions) (http.Handler
 		new_body, err := export.DeprecateRecord(ctx, opts.Exporter, body)
 
 		// Something something something superseded by...
-		
+
 		br := bytes.NewReader(new_body)
-		
+
 		_, err = opts.Writer.Write(ctx, uri.URI, br)
 
 		if err != nil {

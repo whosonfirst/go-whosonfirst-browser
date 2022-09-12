@@ -44,7 +44,7 @@ func CessateFeatureHandler(opts *CessateFeatureHandlerOptions) (http.Handler, er
 		new_body, err := export.CessateRecord(ctx, opts.Exporter, body)
 
 		br := bytes.NewReader(new_body)
-		
+
 		_, err = opts.Writer.Write(ctx, uri.URI, br)
 
 		if err != nil {
