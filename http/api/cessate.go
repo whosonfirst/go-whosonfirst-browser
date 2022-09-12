@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-type DeprecateFeatureHandlerOptions struct {
+type CessateFeatureHandlerOptions struct {
 	Reader        reader.Reader
 	Writer        writer.Writer
 	Exporter      export.Exporter
@@ -19,7 +19,7 @@ type DeprecateFeatureHandlerOptions struct {
 	Logger        *log.Logger
 }
 
-func DeprecateFeatureHandler(opts *DeprecateFeatureHandlerOptions) (http.Handler, error) {
+func CessateFeatureHandler(opts *CessateFeatureHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
@@ -41,10 +41,8 @@ func DeprecateFeatureHandler(opts *DeprecateFeatureHandlerOptions) (http.Handler
 
 		body := uri.Feature
 
-		new_body, err := export.DeprecateRecord(ctx, opts.Exporter, body)
+		new_body, err := export.CessateRecord(ctx, opts.Exporter, body)
 
-		// Something something something superseded by...
-		
 		br := bytes.NewReader(new_body)
 		
 		_, err = opts.Writer.Write(ctx, uri.URI, br)

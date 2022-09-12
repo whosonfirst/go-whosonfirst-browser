@@ -3,6 +3,7 @@ package www
 import (
 	"encoding/json"
 	"github.com/whosonfirst/go-reader"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"log"
 	"net/http"
@@ -12,7 +13,7 @@ func SPRHandler(r reader.Reader) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		uri, err, status := ParseURIFromRequest(req, r)
+		uri, err, status := wof_http.ParseURIFromRequest(req, r)
 
 		if err != nil {
 

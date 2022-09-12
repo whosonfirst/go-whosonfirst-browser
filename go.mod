@@ -21,7 +21,7 @@ require (
 	github.com/whosonfirst/go-reader-cachereader v0.2.3
 	github.com/whosonfirst/go-reader-findingaid v0.13.0
 	github.com/whosonfirst/go-sanitize v0.1.0
-	github.com/whosonfirst/go-whosonfirst-export/v2 v2.5.0
+	github.com/whosonfirst/go-whosonfirst-export/v2 v2.6.0
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.24
 	github.com/whosonfirst/go-whosonfirst-image v0.1.0
 	github.com/whosonfirst/go-whosonfirst-search v0.1.0

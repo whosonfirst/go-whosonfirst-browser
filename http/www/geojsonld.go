@@ -3,6 +3,7 @@ package www
 import (
 	"github.com/sfomuseum/go-geojsonld"
 	"github.com/whosonfirst/go-reader"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
 	"log"
 	"net/http"
 )
@@ -11,7 +12,7 @@ func GeoJSONLDHandler(r reader.Reader) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		uri, err, status := ParseURIFromRequest(req, r)
+		uri, err, status := wof_http.ParseURIFromRequest(req, r)
 
 		if err != nil {
 

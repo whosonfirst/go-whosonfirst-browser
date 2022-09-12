@@ -5,6 +5,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
 	"github.com/whosonfirst/go-whosonfirst-svg"
 	"log"
 	"net/http"
@@ -57,7 +58,7 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (http.Handler, error)
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		uri, err, status := ParseURIFromRequest(req, r)
+		uri, err, status := wof_http.ParseURIFromRequest(req, r)
 
 		if err != nil {
 

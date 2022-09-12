@@ -4,6 +4,7 @@ package www
 
 import (
 	"github.com/whosonfirst/go-reader"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -36,11 +37,11 @@ func NavPlaceHandler(opts *NavPlaceHandlerOptions) (http.Handler, error) {
 
 		ids := strings.Split(base, ",")
 
-		uris := make([]*URI, len(ids))
+		uris := make([]*wof_http.URI, len(ids))
 
 		for idx, id := range ids {
 
-			uri, err, status := ParseURIFromPath(ctx, id, opts.Reader)
+			uri, err, status := wof_http.ParseURIFromPath(ctx, id, opts.Reader)
 
 			if err != nil {
 

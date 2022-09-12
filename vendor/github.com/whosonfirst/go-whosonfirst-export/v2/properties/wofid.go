@@ -12,9 +12,9 @@ func EnsureWOFId(feature []byte, provider id.Provider) ([]byte, error) {
 	// Eventually `ctx` should be part of the method signature but
 	// should happen go-whosonfirst-export wide and will be a backwards
 	// incompatible change
-	
+
 	ctx := context.Background()
-	
+
 	var err error
 
 	var wof_id int64

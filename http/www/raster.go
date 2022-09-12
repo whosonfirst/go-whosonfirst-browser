@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
 	"github.com/whosonfirst/go-whosonfirst-image"
 	"log"
 	"net/http"
@@ -70,7 +71,7 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		uri, err, status := ParseURIFromRequest(req, r)
+		uri, err, status := wof_http.ParseURIFromRequest(req, r)
 
 		if err != nil {
 

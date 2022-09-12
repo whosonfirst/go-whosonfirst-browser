@@ -15,7 +15,7 @@ type URI struct {
 	Id          int64
 	URI         string
 	Feature     []byte
-	URIArgs     *uri.URIArgs
+	URIArgs     *wof_uri.URIArgs
 	IsAlternate bool
 }
 
