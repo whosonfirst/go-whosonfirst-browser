@@ -13,6 +13,7 @@ import (
 
 type NavPlaceHandlerOptions struct {
 	Reader      reader.Reader
+	Logger      *log.Logger
 	MaxFeatures int
 }
 
@@ -45,7 +46,7 @@ func NavPlaceHandler(opts *NavPlaceHandlerOptions) (http.Handler, error) {
 
 			if err != nil {
 
-				log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+				opts.Logger.Printf("Failed to parse URI from request %s, %v", req.URL, err)
 
 				http.Error(rsp, err.Error(), status)
 				return

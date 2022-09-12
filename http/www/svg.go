@@ -17,11 +17,13 @@ type SVGSize struct {
 	MaxWidth  int
 }
 
-type SVGOptions struct {
-	Sizes map[string]SVGSize
+type SVGHandlerOptions struct {
+	Sizes  map[string]SVGSize
+	Reader reader.Reader
+	Logger *log.Logger
 }
 
-func NewDefaultSVGOptions() (*SVGOptions, error) {
+func DefaultSVGSizes() map[string]SVGSize {
 
 	sm := SVGSize{
 		Label:     "sm",
@@ -47,22 +49,18 @@ func NewDefaultSVGOptions() (*SVGOptions, error) {
 		"lg":  lg,
 	}
 
-	opts := SVGOptions{
-		Sizes: sz,
-	}
-
-	return &opts, nil
+	return sz
 }
 
-func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (http.Handler, error) {
+func SVGHandler(opts *SVGHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		uri, err, status := wof_http.ParseURIFromRequest(req, r)
+		uri, err, status := wof_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {
 
-			log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+			opts.Logger.Printf("Failed to parse URI from request %s, %v", req.URL, err)
 
 			http.Error(rsp, err.Error(), status)
 			return
@@ -88,7 +86,7 @@ func SVGHandler(r reader.Reader, handler_opts *SVGOptions) (http.Handler, error)
 			sz = req_sz
 		}
 
-		sz_info, ok := handler_opts.Sizes[sz]
+		sz_info, ok := opts.Sizes[sz]
 
 		if !ok {
 			http.Error(rsp, "Invalid output size", http.StatusBadRequest)

@@ -17,12 +17,14 @@ type RasterSize struct {
 	MaxWidth  int
 }
 
-type RasterOptions struct {
+type RasterHandlerOptions struct {
 	Format string
 	Sizes  map[string]RasterSize
+	Reader reader.Reader
+	Logger *log.Logger
 }
 
-func NewDefaultRasterOptions() (*RasterOptions, error) {
+func DefaultRasterSizes() map[string]RasterSize {
 
 	xsm := RasterSize{
 		Label:     "xsm",
@@ -55,15 +57,10 @@ func NewDefaultRasterOptions() (*RasterOptions, error) {
 		"lg":  lg,
 	}
 
-	opts := RasterOptions{
-		Format: "png",
-		Sizes:  sz,
-	}
-
-	return &opts, nil
+	return sz
 }
 
-func RasterHandler(r reader.Reader, opts *RasterOptions) (http.Handler, error) {
+func RasterHandler(opts *RasterHandlerOptions) (http.Handler, error) {
 
 	if opts.Format != "png" {
 		return nil, errors.New("Invalid or unsupported raster format")
@@ -71,11 +68,11 @@ func RasterHandler(r reader.Reader, opts *RasterOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		uri, err, status := wof_http.ParseURIFromRequest(req, r)
+		uri, err, status := wof_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {
 
-			log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+			opts.Logger.Printf("Failed to parse URI from request %s, %v", req.URL, err)
 
 			http.Error(rsp, err.Error(), status)
 			return

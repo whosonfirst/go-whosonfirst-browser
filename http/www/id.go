@@ -18,6 +18,8 @@ import (
 type IDHandlerOptions struct {
 	Templates *template.Template
 	Endpoints *Endpoints
+	Reader    reader.Reader
+	Logger    *log.Logger
 }
 
 type IDVars struct {
@@ -29,7 +31,7 @@ type IDVars struct {
 	Endpoints    *Endpoints
 }
 
-func IDHandler(r reader.Reader, opts IDHandlerOptions) (http.Handler, error) {
+func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 
 	id_t := opts.Templates.Lookup("id")
 
@@ -88,11 +90,11 @@ func IDHandler(r reader.Reader, opts IDHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		uri, err, _ := wof_http.ParseURIFromRequest(req, r)
+		uri, err, _ := wof_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {
 
-			log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+			opts.Logger.Printf("Failed to parse URI from request %s, %v", req.URL, err)
 
 			vars := ErrorVars{
 				Error:     err,

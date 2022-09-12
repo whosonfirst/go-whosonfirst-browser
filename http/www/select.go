@@ -13,9 +13,11 @@ import (
 
 type SelectHandlerOptions struct {
 	Pattern *regexp.Regexp
+	Reader  reader.Reader
+	Logger  *log.Logger
 }
 
-func SelectHandler(r reader.Reader, opts *SelectHandlerOptions) (http.Handler, error) {
+func SelectHandler(opts *SelectHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
@@ -36,11 +38,11 @@ func SelectHandler(r reader.Reader, opts *SelectHandlerOptions) (http.Handler, e
 			return
 		}
 
-		uri, err, status := wof_http.ParseURIFromRequest(req, r)
+		uri, err, status := wof_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {
 
-			log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+			opts.Logger.Printf("Failed to parse URI from request %s, %v", req.URL, err)
 
 			http.Error(rsp, err.Error(), status)
 			return

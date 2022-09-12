@@ -176,13 +176,16 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_png {
 
-		png_opts, err := www.NewDefaultRasterOptions()
+		sizes := www.DefaultRasterSizes()
 
-		if err != nil {
-			return fmt.Errorf("Failed to create raster/png options, %w", err)
+		png_opts := &www.RasterHandlerOptions{
+			Sizes:  sizes,
+			Format: "png",
+			Reader: cr,
+			Logger: logger,
 		}
 
-		png_handler, err := www.RasterHandler(cr, png_opts)
+		png_handler, err := www.RasterHandler(png_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create raster/png handler, %w", err)
@@ -193,13 +196,15 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_svg {
 
-		svg_opts, err := www.NewDefaultSVGOptions()
+		sizes := www.DefaultSVGSizes()
 
-		if err != nil {
-			return fmt.Errorf("Failed to create SVG options, %w", err)
+		svg_opts := &www.SVGHandlerOptions{
+			Sizes:  sizes,
+			Reader: cr,
+			Logger: logger,
 		}
 
-		svg_handler, err := www.SVGHandler(cr, svg_opts)
+		svg_handler, err := www.SVGHandler(svg_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create SVG handler, %w", err)
@@ -214,7 +219,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_spr {
 
-		spr_handler, err := www.SPRHandler(cr)
+		spr_opts := &www.SPRHandlerOptions{
+			Reader: cr,
+			Logger: logger,
+		}
+
+		spr_handler, err := www.SPRHandler(spr_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create SPR handler, %w", err)
@@ -229,7 +239,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_geojson {
 
-		geojson_handler, err := www.GeoJSONHandler(cr)
+		geojson_opts := &www.GeoJSONHandlerOptions{
+			Reader: cr,
+			Logger: logger,
+		}
+
+		geojson_handler, err := www.GeoJSONHandler(geojson_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create GeoJSON handler, %w", err)
@@ -244,7 +259,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_geojsonld {
 
-		geojsonld_handler, err := www.GeoJSONLDHandler(cr)
+		geojsonld_opts := &www.GeoJSONLDHandlerOptions{
+			Reader: cr,
+			Logger: logger,
+		}
+
+		geojsonld_handler, err := www.GeoJSONLDHandler(geojsonld_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create GeoJSON LD handler, %w", err)
@@ -262,6 +282,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		navplace_opts := &www.NavPlaceHandlerOptions{
 			Reader:      cr,
 			MaxFeatures: navplace_max_features,
+			Logger:      logger,
 		}
 
 		navplace_handler, err := www.NavPlaceHandler(navplace_opts)
@@ -291,9 +312,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		select_opts := &www.SelectHandlerOptions{
 			Pattern: pat,
+			Reader:  cr,
+			Logger:  logger,
 		}
 
-		select_handler, err := www.SelectHandler(cr, select_opts)
+		select_handler, err := www.SelectHandler(select_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create select handler, %w", err)
@@ -440,9 +463,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		id_opts := www.IDHandlerOptions{
 			Templates: t,
 			Endpoints: endpoints,
+			Reader:    cr,
+			Logger:    logger,
 		}
 
-		id_handler, err := www.IDHandler(cr, id_opts)
+		id_handler, err := www.IDHandler(id_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create ID handler, %w", err)

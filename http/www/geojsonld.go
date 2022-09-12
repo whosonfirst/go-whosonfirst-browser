@@ -8,15 +8,20 @@ import (
 	"net/http"
 )
 
-func GeoJSONLDHandler(r reader.Reader) (http.Handler, error) {
+type GeoJSONLDHandlerOptions struct {
+	Reader reader.Reader
+	Logger *log.Logger
+}
+
+func GeoJSONLDHandler(opts *GeoJSONLDHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		uri, err, status := wof_http.ParseURIFromRequest(req, r)
+		uri, err, status := wof_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {
 
-			log.Printf("Failed to parse URI from request %s, %v", req.URL, err)
+			opts.Logger.Printf("Failed to parse URI from request %s, %v", req.URL, err)
 
 			http.Error(rsp, err.Error(), status)
 			return
