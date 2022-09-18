@@ -26,7 +26,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v5/templates/html"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
-	"github.com/whosonfirst/go-writer/v2"
+	"github.com/whosonfirst/go-writer/v3"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -571,8 +571,17 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			writers[idx] = wr
 		}
 
-		multi_wr := writer.NewMultiWriter(writers...)
+		multi_opts := &writer.MultiWriterOptions{
+			Logger: logger,
+			Writers: writers,
+		}
+			
+		multi_wr, err := writer.NewMultiWriterWithOptions(ctx, multi_opts)
 
+		if err != nil {
+			return fmt.Errorf("Failed to create multi writer, %w", err)
+		}
+		
 		deprecate_opts := &api.DeprecateFeatureHandlerOptions{
 			Reader:        cr,
 			Logger:        logger,

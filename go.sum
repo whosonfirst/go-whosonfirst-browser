@@ -635,6 +635,8 @@ github.com/whosonfirst/go-writer-featurecollection/v2 v2.0.0 h1:unVgRY7whpg/02vJ
 github.com/whosonfirst/go-writer-featurecollection/v2 v2.0.0/go.mod h1:V9wX9MVEGZEvGXuvapoaLq0iqmSrr4O+WZkIFrWqv8A=
 github.com/whosonfirst/go-writer/v2 v2.0.0 h1:BQL9qR3z5yHGuRtbkqf/MYkaqu/p6r5txRTZ/h1w5xA=
 github.com/whosonfirst/go-writer/v2 v2.0.0/go.mod h1:/fiSSOP4uSOTCQOHzin9Ey/G9s55U4iRLdK9MHr2MMo=
+github.com/whosonfirst/go-writer/v3 v3.0.0 h1:EyGed1mP60LbXYGTVqQl5PAkfUkLfczGOPcC9mcHTMQ=
+github.com/whosonfirst/go-writer/v3 v3.0.0/go.mod h1:TmYoKR7RvrzJaj3eOgMhgXHFE+R1yuO/4smxKHFhv14=
 github.com/whosonfirst/iso8601duration v0.0.0-20150204201828-8da3af7a2a61/go.mod h1:mT7JgXlZYn9Ct77XmFiCDqdp0vEgWvRjC9mnY0lT6Lo=
 github.com/whosonfirst/walk v0.0.1/go.mod h1:1KtP/VeooSlFOI61p+THc/C16Ra8Z5MjpjI0tsd3c1M=
 github.com/whosonfirst/warning v0.1.1/go.mod h1:/unEMzhB9YaMeEwTJpzLN3kM5LiSxdJhKEsf/OQhn6s=

@@ -388,6 +388,9 @@ github.com/whosonfirst/go-writer-featurecollection/v2
 # github.com/whosonfirst/go-writer/v2 v2.0.0
 ## explicit; go 1.16
 github.com/whosonfirst/go-writer/v2
+# github.com/whosonfirst/go-writer/v3 v3.0.0
+## explicit; go 1.18
+github.com/whosonfirst/go-writer/v3
 # go.opencensus.io v0.23.0
 ## explicit; go 1.13
 go.opencensus.io
