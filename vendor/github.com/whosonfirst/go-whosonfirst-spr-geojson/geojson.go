@@ -1,7 +1,7 @@
 package geojson
 
 import (
-	_ "github.com/whosonfirst/go-writer-featurecollection/v2"
+	_ "github.com/whosonfirst/go-writer-featurecollection/v3"
 )
 
 import (
@@ -13,7 +13,7 @@ import (
 	go_geojson "github.com/paulmach/go.geojson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
-	"github.com/whosonfirst/go-writer/v2"
+	"github.com/whosonfirst/go-writer/v3"
 	"io"
 	_ "log"
 )

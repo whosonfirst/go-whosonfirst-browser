@@ -25,7 +25,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.24
 	github.com/whosonfirst/go-whosonfirst-image v0.1.0
 	github.com/whosonfirst/go-whosonfirst-search v0.1.0
-	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.7
+	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.8
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.2.1
 	github.com/whosonfirst/go-whosonfirst-svg v0.1.0
 	github.com/whosonfirst/go-whosonfirst-uri v1.2.0
@@ -90,8 +90,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-id v1.0.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-placetypes v0.3.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-sources v0.1.0 // indirect
-	github.com/whosonfirst/go-writer-featurecollection/v2 v2.0.0 // indirect
-	github.com/whosonfirst/go-writer/v2 v2.0.0 // indirect
+	github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0-20220916180959-42588e308a3e // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/ratelimit v0.2.0 // indirect
 	gocloud.dev v0.25.0 // indirect
