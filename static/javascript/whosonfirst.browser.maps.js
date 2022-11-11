@@ -26,13 +26,31 @@ whosonfirst.browser.maps = (function(){
 	    if (maps[map_id]){
 		return maps[map_id];
 	    }
+
+	    var map = L.map("map");
 	    
-	    var tangram_opts = self.getTangramOptions(args);
-	    var tangramLayer = Tangram.leafletLayer(tangram_opts);
+	    var map_provider = whosonfirst.browser.common.map_provider();
+	    
+	    switch (map_provider){
+		case "nextzen":
+		    
+		    var tangram_opts = self.getTangramOptions(args);
+		    var tangramLayer = Tangram.leafletLayer(tangram_opts);
+		    
+		    tangramLayer.addTo(map);
+		    break
 
-	    var map = L.map("map");	    
-	    tangramLayer.addTo(map);
+		case "protomaps":
 
+		    var tile_url = document.body.getAttribute("data-protomaps-tile-url");
+		    var layer = protomaps.leafletLayer({url:tile_url})
+		    layer.addTo(map);
+		    break;
+		    
+		default:
+		    console.log("Unsupported map provider ", map_provider);
+	    }
+	    
 	    var attribution = self.getAttribution();
 	    map.attributionControl.addAttribution(attribution);
 

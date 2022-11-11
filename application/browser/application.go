@@ -581,8 +581,14 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			pmtiles_handler := pmhttp.TileHandler(loop, logger)
 			mux.Handle(path_protomaps_tiles, pmtiles_handler)
 
+			pm_tile_url, err := url.JoinPath(path_protomaps_tiles, protomaps_tiles_database)
+
+			if err != nil {
+				return fmt.Errorf("Failed to join path to derive Protomaps tile URL, %w", err)
+			}
+
 			pm_opts := protomaps.DefaultProtomapsOptions()
-			pm_opts.TileURL = path_protomaps_tiles
+			pm_opts.TileURL = pm_tile_url
 
 			id_handler = protomaps.AppendResourcesHandlerWithPrefix(id_handler, pm_opts, static_prefix)
 			search_handler = protomaps.AppendResourcesHandlerWithPrefix(search_handler, pm_opts, static_prefix)

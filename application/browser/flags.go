@@ -35,6 +35,7 @@ var tilepack_uri string
 
 var protomaps_bucket_uri string
 var protomaps_cache_size int
+var protomaps_tiles_database string
 
 var enable_all bool
 var enable_graphics bool
@@ -122,6 +123,7 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.StringVar(&protomaps_bucket_uri, "protomaps-bucket-uri", "", "A valid gocloud.dev/blob.Bucket URI containing Protomaps tile databases.")
 	fs.IntVar(&protomaps_cache_size, "protomaps-cache-size", 64, "The size in MB of the Protomaps tile cache.")
+	fs.StringVar(&protomaps_tiles_database, "protomaps-tiles-database", "", "The name of the Protomaps tiles database to use.")
 
 	fs.BoolVar(&enable_all, "enable-all", false, "Enable all the available output handlers EXCEPT the search handlers which need to be explicitly enable using the -enable-search* flags.")
 	fs.BoolVar(&enable_graphics, "enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
@@ -153,7 +155,7 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&path_navplace, "path-navplace", "/navplace/", "The path that IIIF navPlace requests should be served from.")
 	fs.StringVar(&path_spr, "path-spr", "/spr/", "The path that SPR requests should be served from.")
 	fs.StringVar(&path_select, "path-select", "/select/", "The path that 'select' requests should be served from.")
-	fs.StringVar(&path_protomaps_tiles, "path-protomaps-tiles-uri", "/tiles/", "The root path from which Protomaps tiles will be served.")
+	fs.StringVar(&path_protomaps_tiles, "path-protomaps-tiles", "/tiles/", "The root path from which Protomaps tiles will be served.")
 
 	fs.StringVar(&path_search_api, "path-search-api", "/search/spr/", "The path that API 'search' requests should be served from.")
 	fs.StringVar(&path_search_html, "path-search-html", "/search/", "The path that API 'search' requests should be served from.")
