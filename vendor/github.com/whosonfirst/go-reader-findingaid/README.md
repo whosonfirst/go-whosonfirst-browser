@@ -84,6 +84,14 @@ Finding aid URIs take the form of:
 findingaid://{RESOLVER}?{QUERY_PARAMETERS}
 ```
 
+### SQLite resolver
+
+Resolve `wof:repo` lookups using a SQLite finding aid. For example:
+
+```
+findingaid://sqlite?dsn=/usr/local/data/findingaids/wof.db
+```
+
 Valid finding aid query parameters are:
 
 | Name | Type | Notes | Required
@@ -91,13 +99,31 @@ Valid finding aid query parameters are:
 | dsn | string | A valid `matt/go-sqlite3` DSN string | yes |
 | template | string | A valid `jtacoma/uritemplates` for resolving final reader URIs. If empty the default URI template mapping to `whosonfirst-data/whosonfirst-data` repositories will be used. | no |
 
+### HTTP resolver
+
+Resolve `wof:repo` lookups using an HTTP resolver endpoint (like the `resolverd` tool in the [whosonfirst/go-whosonfirst-findingaid](https://github.com/whosonfirst/go-whosonfirst-findingaid#resolverd) package. For example:
+
+```
+findingaid://https/static.sfomuseum.org/findingaid?template=https://raw.githubusercontent.com/sfomuseum-data/{repo}/main/data/
+```
+
+Valid finding aid query parameters are:
+
+| Name | Type | Notes | Required
+| --- | --- | --- | --- |
+| template | string | A valid `jtacoma/uritemplates` for resolving final reader URIs. If empty the default URI template mapping to `whosonfirst-data/whosonfirst-data` repositories will be used. | no |
+
 For example:
 
 ```
-findingaid://sqlite?dsn=/usr/local/data/findingaids/wof.db
-```
+$> ./bin/read \
+	-reader-uri 'findingaid://https/static.sfomuseum.org/findingaid?template=https://raw.githubusercontent.com/sfomuseum-data/{repo}/main/data/' \
+	102527513 \
+	
+| jq '.properties["wof:name"]'
 
-Note: Although it is possible to produce Who's On First finding aids that are not SQLite database this package _only_ works with SQLite-based finding aids.
+"San Francisco International Airport"
+```
 
 ## How does it work?
 

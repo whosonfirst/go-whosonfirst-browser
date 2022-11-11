@@ -7,9 +7,16 @@ func (e AccountNotExist) Error() string {
 	return "Account does not exist"
 }
 
-// AccountNotExist defines a well-known error for signaling that there is no account information.
+// NotLoggedIn defines a well-known error for signaling that the account is not logged in.
 type NotLoggedIn struct{}
 
 func (e NotLoggedIn) Error() string {
 	return "Not logged in"
+}
+
+// NotAuthorized defines a well-known error for signaling that the request is not authorized.
+type NotAuthorized struct{}
+
+func (e NotAuthorized) Error() string {
+	return "Not authorized"
 }

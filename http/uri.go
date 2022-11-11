@@ -9,6 +9,7 @@ import (
 	go_http "net/http"
 	"path/filepath"
 	"strings"
+	"log"
 )
 
 type URI struct {
@@ -49,6 +50,8 @@ func ParseURIFromPath(ctx context.Context, path string, r reader.Reader) (*URI, 
 		return nil, fmt.Errorf("Failed to read %s, %w", rel_path, err), go_http.StatusBadRequest // StatusInternalServerError
 	}
 
+	log.Printf("WTF %s %T %T", rel_path, r, fh)
+	
 	f, err := io.ReadAll(fh)
 
 	if err != nil {

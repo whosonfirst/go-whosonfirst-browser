@@ -489,6 +489,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_id, id_handler)
 
+		null_handler := www.NewNullHandler()
+
+		favicon_path := filepath.Join(path_id, "favicon.ico")
+		mux.Handle(favicon_path, null_handler)
+		
 		if enable_search_html {
 
 			search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)

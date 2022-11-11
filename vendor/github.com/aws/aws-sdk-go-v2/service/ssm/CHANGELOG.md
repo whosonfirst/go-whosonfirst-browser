@@ -1,3 +1,43 @@
+# v1.27.6 (2022-08-01)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.27.5 (2022-07-27)
+
+* **Documentation**: Adding doc updates for OpsCenter support in Service Setting actions.
+
+# v1.27.4 (2022-07-05)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.27.3 (2022-06-29)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.27.2 (2022-06-07)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.27.1 (2022-05-17)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.27.0 (2022-05-04)
+
+* **Feature**: This release adds the TargetMaps parameter in SSM State Manager API.
+
+# v1.26.0 (2022-04-29)
+
+* **Feature**: Update the StartChangeRequestExecution, adding TargetMaps to the Runbook parameter
+
+# v1.25.1 (2022-04-25)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.25.0 (2022-04-19)
+
+* **Feature**: Added offset support for specifying the number of days to wait after the date and time specified by a CRON expression when creating SSM association.
+
 # v1.24.1 (2022-03-30)
 
 * **Dependency Update**: Updated to the latest SDK module versions

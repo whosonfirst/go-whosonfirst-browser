@@ -148,8 +148,16 @@ func (c *GoCache) Set(ctx context.Context, key string, fh io.ReadSeekCloser) (io
 	c.cache.Set(key, body, gocache.DefaultExpiration)
 	atomic.AddInt64(&c.keys, 1)
 
-	fh.Seek(0, 0)
-	return fh, nil
+	// For reasons I don't understand if we return fh when fh is an *os.File
+	// it can trigger "file already closed" errors even though the Seek returns
+	// not errors and, in testing, I can successfully copy the data to STDOUT.
+	// I don't really understand what's going on here but since we already have
+	// the bytes on hand, we just return those and carry on. Computers, amirite?
+	// fh.Seek(0, 0)
+	// io.Copy(os.Stdout, fh)
+
+	br := bytes.NewReader(body)
+	return ioutil.NewReadSeekCloser(br)
 }
 
 func (c *GoCache) Unset(ctx context.Context, key string) error {

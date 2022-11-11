@@ -133,6 +133,17 @@ type CreateAssociationInput struct {
 	// A cron expression when the association will be applied to the target(s).
 	ScheduleExpression *string
 
+	// Number of days to wait after the scheduled day to run an association. For
+	// example, if you specified a cron schedule of cron(0 0 ? * THU#2 *), you could
+	// specify an offset of 3 to run the association each Sunday after the second
+	// Thursday of the month. For more information about cron schedules for
+	// associations, see Reference: Cron and rate expressions for Systems Manager
+	// (https://docs.aws.amazon.com/systems-manager/latest/userguide/reference-cron-and-rate-expressions.html)
+	// in the Amazon Web Services Systems Manager User Guide. To use offsets, you must
+	// specify the ApplyOnlyAtCronInterval parameter. This option tells the system not
+	// to run an association immediately after you create it.
+	ScheduleOffset int32
+
 	// The mode for generating association compliance. You can specify AUTO or MANUAL.
 	// In AUTO mode, the system uses the status of the association execution to
 	// determine the compliance status. If the association execution runs successfully,
@@ -148,6 +159,10 @@ type CreateAssociationInput struct {
 	// Services accounts where you want to run the association. Use this action to
 	// create an association in multiple Regions and multiple accounts.
 	TargetLocations []types.TargetLocation
+
+	// A key-value mapping of document parameters to target resources. Both Targets and
+	// TargetMaps can't be specified together.
+	TargetMaps []map[string][]string
 
 	// The targets for the association. You can target managed nodes by using tags,
 	// Amazon Web Services resource groups, all managed nodes in an Amazon Web Services

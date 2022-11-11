@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/aaronland/go-roster"
+	"log"
 	"net/http"
 	"net/url"
 	"sort"
@@ -17,6 +18,14 @@ type Authenticator interface {
 	WrapHandler(http.Handler) http.Handler
 	// GetAccountForRequest returns an `Account` instance  for an HTTP request.
 	GetAccountForRequest(*http.Request) (*Account, error)
+	// SigninHandler returns a `http.Handler` for implementing account signin.
+	SigninHandler() http.Handler
+	// SignoutHandler returns a `http.Handler` for implementing account signout.
+	SignoutHandler() http.Handler
+	// SignupHandler returns a `http.Handler` for implementing account signups.
+	SignupHandler() http.Handler
+	// SetLogger assigns a `log.Logger` instance.
+	SetLogger(*log.Logger)
 }
 
 var authenticator_roster roster.Roster

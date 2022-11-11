@@ -5,10 +5,8 @@ import (
 	"bytes"
 	"golang.org/x/net/html"
 	"io"
-	_ "log"
 	go_http "net/http"
 	go_httptest "net/http/httptest"
-	"strconv"
 	"strings"
 )
 
@@ -109,14 +107,10 @@ func RewriteHTMLHandler(previous_handler go_http.Handler, rewrite_func RewriteHT
 			rsp.Header()[k] = v
 		}
 
-		data := buf.Bytes()
-		clen := len(data)
-
-		rsp.Header().Set("Content-Length", strconv.Itoa(clen))
 		rsp.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		rsp.WriteHeader(200)
-		rsp.Write(data)
+		rsp.WriteHeader(prev_rsp.StatusCode)
+		rsp.Write(buf.Bytes())
 	}
 
 	return go_http.HandlerFunc(fn)
