@@ -1,9 +1,9 @@
 package browser
 
 import (
+	_ "github.com/aaronland/go-http-server-tsnet"
 	_ "github.com/whosonfirst/go-reader-cachereader"
 	_ "github.com/whosonfirst/go-reader-findingaid"
-	_ "github.com/aaronland/go-http-server-tsnet"
 )
 
 import (
@@ -14,10 +14,13 @@ import (
 	"github.com/aaronland/go-http-ping/v2"
 	"github.com/aaronland/go-http-server"
 	"github.com/aaronland/go-http-tangramjs"
+	"github.com/protomaps/go-pmtiles/pmtiles"
 	"github.com/rs/cors"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-http-auth"
+	"github.com/sfomuseum/go-http-protomaps"
 	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
+	pmhttp "github.com/sfomuseum/go-sfomuseum-pmtiles/http"
 	tiles_http "github.com/tilezen/go-tilepacks/http"
 	"github.com/tilezen/go-tilepacks/tilepack"
 	"github.com/whosonfirst/go-cache"
@@ -390,57 +393,6 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_html {
 
-		if proxy_tiles {
-
-			tile_cache, err := cache.NewCache(ctx, proxy_tiles_cache)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create proxy tiles cache for '%s', %w", proxy_tiles_cache, err)
-			}
-
-			timeout := time.Duration(proxy_tiles_timeout) * time.Second
-
-			proxy_opts := &tzhttp.TilezenProxyHandlerOptions{
-				Cache:   tile_cache,
-				Timeout: timeout,
-			}
-
-			proxy_handler, err := tzhttp.TilezenProxyHandler(proxy_opts)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create proxy tiles handler, %w", err)
-			}
-
-			// the order here is important - we don't have a general-purpose "add to
-			// mux with prefix" function here, like we do in the tangram handler so
-			// we set the nextzen tile url with proxy_tiles_url and then update it
-			// (proxy_tiles_url) with a prefix if necessary (20190911/thisisaaronland)
-
-			nextzen_tile_url = fmt.Sprintf("%s{z}/{x}/{y}.mvt", proxy_tiles_url)
-
-			if static_prefix != "" {
-
-				proxy_tiles_url = filepath.Join(static_prefix, proxy_tiles_url)
-
-				if !strings.HasSuffix(proxy_tiles_url, "/") {
-					proxy_tiles_url = fmt.Sprintf("%s/", proxy_tiles_url)
-				}
-			}
-
-			mux.Handle(proxy_tiles_url, proxy_handler)
-		}
-
-		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
-
-		tangramjs_opts := tangramjs.DefaultTangramJSOptions()
-		tangramjs_opts.NextzenOptions.APIKey = nextzen_api_key
-		tangramjs_opts.NextzenOptions.StyleURL = nextzen_style_url
-		tangramjs_opts.NextzenOptions.TileURL = nextzen_tile_url
-
-		if tilepack_db != "" {
-			tangramjs_opts.NextzenOptions.TileURL = tilepack_uri
-		}
-
 		endpoints := &www.Endpoints{
 			Data:  path_geojson,
 			Png:   path_png,
@@ -454,21 +406,42 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			endpoints.Search = path_search_html
 		}
 
+		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
+
+		err = bootstrap.AppendAssetHandlersWithPrefix(mux, static_prefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append Bootstrap asset handlers, %w", err)
+		}
+
+		err = www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append static asset handlers, %w", err)
+		}
+
+		// Note that we append all the handler to mux at the end of this block so that they
+		// can be updated with map-related middleware where necessary
+
+		var index_handler http.Handler
+		var id_handler http.Handler
+		var search_handler http.Handler
+
 		if enable_index {
+
 			index_opts := www.IndexHandlerOptions{
 				Templates: t,
 				Endpoints: endpoints,
 			}
 
-			index_handler, err := www.IndexHandler(index_opts)
+			index_h, err := www.IndexHandler(index_opts)
 
 			if err != nil {
 				return fmt.Errorf("Failed to create index handler, %w", err)
 			}
 
+			index_handler = index_h
 			index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, static_prefix)
-
-			mux.Handle("/", index_handler)
 		}
 
 		id_opts := www.IDHandlerOptions{
@@ -478,22 +451,15 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			Logger:    logger,
 		}
 
-		id_handler, err := www.IDHandler(id_opts)
+		id_h, err := www.IDHandler(id_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create ID handler, %w", err)
 		}
 
+		id_handler = id_h
 		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, static_prefix)
-		id_handler = tangramjs.AppendResourcesHandlerWithPrefix(id_handler, tangramjs_opts, static_prefix)
 
-		mux.Handle(path_id, id_handler)
-
-		null_handler := www.NewNullHandler()
-
-		favicon_path := filepath.Join(path_id, "favicon.ico")
-		mux.Handle(favicon_path, null_handler)
-		
 		if enable_search_html {
 
 			search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
@@ -508,51 +474,130 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 				Database:  search_db,
 			}
 
-			search_handler, err := www.SearchHandler(search_opts)
+			search_h, err := www.SearchHandler(search_opts)
 
 			if err != nil {
 				return fmt.Errorf("Failed to create search handler, %w", err)
 			}
 
+			search_handler = search_h
 			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, static_prefix)
-			search_handler = tangramjs.AppendResourcesHandlerWithPrefix(search_handler, tangramjs_opts, static_prefix)
-
-			mux.Handle(path_search_html, search_handler)
 		}
 
-		err = bootstrap.AppendAssetHandlersWithPrefix(mux, static_prefix)
+		switch map_provider {
+		case "nextzen":
 
-		if err != nil {
-			return fmt.Errorf("Failed to append Bootstrap asset handlers, %w", err)
-		}
+			if proxy_tiles {
 
-		err = tangramjs.AppendAssetHandlersWithPrefix(mux, static_prefix)
+				tile_cache, err := cache.NewCache(ctx, proxy_tiles_cache)
 
-		if err != nil {
-			return fmt.Errorf("Failed to append Tangram.js asset handlers, %w", err)
-		}
+				if err != nil {
+					return fmt.Errorf("Failed to create proxy tiles cache for '%s', %w", proxy_tiles_cache, err)
+				}
 
-		err = www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
+				timeout := time.Duration(proxy_tiles_timeout) * time.Second
 
-		if err != nil {
-			return fmt.Errorf("Failed to append static asset handlers, %w", err)
-		}
+				proxy_opts := &tzhttp.TilezenProxyHandlerOptions{
+					Cache:   tile_cache,
+					Timeout: timeout,
+				}
 
-		if tilepack_db != "" {
+				proxy_handler, err := tzhttp.TilezenProxyHandler(proxy_opts)
 
-			tiles_reader, err := tilepack.NewMbtilesReader(tilepack_db)
+				if err != nil {
+					return fmt.Errorf("Failed to create proxy tiles handler, %w", err)
+				}
 
-			if err != nil {
-				return fmt.Errorf("Failed to load tilepack, %v", err)
+				// the order here is important - we don't have a general-purpose "add to
+				// mux with prefix" function here, like we do in the tangram handler so
+				// we set the nextzen tile url with proxy_tiles_url and then update it
+				// (proxy_tiles_url) with a prefix if necessary (20190911/thisisaaronland)
+
+				nextzen_tile_url = fmt.Sprintf("%s{z}/{x}/{y}.mvt", proxy_tiles_url)
+
+				if static_prefix != "" {
+
+					proxy_tiles_url = filepath.Join(static_prefix, proxy_tiles_url)
+
+					if !strings.HasSuffix(proxy_tiles_url, "/") {
+						proxy_tiles_url = fmt.Sprintf("%s/", proxy_tiles_url)
+					}
+				}
+
+				mux.Handle(proxy_tiles_url, proxy_handler)
 			}
 
-			u := strings.TrimLeft(tilepack_uri, "/")
-			p := strings.Split(u, "/")
-			path_tiles := fmt.Sprintf("/%s/", p[0])
+			tangramjs_opts := tangramjs.DefaultTangramJSOptions()
+			tangramjs_opts.NextzenOptions.APIKey = nextzen_api_key
+			tangramjs_opts.NextzenOptions.StyleURL = nextzen_style_url
+			tangramjs_opts.NextzenOptions.TileURL = nextzen_tile_url
 
-			tiles_handler := tiles_http.MbtilesHandler(tiles_reader)
-			mux.Handle(path_tiles, tiles_handler)
+			if tilepack_db != "" {
+				tangramjs_opts.NextzenOptions.TileURL = tilepack_uri
+			}
+
+			err = tangramjs.AppendAssetHandlersWithPrefix(mux, static_prefix)
+
+			if err != nil {
+				return fmt.Errorf("Failed to append Tangram.js asset handlers, %w", err)
+			}
+
+			if tilepack_db != "" {
+
+				tiles_reader, err := tilepack.NewMbtilesReader(tilepack_db)
+
+				if err != nil {
+					return fmt.Errorf("Failed to load tilepack, %v", err)
+				}
+
+				u := strings.TrimLeft(tilepack_uri, "/")
+				p := strings.Split(u, "/")
+				path_tiles := fmt.Sprintf("/%s/", p[0])
+
+				tiles_handler := tiles_http.MbtilesHandler(tiles_reader)
+				mux.Handle(path_tiles, tiles_handler)
+			}
+
+			id_handler = tangramjs.AppendResourcesHandlerWithPrefix(id_handler, tangramjs_opts, static_prefix)
+			search_handler = tangramjs.AppendResourcesHandlerWithPrefix(search_handler, tangramjs_opts, static_prefix)
+
+		case "protomaps":
+
+			loop, err := pmtiles.NewLoop(protomaps_tiles_uri, logger, protomaps_cache_size, "")
+
+			if err != nil {
+				return fmt.Errorf("Failed to create pmtiles.Loop, %w", err)
+			}
+
+			loop.Start()
+
+			err = protomaps.AppendAssetHandlers(mux)
+
+			if err != nil {
+				return fmt.Errorf("Failed to append leaflet-protomaps asset handler, %w", err)
+			}
+
+			pmtiles_handler := pmhttp.TileHandler(loop, logger)
+			mux.Handle(path_protomaps_tiles, pmtiles_handler)
+
+			pm_opts := protomaps.DefaultProtomapsOptions()
+			pm_opts.TileURL = path_protomaps_tiles
+
+			id_handler = protomaps.AppendResourcesHandlerWithPrefix(id_handler, pm_opts, static_prefix)
+			search_handler = protomaps.AppendResourcesHandlerWithPrefix(search_handler, pm_opts, static_prefix)
+
+		default:
+			return fmt.Errorf("Unrecognized map provider")
 		}
+
+		mux.Handle("/", index_handler)
+		mux.Handle(path_id, id_handler)
+		mux.Handle(path_search_html, search_handler)
+
+		null_handler := www.NewNullHandler()
+
+		favicon_path := filepath.Join(path_id, "favicon.ico")
+		mux.Handle(favicon_path, null_handler)
 
 	}
 
@@ -578,16 +623,16 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		multi_opts := &writer.MultiWriterOptions{
-			Logger: logger,
+			Logger:  logger,
 			Writers: writers,
 		}
-			
+
 		multi_wr, err := writer.NewMultiWriterWithOptions(ctx, multi_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create multi writer, %w", err)
 		}
-		
+
 		deprecate_opts := &api.DeprecateFeatureHandlerOptions{
 			Reader:        cr,
 			Logger:        logger,

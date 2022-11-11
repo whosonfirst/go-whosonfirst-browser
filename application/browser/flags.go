@@ -19,6 +19,8 @@ var exporter_uri string
 
 var writer_uris multi.MultiCSVString
 
+var map_provider string
+
 var nextzen_api_key string
 var nextzen_style_url string
 var nextzen_tile_url string
@@ -30,6 +32,9 @@ var proxy_tiles_timeout int
 
 var tilepack_db string
 var tilepack_uri string
+
+var protomaps_tiles_uri string
+var protomaps_cache_size int
 
 var enable_all bool
 var enable_graphics bool
@@ -70,6 +75,7 @@ var path_geojsonld string
 var path_navplace string
 var path_spr string
 var path_select string
+var path_protomaps_tiles string
 
 var path_search_api string
 var path_search_html string
@@ -100,6 +106,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.StringVar(&exporter_uri, "exporter-uri", "whosonfirst://", "A valid whosonfirst/go-whosonfirst-export/v2 URI.")
 
+	fs.StringVar(&map_provider, "map-provider", "nextzen", "Valid options are: nextzen, protomaps")
+
 	fs.StringVar(&nextzen_api_key, "nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
 	fs.StringVar(&nextzen_style_url, "nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
 	fs.StringVar(&nextzen_tile_url, "nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
@@ -111,6 +119,9 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&proxy_tiles_url, "proxy-tiles-url", "/tiles/", "The URL (a relative path) for proxied tiles.")
 	fs.StringVar(&proxy_tiles_cache, "proxy-tiles-cache", "gocache://", "A valid tile proxy DSN string.")
 	fs.IntVar(&proxy_tiles_timeout, "proxy-tiles-timeout", 30, "The maximum number of seconds to allow for fetching a tile from the proxy.")
+
+	fs.StringVar(&protomaps_tiles_uri, "protomaps-tiles-uri", "", "The path to a folder containing Protomaps tile databases.")
+	fs.IntVar(&protomaps_cache_size, "protomaps-cache-size", 64, "The size in MB of the Protomaps tile cache.")
 
 	fs.BoolVar(&enable_all, "enable-all", false, "Enable all the available output handlers EXCEPT the search handlers which need to be explicitly enable using the -enable-search* flags.")
 	fs.BoolVar(&enable_graphics, "enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
@@ -142,6 +153,7 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&path_navplace, "path-navplace", "/navplace/", "The path that IIIF navPlace requests should be served from.")
 	fs.StringVar(&path_spr, "path-spr", "/spr/", "The path that SPR requests should be served from.")
 	fs.StringVar(&path_select, "path-select", "/select/", "The path that 'select' requests should be served from.")
+	fs.StringVar(&path_protomaps_tiles, "path-protomaps-tiles-uri", "/tiles/", "The root path from which Protomaps tiles will be served.")
 
 	fs.StringVar(&path_search_api, "path-search-api", "/search/spr/", "The path that API 'search' requests should be served from.")
 	fs.StringVar(&path_search_html, "path-search-html", "/search/", "The path that API 'search' requests should be served from.")

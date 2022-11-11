@@ -10,11 +10,14 @@ require (
 	github.com/aaronland/go-http-server v1.0.0
 	github.com/aaronland/go-http-server-tsnet v0.9.0
 	github.com/aaronland/go-http-tangramjs v0.1.3
+	github.com/protomaps/go-pmtiles v1.6.0
 	github.com/rs/cors v1.8.2
 	github.com/sfomuseum/go-flags v0.10.0
 	github.com/sfomuseum/go-geojsonld v1.0.0
 	github.com/sfomuseum/go-http-auth v0.0.6
+	github.com/sfomuseum/go-http-protomaps v0.0.14
 	github.com/sfomuseum/go-http-tilezen v0.0.7
+	github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3
 	github.com/tidwall/gjson v1.14.3
 	github.com/tilezen/go-tilepacks v0.0.0-20220729022432-5ee633f5bb6a
 	github.com/whosonfirst/go-cache v0.5.2
@@ -35,6 +38,7 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
+	github.com/RoaringBitmap/roaring v1.2.1 // indirect
 	github.com/aaronland/go-artisanal-integers v0.9.1 // indirect
 	github.com/aaronland/go-aws-dynamodb v0.0.5 // indirect
 	github.com/aaronland/go-aws-session v0.0.6 // indirect
@@ -65,8 +69,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.13 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.10 // indirect
 	github.com/aws/smithy-go v1.12.0 // indirect
+	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/coreos/go-iptables v0.6.0 // indirect
+	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
 	github.com/g8rswimmer/error-chain v1.0.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
@@ -86,17 +92,24 @@ require (
 	github.com/jtacoma/uritemplates v1.0.0 // indirect
 	github.com/klauspost/compress v1.15.4 // indirect
 	github.com/kortschak/wol v0.0.0-20200729010619-da482cc4850a // indirect
+	github.com/mattn/go-isatty v0.0.16 // indirect
+	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.16 // indirect
 	github.com/mdlayher/genetlink v1.2.0 // indirect
 	github.com/mdlayher/netlink v1.6.0 // indirect
 	github.com/mdlayher/sdnotify v1.0.0 // indirect
 	github.com/mdlayher/socket v0.2.3 // indirect
+	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mitchellh/go-ps v1.0.0 // indirect
+	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/paulmach/go.geojson v1.4.0 // indirect
 	github.com/paulmach/orb v0.7.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/schollz/progressbar/v3 v3.11.0 // indirect
 	github.com/sfomuseum/go-edtf v1.1.1 // indirect
 	github.com/sfomuseum/go-tilezen v0.0.6 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76 // indirect
@@ -146,6 +159,11 @@ require (
 	google.golang.org/grpc v1.48.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gvisor.dev/gvisor v0.0.0-20220817001344-846276b3dbc5 // indirect
+	modernc.org/libc v1.16.7 // indirect
+	modernc.org/mathutil v1.4.1 // indirect
+	modernc.org/memory v1.1.1 // indirect
+	modernc.org/sqlite v1.17.3 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 	tailscale.com v1.32.2 // indirect
+	zombiezen.com/go/sqlite v0.10.1 // indirect
 )

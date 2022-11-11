@@ -2,6 +2,11 @@
 ## explicit; go 1.17
 filippo.io/edwards25519
 filippo.io/edwards25519/field
+# github.com/RoaringBitmap/roaring v1.2.1
+## explicit; go 1.14
+github.com/RoaringBitmap/roaring
+github.com/RoaringBitmap/roaring/internal
+github.com/RoaringBitmap/roaring/roaring64
 # github.com/aaronland/go-artisanal-integers v0.9.1
 ## explicit; go 1.16
 github.com/aaronland/go-artisanal-integers/client
@@ -222,12 +227,18 @@ github.com/aws/smithy-go/time
 github.com/aws/smithy-go/transport/http
 github.com/aws/smithy-go/transport/http/internal/io
 github.com/aws/smithy-go/waiter
+# github.com/bits-and-blooms/bitset v1.2.0
+## explicit; go 1.14
+github.com/bits-and-blooms/bitset
 # github.com/cenkalti/backoff/v4 v4.1.3
 ## explicit; go 1.13
 github.com/cenkalti/backoff/v4
 # github.com/coreos/go-iptables v0.6.0
 ## explicit; go 1.16
 github.com/coreos/go-iptables/iptables
+# github.com/dustin/go-humanize v1.0.0
+## explicit
+github.com/dustin/go-humanize
 # github.com/fxamacker/cbor/v2 v2.4.0
 ## explicit; go 1.12
 github.com/fxamacker/cbor/v2
@@ -309,6 +320,12 @@ github.com/klauspost/compress/zstd/internal/xxhash
 # github.com/kortschak/wol v0.0.0-20200729010619-da482cc4850a
 ## explicit; go 1.12
 github.com/kortschak/wol
+# github.com/mattn/go-isatty v0.0.16
+## explicit; go 1.15
+github.com/mattn/go-isatty
+# github.com/mattn/go-runewidth v0.0.13
+## explicit; go 1.9
+github.com/mattn/go-runewidth
 # github.com/mattn/go-sqlite3 v1.14.16
 ## explicit; go 1.16
 github.com/mattn/go-sqlite3
@@ -325,9 +342,15 @@ github.com/mdlayher/sdnotify
 # github.com/mdlayher/socket v0.2.3
 ## explicit; go 1.17
 github.com/mdlayher/socket
+# github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db
+## explicit
+github.com/mitchellh/colorstring
 # github.com/mitchellh/go-ps v1.0.0
 ## explicit; go 1.13
 github.com/mitchellh/go-ps
+# github.com/mschoch/smat v0.2.0
+## explicit; go 1.13
+github.com/mschoch/smat
 # github.com/natefinch/atomic v1.0.1
 ## explicit; go 1.12
 github.com/natefinch/atomic
@@ -350,9 +373,21 @@ github.com/paulmach/orb/project
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
+# github.com/protomaps/go-pmtiles v1.6.0
+## explicit; go 1.17
+github.com/protomaps/go-pmtiles/pmtiles
+# github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0
+## explicit; go 1.12
+github.com/remyoudompheng/bigfft
+# github.com/rivo/uniseg v0.2.0
+## explicit; go 1.12
+github.com/rivo/uniseg
 # github.com/rs/cors v1.8.2
 ## explicit; go 1.13
 github.com/rs/cors
+# github.com/schollz/progressbar/v3 v3.11.0
+## explicit; go 1.13
+github.com/schollz/progressbar/v3
 # github.com/sfomuseum/go-edtf v1.1.1
 ## explicit; go 1.12
 github.com/sfomuseum/go-edtf
@@ -374,9 +409,16 @@ github.com/sfomuseum/go-geojsonld
 # github.com/sfomuseum/go-http-auth v0.0.6
 ## explicit; go 1.19
 github.com/sfomuseum/go-http-auth
+# github.com/sfomuseum/go-http-protomaps v0.0.14
+## explicit; go 1.16
+github.com/sfomuseum/go-http-protomaps
+github.com/sfomuseum/go-http-protomaps/static
 # github.com/sfomuseum/go-http-tilezen v0.0.7
 ## explicit; go 1.16
 github.com/sfomuseum/go-http-tilezen/http
+# github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3
+## explicit; go 1.19
+github.com/sfomuseum/go-sfomuseum-pmtiles/http
 # github.com/sfomuseum/go-tilezen v0.0.6
 ## explicit; go 1.16
 github.com/sfomuseum/go-tilezen
@@ -550,6 +592,8 @@ go4.org/netipx
 # gocloud.dev v0.27.0
 ## explicit; go 1.12
 gocloud.dev/aws
+gocloud.dev/blob
+gocloud.dev/blob/driver
 gocloud.dev/docstore
 gocloud.dev/docstore/awsdynamodb
 gocloud.dev/docstore/driver
@@ -810,6 +854,43 @@ gvisor.dev/gvisor/pkg/tcpip/transport/tcp
 gvisor.dev/gvisor/pkg/tcpip/transport/tcpconntrack
 gvisor.dev/gvisor/pkg/tcpip/transport/udp
 gvisor.dev/gvisor/pkg/waiter
+# modernc.org/libc v1.16.7
+## explicit; go 1.16
+modernc.org/libc
+modernc.org/libc/errno
+modernc.org/libc/fcntl
+modernc.org/libc/fts
+modernc.org/libc/grp
+modernc.org/libc/honnef.co/go/netdb
+modernc.org/libc/langinfo
+modernc.org/libc/limits
+modernc.org/libc/netdb
+modernc.org/libc/netinet/in
+modernc.org/libc/poll
+modernc.org/libc/pthread
+modernc.org/libc/pwd
+modernc.org/libc/signal
+modernc.org/libc/stdio
+modernc.org/libc/stdlib
+modernc.org/libc/sys/socket
+modernc.org/libc/sys/stat
+modernc.org/libc/sys/types
+modernc.org/libc/termios
+modernc.org/libc/time
+modernc.org/libc/unistd
+modernc.org/libc/utime
+modernc.org/libc/uuid
+modernc.org/libc/uuid/uuid
+modernc.org/libc/wctype
+# modernc.org/mathutil v1.4.1
+## explicit; go 1.13
+modernc.org/mathutil
+# modernc.org/memory v1.1.1
+## explicit; go 1.16
+modernc.org/memory
+# modernc.org/sqlite v1.17.3
+## explicit; go 1.16
+modernc.org/sqlite/lib
 # nhooyr.io/websocket v1.8.7
 ## explicit; go 1.13
 nhooyr.io/websocket
@@ -936,3 +1017,6 @@ tailscale.com/wgengine/wgcfg/nmcfg
 tailscale.com/wgengine/wgint
 tailscale.com/wgengine/wglog
 tailscale.com/wgengine/winnet
+# zombiezen.com/go/sqlite v0.10.1
+## explicit; go 1.16
+zombiezen.com/go/sqlite
