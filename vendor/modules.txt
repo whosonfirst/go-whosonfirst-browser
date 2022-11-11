@@ -594,11 +594,13 @@ go4.org/netipx
 gocloud.dev/aws
 gocloud.dev/blob
 gocloud.dev/blob/driver
+gocloud.dev/blob/fileblob
 gocloud.dev/docstore
 gocloud.dev/docstore/awsdynamodb
 gocloud.dev/docstore/driver
 gocloud.dev/docstore/internal/fields
 gocloud.dev/gcerrors
+gocloud.dev/internal/escape
 gocloud.dev/internal/gcerr
 gocloud.dev/internal/oc
 gocloud.dev/internal/openurl

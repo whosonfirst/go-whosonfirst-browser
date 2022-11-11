@@ -4,6 +4,7 @@ import (
 	_ "github.com/aaronland/go-http-server-tsnet"
 	_ "github.com/whosonfirst/go-reader-cachereader"
 	_ "github.com/whosonfirst/go-reader-findingaid"
+	_ "gocloud.dev/blob/fileblob"
 )
 
 import (
@@ -563,7 +564,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		case "protomaps":
 
-			loop, err := pmtiles.NewLoop(protomaps_tiles_uri, logger, protomaps_cache_size, "")
+			loop, err := pmtiles.NewLoop(protomaps_bucket_uri, logger, protomaps_cache_size, "")
 
 			if err != nil {
 				return fmt.Errorf("Failed to create pmtiles.Loop, %w", err)

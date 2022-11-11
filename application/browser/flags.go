@@ -33,7 +33,7 @@ var proxy_tiles_timeout int
 var tilepack_db string
 var tilepack_uri string
 
-var protomaps_tiles_uri string
+var protomaps_bucket_uri string
 var protomaps_cache_size int
 
 var enable_all bool
@@ -120,7 +120,7 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&proxy_tiles_cache, "proxy-tiles-cache", "gocache://", "A valid tile proxy DSN string.")
 	fs.IntVar(&proxy_tiles_timeout, "proxy-tiles-timeout", 30, "The maximum number of seconds to allow for fetching a tile from the proxy.")
 
-	fs.StringVar(&protomaps_tiles_uri, "protomaps-tiles-uri", "", "The path to a folder containing Protomaps tile databases.")
+	fs.StringVar(&protomaps_bucket_uri, "protomaps-bucket-uri", "", "A valid gocloud.dev/blob.Bucket URI containing Protomaps tile databases.")
 	fs.IntVar(&protomaps_cache_size, "protomaps-cache-size", 64, "The size in MB of the Protomaps tile cache.")
 
 	fs.BoolVar(&enable_all, "enable-all", false, "Enable all the available output handlers EXCEPT the search handlers which need to be explicitly enable using the -enable-search* flags.")
