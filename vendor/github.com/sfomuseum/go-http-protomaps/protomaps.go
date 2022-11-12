@@ -38,7 +38,7 @@ func DefaultProtomapsOptions() *ProtomapsOptions {
 	opts := &ProtomapsOptions{
 		CSS: []string{},
 		JS: []string{
-			"/javascript/protomaps.js",
+			"/javascript/protomaps.min.js",
 		},
 		LeafletOptions: leaflet_opts,
 	}

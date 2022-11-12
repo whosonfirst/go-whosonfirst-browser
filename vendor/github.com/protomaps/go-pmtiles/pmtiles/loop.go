@@ -201,13 +201,11 @@ func (loop *Loop) get_metadata(ctx context.Context, http_headers map[string]stri
 	header := root_value.header
 
 	if !root_value.ok {
-		log.Println("SAD 1")
 		return 404, http_headers, []byte("Archive not found")
 	}
 
 	r, err := loop.bucket.NewRangeReader(ctx, name+".pmtiles", int64(header.MetadataOffset), int64(header.MetadataLength), nil)
 	if err != nil {
-		log.Println("SAD 2")		
 		return 404, http_headers, []byte("Archive not found")
 	}
 	defer r.Close()
@@ -225,25 +223,18 @@ func (loop *Loop) get_metadata(ctx context.Context, http_headers map[string]stri
 }
 
 func (loop *Loop) get_tile(ctx context.Context, http_headers map[string]string, name string, z uint8, x uint32, y uint32, ext string) (int, map[string]string, []byte) {
-
-	log.Println("WTF", name)
-	
 	root_req := Request{key: CacheKey{name: name, offset: 0, length: 0}, value: make(chan CachedValue, 1)}
 	loop.reqs <- root_req
 
-	log.Println("HELLO", name)
-	
 	// https://golang.org/doc/faq#atomic_maps
 	root_value := <-root_req.value
 	header := root_value.header
 
 	if !root_value.ok {
-		log.Println("SAD 3")		
 		return 404, http_headers, []byte("Archive not found")
 	}
 
 	if z < header.MinZoom || z > header.MaxZoom {
-		log.Println("SAD 4")		
 		return 404, http_headers, []byte("Tile not found")
 	}
 
@@ -305,13 +296,10 @@ func (loop *Loop) get_tile(ctx context.Context, http_headers map[string]string, 
 	return 204, http_headers, nil
 }
 
-var tilePattern = regexp.MustCompile(`^\/?([-A-Za-z0-9_\/!-_\.\*'\(\)']+)\/(\d+)\/(\d+)\/(\d+)\.([a-z]+)$`)
+var tilePattern = regexp.MustCompile(`^\/([-A-Za-z0-9_\/!-_\.\*'\(\)']+)\/(\d+)\/(\d+)\/(\d+)\.([a-z]+)$`)
 var metadataPattern = regexp.MustCompile(`^\/([-A-Za-z0-9_\/!-_\.\*'\(\)']+)\/metadata$`)
 
 func parse_tile_path(path string) (bool, string, uint8, uint32, uint32, string) {
-
-	log.Println("PATH", "WOT")
-	
 	if res := tilePattern.FindStringSubmatch(path); res != nil {
 		name := res[1]
 		z, _ := strconv.ParseUint(res[2], 10, 8)
@@ -337,23 +325,12 @@ func (loop *Loop) Get(ctx context.Context, path string) (int, map[string]string,
 		http_headers["Access-Control-Allow-Origin"] = loop.cors
 	}
 
-	log.Println("PATH", path)
-	
-	ok, key, z, x, y, ext := parse_tile_path(path)
-
-	log.Println("TILE", ok, key, z, x, y, ext)
-	
-	if ok, key, z, x, y, ext = parse_tile_path(path); ok {
+	if ok, key, z, x, y, ext := parse_tile_path(path); ok {
 		return loop.get_tile(ctx, http_headers, key, z, x, y, ext)
 	}
-
-	ok, key = parse_metadata_path(path)	
-	log.Println("META PATH", ok, key)
-	
-	if ok, key = parse_metadata_path(path); ok {
+	if ok, key := parse_metadata_path(path); ok {
 		return loop.get_metadata(ctx, http_headers, key)
 	}
 
-		log.Println("SAD 5")	
 	return 404, http_headers, []byte("Tile not found")
 }

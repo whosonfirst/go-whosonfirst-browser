@@ -373,7 +373,7 @@ github.com/paulmach/orb/project
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
-# github.com/protomaps/go-pmtiles v1.6.0
+# github.com/protomaps/go-pmtiles v1.5.1
 ## explicit; go 1.17
 github.com/protomaps/go-pmtiles/pmtiles
 # github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0

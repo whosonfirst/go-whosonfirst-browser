@@ -14,10 +14,8 @@ func TileHandler(loop *pmtiles.Loop, logger *log.Logger) gohttp.Handler {
 
 		start := time.Now()
 
-		log.Println("GET TILES", req.URL.Path)
 		status_code, headers, body := loop.Get(req.Context(), req.URL.Path)
 
-		log.Println("RESPONSE", status_code)
 		for k, v := range headers {
 			rsp.Header().Set(k, v)
 		}

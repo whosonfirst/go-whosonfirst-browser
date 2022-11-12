@@ -2,6 +2,11 @@ module github.com/whosonfirst/go-whosonfirst-browser/v5
 
 go 1.19
 
+// Note: until I can figure out why v1.6.0 doesn't work
+// work with go-sfomuseum-pmtiles we are pegged at v1.5.1
+// github.com/protomaps/go-pmtiles v1.6.0
+require github.com/protomaps/go-pmtiles v1.5.1
+
 require (
 	github.com/aaronland/go-http-bootstrap v0.1.0
 	github.com/aaronland/go-http-ping/v2 v2.0.0
@@ -10,7 +15,6 @@ require (
 	github.com/aaronland/go-http-server v1.0.0
 	github.com/aaronland/go-http-server-tsnet v0.9.0
 	github.com/aaronland/go-http-tangramjs v0.1.3
-	github.com/protomaps/go-pmtiles v1.6.0
 	github.com/rs/cors v1.8.2
 	github.com/sfomuseum/go-flags v0.10.0
 	github.com/sfomuseum/go-geojsonld v1.0.0

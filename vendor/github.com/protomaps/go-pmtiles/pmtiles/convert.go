@@ -28,8 +28,6 @@ type OffsetLen struct {
 }
 
 type Resolver struct {
-	deduplicate    bool
-	compress       bool
 	Entries        []EntryV3
 	Offset         uint64
 	OffsetMap      map[string]OffsetLen
@@ -39,29 +37,16 @@ type Resolver struct {
 	hashfunc       hash.Hash
 }
 
-func (r *Resolver) NumContents() uint64 {
-	if r.deduplicate {
-		return uint64(len(r.OffsetMap))
-	} else {
-		return r.AddressedTiles
-	}
-}
-
 // must be called in increasing tile_id order, uniquely
 func (r *Resolver) AddTileIsNew(tile_id uint64, data []byte) (bool, []byte) {
 	r.AddressedTiles++
-	var found OffsetLen
-	var ok bool
-	var sum_string string
-	if r.deduplicate {
-		r.hashfunc.Reset()
-		r.hashfunc.Write(data)
-		var tmp []byte
-		sum_string = string(r.hashfunc.Sum(tmp))
-		found, ok = r.OffsetMap[sum_string]
-	}
+	r.hashfunc.Reset()
+	r.hashfunc.Write(data)
+	var tmp []byte
+	sum := r.hashfunc.Sum(tmp)
+	sum_string := string(sum)
 
-	if r.deduplicate && ok {
+	if found, ok := r.OffsetMap[sum_string]; ok {
 		last_entry := r.Entries[len(r.Entries)-1]
 		if tile_id == last_entry.TileId+uint64(last_entry.RunLength) && last_entry.Offset == found.Offset {
 			// RLE
@@ -76,8 +61,8 @@ func (r *Resolver) AddTileIsNew(tile_id uint64, data []byte) (bool, []byte) {
 		return false, nil
 	} else {
 		var new_data []byte
-		if !r.compress || (len(data) >= 2 && data[0] == 31 && data[1] == 139) {
-			// the tile is already compressed
+		if len(data) >= 2 && data[0] == 31 && data[1] == 139 {
+			// the tile is already gzipped
 			new_data = data
 		} else {
 			r.compress_tmp.Reset()
@@ -87,27 +72,25 @@ func (r *Resolver) AddTileIsNew(tile_id uint64, data []byte) (bool, []byte) {
 			new_data = r.compress_tmp.Bytes()
 		}
 
-		if r.deduplicate {
-			r.OffsetMap[sum_string] = OffsetLen{r.Offset, uint32(len(new_data))}
-		}
+		r.OffsetMap[sum_string] = OffsetLen{r.Offset, uint32(len(new_data))}
 		r.Entries = append(r.Entries, EntryV3{tile_id, r.Offset, uint32(len(new_data)), 1})
 		r.Offset += uint64(len(new_data))
 		return true, new_data
 	}
 }
 
-func NewResolver(deduplicate bool, compress bool) *Resolver {
+func NewResolver() *Resolver {
 	b := new(bytes.Buffer)
 	compressor, _ := gzip.NewWriterLevel(b, gzip.BestCompression)
-	r := Resolver{deduplicate, compress, make([]EntryV3, 0), 0, make(map[string]OffsetLen), 0, compressor, b, fnv.New128a()}
+	r := Resolver{make([]EntryV3, 0), 0, make(map[string]OffsetLen), 0, compressor, b, fnv.New128a()}
 	return &r
 }
 
-func Convert(logger *log.Logger, input string, output string, deduplicate bool) error {
+func Convert(logger *log.Logger, input string, output string) error {
 	if strings.HasSuffix(input, ".pmtiles") {
-		return ConvertPmtilesV2(logger, input, output, deduplicate)
+		return ConvertPmtilesV2(logger, input, output)
 	} else {
-		return ConvertMbtiles(logger, input, output, deduplicate)
+		return ConvertMbtiles(logger, input, output)
 	}
 }
 
@@ -146,7 +129,7 @@ func set_zoom_center_defaults(header *HeaderV3, entries []EntryV3) {
 	}
 }
 
-func ConvertPmtilesV2(logger *log.Logger, input string, output string, deduplicate bool) error {
+func ConvertPmtilesV2(logger *log.Logger, input string, output string) error {
 	start := time.Now()
 	f, err := os.Open(input)
 	if err != nil {
@@ -194,7 +177,7 @@ func ConvertPmtilesV2(logger *log.Logger, input string, output string, deduplica
 	defer os.Remove(tmpfile.Name())
 
 	// re-use resolver, because even if archives are de-duplicated we may need to recompress.
-	resolver := NewResolver(deduplicate, header.TileType == Mvt)
+	resolver := NewResolver()
 
 	bar := progressbar.Default(int64(len(entries)))
 	for _, entry := range entries {
@@ -225,7 +208,7 @@ func ConvertPmtilesV2(logger *log.Logger, input string, output string, deduplica
 	return nil
 }
 
-func ConvertMbtiles(logger *log.Logger, input string, output string, deduplicate bool) error {
+func ConvertMbtiles(logger *log.Logger, input string, output string) error {
 	start := time.Now()
 	conn, err := sqlite.OpenConn(input, sqlite.OpenReadOnly)
 	if err != nil {
@@ -312,7 +295,8 @@ func ConvertMbtiles(logger *log.Logger, input string, output string, deduplicate
 	defer os.Remove(tmpfile.Name())
 
 	logger.Println("Pass 2: writing tiles")
-	resolver := NewResolver(deduplicate, header.TileType == Mvt)
+	// write tiles to tmpfile with deduplication
+	resolver := NewResolver()
 	{
 		bar := progressbar.Default(int64(tileset.GetCardinality()))
 		i := tileset.Iterator()
@@ -361,11 +345,11 @@ func ConvertMbtiles(logger *log.Logger, input string, output string, deduplicate
 func finalize(logger *log.Logger, resolver *Resolver, header HeaderV3, tmpfile *os.File, output string, json_metadata map[string]interface{}) error {
 	logger.Println("# of addressed tiles: ", resolver.AddressedTiles)
 	logger.Println("# of tile entries (after RLE): ", len(resolver.Entries))
-	logger.Println("# of tile contents: ", resolver.NumContents())
+	logger.Println("# of tile contents: ", len(resolver.OffsetMap))
 
 	header.AddressedTilesCount = resolver.AddressedTiles
 	header.TileEntriesCount = uint64(len(resolver.Entries))
-	header.TileContentsCount = resolver.NumContents()
+	header.TileContentsCount = uint64(len(resolver.OffsetMap))
 
 	// assemble the final file
 	outfile, err := os.Create(output)
@@ -404,9 +388,7 @@ func finalize(logger *log.Logger, resolver *Resolver, header HeaderV3, tmpfile *
 
 	header.Clustered = true
 	header.InternalCompression = Gzip
-	if header.TileType == Mvt {
-		header.TileCompression = Gzip
-	}
+	header.TileCompression = Gzip
 
 	header.RootOffset = HEADERV3_LEN_BYTES
 	header.RootLength = uint64(len(root_bytes))
@@ -470,6 +452,8 @@ func v2_to_header_json(v2_json_metadata map[string]interface{}, first4 []byte) (
 	} else {
 		if first4[0] == 0x1f && first4[1] == 0x8b {
 			header.TileCompression = Gzip
+		} else {
+			header.TileCompression = NoCompression
 		}
 	}
 
@@ -479,23 +463,18 @@ func v2_to_header_json(v2_json_metadata map[string]interface{}, first4 []byte) (
 			header.TileType = Mvt
 		case "png":
 			header.TileType = Png
-			header.TileCompression = NoCompression
 		case "jpg":
 			header.TileType = Jpeg
-			header.TileCompression = NoCompression
 		case "webp":
 			header.TileType = Webp
-			header.TileCompression = NoCompression
 		default:
 			return header, v2_json_metadata, errors.New("Unknown tile type")
 		}
 	} else {
 		if first4[0] == 0x89 && first4[1] == 0x50 && first4[2] == 0x4e && first4[3] == 0x47 {
 			header.TileType = Png
-			header.TileCompression = NoCompression
 		} else if first4[0] == 0xff && first4[1] == 0xd8 && first4[2] == 0xff && first4[3] == 0xe0 {
 			header.TileType = Jpeg
-			header.TileCompression = NoCompression
 		} else {
 			// assume it is a vector tile
 			header.TileType = Mvt
@@ -569,13 +548,10 @@ func mbtiles_to_header_json(mbtiles_metadata []string) (HeaderV3, map[string]int
 				header.TileType = Mvt
 			case "png":
 				header.TileType = Png
-				header.TileCompression = NoCompression
 			case "jpg":
 				header.TileType = Jpeg
-				header.TileCompression = NoCompression
 			case "webp":
 				header.TileType = Webp
-				header.TileCompression = NoCompression
 			}
 			json_result["format"] = value
 		case "bounds":
@@ -604,11 +580,7 @@ func mbtiles_to_header_json(mbtiles_metadata []string) (HeaderV3, map[string]int
 		case "compression":
 			switch value {
 			case "gzip":
-				if header.TileType == Mvt {
-					header.TileCompression = Gzip
-				} else {
-					header.TileCompression = NoCompression
-				}
+				header.TileCompression = Gzip // TODO: fix me for non-vector outputs
 			}
 			json_result["compression"] = value
 		// name, attribution, description, type, version
