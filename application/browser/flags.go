@@ -103,8 +103,6 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.Var(&reader_uris, "reader-uri", "One or more valid go-reader Reader URI strings.")
 	fs.StringVar(&cache_uri, "cache-uri", "gocache://", "A valid go-cache Cache URI string.")
 
-	fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
-
 	fs.StringVar(&exporter_uri, "exporter-uri", "whosonfirst://", "A valid whosonfirst/go-whosonfirst-export/v2 URI.")
 
 	fs.StringVar(&map_provider, "map-provider", "nextzen", "Valid options are: nextzen, protomaps")
@@ -169,11 +167,12 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.StringVar(&authenticator_uri, "authenticator-uri", "null://", "A valid sfomuseum/go-http-auth URI.")
 
-	fs.BoolVar(&enable_api, "enable-api", false, "Enable the API endpoints")
-
-	fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
-
-	fs.StringVar(&path_api_cessate, "path-api-cessate", "/api/cessate/", "...")
+	/*
+		fs.BoolVar(&enable_api, "enable-api", false, "Enable the API endpoints")
+		fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
+		fs.StringVar(&path_api_cessate, "path-api-cessate", "/api/cessate/", "...")
+		fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
+	*/
 
 	return fs, nil
 }

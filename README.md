@@ -59,11 +59,17 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 ### whosonfirst-browser
 
 ```
-$> ./bin/whosonfirst-browser -h
-  -cache-source string
+> ./bin/whosonfirst-browser -h
+  -authenticator-uri string
+    	A valid sfomuseum/go-http-auth URI. (default "null://")
+  -cache-uri string
     	A valid go-cache Cache URI string. (default "gocache://")
+  -cors-origin value
+    	One or more hosts to restrict CORS support to on the API endpoint. If no origins are defined (and -cors is enabled) then the server will default to all hosts.
   -enable-all
     	Enable all the available output handlers EXCEPT the search handlers which need to be explicitly enable using the -enable-search* flags.
+  -enable-cors
+    	A boolean flag to enable CORS headers (default true)
   -enable-data
     	Enable the 'geojson' and 'spr' and 'select' output handlers.
   -enable-geojson
@@ -74,32 +80,38 @@ $> ./bin/whosonfirst-browser -h
     	Enable the 'png' and 'svg' output handlers.
   -enable-html
     	Enable the 'html' (or human-friendly) output handlers. (default true)
+  -enable-index
+    	Enable the 'index' (or human-friendly) index handler. (default true)
   -enable-navplace
-    	Enable the IIIF 'navPlace' output handler. (default true)	
+    	Enable the IIIF 'navPlace' output handler. (default true)
   -enable-png
     	Enable the 'png' output handler.
   -enable-search
     	Enable both the API and human-friendly search handlers.
   -enable-search-api
-    	Enable the (API) search handlers. (default true)
+    	Enable the (API) search handlers.
   -enable-search-api-geojson
     	Enable the (API) search handlers to return results as GeoJSON.
   -enable-search-html
-    	Enable the (human-friendly) search handlers. (default true)
+    	Enable the (human-friendly) search handlers.
   -enable-select
     	Enable the 'select' output handler.
   -enable-spr
     	Enable the 'spr' (or "standard places response") output handler. (default true)
   -enable-svg
     	Enable the 'svg' output handler.
+  -exporter-uri string
+    	A valid whosonfirst/go-whosonfirst-export/v2 URI. (default "whosonfirst://")
+  -map-provider string
+    	Valid options are: nextzen, protomaps (default "nextzen")
   -navplace-max-features int
-    	The maximum number of features to allow in a /navplace/{ID} URI string. (default 3)	
+    	The maximum number of features to allow in a /navplace/{ID} URI string. (default 3)
   -nextzen-api-key string
     	A valid Nextzen API key (https://developers.nextzen.org/).
   -nextzen-style-url string
     	A valid Tangram scene file URL. (default "/tangram/refill-style.zip")
   -nextzen-tile-url string
-    	A valid Nextzen MVT tile URL. (default "https://{s}.tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
+    	A valid Nextzen MVT tile URL. (default "https://tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
   -nextzen-tilepack-database string
     	The path to a valid MBTiles database (tilepack) containing Nextzen MVT tiles.
   -nextzen-tilepack-uri string
@@ -109,11 +121,13 @@ $> ./bin/whosonfirst-browser -h
   -path-geojson-ld string
     	The path that GeoJSON-LD requests should be served from. (default "/geojson-ld/")
   -path-id string
-    	The that Who's On First documents should be served from. (default "/id/")
+    	The URL that Who's On First documents should be served from. (default "/id/")
   -path-navplace string
     	The path that IIIF navPlace requests should be served from. (default "/navplace/")
   -path-png string
     	The path that PNG requests should be served from. (default "/png/")
+  -path-protomaps-tiles string
+    	The root path from which Protomaps tiles will be served. (default "/tiles/")
   -path-search-api string
     	The path that API 'search' requests should be served from. (default "/search/spr/")
   -path-search-html string
@@ -124,6 +138,12 @@ $> ./bin/whosonfirst-browser -h
     	The path that SPR requests should be served from. (default "/spr/")
   -path-svg string
     	The path that SVG requests should be served from. (default "/svg/")
+  -protomaps-bucket-uri string
+    	A valid gocloud.dev/blob.Bucket URI containing Protomaps tile databases.
+  -protomaps-cache-size int
+    	The size in MB of the Protomaps tile cache. (default 64)
+  -protomaps-tiles-database string
+    	The name of the Protomaps tiles database to use.
   -proxy-tiles
     	Proxy (and cache) Nextzen tiles.
   -proxy-tiles-cache string
@@ -132,8 +152,8 @@ $> ./bin/whosonfirst-browser -h
     	The maximum number of seconds to allow for fetching a tile from the proxy. (default 30)
   -proxy-tiles-url string
     	The URL (a relative path) for proxied tiles. (default "/tiles/")
-  -reader-source string
-    	A valid go-reader Reader URI string. (default "whosonfirst-data://")
+  -reader-uri value
+    	One or more valid go-reader Reader URI strings.
   -search-database-uri string
     	A valid whosonfirst/go-whosonfist-search/fulltext URI.
   -select-pattern string
@@ -142,14 +162,15 @@ $> ./bin/whosonfirst-browser -h
     	A valid aaronland/go-http-server URI. (default "http://localhost:8080")
   -static-prefix string
     	Prepend this prefix to URLs for static assets.
-  -templates string
-    	An optional string for local templates. This is anything that can be read by the 'templates.ParseGlob' method.
 ```
 
 #### Example
 
 ```
-$> bin/browser -enable-all -nextzen-api-key {NEXTZEN_APIKEY} -reader-uri {READER_URI}
+$> bin/whosonfirst-browser \
+	-enable-all -nextzen-api-key {NEXTZEN_APIKEY} \
+	-reader-uri {READER_URI}
+	
 2019/12/14 18:22:16 Listening on http://localhost:8080
 ```
 
@@ -158,6 +179,59 @@ Then if you visited `http://localhost:8080/id/101736545` in your web browser you
 ![](docs/images/wof-browser-montreal-props.png)
 
 By default Who's On First (WOF) properties are rendered as nested (and collapsed) trees but there is are handy `show raw` and `show pretty` toggles for viewing the raw WOF GeoJSON data.
+
+Other examples include reading data from two different sources and using [Protomaps](https://protomaps.com) as a map tile provider:
+
+```
+$> bin/whosonfirst-browser/main.go \
+	-enable-all \
+	-reader-uri repo:///usr/local/data/sfomuseum-data-architecture \
+	-reader-uri repo:///usr/local/data/sfomuseum-data-whosonfirst \
+	-map-provider protomaps \
+	-protomaps-bucket-uri file:///usr/local/data/ \
+	-protomaps-tiles-database sfo.pmtiles
+
+2022/11/11 22:29:05 Listening on http://localhost:8080
+```
+
+Only the [GoCloud `fileblob` providers](https://gocloud.dev/howto/blob/#local) for accessing files on the local filesystem is enabled by default. If you need to enable other providers you will need to clone the [cmd/whosonfirst-browser/main.go](cmd/whosonfirst-browser/main.go) tool and add the relevant `import` statements. See the [Data sources and Caches](#) section for examples.
+
+Or all of those things but running the application as a [Tailscale virtual private service](https://tailscale.com/blog/tsnet-virtual-private-services/): 
+
+```
+$> bin/whosonfirst-browser/main.go \
+	-enable-all \
+	-reader-uri repo:///usr/local/data/sfomuseum-data-architecture \
+	-reader-uri repo:///usr/local/data/sfomuseum-data-whosonfirst \
+	-map-provider protomaps \
+	-protomaps-bucket-uri file:///usr/local/data/ \
+	-protomaps-tiles-database sfo.pmtiles
+	-server-uri 'tsnet://whosonfirst:80?auth-key={TAILSCALE_AUTH_KEY}'
+
+2022/11/11 22:25:47 Listening on http://whosonfirst:80
+```
+
+## Map providers
+
+`whosonfirst-provider` supports two map tile providers.
+
+### Nextzen
+
+`go-whosonfirst-browser` uses [Nextzen](https://nextzen.org/) vector data tiles and the [Tangram.js](https://github.com/tangrams/tangram) rendering library for displaying maps. The Tangram code and styling assets are bundled with this tool and served directly but, by default, tile data is retrieved from the Nextzen servers.
+
+It is possible to cache those tiles locally using the `-proxy-tiles` flag at start up. The default cache for proxying tiles is an ephemiral in-memory cache but you can also specify an alternative [go-cache](https://github.com/whosonfirst/go-cache) `cache.Cache` source using the `-proxy-tiles-cache` flag. Caches are discussed in detail below.
+
+You will need a [valid Nextzen API key](https://developers.nextzen.org/) in order for map tiles to work. 
+
+### Protomaps
+
+As of this writing I haven't figured out how to support custom Protomaps styles yet.
+
+### Fallback
+
+If no map provider is defined, or if not Nextzen API key is defined, then the browser tool will display the SVG rendering for a place's geometry. For example:
+
+![](docs/images/wof-browser-montreal-map-svg.png)
 
 ## Output formats
 
@@ -262,18 +336,6 @@ An XML-encoded SVG representation of the geometry for a given WOF ID.  For examp
 ![](docs/images/wof-browser-montreal-svg.png)
 
 `http://localhost:8080/svg/101736545`
-
-## Tiles
-
-`go-whosonfirst-browser` uses [Nextzen](https://nextzen.org/) vector data tiles and the [Tangram.js](https://github.com/tangrams/tangram) rendering library for displaying maps. The Tangram code and styling assets are bundled with this tool and served directly but, by default, tile data is retrieved from the Nextzen servers.
-
-It is possible to cache those tiles locally using the `-proxy-tiles` flag at start up. The default cache for proxying tiles is an ephemiral in-memory cache but you can also specify an alternative [go-cache](https://github.com/whosonfirst/go-cache) `cache.Cache` source using the `-proxy-tiles-cache` flag. Caches are discussed in detail below.
-
-### Important
-
-You will need a [valid Nextzen API key](https://developers.nextzen.org/) in order for map tiles to work. If no API key is present then the browser tool will display the SVG rendering for a place's geometry. For example:
-
-![](docs/images/wof-browser-montreal-map-svg.png)
 
 ## Data sources and Caches
 
@@ -497,6 +559,10 @@ $> docker run -it -p 8080:8080 whosonfirst-browser \
 * https://github.com/aaronland/go-http-bootstrap
 * https://github.com/aaronland/go-http-tangramjs
 * https://github.com/aaronland/go-http-server
+* https://github.com/aaronland/go-http-server-tsnet
 * https://github.com/sfomuseum/go-http-tilezen
+* https://github.com/sfomuseum/go-http-protomaps
+* https://github.com/protomaps/go-pmtiles
+* https://github.com/sfomuseum/go-sfomuseum-pmtiles
 * https://github.com/whosonfirst/go-whosonfirst-svg
 * https://github.com/whosonfirst/go-whosonfirst-image
