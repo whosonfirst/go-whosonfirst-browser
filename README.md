@@ -180,6 +180,8 @@ Then if you visited `http://localhost:8080/id/101736545` in your web browser you
 
 By default Who's On First (WOF) properties are rendered as nested (and collapsed) trees but there is are handy `show raw` and `show pretty` toggles for viewing the raw WOF GeoJSON data.
 
+##### Protomaps
+
 Other examples include reading data from two different sources and using [Protomaps](https://protomaps.com) as a map tile provider:
 
 ```
@@ -194,7 +196,9 @@ $> bin/whosonfirst-browser/main.go \
 2022/11/11 22:29:05 Listening on http://localhost:8080
 ```
 
-Only the [GoCloud `fileblob` providers](https://gocloud.dev/howto/blob/#local) for accessing files on the local filesystem is enabled by default. If you need to enable other providers you will need to clone the [cmd/whosonfirst-browser/main.go](cmd/whosonfirst-browser/main.go) tool and add the relevant `import` statements. See the [Data sources and Caches](#) section for examples.
+The `-protomaps-bucket-uri` is expected to be a valid [gocloud.dev/blob](https://gocloud.dev/howto/blob/) bucket URI. Only the [gocloud `fileblob` provider](https://gocloud.dev/howto/blob/#local) for accessing files on the local filesystem is enabled by default. If you need to enable other providers you will need to clone the [cmd/whosonfirst-browser/main.go](cmd/whosonfirst-browser/main.go) tool and add the relevant `import` statements. See the [Data sources and Caches](#) section for examples.
+
+##### Tailscale
 
 Or all of those things but running the application as a [Tailscale virtual private service](https://tailscale.com/blog/tsnet-virtual-private-services/): 
 
