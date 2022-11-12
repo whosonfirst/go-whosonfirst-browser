@@ -3,7 +3,7 @@ whosonfirst.browser = whosonfirst.browser || {};
 
 whosonfirst.browser.maps = (function(){
 
-    var attribution = '<a href="https://github.com/tangrams" target="_blank">Tangram</a> | <a href="http://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a> | <a href="https://www.nextzen.org/" target="_blank">Nextzen</a>';
+    var attribution;
    
     var maps = {};
 
@@ -33,6 +33,8 @@ whosonfirst.browser.maps = (function(){
 	    
 	    switch (map_provider){
 		case "nextzen":
+
+		    attribution = '<a href="https://github.com/tangrams" target="_blank">Tangram</a> | <a href="http://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a> | <a href="https://www.nextzen.org/" target="_blank">Nextzen</a>';
 		    
 		    var tangram_opts = self.getTangramOptions(args);
 		    var tangramLayer = Tangram.leafletLayer(tangram_opts);
