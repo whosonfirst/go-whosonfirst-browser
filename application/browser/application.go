@@ -570,54 +570,30 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 				return fmt.Errorf("Failed to append leaflet-protomaps asset handler, %w", err)
 			}
 
-			use_go_pmtiles := false
+			loop, err := pmtiles.NewLoop(protomaps_bucket_uri, logger, protomaps_cache_size, "")
 
-			if use_go_pmtiles {
-				loop, err := pmtiles.NewLoop(protomaps_bucket_uri, logger, protomaps_cache_size, "")
-
-				if err != nil {
-					return fmt.Errorf("Failed to create pmtiles.Loop, %w", err)
-				}
-
-				loop.Start()
-
-				pmtiles_handler := pmhttp.TileHandler(loop, logger)
-				pmtiles_handler = http.StripPrefix(path_protomaps_tiles, pmtiles_handler)
-
-				mux.Handle(path_protomaps_tiles, pmtiles_handler)
-
-				pm_tile_url, err := url.JoinPath(path_protomaps_tiles, protomaps_tiles_database)
-
-				if err != nil {
-					return fmt.Errorf("Failed to join path to derive Protomaps tile URL, %w", err)
-				}
-
-				pm_opts := protomaps.DefaultProtomapsOptions()
-				pm_opts.TileURL = pm_tile_url
-
-				id_handler = protomaps.AppendResourcesHandlerWithPrefix(id_handler, pm_opts, static_prefix)
-				search_handler = protomaps.AppendResourcesHandlerWithPrefix(search_handler, pm_opts, static_prefix)
-
-			} else {
-
-				path := filepath.Join(protomaps_bucket_uri, protomaps_tiles_database)
-				path = strings.Replace(path, "file:", "", 1)
-
-				mux_url, mux_handler, err := protomaps.FileHandlerFromPath(path, path_protomaps_tiles)
-
-				if err != nil {
-					return fmt.Errorf("Failed to create Protomaps file handler, %w", err)
-				}
-
-				mux.Handle(mux_url, mux_handler)
-
-				pm_opts := protomaps.DefaultProtomapsOptions()
-				pm_opts.TileURL = mux_url
-
-				id_handler = protomaps.AppendResourcesHandlerWithPrefix(id_handler, pm_opts, static_prefix)
-				search_handler = protomaps.AppendResourcesHandlerWithPrefix(search_handler, pm_opts, static_prefix)
-
+			if err != nil {
+				return fmt.Errorf("Failed to create pmtiles.Loop, %w", err)
 			}
+
+			loop.Start()
+
+			pmtiles_handler := pmhttp.TileHandler(loop, logger)
+			pmtiles_handler = http.StripPrefix(path_protomaps_tiles, pmtiles_handler)
+
+			mux.Handle(path_protomaps_tiles, pmtiles_handler)
+
+			pm_tile_url, err := url.JoinPath(path_protomaps_tiles, protomaps_tiles_database)
+
+			if err != nil {
+				return fmt.Errorf("Failed to join path to derive Protomaps tile URL, %w", err)
+			}
+
+			pm_opts := protomaps.DefaultProtomapsOptions()
+			pm_opts.TileURL = pm_tile_url
+
+			id_handler = protomaps.AppendResourcesHandlerWithPrefix(id_handler, pm_opts, static_prefix)
+			search_handler = protomaps.AppendResourcesHandlerWithPrefix(search_handler, pm_opts, static_prefix)
 
 		default:
 			return fmt.Errorf("Unrecognized map provider")

@@ -43,10 +43,6 @@ If you'd like to read more about the subject of editing Who's On First documents
 * Dan Phiffer's blog posts about the [Boundary Issues editing tool](https://whosonfirst.org/blog/tags/boundaryissues/).
 * Gary Gale's [Three Steps Backwards, One Step Forwards; a Tale of Data Consistency and JSON Schema](https://whosonfirst.org/blog/2018/05/25/three-steps-backwards/).
 
-## Install
-
-You will need to have the `Go` programming language (specifically version [1.12](https://golang.org/dl/) or higher) installed. All of this package's dependencies are bundled with the code in the `vendor` directory.
-
 ## Tools
 
 To build binary versions of these tools run the `cli` Makefile target. For example:
@@ -59,7 +55,7 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 ### whosonfirst-browser
 
 ```
-> ./bin/whosonfirst-browser -h
+$> ./bin/whosonfirst-browser -h
   -authenticator-uri string
     	A valid sfomuseum/go-http-auth URI. (default "null://")
   -cache-uri string
