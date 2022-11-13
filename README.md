@@ -187,10 +187,12 @@ $> bin/whosonfirst-browser/main.go \
 	-reader-uri repo:///usr/local/data/sfomuseum-data-whosonfirst \
 	-map-provider protomaps \
 	-protomaps-bucket-uri file:///usr/local/data/ \
-	-protomaps-tiles-database sfo.pmtiles
+	-protomaps-tiles-database sfo
 
 2022/11/11 22:29:05 Listening on http://localhost:8080
 ```
+
+![](images/wof-browser-protomaps.png)
 
 The `-protomaps-bucket-uri` is expected to be a valid [gocloud.dev/blob](https://gocloud.dev/howto/blob/) bucket URI. Only the [gocloud `fileblob` provider](https://gocloud.dev/howto/blob/#local) for accessing files on the local filesystem is enabled by default. If you need to enable other providers you will need to clone the [cmd/whosonfirst-browser/main.go](cmd/whosonfirst-browser/main.go) tool and add the relevant `import` statements. See the [Data sources and Caches](#) section for examples.
 
@@ -205,7 +207,7 @@ $> bin/whosonfirst-browser/main.go \
 	-reader-uri repo:///usr/local/data/sfomuseum-data-whosonfirst \
 	-map-provider protomaps \
 	-protomaps-bucket-uri file:///usr/local/data/ \
-	-protomaps-tiles-database sfo.pmtiles
+	-protomaps-tiles-database sfo
 	-server-uri 'tsnet://whosonfirst:80?auth-key={TAILSCALE_AUTH_KEY}'
 
 2022/11/11 22:25:47 Listening on http://whosonfirst:80
@@ -249,7 +251,7 @@ It is possible to configure `whosonfirst-browser` to use [Protomaps](https://pro
 | Name | Value | | Required | Notes |
 | --- | --- | --- | --- |
 | protomaps-bucket-uri | string | yes | A valid `gocloud.dev/blob.Bucket` URI. |
-| protomaps-tiles-database | string | yes | The name of the PMTiles database to serve tiles from. |
+| protomaps-tiles-database | string | yes | The name of the PMTiles database to serve tiles from. This name should not have the `.pmtiles` extension but it will be silently removed if it does. |
 | path-protomaps-tiles | string | no | The relative root URI from which PMTiles will be served. Default is `/tiles/` |
 
 As of this writing I haven't figured out how to support custom Protomaps styles yet. You can create custom Protomaps tiles databases, for small geographic areas, using the [Create Small Map](https://protomaps.com/downloads/small_map) on the [protomaps.com](https://protomaps.com/) website.

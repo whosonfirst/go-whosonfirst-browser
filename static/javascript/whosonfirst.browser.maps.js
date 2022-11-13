@@ -45,6 +45,9 @@ whosonfirst.browser.maps = (function(){
 		case "protomaps":
 
 		    var tile_url = document.body.getAttribute("data-protomaps-tile-url");
+
+		    tile_url = "/tiles/sfo/{z}/{x}/{y}.mvt";
+		    
 		    var layer = protomaps.leafletLayer({url:tile_url})
 		    layer.addTo(map);
 		    break;
