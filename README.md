@@ -194,7 +194,7 @@ $> bin/whosonfirst-browser/main.go \
 
 ![](docs/images/wof-browser-protomaps.png)
 
-The `-protomaps-bucket-uri` is expected to be a valid [gocloud.dev/blob](https://gocloud.dev/howto/blob/) bucket URI. Only the [gocloud `fileblob` provider](https://gocloud.dev/howto/blob/#local) for accessing files on the local filesystem is enabled by default. If you need to enable other providers you will need to clone the [cmd/whosonfirst-browser/main.go](cmd/whosonfirst-browser/main.go) tool and add the relevant `import` statements. See the [Data sources and Caches](#) section for examples.
+The `-protomaps-bucket-uri` is expected to be a valid [gocloud.dev/blob](https://gocloud.dev/howto/blob/) bucket URI. Only the [gocloud `fileblob` provider](https://gocloud.dev/howto/blob/#local) for accessing files on the local filesystem is enabled by default. If you need to enable other providers you will need to clone the [cmd/whosonfirst-browser/main.go](cmd/whosonfirst-browser/main.go) tool and add the relevant `import` statements. See the [Data sources and Caches](#data-sources-and-caches) section for examples.
 
 ##### Tailscale
 
