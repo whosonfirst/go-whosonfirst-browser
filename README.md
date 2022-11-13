@@ -213,7 +213,7 @@ $> bin/whosonfirst-browser/main.go \
 2022/11/11 22:25:47 Listening on http://whosonfirst:80
 ```
 
-![](docs/images/wof-browser-tsnet.png)
+![](docs/images/wof-browser-tsnet-sm.png)
 
 Please consult the documentation for [aaronland/go-http-tsnet](https://github.com/aaronland/go-http-server-tsnet) for details on running `whosonfirst-browser` as a virtual private service.
 
