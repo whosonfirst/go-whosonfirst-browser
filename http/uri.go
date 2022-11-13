@@ -38,6 +38,14 @@ func ParseURIFromPath(ctx context.Context, path string, r reader.Reader) (*URI, 
 
 	wofid, uri_args, err := wof_uri.ParseURI(path)
 
+	if err != nil {
+		return nil, fmt.Errorf("Error locating record for %s, %w", path, err), go_http.StatusNotFound
+	}
+
+	if wofid == -1 {
+		return nil, fmt.Errorf("Failed to locate record for %s", path), go_http.StatusNotFound
+	}
+
 	rel_path, err := wof_uri.Id2RelPath(wofid, uri_args)
 
 	if err != nil {

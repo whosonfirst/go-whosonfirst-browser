@@ -143,7 +143,7 @@ $> ./bin/whosonfirst-browser -h
   -proxy-tiles
     	Proxy (and cache) Nextzen tiles.
   -proxy-tiles-cache string
-    	A valid tile proxy DSN string. (default "gocache://")
+    	A valid `whosonfirst/go-cache` URI. (default "gocache://")
   -proxy-tiles-timeout int
     	The maximum number of seconds to allow for fetching a tile from the proxy. (default 30)
   -proxy-tiles-url string
@@ -211,21 +211,50 @@ $> bin/whosonfirst-browser/main.go \
 2022/11/11 22:25:47 Listening on http://whosonfirst:80
 ```
 
+![](docs/images/wof-browser-tsnet.png)
+
+Please consult the documentation for [aaronland/go-http-tsnet](https://github.com/aaronland/go-http-server-tsnet) for details on running `whosonfirst-browser` as a virtual private service.
+
 ## Map providers
 
 `whosonfirst-provider` supports two map tile providers.
 
 ### Nextzen
 
-`go-whosonfirst-browser` uses [Nextzen](https://nextzen.org/) vector data tiles and the [Tangram.js](https://github.com/tangrams/tangram) rendering library for displaying maps. The Tangram code and styling assets are bundled with this tool and served directly but, by default, tile data is retrieved from the Nextzen servers.
+By default, `whosonfirst-browser` uses [Nextzen](https://nextzen.org/) vector data tiles and the [Tangram.js](https://github.com/tangrams/tangram) rendering library for displaying maps. The Tangram code and styling assets are bundled with this tool and served directly but, by default, tile data is retrieved from the Nextzen servers.
 
 It is possible to cache those tiles locally using the `-proxy-tiles` flag at start up. The default cache for proxying tiles is an ephemiral in-memory cache but you can also specify an alternative [go-cache](https://github.com/whosonfirst/go-cache) `cache.Cache` source using the `-proxy-tiles-cache` flag. Caches are discussed in detail below.
 
 You will need a [valid Nextzen API key](https://developers.nextzen.org/) in order for map tiles to work. 
 
+#### Parameters (command line flags)
+
+| Name | Value | | Required | Notes |
+| --- | --- | --- | --- |
+| nextzen-api-key | string | yes | A valid Nextzen developer API key. |
+| nextzen-style-url | string no | A valid Tangram scene file URL. Default is `/tangram/refill-style.zip` |
+| nextzen-tile-url string |  no | A valid Nextzen MVT tile URL. Default is `https://tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt` |
+| nextzen-tilepack-uri | string | no | The relative URI to serve Nextzen MVT tiles from a MBTiles database (tilepack). Default is `/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt` |
+| proxy | bool | no | Proxy (and cache) Nextzen tiles. Default is false. |
+| proxy-tiles-cache string | string | no | A valid `whosonfirst/go-cache` URI. Default is `gocache://` |
+| proxy-tiles-timeout | int | no | The maximum number of seconds to allow for fetching a tile from the proxy. Default is 30. |
+| proxy-tiles-url | string | no | The URL (a relative path) for proxied tiles. Default is `/tiles` |
+
 ### Protomaps
 
-As of this writing I haven't figured out how to support custom Protomaps styles yet.
+It is possible to configure `whosonfirst-browser` to use [Protomaps](https://protomaps.com) to serve and render tiles for display maps. To do so pass the `-map-provider protomaps` flag at startup along with the other required Protomap-related flags.
+
+#### Parameters (command line flags)
+
+| Name | Value | | Required | Notes |
+| --- | --- | --- | --- |
+| protomaps-bucket-uri | string | yes | A valid `gocloud.dev/blob.Bucket` URI. |
+| protomaps-tiles-database | string | yes | The name of the PMTiles database to serve tiles from. |
+| path-protomaps-tiles | string | no | The relative root URI from which PMTiles will be served. Default is `/tiles/` |
+
+As of this writing I haven't figured out how to support custom Protomaps styles yet. You can create custom Protomaps tiles databases, for small geographic areas, using the [Create Small Map](https://protomaps.com/downloads/small_map) on the [protomaps.com](https://protomaps.com/) website.
+
+![](wof-browser-protomaps-create)s
 
 ### Fallback
 
