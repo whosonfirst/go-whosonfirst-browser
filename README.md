@@ -231,7 +231,7 @@ You will need a [valid Nextzen API key](https://developers.nextzen.org/) in orde
 
 #### Parameters (command line flags)
 
-| Name | Value | | Required | Notes |
+| Name | Value | Required | Notes |
 | --- | --- | --- | --- |
 | nextzen-api-key | string | yes | A valid Nextzen developer API key. |
 | nextzen-style-url | string no | A valid Tangram scene file URL. Default is `/tangram/refill-style.zip` |
@@ -248,7 +248,7 @@ It is possible to configure `whosonfirst-browser` to use [Protomaps](https://pro
 
 #### Parameters (command line flags)
 
-| Name | Value | | Required | Notes |
+| Name | Value | Required | Notes |
 | --- | --- | --- | --- |
 | protomaps-bucket-uri | string | yes | A valid `gocloud.dev/blob.Bucket` URI. |
 | protomaps-tiles-database | string | yes | The name of the PMTiles database to serve tiles from. This name should not have the `.pmtiles` extension but it will be silently removed if it does. |
