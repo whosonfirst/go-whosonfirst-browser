@@ -256,7 +256,7 @@ It is possible to configure `whosonfirst-browser` to use [Protomaps](https://pro
 
 As of this writing I haven't figured out how to support custom Protomaps styles yet. You can create custom Protomaps tiles databases, for small geographic areas, using the [Create Small Map](https://protomaps.com/downloads/small_map) on the [protomaps.com](https://protomaps.com/) website.
 
-![](wof-browser-protomaps-create)s
+![](wof-browser-protomaps-create)
 
 ### Fallback
 
