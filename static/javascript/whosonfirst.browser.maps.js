@@ -3,7 +3,7 @@ whosonfirst.browser = whosonfirst.browser || {};
 
 whosonfirst.browser.maps = (function(){
 
-    var attribution = '<a href="https://github.com/tangrams" target="_blank">Tangram</a> | <a href="http://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a> | <a href="https://www.nextzen.org/" target="_blank">Nextzen</a>';
+    var attribution;
    
     var maps = {};
 
@@ -26,13 +26,36 @@ whosonfirst.browser.maps = (function(){
 	    if (maps[map_id]){
 		return maps[map_id];
 	    }
+
+	    var map = L.map("map");
 	    
-	    var tangram_opts = self.getTangramOptions(args);
-	    var tangramLayer = Tangram.leafletLayer(tangram_opts);
+	    var map_provider = whosonfirst.browser.common.map_provider();
+	    
+	    switch (map_provider){
+		case "nextzen":
 
-	    var map = L.map("map");	    
-	    tangramLayer.addTo(map);
+		    attribution = '<a href="https://github.com/tangrams" target="_blank">Tangram</a> | <a href="http://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a> | <a href="https://www.nextzen.org/" target="_blank">Nextzen</a>';
+		    
+		    var tangram_opts = self.getTangramOptions(args);
+		    var tangramLayer = Tangram.leafletLayer(tangram_opts);
+		    
+		    tangramLayer.addTo(map);
+		    break
 
+		case "protomaps":
+
+		    var tile_url = document.body.getAttribute("data-protomaps-tile-url");
+
+		    tile_url = "/tiles/sfo/{z}/{x}/{y}.mvt";
+		    
+		    var layer = protomaps.leafletLayer({url:tile_url})
+		    layer.addTo(map);
+		    break;
+		    
+		default:
+		    console.log("Unsupported map provider ", map_provider);
+	    }
+	    
 	    var attribution = self.getAttribution();
 	    map.attributionControl.addAttribution(attribution);
 

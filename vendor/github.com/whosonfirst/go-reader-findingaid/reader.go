@@ -24,7 +24,7 @@ const WHOSONFIRST_DATA_TEMPLATE string = "https://raw.githubusercontent.com/whos
 // type FindingAidReader implements the `whosonfirst/go-reader` interface for use with Who's On First finding aids.
 type FindingAidReader struct {
 	wof_reader.Reader
-	// A SQLite `sql.DB` instance containing Who's On First finding aid data.
+	// A SQLite `sql.DB` instance containing Who's On First finding aid data. (Optional)
 	db *sql.DB
 	// A compiled `uritemplates.UriTemplate` to use resolving Who's On First finding aid URIs.
 	template *uritemplates.UriTemplate
