@@ -270,6 +270,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		mux.Handle(path_geojson, geojson_handler)
+
+		for _, alt_path := range alt_path_geojson {
+			mux.Handle(alt_path, geojson_handler)
+		}
 	}
 
 	if enable_geojsonld {

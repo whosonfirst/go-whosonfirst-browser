@@ -71,7 +71,13 @@ var search_database_uri string
 
 var path_png string
 var path_svg string
+
+// The path that GeoJSON requests should be served from.
 var path_geojson string
+
+// Zero or more alternate paths that GeoJSON requests should be served from.
+var alt_path_geojson multi.MultiCSVString
+
 var path_geojsonld string
 var path_navplace string
 var path_spr string
@@ -148,7 +154,10 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.StringVar(&path_png, "path-png", "/png/", "The path that PNG requests should be served from.")
 	fs.StringVar(&path_svg, "path-svg", "/svg/", "The path that SVG requests should be served from.")
+	
 	fs.StringVar(&path_geojson, "path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
+	fs.Var(&alt_path_geojson, "alt-path-geojson", "Zero or more alternate paths that GeoJSON requests should be served from.")
+	
 	fs.StringVar(&path_geojsonld, "path-geojson-ld", "/geojson-ld/", "The path that GeoJSON-LD requests should be served from.")
 	fs.StringVar(&path_navplace, "path-navplace", "/navplace/", "The path that IIIF navPlace requests should be served from.")
 	fs.StringVar(&path_spr, "path-spr", "/spr/", "The path that SPR requests should be served from.")
