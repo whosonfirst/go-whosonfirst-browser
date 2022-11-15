@@ -69,13 +69,48 @@ var path_api_cessate string
 
 var search_database_uri string
 
+// The path that PNG requests should be served from.
 var path_png string
+
+// Zero or more alternate paths that PNG requests should be served from.
+var path_png_alt multi.MultiCSVString
+
+// The path that SVG requests should be served from.
 var path_svg string
+
+// Zero or more alternate paths that SVG requests should be served from.
+var path_svg_alt multi.MultiCSVString
+
+// The path that GeoJSON requests should be served from.
 var path_geojson string
+
+// Zero or more alternate paths that GeoJSON requests should be served from.
+var path_geojson_alt multi.MultiCSVString
+
+// The path that GeoJSON-LD requests should be served from.
 var path_geojsonld string
+
+// Zero or more alternate paths that GeoJSON-LD requests should be served from.
+var path_geojsonld_alt multi.MultiCSVString
+
+// The path that IIIF navPlace requests should be served from.
 var path_navplace string
+
+// Zero or more alternate paths that IIIF navPlace requests should be served from.
+var path_navplace_alt multi.MultiCSVString
+
+// The path that SPR requests should be served from.
 var path_spr string
+
+// Zero or more alternate paths that SPR requests should be served from.
+var path_spr_alt multi.MultiCSVString
+
+// The path that 'select' requests should be served from.
 var path_select string
+
+// Zero or more alternate paths that 'select' requests should be served from.
+var path_select_alt multi.MultiCSVString
+
 var path_protomaps_tiles string
 
 var path_search_api string
@@ -147,12 +182,26 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&search_database_uri, "search-database-uri", "", "A valid whosonfirst/go-whosonfist-search/fulltext URI.")
 
 	fs.StringVar(&path_png, "path-png", "/png/", "The path that PNG requests should be served from.")
+	fs.Var(&path_png_alt, "path-png-alt", "Zero or more alternate paths that PNG requests should be served from.")
+
 	fs.StringVar(&path_svg, "path-svg", "/svg/", "The path that SVG requests should be served from.")
+	fs.Var(&path_svg_alt, "path-svg-alt", "Zero or more alternate paths that SVG requests should be served from.")
+
 	fs.StringVar(&path_geojson, "path-geojson", "/geojson/", "The path that GeoJSON requests should be served from.")
+	fs.Var(&path_geojson_alt, "path-geojson-alt", "Zero or more alternate paths that GeoJSON requests should be served from.")
+
 	fs.StringVar(&path_geojsonld, "path-geojson-ld", "/geojson-ld/", "The path that GeoJSON-LD requests should be served from.")
+	fs.Var(&path_geojsonld_alt, "path-geojson-ld-alt", "Zero or more alternate paths that GeoJSON-LD requests should be served from.")
+
 	fs.StringVar(&path_navplace, "path-navplace", "/navplace/", "The path that IIIF navPlace requests should be served from.")
+	fs.Var(&path_navplace_alt, "path-navplace-alt", "Zero or more alternate paths that IIIF navPlace requests should be served from.")
+
 	fs.StringVar(&path_spr, "path-spr", "/spr/", "The path that SPR requests should be served from.")
+	fs.Var(&path_spr_alt, "path-spr-alt", "Zero or more alternate paths that SPR requests should be served from.")
+
 	fs.StringVar(&path_select, "path-select", "/select/", "The path that 'select' requests should be served from.")
+	fs.Var(&path_select_alt, "path-select-alt", "Zero or more alternate paths that 'select' requests should be served from.")
+
 	fs.StringVar(&path_protomaps_tiles, "path-protomaps-tiles", "/tiles/", "The root path from which Protomaps tiles will be served.")
 
 	fs.StringVar(&path_search_api, "path-search-api", "/search/spr/", "The path that API 'search' requests should be served from.")

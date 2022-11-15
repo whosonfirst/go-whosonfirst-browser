@@ -207,6 +207,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		mux.Handle(path_png, png_handler)
+
+		for _, alt_path := range path_png_alt {
+			mux.Handle(alt_path, png_handler)
+		}
 	}
 
 	if enable_svg {
@@ -230,6 +234,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		mux.Handle(path_svg, svg_handler)
+
+		for _, alt_path := range path_svg_alt {
+			mux.Handle(alt_path, svg_handler)
+		}
 	}
 
 	if enable_spr {
@@ -250,6 +258,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		mux.Handle(path_spr, spr_handler)
+
+		for _, alt_path := range path_spr_alt {
+			mux.Handle(alt_path, spr_handler)
+		}
 	}
 
 	if enable_geojson {
@@ -270,6 +282,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		mux.Handle(path_geojson, geojson_handler)
+
+		for _, alt_path := range path_geojson_alt {
+			mux.Handle(alt_path, geojson_handler)
+		}
 	}
 
 	if enable_geojsonld {
@@ -290,6 +306,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		mux.Handle(path_geojsonld, geojsonld_handler)
+
+		for _, alt_path := range path_geojsonld_alt {
+			mux.Handle(alt_path, geojsonld_handler)
+		}
 	}
 
 	if enable_navplace {
@@ -311,6 +331,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		mux.Handle(path_navplace, navplace_handler)
+
+		for _, alt_path := range path_navplace_alt {
+			mux.Handle(alt_path, navplace_handler)
+		}
 	}
 
 	if enable_select {
@@ -342,6 +366,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		mux.Handle(path_select, select_handler)
+
+		for _, alt_path := range path_select_alt {
+			mux.Handle(alt_path, select_handler)
+		}
 	}
 
 	if enable_search_api {
@@ -587,7 +615,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 			// Because inevitably I will forget...
 			protomaps_tiles_database = strings.Replace(protomaps_tiles_database, ".pmtiles", "", 1)
-			
+
 			pm_tile_url, err := url.JoinPath(path_protomaps_tiles, protomaps_tiles_database)
 
 			if err != nil {
@@ -595,7 +623,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			}
 
 			pm_tile_url = fmt.Sprintf("%s/{z}/{x}/{y}.mvt", pm_tile_url)
-				
+
 			pm_opts := protomaps.DefaultProtomapsOptions()
 			pm_opts.TileURL = pm_tile_url
 
