@@ -114,14 +114,22 @@ $> ./bin/whosonfirst-browser -h
     	The relative URI to serve Nextzen MVT tiles from a MBTiles database (tilepack). (default "/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
   -path-geojson string
     	The path that GeoJSON requests should be served from. (default "/geojson/")
+  -path-geojson-alt value
+    	Zero or more alternate paths that GeoJSON requests should be served from.
   -path-geojson-ld string
     	The path that GeoJSON-LD requests should be served from. (default "/geojson-ld/")
+  -path-geojson-ld-alt value
+    	Zero or more alternate paths that GeoJSON-LD requests should be served from.
   -path-id string
     	The URL that Who's On First documents should be served from. (default "/id/")
   -path-navplace string
     	The path that IIIF navPlace requests should be served from. (default "/navplace/")
+  -path-navplace-alt value
+    	Zero or more alternate paths that IIIF navPlace requests should be served from.
   -path-png string
     	The path that PNG requests should be served from. (default "/png/")
+  -path-png-alt value
+    	Zero or more alternate paths that PNG requests should be served from.
   -path-protomaps-tiles string
     	The root path from which Protomaps tiles will be served. (default "/tiles/")
   -path-search-api string
@@ -130,10 +138,16 @@ $> ./bin/whosonfirst-browser -h
     	The path that API 'search' requests should be served from. (default "/search/")
   -path-select string
     	The path that 'select' requests should be served from. (default "/select/")
+  -path-select-alt value
+    	Zero or more alternate paths that 'select' requests should be served from.
   -path-spr string
     	The path that SPR requests should be served from. (default "/spr/")
+  -path-spr-alt value
+    	Zero or more alternate paths that SPR requests should be served from.
   -path-svg string
     	The path that SVG requests should be served from. (default "/svg/")
+  -path-svg-alt value
+    	Zero or more alternate paths that SVG requests should be served from.
   -protomaps-bucket-uri string
     	A valid gocloud.dev/blob.Bucket URI containing Protomaps tile databases.
   -protomaps-cache-size int
@@ -142,8 +156,8 @@ $> ./bin/whosonfirst-browser -h
     	The name of the Protomaps tiles database to use.
   -proxy-tiles
     	Proxy (and cache) Nextzen tiles.
-  -proxy-tiles-cache string
-    	A valid `whosonfirst/go-cache` URI. (default "gocache://")
+  -proxy-tiles-cache whosonfirst/go-cache
+    	A valid whosonfirst/go-cache URI. (default "gocache://")
   -proxy-tiles-timeout int
     	The maximum number of seconds to allow for fetching a tile from the proxy. (default 30)
   -proxy-tiles-url string
