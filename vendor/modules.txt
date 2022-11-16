@@ -142,6 +142,7 @@ github.com/aws/aws-sdk-go/service/dynamodb/expression
 github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/service/s3/s3iface
 github.com/aws/aws-sdk-go/service/s3/s3manager
+github.com/aws/aws-sdk-go/service/ssm
 github.com/aws/aws-sdk-go/service/sso
 github.com/aws/aws-sdk-go/service/sso/ssoiface
 github.com/aws/aws-sdk-go/service/sts
@@ -239,6 +240,9 @@ github.com/coreos/go-iptables/iptables
 # github.com/dustin/go-humanize v1.0.0
 ## explicit
 github.com/dustin/go-humanize
+# github.com/fsnotify/fsnotify v1.5.4
+## explicit; go 1.16
+github.com/fsnotify/fsnotify
 # github.com/fxamacker/cbor/v2 v2.4.0
 ## explicit; go 1.12
 github.com/fxamacker/cbor/v2
@@ -273,6 +277,12 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
+# github.com/google/go-github v17.0.0+incompatible
+## explicit
+github.com/google/go-github/github
+# github.com/google/go-querystring v1.1.0
+## explicit; go 1.10
+github.com/google/go-querystring/query
 # github.com/google/uuid v1.3.0
 ## explicit
 github.com/google/uuid
@@ -285,6 +295,12 @@ github.com/googleapis/gax-go/v2
 github.com/googleapis/gax-go/v2/apierror
 github.com/googleapis/gax-go/v2/apierror/internal/proto
 github.com/googleapis/gax-go/v2/internal
+# github.com/hashicorp/errwrap v1.1.0
+## explicit
+github.com/hashicorp/errwrap
+# github.com/hashicorp/go-multierror v1.1.1
+## explicit; go 1.13
+github.com/hashicorp/go-multierror
 # github.com/hdevalence/ed25519consensus v0.0.0-20220222234857-c00d1f31bab3
 ## explicit; go 1.14
 github.com/hdevalence/ed25519consensus
@@ -422,6 +438,9 @@ github.com/sfomuseum/go-sfomuseum-pmtiles/http
 # github.com/sfomuseum/go-tilezen v0.0.6
 ## explicit; go 1.16
 github.com/sfomuseum/go-tilezen
+# github.com/sfomuseum/runtimevar v1.0.3
+## explicit; go 1.18
+github.com/sfomuseum/runtimevar
 # github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76
 ## explicit; go 1.17
 github.com/srwiley/oksvg
@@ -487,15 +506,18 @@ github.com/whosonfirst/go-geojson-svg
 # github.com/whosonfirst/go-ioutil v1.0.2
 ## explicit; go 1.16
 github.com/whosonfirst/go-ioutil
-# github.com/whosonfirst/go-reader v1.0.1
-## explicit; go 1.16
+# github.com/whosonfirst/go-reader v1.0.2
+## explicit; go 1.18
 github.com/whosonfirst/go-reader
 # github.com/whosonfirst/go-reader-cachereader v0.2.5
 ## explicit; go 1.18
 github.com/whosonfirst/go-reader-cachereader
-# github.com/whosonfirst/go-reader-findingaid v0.14.0
+# github.com/whosonfirst/go-reader-findingaid v0.14.2
 ## explicit; go 1.18
 github.com/whosonfirst/go-reader-findingaid
+# github.com/whosonfirst/go-reader-github v0.6.2
+## explicit; go 1.18
+github.com/whosonfirst/go-reader-github
 # github.com/whosonfirst/go-reader-http v0.3.1
 ## explicit; go 1.16
 github.com/whosonfirst/go-reader-http
@@ -605,6 +627,13 @@ gocloud.dev/internal/gcerr
 gocloud.dev/internal/oc
 gocloud.dev/internal/openurl
 gocloud.dev/internal/retry
+gocloud.dev/runtimevar
+gocloud.dev/runtimevar/awsparamstore
+gocloud.dev/runtimevar/constantvar
+gocloud.dev/runtimevar/driver
+gocloud.dev/runtimevar/filevar
+gocloud.dev/secrets
+gocloud.dev/secrets/driver
 # golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
 ## explicit; go 1.17
 golang.org/x/crypto/acme
@@ -637,6 +666,8 @@ golang.org/x/image/vector
 # golang.org/x/net v0.1.0
 ## explicit; go 1.17
 golang.org/x/net/bpf
+golang.org/x/net/context
+golang.org/x/net/context/ctxhttp
 golang.org/x/net/dns/dnsmessage
 golang.org/x/net/html
 golang.org/x/net/html/atom
@@ -656,6 +687,10 @@ golang.org/x/net/ipv6
 golang.org/x/net/proxy
 golang.org/x/net/route
 golang.org/x/net/trace
+# golang.org/x/oauth2 v0.0.0-20220808172628-8227340efae7
+## explicit; go 1.17
+golang.org/x/oauth2
+golang.org/x/oauth2/internal
 # golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 ## explicit
 golang.org/x/sync/errgroup
@@ -723,6 +758,15 @@ golang.zx2c4.com/wireguard/windows/tunnel/winipcfg
 ## explicit; go 1.15
 google.golang.org/api/googleapi
 google.golang.org/api/internal/third_party/uritemplates
+# google.golang.org/appengine v1.6.7
+## explicit; go 1.11
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/remote_api
+google.golang.org/appengine/internal/urlfetch
+google.golang.org/appengine/urlfetch
 # google.golang.org/genproto v0.0.0-20220802133213-ce4fa296bf78
 ## explicit; go 1.18
 google.golang.org/genproto/googleapis/rpc/code

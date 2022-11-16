@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/go-multierror"
 	"io"
 	_ "log"
 	"sync"
@@ -28,7 +29,7 @@ func NewMultiReaderFromURIs(ctx context.Context, uris ...string) (Reader, error)
 		r, err := NewReader(ctx, uri)
 
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Failed to create reader for %s, %w", uri, err)
 		}
 
 		readers = append(readers, r)
@@ -80,11 +81,15 @@ func (mr *MultiReader) Read(ctx context.Context, path string) (io.ReadSeekCloser
 	var fh io.ReadSeekCloser
 	idx = -1
 
+	var errors error
+
 	for i, r := range mr.readers {
 
 		rsp, err := r.Read(ctx, path)
 
-		if err == nil {
+		if err != nil {
+			errors = multierror.Append(fmt.Errorf("Failed to read %s with %T, %w", path, r, err))
+		} else {
 
 			fh = rsp
 			idx = i
@@ -100,7 +105,7 @@ func (mr *MultiReader) Read(ctx context.Context, path string) (io.ReadSeekCloser
 	mr.mu.Unlock()
 
 	if fh == nil {
-		return nil, missing
+		return nil, errors
 	}
 
 	return fh, nil
