@@ -26,6 +26,7 @@ import (
 	"github.com/tilezen/go-tilepacks/tilepack"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
+	github_reader "github.com/whosonfirst/go-reader-github"
 	"github.com/whosonfirst/go-whosonfirst-browser/v5/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v5/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v5/templates/html"
@@ -130,6 +131,17 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		cache_uri = fmt.Sprintf("fs://%s", tempdir)
 	}
 
+	for idx, r_uri := range reader_uris {
+
+		r_uri, err := github_reader.EnsureGitHubAccessToken(ctx, r_uri, github_access_token)
+
+		if err != nil {
+			return fmt.Errorf("Failed to ensure GitHub access token for %s, %w", r_uri)
+		}
+
+		reader_uris[idx] = r_uri
+	}
+	
 	cr_q := url.Values{}
 
 	// go-reader-cachereader is configured to accept multiple readers
