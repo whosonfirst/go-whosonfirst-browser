@@ -55,7 +55,7 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 ### whosonfirst-browser
 
 ```
-$> ./bin/whosonfirst-browser -h
+> ./bin/whosonfirst-browser -h
   -authenticator-uri string
     	A valid sfomuseum/go-http-auth URI. (default "null://")
   -cache-uri string
@@ -98,6 +98,8 @@ $> ./bin/whosonfirst-browser -h
     	Enable the 'svg' output handler.
   -exporter-uri string
     	A valid whosonfirst/go-whosonfirst-export/v2 URI. (default "whosonfirst://")
+  -github-accesstoken-uri string
+    	A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.
   -map-provider string
     	Valid options are: nextzen, protomaps (default "nextzen")
   -navplace-max-features int
@@ -491,34 +493,12 @@ $> bin/blob-browser -enable-all \
 2019/12/18 08:44:15 Listening on http://localhost:8080
 ```
 
-Or if you wanted to read data from a specific GitHub repository:
+### The default `go-reader` implementations that are bundled with this package are:
 
-```
-// cmd/github-browser/main.go
-package main
-
-import (
-	"context"
-	_ "github.com/whosonfirst/go-reader-github"
-	"github.com/whosonfirst/go-whosonfirst-browser/v5/application/browser"
-)
-
-func main() {
-	ctx := context.Background()
-	app, _ := browser.NewBrowserApplication(ctx)
-	app.Run(ctx)
-}
-```
-
-And then:
-
-```
-$> bin/github-browser -enable-all \
-	-reader-source 'github://whosonfirst-data/whosonfirst-data-admin-ca'
-	-nextzen-api-key {NEXTZEN_APIKEY}
-	
-2019/12/18 08:44:15 Listening on http://localhost:8080
-```
+* https://github.com/whosonfirst/go-reader
+* https://github.com/whosonfirst/go-reader-cachereader
+* https://github.com/whosonfirst/go-reader-findingaid
+* https://github.com/whosonfirst/go-reader-github
 
 ### See also
 

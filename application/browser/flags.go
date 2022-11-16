@@ -70,7 +70,7 @@ var path_api_cessate string
 var search_database_uri string
 
 // A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.
-var github_access_token string
+var github_accesstoken_uri string
 
 // The path that PNG requests should be served from.
 var path_png string
@@ -219,8 +219,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.StringVar(&authenticator_uri, "authenticator-uri", "null://", "A valid sfomuseum/go-http-auth URI.")
 
-	fs.StringVar(&github_access_token, "github-access-token", "", "A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.")
-	
+	fs.StringVar(&github_accesstoken_uri, "github-accesstoken-uri", "", "A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.")
+
 	/*
 		fs.BoolVar(&enable_api, "enable-api", false, "Enable the API endpoints")
 		fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
