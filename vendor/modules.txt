@@ -490,7 +490,7 @@ github.com/whosonfirst/go-ioutil
 # github.com/whosonfirst/go-reader v1.0.1
 ## explicit; go 1.16
 github.com/whosonfirst/go-reader
-# github.com/whosonfirst/go-reader-cachereader v0.2.4
+# github.com/whosonfirst/go-reader-cachereader v0.2.5
 ## explicit; go 1.18
 github.com/whosonfirst/go-reader-cachereader
 # github.com/whosonfirst/go-reader-findingaid v0.14.0

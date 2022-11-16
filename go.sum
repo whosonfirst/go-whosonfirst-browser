@@ -1557,8 +1557,8 @@ github.com/whosonfirst/go-ioutil v1.0.2 h1:+GJPfa42OFn5A+5yJSc5jQTQIkNV3/MhYyg4p
 github.com/whosonfirst/go-ioutil v1.0.2/go.mod h1:2dS1vWdAIkiHDvDF8fYyjv6k2NISmwaIjJJeEDBEdvg=
 github.com/whosonfirst/go-reader v1.0.1 h1:mvEqObVuzJyZkI37SDmuvCpTJ2iEG5GUgD2Z3mT2e7s=
 github.com/whosonfirst/go-reader v1.0.1/go.mod h1:3RXON51sbyPw8Ca7sxxwOItVfx8SM+KFPR+l2azGxJA=
-github.com/whosonfirst/go-reader-cachereader v0.2.4 h1:yxY6QfixPUexwdHeQ+kYV61RKnClso3F5AhvweQJrTE=
-github.com/whosonfirst/go-reader-cachereader v0.2.4/go.mod h1:R0rpe3bJB0XmqVnCJxbzKf0KWnE1652oF4FOvJmYWpU=
+github.com/whosonfirst/go-reader-cachereader v0.2.5 h1:enNnXAhEpWIgdh/jl/wPPjsJ6RuC1h3YV8MSC2p/7WI=
+github.com/whosonfirst/go-reader-cachereader v0.2.5/go.mod h1:R0rpe3bJB0XmqVnCJxbzKf0KWnE1652oF4FOvJmYWpU=
 github.com/whosonfirst/go-reader-findingaid v0.14.0 h1:V1VMInYpvpi5NtiO0BYjro3fmnf5IZHABUrxG92k2zQ=
 github.com/whosonfirst/go-reader-findingaid v0.14.0/go.mod h1:vnUF117OnNuBvUutwonjqZz84XqtIyFIdl9RLv3N1h0=
 github.com/whosonfirst/go-reader-http v0.3.1 h1:05cfqxb0OCyoKmaJgyzyX81mXzPe1J29QV/4NqEUMRQ=

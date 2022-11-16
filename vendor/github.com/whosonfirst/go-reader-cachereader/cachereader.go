@@ -31,7 +31,7 @@ func NewCacheReader(ctx context.Context, uri string) (reader.Reader, error) {
 	u, err := url.Parse(uri)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to parse URI, %w", err)
 	}
 
 	q := u.Query()
@@ -74,19 +74,19 @@ func (cr *CacheReader) Read(ctx context.Context, key string) (io.ReadSeekCloser,
 	}
 
 	if !cache.IsCacheMiss(err) {
-		return nil, err
+		return nil, fmt.Errorf("Failed to read from cache for %s with %T, %w", key, cr.cache, err)
 	}
 
 	fh, err = cr.reader.Read(ctx, key)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to read %s from %T, %w", key, cr.reader, err)
 	}
 
 	fh, err = cr.cache.Set(ctx, key, fh)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to set cache for %s with %T, %w", key, cr.cache, err)
 	}
 
 	// https://github.com/whosonfirst/go-cache/issues/1

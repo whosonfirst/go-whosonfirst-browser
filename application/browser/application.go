@@ -59,7 +59,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	flagset.Parse(fs)
 
-	err := flagset.SetFlagsFromEnvVarsWithFeedback(fs, "BROWSER", true)
+	err := flagset.SetFlagsFromEnvVars(fs, "BROWSER")
 
 	if err != nil {
 		return fmt.Errorf("Failed to set flags from environment variables, %w", err)
