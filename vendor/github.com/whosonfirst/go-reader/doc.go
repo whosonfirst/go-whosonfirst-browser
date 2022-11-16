@@ -1,13 +1,13 @@
 // Example:
 //
-// 	package main
+//	package main
 //
-// 	import (
+//	import (
 //	 	"context"
-// 		"github.com/whosonfirst/go-reader"
-// 		"io"
+//		"github.com/whosonfirst/go-reader"
+//		"io"
 //	 	"os"
-// 	)
+//	)
 //
 //	 func main() {
 //	 	ctx := context.Background()
@@ -36,11 +36,10 @@
 //
 //		ctx := context.Background()
 //
-// 		err = RegisterReader(ctx, "file", NewFileReader)
+//		err = RegisterReader(ctx, "file", NewFileReader)
 //
 //	 	if err != nil {
-// 			panic(err)
-// 		}
-// 	}
-//
+//			panic(err)
+//		}
+//	}
 package reader

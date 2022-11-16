@@ -26,10 +26,10 @@ require (
 	github.com/tidwall/gjson v1.14.3
 	github.com/tilezen/go-tilepacks v0.0.0-20220729022432-5ee633f5bb6a
 	github.com/whosonfirst/go-cache v0.5.2
-	github.com/whosonfirst/go-reader v1.0.1
+	github.com/whosonfirst/go-reader v1.0.2
 	github.com/whosonfirst/go-reader-cachereader v0.2.5
-	github.com/whosonfirst/go-reader-findingaid v0.14.0
-	github.com/whosonfirst/go-reader-github v0.6.1
+	github.com/whosonfirst/go-reader-findingaid v0.14.1
+	github.com/whosonfirst/go-reader-github v0.6.2
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-export/v2 v2.6.0
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.24
@@ -80,6 +80,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/coreos/go-iptables v0.6.0 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
+	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
 	github.com/g8rswimmer/error-chain v1.0.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
@@ -93,6 +94,8 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/google/wire v0.5.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
+	github.com/hashicorp/errwrap v1.1.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hdevalence/ed25519consensus v0.0.0-20220222234857-c00d1f31bab3 // indirect
 	github.com/insomniacslk/dhcp v0.0.0-20211209223715-7d93572ebe8e // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -121,7 +124,7 @@ require (
 	github.com/schollz/progressbar/v3 v3.11.0 // indirect
 	github.com/sfomuseum/go-edtf v1.1.1 // indirect
 	github.com/sfomuseum/go-tilezen v0.0.6 // indirect
-	github.com/sfomuseum/runtimevar v1.0.0 // indirect
+	github.com/sfomuseum/runtimevar v1.0.3 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/tailscale/certstore v0.1.1-0.20220316223106-78d6e1c49d8d // indirect

@@ -43,10 +43,9 @@ $> go run cmd/runtimevar/main.go 'constant://?val=hello+world'
 hello world
 ```
 
-The following Go Cloud `runtimevar` services are supported by the runtimevar tool:
+The following Go Cloud `runtimevar` services are supported by the runtimevar tool by default:
 
 * [AWS Parameter Store](https://gocloud.dev/howto/runtimevar/#awsps)
-* [Blob](https://gocloud.dev/howto/runtimevar/#blob)
 * [Local](https://gocloud.dev/howto/runtimevar/#local)
 
 ### AWS Parameter Store
