@@ -2,11 +2,6 @@ module github.com/whosonfirst/go-whosonfirst-browser/v5
 
 go 1.19
 
-// Note: until I can figure out why v1.6.0 doesn't work
-// work with go-sfomuseum-pmtiles we are pegged at v1.5.1
-// github.com/protomaps/go-pmtiles v1.6.0
-// require github.com/protomaps/go-pmtiles v1.3.0
-
 require (
 	github.com/aaronland/go-http-bootstrap v0.1.0
 	github.com/aaronland/go-http-ping/v2 v2.0.0
@@ -28,7 +23,7 @@ require (
 	github.com/whosonfirst/go-cache v0.5.2
 	github.com/whosonfirst/go-reader v1.0.2
 	github.com/whosonfirst/go-reader-cachereader v0.2.5
-	github.com/whosonfirst/go-reader-findingaid v0.14.1
+	github.com/whosonfirst/go-reader-findingaid v0.14.2
 	github.com/whosonfirst/go-reader-github v0.6.2
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-export/v2 v2.6.0

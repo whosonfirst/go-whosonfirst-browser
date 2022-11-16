@@ -512,7 +512,7 @@ github.com/whosonfirst/go-reader
 # github.com/whosonfirst/go-reader-cachereader v0.2.5
 ## explicit; go 1.18
 github.com/whosonfirst/go-reader-cachereader
-# github.com/whosonfirst/go-reader-findingaid v0.14.1
+# github.com/whosonfirst/go-reader-findingaid v0.14.2
 ## explicit; go 1.18
 github.com/whosonfirst/go-reader-findingaid
 # github.com/whosonfirst/go-reader-github v0.6.2

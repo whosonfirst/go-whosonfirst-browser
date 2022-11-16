@@ -55,6 +55,12 @@ func NewFindingAidReader(ctx context.Context, uri string) (wof_reader.Reader, er
 		uri_template = q.Get("template")
 	}
 
+	uri_template, err = url.QueryUnescape(uri_template)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to unescape ?template= parameter, %w", err)
+	}
+
 	t, err := uritemplates.Parse(uri_template)
 
 	if err != nil {
@@ -90,7 +96,7 @@ func NewFindingAidReader(ctx context.Context, uri string) (wof_reader.Reader, er
 		}
 
 		ru.RawQuery = u.RawQuery
-		
+
 	default:
 
 		path := u.Path
@@ -171,7 +177,7 @@ func (r *FindingAidReader) getReaderURIAndPath(ctx context.Context, uri string) 
 	if err != nil {
 		return "", "", fmt.Errorf("Failed to parse URI, %w", err)
 	}
-	
+
 	repo, err := r.resolver.GetRepo(ctx, id)
 
 	if err != nil {
