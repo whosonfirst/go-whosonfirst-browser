@@ -50,6 +50,8 @@ var enable_navplace bool
 var enable_spr bool
 var enable_select bool
 
+var enable_webfinger bool
+
 var select_pattern string
 
 var enable_html bool
@@ -114,6 +116,12 @@ var path_select string
 // Zero or more alternate paths that 'select' requests should be served from.
 var path_select_alt multi.MultiCSVString
 
+// The path that 'webfinger' requests should be served from.
+var path_webfinger string
+
+// Zero or more alternate paths that 'webfinger' requests should be served from.
+var path_webfinger_alt multi.MultiCSVString
+
 var path_protomaps_tiles string
 
 var path_search_api string
@@ -168,6 +176,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.BoolVar(&enable_png, "enable-png", false, "Enable the 'png' output handler.")
 	fs.BoolVar(&enable_svg, "enable-svg", false, "Enable the 'svg' output handler.")
 
+	fs.BoolVar(&enable_webfinger, "enable-webfinger", false, "Enable the 'webfinger' output handler.")
+
 	fs.BoolVar(&enable_geojson, "enable-geojson", true, "Enable the 'geojson' output handler.")
 	fs.BoolVar(&enable_geojsonld, "enable-geojson-ld", true, "Enable the 'geojson-ld' output handler.")
 	fs.BoolVar(&enable_navplace, "enable-navplace", true, "Enable the IIIF 'navPlace' output handler.")
@@ -204,6 +214,9 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.StringVar(&path_select, "path-select", "/select/", "The path that 'select' requests should be served from.")
 	fs.Var(&path_select_alt, "path-select-alt", "Zero or more alternate paths that 'select' requests should be served from.")
+
+	fs.StringVar(&path_webfinger, "path-webfinger", "/.well-known/webfinger/", "The path that 'webfinger' requests should be served from.")
+	fs.Var(&path_webfinger_alt, "path-webfinger-alt", "Zero or more alternate paths that 'webfinger' requests should be served from.")
 
 	fs.StringVar(&path_protomaps_tiles, "path-protomaps-tiles", "/tiles/", "The root path from which Protomaps tiles will be served.")
 

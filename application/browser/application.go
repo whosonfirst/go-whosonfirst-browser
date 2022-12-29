@@ -90,6 +90,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		enable_navplace = true
 		enable_spr = true
 		enable_select = true
+		enable_webfinger = true
 	}
 
 	if enable_search_html {
@@ -383,6 +384,30 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		for _, alt_path := range path_select_alt {
 			mux.Handle(alt_path, select_handler)
+		}
+	}
+
+	if enable_webfinger {
+
+		webfinger_opts := &www.WebfingerHandlerOptions{
+			Reader: cr,
+			Logger: logger,
+		}
+
+		webfinger_handler, err := www.WebfingerHandler(webfinger_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create webfinger handler, %w", err)
+		}
+
+		if enable_cors {
+			webfinger_handler = cors_wrapper.Handler(webfinger_handler)
+		}
+
+		mux.Handle(path_webfinger, webfinger_handler)
+
+		for _, alt_path := range path_webfinger_alt {
+			mux.Handle(alt_path, webfinger_handler)
 		}
 	}
 
