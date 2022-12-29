@@ -389,9 +389,17 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_webfinger {
 
+		// To do: Move this up the "stack" and make it a common first-class thingy
+		// shared between all the handlers
+
+		paths := &www.Paths{
+			GeoJSON: path_geojson,
+		}
+
 		webfinger_opts := &www.WebfingerHandlerOptions{
 			Reader: cr,
 			Logger: logger,
+			Paths:  paths,
 		}
 
 		webfinger_handler, err := www.WebfingerHandler(webfinger_opts)

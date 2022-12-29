@@ -3,7 +3,9 @@ package http
 import (
 	"context"
 	"fmt"
+	"github.com/aaronland/go-http-sanitize"
 	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-browser/v5/webfinger"
 	wof_uri "github.com/whosonfirst/go-whosonfirst-uri"
 	"io"
 	_ "log"
@@ -24,8 +26,28 @@ func ParseURIFromRequest(req *go_http.Request, r reader.Reader) (*URI, error, in
 
 	ctx := req.Context()
 
-	q := req.URL.Query()
-	path := q.Get("id")
+	path, err := sanitize.GetString(req, "id")
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive ?id= parameter, %w", err), go_http.StatusBadRequest
+	}
+
+	resource, err := sanitize.GetString(req, "resource")
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive ?resource= parameter, %w", err), go_http.StatusBadRequest
+	}
+
+	if path == "" && resource != "" {
+
+		wof_uri, err := webfinger.DeriveWhosOnFirstURIFromResource(resource)
+
+		if err != nil {
+
+		}
+
+		path = wof_uri
+	}
 
 	if path == "" {
 		path = req.URL.Path

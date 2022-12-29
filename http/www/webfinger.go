@@ -7,23 +7,32 @@ import (
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/v5/webfinger"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
+	"github.com/whosonfirst/go-whosonfirst-uri"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 )
 
 type WebfingerHandlerOptions struct {
 	Reader reader.Reader
 	Logger *log.Logger
+	Paths  *Paths
 }
 
 func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		// Not sure this will work because of query parameters
+		wf_scheme := "https"
 
-		uri, err, status := wof_http.ParseURIFromRequest(req, opts.Reader)
+		if req.TLS == nil {
+			wf_scheme = "http"
+		}
+
+		wf_host := req.Host
+
+		wof_uri, err, status := wof_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {
 
@@ -33,22 +42,43 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 			return
 		}
 
-		pt, err := properties.Placetype(uri.Feature)
+		pt, err := properties.Placetype(wof_uri.Feature)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
-		name, err := properties.Name(uri.Feature)
+		name, err := properties.Name(wof_uri.Feature)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
-		lastmod := properties.LastModified(uri.Feature)
+		lastmod := properties.LastModified(wof_uri.Feature)
 		str_lastmod := strconv.FormatInt(lastmod, 10)
 
-		subject := fmt.Sprintf("acct:%d@whosonfirst.org", uri.Id)
+		rel_path, err := uri.Id2RelPath(wof_uri.Id, wof_uri.URIArgs)
+
+		if err != nil {
+			http.Error(rsp, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		path_geojson, err := url.JoinPath(opts.Paths.GeoJSON, rel_path)
+
+		if err != nil {
+			http.Error(rsp, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		geojson_uri := url.URL{}
+		geojson_uri.Scheme = wf_scheme
+		geojson_uri.Host = wf_host
+		geojson_uri.Path = path_geojson
+
+		subject := fmt.Sprintf("acct:%d@%s", wof_uri.Id, wf_host)
 
 		props := map[string]string{
 			"http://whosonfirst.org/properties/wof/placetype":    pt,
@@ -57,7 +87,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 		}
 
 		aliases := []string{
-			uri.URI,
+			geojson_uri.String(),
 		}
 
 		r := webfinger.Resource{

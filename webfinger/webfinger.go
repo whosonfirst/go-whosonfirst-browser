@@ -9,7 +9,7 @@ type Resource struct {
 	Subject    string            `json:"subject,omitempty"`
 	Aliases    []string          `json:"aliases,omitempty"`
 	Properties map[string]string `json:"properties,omitempty"`
-	Links      []Link            `json:"links"`
+	Links      []Link            `json:"links,omitempty"`
 }
 
 type Link struct {
