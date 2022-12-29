@@ -1,5 +1,8 @@
 package webfinger
 
+// https://www.rfc-editor.org/rfc/rfc7033 (webfinger)
+// https://www.rfc-editor.org/rfc/rfc7565 (acct:)
+
 const ContentType string = "application/jrd+json"
 
 type Resource struct {
