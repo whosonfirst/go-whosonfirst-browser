@@ -15,9 +15,10 @@ import (
 )
 
 type WebfingerHandlerOptions struct {
-	Reader reader.Reader
-	Logger *log.Logger
-	Paths  *Paths
+	Reader       reader.Reader
+	Logger       *log.Logger
+	Paths        *Paths
+	Capabilities *Capabilities
 }
 
 func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {

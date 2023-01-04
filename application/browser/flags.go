@@ -8,14 +8,27 @@ import (
 	"github.com/sfomuseum/go-flags/multi"
 )
 
+const ServerURIFlag string = "server-uri"
+
 var server_uri string
+
+const StaticPrefixFlag string = "static-prefix"
 
 var static_prefix string
 
+const ReaderURIFlag string = "reader-uri"
+
 var reader_uris multi.MultiCSVString
+
+const CacheURIFlag string = "cache-uri"
+
 var cache_uri string
 
+const ExporterURIFlag string = "exporter-uri"
+
 var exporter_uri string
+
+const WriterURIFlag string = "writer-uri"
 
 var writer_uris multi.MultiCSVString
 
@@ -37,32 +50,79 @@ var protomaps_bucket_uri string
 var protomaps_cache_size int
 var protomaps_tiles_database string
 
+const EnableAllFlag string = "enable-all"
+
 var enable_all bool
+
+const EnableGraphicsFlag string = "enable-graphics"
+
 var enable_graphics bool
+
+const EnableDataFlag string = "enable-data"
+
 var enable_data bool
 
+const EnablePNGFlag string = "enable-png"
+
 var enable_png bool
+
+const EnableSVGFlag string = "enable-svg"
+
 var enable_svg bool
 
+const EnableGeoJSONFlag string = "enable-geojson"
+
 var enable_geojson bool
+
+const EnableGeoJSONLDFlag string = "enable-geojson-ld"
+
 var enable_geojsonld bool
+
+const EnableNavPlaceFlag string = "enable-navplace"
+
 var enable_navplace bool
+
+const EnableSPRFlag string = "enable-spr"
+
 var enable_spr bool
+
+const EnableSelect string = "enable-select"
+
 var enable_select bool
+
+const EnableWebFingerFlag string = "enable-webfinger"
 
 var enable_webfinger bool
 
+const SelectPatternFlag string = "select-pattern"
+
 var select_pattern string
 
+const EnableHTMLFlag string = "enable-html"
+
 var enable_html bool
+
+const EnableIndexFlag string = "enable-index"
+
 var enable_index bool
 
+const EnableSearchAPIFlag string = "enable-search-api"
+
 var enable_search_api bool
+
+const EnableSearchAPIGeoJSONFlag string = "enable-search-api-geojson"
+
 var enable_search_api_geojson bool
+
+const EnableSearchHTMLFlag string = "enable-search-html"
 
 var enable_search_html bool
 
+const EnableSearchFlag string = "enable-search"
+
 var enable_search bool
+
+const EnableAPIFlag string = "enable-api"
 
 var enable_api bool
 
@@ -131,9 +191,15 @@ var path_id string
 
 var navplace_max_features int
 
+const EnableCORSFlag string = "enable-cors"
+
 var enable_cors bool
 
+const CORSOriginFlag string = "cors-origin"
+
 var cors_origins multi.MultiCSVString
+
+const AuthenticatorURI string = "authenticator-uri"
 
 var authenticator_uri string
 
@@ -142,14 +208,16 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs := flagset.NewFlagSet("browser")
 
-	fs.StringVar(&server_uri, "server-uri", "http://localhost:8080", "A valid aaronland/go-http-server URI.")
+	fs.StringVar(&server_uri, ServerURIFlag, "http://localhost:8080", "A valid aaronland/go-http-server URI.")
 
-	fs.StringVar(&static_prefix, "static-prefix", "", "Prepend this prefix to URLs for static assets.")
+	fs.StringVar(&static_prefix, StaticPrefixFlag, "", "Prepend this prefix to URLs for static assets.")
 
-	fs.Var(&reader_uris, "reader-uri", "One or more valid go-reader Reader URI strings.")
-	fs.StringVar(&cache_uri, "cache-uri", "gocache://", "A valid go-cache Cache URI string.")
+	fs.Var(&reader_uris, ReaderURIFlag, "One or more valid go-reader Reader URI strings.")
+	fs.StringVar(&cache_uri, CacheURIFlag, "gocache://", "A valid go-cache Cache URI string.")
 
-	fs.StringVar(&exporter_uri, "exporter-uri", "whosonfirst://", "A valid whosonfirst/go-whosonfirst-export/v2 URI.")
+	fs.StringVar(&exporter_uri, ExporterURIFlag, "whosonfirst://", "A valid whosonfirst/go-whosonfirst-export/v2 URI.")
+
+	// START OF replace/reconcile with aaronland/go-http-maps
 
 	fs.StringVar(&map_provider, "map-provider", "nextzen", "Valid options are: nextzen, protomaps")
 
@@ -169,14 +237,16 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.IntVar(&protomaps_cache_size, "protomaps-cache-size", 64, "The size in MB of the Protomaps tile cache.")
 	fs.StringVar(&protomaps_tiles_database, "protomaps-tiles-database", "", "The name of the Protomaps tiles database to use.")
 
-	fs.BoolVar(&enable_all, "enable-all", false, "Enable all the available output handlers EXCEPT the search handlers which need to be explicitly enable using the -enable-search* flags.")
-	fs.BoolVar(&enable_graphics, "enable-graphics", false, "Enable the 'png' and 'svg' output handlers.")
-	fs.BoolVar(&enable_data, "enable-data", false, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
+	// END OF replace/reconcile with aaronland/go-http-maps
 
-	fs.BoolVar(&enable_png, "enable-png", false, "Enable the 'png' output handler.")
-	fs.BoolVar(&enable_svg, "enable-svg", false, "Enable the 'svg' output handler.")
+	fs.BoolVar(&enable_all, EnableAllFlag, false, "Enable all the available output handlers EXCEPT the search handlers which need to be explicitly enable using the -enable-search* flags.")
+	fs.BoolVar(&enable_graphics, EnableGraphicsFlag, false, "Enable the 'png' and 'svg' output handlers.")
+	fs.BoolVar(&enable_data, EnableDataFlag, false, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
 
-	fs.BoolVar(&enable_webfinger, "enable-webfinger", false, "Enable the 'webfinger' output handler.")
+	fs.BoolVar(&enable_png, EnablePNGFlag, false, "Enable the 'png' output handler.")
+	fs.BoolVar(&enable_svg, EnableSVGFlag, false, "Enable the 'svg' output handler.")
+
+	fs.BoolVar(&enable_webfinger, EnableWebFingerFlag, false, "Enable the 'webfinger' output handler.")
 
 	fs.BoolVar(&enable_geojson, "enable-geojson", true, "Enable the 'geojson' output handler.")
 	fs.BoolVar(&enable_geojsonld, "enable-geojson-ld", true, "Enable the 'geojson-ld' output handler.")

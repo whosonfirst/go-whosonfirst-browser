@@ -126,7 +126,6 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to derive tmp dir, %w", err)
 		}
 
-		log.Println(tempdir)
 		defer os.RemoveAll(tempdir)
 
 		cache_uri = fmt.Sprintf("fs://%s", tempdir)
@@ -193,6 +192,18 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	if err != nil {
 		return fmt.Errorf("Failed to create authenticator, %w", err)
 	}
+
+	www_paths := &www.Paths{
+		GeoJSON:   path_geojson,
+		GeoJSONLD: path_geojsonld,
+		SVG:       path_svg,
+		PNG:       path_png,
+		Select:    path_select,
+		NavPlace:  path_navplace,
+		SPR:       path_spr,
+	}
+
+	www_capabilities := &www.Capabilities{}
 
 	mux := http.NewServeMux()
 
@@ -389,17 +400,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_webfinger {
 
-		// To do: Move this up the "stack" and make it a common first-class thingy
-		// shared between all the handlers
-
-		paths := &www.Paths{
-			GeoJSON: path_geojson,
-		}
-
 		webfinger_opts := &www.WebfingerHandlerOptions{
-			Reader: cr,
-			Logger: logger,
-			Paths:  paths,
+			Reader:       cr,
+			Logger:       logger,
+			Paths:        www_paths,
+			Capabilities: www_capabilities,
 		}
 
 		webfinger_handler, err := www.WebfingerHandler(webfinger_opts)

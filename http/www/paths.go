@@ -1,5 +1,12 @@
 package www
 
 type Paths struct {
-	GeoJSON string
+	PNG       string
+	SVG       string
+	GeoJSON   string
+	GeoJSONLD string
+	NavPlace  string
+	SPR       string
+	Select    string
+	URIPrefix string
 }

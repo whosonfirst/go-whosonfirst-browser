@@ -6,8 +6,11 @@ import (
 	"strings"
 )
 
+// AccountScheme is URI scheme for WebFinger `acct://` URIs.
 const AccountScheme string = "acct:"
 
+// DeriveWhosOnFirstURIFromResource derives a valid Who's On First URI string (something that can be parsed by
+// the `whosonfirst/go-whosonfirst-uri` package from 'resource'.
 func DeriveWhosOnFirstURIFromResource(resource string) (string, error) {
 
 	if !strings.HasPrefix(resource, AccountScheme) {
