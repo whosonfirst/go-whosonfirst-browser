@@ -18,6 +18,7 @@ require (
 	github.com/sfomuseum/go-http-protomaps v0.0.14
 	github.com/sfomuseum/go-http-tilezen v0.0.7
 	github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3
+	github.com/sfomuseum/go-template v1.3.0
 	github.com/tidwall/gjson v1.14.3
 	github.com/tilezen/go-tilepacks v0.0.0-20220729022432-5ee633f5bb6a
 	github.com/whosonfirst/go-cache v0.5.2

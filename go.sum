@@ -1424,6 +1424,8 @@ github.com/sfomuseum/go-http-tilezen v0.0.7 h1:4C+SVZJMTH4cXv3ueEgPDUc1hs/LQuWEq
 github.com/sfomuseum/go-http-tilezen v0.0.7/go.mod h1:6N00IspYxLOPMGfUPwR2L5E36T5p3Jy+FEgxt2TCSZw=
 github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3 h1:vdENCMTE1mlNGF70g3GXLW0uj7e3cYitvInwP26j1AE=
 github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3/go.mod h1:ihAhHNZKhUhbBF/OsGYurzqfelcCMwM516T0SBr2HnE=
+github.com/sfomuseum/go-template v1.3.0 h1:RI/myQzEJm5Z/B12Q07ulrPA8RtAPI9uxqZqwALcT1E=
+github.com/sfomuseum/go-template v1.3.0/go.mod h1:JRpTSqjgYv6+PdkoVbX5GmuyCQqnRLd0Yk8LFvLb6/k=
 github.com/sfomuseum/go-tilezen v0.0.6 h1:EpsPimPXKlyUusKyPIHcTwzXet4APxDPd+ZneGOfs3I=
 github.com/sfomuseum/go-tilezen v0.0.6/go.mod h1:sxthwx02ryk+tSyvy2bKL7f+cqXq+9z7U5pAUt479SE=
 github.com/sfomuseum/runtimevar v1.0.3 h1:xegTQ0ioFE9sZz9pPjJvJUaQdUhjEswFPqLyw01iQtc=

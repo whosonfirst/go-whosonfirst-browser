@@ -203,7 +203,15 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		SPR:       path_spr,
 	}
 
-	www_capabilities := &www.Capabilities{}
+	www_capabilities := &www.Capabilities{
+		GeoJSON:   enable_geojson,
+		GeoJSONLD: enable_geojsonld,
+		SVG:       enable_svg,
+		PNG:       enable_png,
+		Select:    enable_select,
+		NavPlace:  enable_navplace,
+		SPR:       enable_spr,
+	}
 
 	mux := http.NewServeMux()
 

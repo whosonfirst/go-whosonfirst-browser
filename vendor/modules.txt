@@ -435,6 +435,10 @@ github.com/sfomuseum/go-http-tilezen/http
 # github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3
 ## explicit; go 1.19
 github.com/sfomuseum/go-sfomuseum-pmtiles/http
+# github.com/sfomuseum/go-template v1.3.0
+## explicit; go 1.18
+github.com/sfomuseum/go-template/funcs
+github.com/sfomuseum/go-template/html
 # github.com/sfomuseum/go-tilezen v0.0.6
 ## explicit; go 1.16
 github.com/sfomuseum/go-tilezen

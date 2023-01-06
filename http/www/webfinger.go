@@ -87,14 +87,95 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 			"http://whosonfirst.org/properties/wof/lastmodified": str_lastmod,
 		}
 
+		links := make([]webfinger.Link, 0)
+
 		aliases := []string{
 			geojson_uri.String(),
+		}
+
+		if opts.Capabilities.GeoJSON {
+
+			l := webfinger.Link{
+				HRef: "",
+				Type: "application/json",
+				Rel:  "",
+			}
+
+			links = append(links, l)
+		}
+
+		if opts.Capabilities.GeoJSONLD {
+
+			l := webfinger.Link{
+				HRef: "",
+				Type: "application/json",
+				Rel:  "",
+			}
+
+			links = append(links, l)
+
+		}
+
+		if opts.Capabilities.SVG {
+
+			l := webfinger.Link{
+				HRef: "",
+				Type: "application/xml+svg",
+				Rel:  "",
+			}
+
+			links = append(links, l)
+		}
+
+		if opts.Capabilities.PNG {
+
+			l := webfinger.Link{
+				HRef: "",
+				Type: "image/png",
+				Rel:  "",
+			}
+
+			links = append(links, l)
+		}
+
+		if opts.Capabilities.Select {
+
+			l := webfinger.Link{
+				HRef: "",
+				Type: "image/png",
+				Rel:  "",
+			}
+
+			links = append(links, l)
+		}
+
+		if opts.Capabilities.NavPlace {
+
+			l := webfinger.Link{
+				HRef: "",
+				Type: "image/png",
+				Rel:  "",
+			}
+
+			links = append(links, l)
+		}
+
+		if opts.Capabilities.SPR {
+
+			l := webfinger.Link{
+				HRef: "",
+				Type: "image/png",
+				Rel:  "",
+			}
+
+			links = append(links, l)
 		}
 
 		r := webfinger.Resource{
 			Subject:    subject,
 			Properties: props,
 			Aliases:    aliases,
+			Links:      links,
 		}
 
 		rsp.Header().Set("Content-type", webfinger.ContentType)
