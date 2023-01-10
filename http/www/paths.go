@@ -9,4 +9,5 @@ type Paths struct {
 	SPR       string
 	Select    string
 	URIPrefix string
+	HTML      string
 }

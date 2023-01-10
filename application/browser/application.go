@@ -201,9 +201,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		Select:    path_select,
 		NavPlace:  path_navplace,
 		SPR:       path_spr,
+		HTML:      path_id,
 	}
 
 	www_capabilities := &www.Capabilities{
+		HTML:      enable_html,
 		GeoJSON:   enable_geojson,
 		GeoJSONLD: enable_geojsonld,
 		SVG:       enable_svg,

@@ -67,18 +67,6 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 			return
 		}
 
-		path_geojson, err := url.JoinPath(opts.Paths.GeoJSON, rel_path)
-
-		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		geojson_uri := url.URL{}
-		geojson_uri.Scheme = wf_scheme
-		geojson_uri.Host = wf_host
-		geojson_uri.Path = path_geojson
-
 		subject := fmt.Sprintf("acct:%d@%s", wof_uri.Id, wf_host)
 
 		props := map[string]string{
@@ -89,11 +77,23 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 		links := make([]webfinger.Link, 0)
 
-		aliases := []string{
-			geojson_uri.String(),
-		}
+		aliases := make([]string, 0)
 
 		if opts.Capabilities.GeoJSON {
+
+			path_geojson, err := url.JoinPath(opts.Paths.GeoJSON, rel_path)
+
+			if err != nil {
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			geojson_uri := url.URL{}
+			geojson_uri.Scheme = wf_scheme
+			geojson_uri.Host = wf_host
+			geojson_uri.Path = path_geojson
+
+			aliases = append(aliases, geojson_uri.String())
 
 			l := webfinger.Link{
 				HRef: geojson_uri.String(),
@@ -126,6 +126,29 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 			links = append(links, l)
 
+		}
+
+		if opts.Capabilities.HTML {
+
+			path_html, err := url.JoinPath(opts.Paths.HTML, rel_path)
+
+			if err != nil {
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			uri := url.URL{}
+			uri.Scheme = wf_scheme
+			uri.Host = wf_host
+			uri.Path = path_html
+
+			l := webfinger.Link{
+				HRef: uri.String(),
+				Type: "text/html",
+				Rel:  "x-whosonfirst-rel#html",
+			}
+
+			links = append(links, l)
 		}
 
 		if opts.Capabilities.SVG {

@@ -8,4 +8,5 @@ type Capabilities struct {
 	NavPlace  bool
 	Select    bool
 	SPR       bool
+	HTML      bool
 }

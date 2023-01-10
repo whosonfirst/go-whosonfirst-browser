@@ -1,6 +1,8 @@
 // package www implements HTTP handlers for the whosonfirst-browser web application.
 package www
 
+// To do: Reconcile with Paths (paths.go)
+
 // Endpoints defines a struct containing (relative) URLs for the various whosonfirst-browser web application handlers.
 type Endpoints struct {
 	Index     string
