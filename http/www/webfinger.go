@@ -11,7 +11,9 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 type WebfingerHandlerOptions struct {
@@ -136,6 +138,11 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)
 				return
 			}
+
+			// This is necessary to trick code in www/id.go to render raw geojson
+			// if the URI extention is ".geojson"
+
+			path_html = strings.Replace(path_html, filepath.Ext(path_html), "", 1)
 
 			uri := url.URL{}
 			uri.Scheme = wf_scheme
