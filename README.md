@@ -215,6 +215,8 @@ If you have started the `whosonfirst-browser` tool with either the `-enable-html
 
 ###### Leaflet
 
+![](docs/images/wof-browser-leaflet.png)
+
 The `leaflet` map provider is for maps that use static TMS (or "slippy") -style raster tiles. For example:
 
 ```
@@ -228,7 +230,7 @@ $> bin/whosonfirst-browser/main.go \
 2022/11/11 22:29:05 Listening on http://localhost:8080
 ```
 
-####### Leaflet specific flags
+###### Leaflet specific flags
 
 ```
   -leaflet-enable-draw
@@ -261,7 +263,7 @@ $> bin/whosonfirst-browser/main.go \
 
 The `-protomaps-bucket-uri` is expected to be a valid [gocloud.dev/blob](https://gocloud.dev/howto/blob/) bucket URI. Only the [gocloud `fileblob` provider](https://gocloud.dev/howto/blob/#local) for accessing files on the local filesystem is enabled by default. If you need to enable other providers you will need to clone the [cmd/whosonfirst-browser/main.go](cmd/whosonfirst-browser/main.go) tool and add the relevant `import` statements. See the [Data sources and Caches](#data-sources-and-caches) section for examples.
 
-####### Protomaps specific flags
+###### Protomaps specific flags
 
 ```
   -protomaps-bucket-uri string
@@ -282,6 +284,8 @@ The `-protomaps-bucket-uri` is expected to be a valid [gocloud.dev/blob](https:/
 
 ##### TangramJS and Nextzen
 
+![](docs/images/wof-browser-tangram.png)
+
 The `tangram` map provider is for maps that use a Nextzen vector tiles and styles rendered by the TangramJS library. For example:
 
 ```
@@ -297,7 +301,7 @@ $> bin/whosonfirst-browser/main.go \
 
 You can register for a Nextzen API key at https://developers.nextzen.org/
 
-####### Nextzen specific flags
+###### Nextzen specific flags
 
 ```
   -nextzen-apikey string
