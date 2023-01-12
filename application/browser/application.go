@@ -5,6 +5,8 @@ import (
 	_ "github.com/whosonfirst/go-reader-cachereader"
 	_ "github.com/whosonfirst/go-reader-findingaid"
 	_ "gocloud.dev/blob/fileblob"
+	_ "gocloud.dev/blob/s3blob"
+	_ "github.com/aaronland/gocloud-blob-s3"
 )
 
 import (
