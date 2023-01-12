@@ -96,6 +96,8 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
     	Enable the 'spr' (or "standard places response") output handler. (default true)
   -enable-svg
     	Enable the 'svg' output handler.
+  -enable-webfinger
+    	Enable the 'webfinger' output handler.	
   -exporter-uri string
     	A valid whosonfirst/go-whosonfirst-export/v2 URI. (default "whosonfirst://")
   -github-accesstoken-uri string
@@ -150,6 +152,10 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
     	The path that SVG requests should be served from. (default "/svg/")
   -path-svg-alt value
     	Zero or more alternate paths that SVG requests should be served from.
+  -path-webfinger string
+    	The path that 'webfinger' requests should be served from. (default "/.well-known/webfinger/")
+  -path-webfinger-alt value
+    	Zero or more alternate paths that 'webfinger' requests should be served from.	
   -protomaps-bucket-uri string
     	A valid gocloud.dev/blob.Bucket URI containing Protomaps tile databases.
   -protomaps-cache-size int
@@ -322,7 +328,15 @@ A PNG-encoded representation of the geometry for a given WOF ID. For example:
 
 `http://localhost:8080/png/101736545`
 
-### Search
+#### WebFinger
+
+A JSON-encoded WebFinger ([RFC 7033](https://www.rfc-editor.org/rfc/rfc7033)) respresentation for a record.
+
+![](docs/images/wof-browser-montreal-webfinger.png)
+
+`http://localhost:8080/.well-known/webfinger/?resource=acct:101736545`
+
+_Note: WebFinger representations should still be considered a work-in-progress. It's not clear yet whether, or where, there are instance-specific gotchas that will be need to be accounted for, particularly involving host names. It stands to reason that there so this is a "starting point" to work through remaining issues in code._
 
 #### HTML
 

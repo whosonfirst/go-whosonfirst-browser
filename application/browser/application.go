@@ -90,6 +90,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		enable_navplace = true
 		enable_spr = true
 		enable_select = true
+		enable_webfinger = true
 	}
 
 	if enable_search_html {
@@ -125,7 +126,6 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to derive tmp dir, %w", err)
 		}
 
-		log.Println(tempdir)
 		defer os.RemoveAll(tempdir)
 
 		cache_uri = fmt.Sprintf("fs://%s", tempdir)
@@ -191,6 +191,28 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if err != nil {
 		return fmt.Errorf("Failed to create authenticator, %w", err)
+	}
+
+	www_paths := &www.Paths{
+		GeoJSON:   path_geojson,
+		GeoJSONLD: path_geojsonld,
+		SVG:       path_svg,
+		PNG:       path_png,
+		Select:    path_select,
+		NavPlace:  path_navplace,
+		SPR:       path_spr,
+		HTML:      path_id,
+	}
+
+	www_capabilities := &www.Capabilities{
+		HTML:      enable_html,
+		GeoJSON:   enable_geojson,
+		GeoJSONLD: enable_geojsonld,
+		SVG:       enable_svg,
+		PNG:       enable_png,
+		Select:    enable_select,
+		NavPlace:  enable_navplace,
+		SPR:       enable_spr,
 	}
 
 	mux := http.NewServeMux()
@@ -383,6 +405,32 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		for _, alt_path := range path_select_alt {
 			mux.Handle(alt_path, select_handler)
+		}
+	}
+
+	if enable_webfinger {
+
+		webfinger_opts := &www.WebfingerHandlerOptions{
+			Reader:       cr,
+			Logger:       logger,
+			Paths:        www_paths,
+			Capabilities: www_capabilities,
+		}
+
+		webfinger_handler, err := www.WebfingerHandler(webfinger_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create webfinger handler, %w", err)
+		}
+
+		if enable_cors {
+			webfinger_handler = cors_wrapper.Handler(webfinger_handler)
+		}
+
+		mux.Handle(path_webfinger, webfinger_handler)
+
+		for _, alt_path := range path_webfinger_alt {
+			mux.Handle(alt_path, webfinger_handler)
 		}
 	}
 
