@@ -2,8 +2,8 @@ cli:
 	go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 
 debug:
-	@make cli
-	./bin/whosonfirst-browser -enable-all -proxy-tiles -nextzen-api-key $(APIKEY) -reader-uri $(READER)
+	# @make cli
+	./bin/whosonfirst-browser -enable-all -map-provider tangram -nextzen-apikey $(APIKEY) -reader-uri $(READER)
 
 debug-tilepack:
 	make cli && bin/whosonfirst-browser -enable-all -nextzen-tilepack-database $(TILEPACK) -reader-uri $(READER)
