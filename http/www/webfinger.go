@@ -19,6 +19,7 @@ import (
 type WebfingerHandlerOptions struct {
 	Reader       reader.Reader
 	Logger       *log.Logger
+	Hostname string	
 	Paths        *Paths
 	Capabilities *Capabilities
 }
@@ -33,8 +34,14 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 			wf_scheme = "http"
 		}
 
-		wf_host := req.Host
+		var wf_host string
 
+		if opts.Hostname == "" {
+			wf_host = req.Host
+		} else {
+			wf_host = opts.Hostname
+		}
+		
 		wof_uri, err, status := wof_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {

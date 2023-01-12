@@ -415,6 +415,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			Logger:       logger,
 			Paths:        www_paths,
 			Capabilities: www_capabilities,
+			Hostname: webfinger_hostname,
 		}
 
 		webfinger_handler, err := www.WebfingerHandler(webfinger_opts)

@@ -180,6 +180,8 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
     	A valid aaronland/go-http-server URI. (default "http://localhost:8080")
   -static-prefix string
     	Prepend this prefix to URLs for static assets.
+  -webfinger-hostname string
+    	An optional hostname to use for WebFinger URLs.	
 ```
 
 #### Example

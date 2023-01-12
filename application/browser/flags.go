@@ -203,6 +203,12 @@ const AuthenticatorURI string = "authenticator-uri"
 
 var authenticator_uri string
 
+const WebFingerHostname string = "webfinger-hostname"
+
+// An optional hostname to use for WebFinger URLs.
+var webfinger_hostname string
+
+
 // DefaultFlagSet returns a `flag.FlagSet` instance with flags and defaults values assigned for use with `app`.
 func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
@@ -304,6 +310,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.StringVar(&github_accesstoken_uri, "github-accesstoken-uri", "", "A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.")
 
+	fs.StringVar(&webfinger_hostname, WebFingerHostname, "", "An optional hostname to use for WebFinger URLs.")
+	
 	/*
 		fs.BoolVar(&enable_api, "enable-api", false, "Enable the API endpoints")
 		fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
