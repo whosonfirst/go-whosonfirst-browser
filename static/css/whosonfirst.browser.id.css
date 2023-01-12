@@ -16,7 +16,7 @@ table td ul li {
 }
 
 #map {
-    height: 350px;
+    height: 350px !important;
     width: 100%;
     border: solid 3px #000;
     margin-bottom:1em;
