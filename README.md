@@ -168,9 +168,9 @@ $> ./bin/whosonfirst-browser -h
   -protomaps-database string
     	The name of the Protomaps database to serve tiles from. Only necessary if -map-provider is "protomaps" and -protomaps-serve-tiles is true.
   -protomaps-label-rules-uri gocloud.dev/runtimevar
-    	// An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps label rules.
+    	An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps label rules.
   -protomaps-paint-rules-uri gocloud.dev/runtimevar
-    	// An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps paint rules.
+    	An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps paint rules.
   -protomaps-serve-tiles
     	A boolean flag signaling whether to serve Protomaps tiles locally. Only necessary if -map-provider is "protomaps".
   -protomaps-tile-url string
@@ -197,7 +197,7 @@ $> ./bin/whosonfirst-browser -h
 
 ```
 $> bin/whosonfirst-browser \
-	-enable-all -nextzen-api-key {NEXTZEN_APIKEY} \
+	-enable-all \
 	-reader-uri {READER_URI}
 	
 2019/12/14 18:22:16 Listening on http://localhost:8080
@@ -273,9 +273,9 @@ The `-protomaps-bucket-uri` is expected to be a valid [gocloud.dev/blob](https:/
   -protomaps-database string
     	The name of the Protomaps database to serve tiles from. Only necessary if -map-provider is "protomaps" and -protomaps-serve-tiles is true.
   -protomaps-label-rules-uri gocloud.dev/runtimevar
-    	// An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps label rules.
+    	An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps label rules.
   -protomaps-paint-rules-uri gocloud.dev/runtimevar
-    	// An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps paint rules.
+    	An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps paint rules.
   -protomaps-serve-tiles
     	A boolean flag signaling whether to serve Protomaps tiles locally. Only necessary if -map-provider is "protomaps".
   -protomaps-tile-url string
@@ -284,7 +284,7 @@ The `-protomaps-bucket-uri` is expected to be a valid [gocloud.dev/blob](https:/
 
 ##### TangramJS and Nextzen
 
-![](docs/images/wof-browser-tangram.png)
+![](docs/images/wof-browser-nextzen.png)
 
 The `tangram` map provider is for maps that use a Nextzen vector tiles and styles rendered by the TangramJS library. For example:
 
@@ -510,7 +510,8 @@ If you wanted, instead, to read data from the local filesystem you would start t
 ```
 $> bin/whosonfirst-browser -enable-all \
 	-reader-source 'fs:///usr/local/data/whosonfirst-data-admin-us/data' \
-	-nextzen-api-key {NEXTZEN_APIKEY}	
+	-map-provider tangram \		
+	-nextzen-apikey {NEXTZEN_APIKEY}	
 ```
 
 Or if you wanted to cache WOF records to the local filesystem you would start the browser like this:
@@ -518,7 +519,8 @@ Or if you wanted to cache WOF records to the local filesystem you would start th
 ```
 $> bin/whosonfirst-browser -enable-all \
 	-cache-source 'fs:///usr/local/cache/whosonfirst' \
-	-nextzen-api-key {NEXTZEN_APIKEY}	
+	-map-provider tangram \		
+	-nextzen-apikey {NEXTZEN_APIKEY}	
 ```
 
 The browser tool will work with any WOF-like data including records outside of the "[core](https://github.com/whosonfirst-data)" dataset. For example this is how you might use the browser tool with the [SFO Museum architecture dataset](https://millsfield.sfomuseum.org/blog/2018/08/28/whosonfirst/):
@@ -526,7 +528,8 @@ The browser tool will work with any WOF-like data including records outside of t
 ```
 $> bin/whosonfirst-browser -enable-all \
 	-reader-source 'fs:///usr/local/data/sfomuseum-data-architecture/data' \
-	-nextzen-api-key {NEXTZEN_APIKEY}	
+	-map-provider tangram \		
+	-nextzen-apikey {NEXTZEN_APIKEY}	
 ```
 
 And then if you went to `http://localhost:8080/id/1159554801` in your browser you would see:
@@ -559,7 +562,8 @@ And then you would start the browser tool like this:
 ```
 $> bin/blob-browser -enable-all \
 	-reader-source 's3://{BUCKET}?region={REGION}' \
-	-nextzen-api-key {NEXTZEN_APIKEY}
+	-map-provider tangram \		
+	-nextzen-apikey {NEXTZEN_APIKEY}
 
 2019/12/18 08:44:15 Listening on http://localhost:8080
 ```
@@ -599,7 +603,8 @@ Minimal viable Lambda environment variables:
 | Name | Value | Notes |
 | --- | --- | --- |
 | BROWSER_ENABLE_ALL | true | You don't have to enable all outputs, it's just the easiest example |
-| BROWSER_NEXTZEN_API_KEY| *** | You can signup for a Nextzen API key at [developers.nextzen.org](https://developers.nextzen.org/) |
+| BROWSER_MAP_PROVIDER | tangram | In this example we're using Tangram (and Nextzen) as a map provider. See documentation above for alternative providers. |
+| BROWSER_NEXTZEN_APIKEY | *** | You can signup for a Nextzen API key at [developers.nextzen.org](https://developers.nextzen.org/) |
 | BROWSER_READER_SOURCE | https://data.whosonfirst.org | |
 | BROWSER_SERVER_URI | lambda://?binary_type=image/png&binary_type=application/zip | The query parameters are necessary if you want output images (see below). |
 
@@ -640,7 +645,8 @@ $> docker run -it -p 8080:8080 whosonfirst-browser \
 	/usr/local/bin/whosonfirst-browser \
 	-server-uri 'http://0.0.0.0:8080' \
 	-enable-all \
-	-nextzen-api-key {NEXTZEN_APIKEY}
+	-map-provider tangram \	
+	-nextzen-apikey {NEXTZEN_APIKEY}
 	
 2019/12/17 16:27:04 Listening on http://0.0.0.0:8080
 ```
