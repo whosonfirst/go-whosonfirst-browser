@@ -334,11 +334,9 @@ A JSON-encoded WebFinger ([RFC 7033](https://www.rfc-editor.org/rfc/rfc7033)) re
 
 ![](docs/images/wof-browser-montreal-webfinger.png)
 
-`http://localhost:8080/.well-known/webfinger/?resource=acct:101736545@collection.sfomuseum.org`
-
 `http://localhost:8080/.well-known/webfinger/?resource=acct:101736545`
 
-_Note: WebFinger representations should still be considered a work-in-progress. It's not clear yet whether, or where, there are instance-specific gotchas that will be need to be accounted for. It stands to reason that there so this is a "starting point" to work through remaining issues in code._
+_Note: WebFinger representations should still be considered a work-in-progress. It's not clear yet whether, or where, there are instance-specific gotchas that will be need to be accounted for, particularly involving host names. It stands to reason that there so this is a "starting point" to work through remaining issues in code._
 
 #### HTML
 
