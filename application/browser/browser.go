@@ -2,11 +2,11 @@ package browser
 
 import (
 	_ "github.com/aaronland/go-http-server-tsnet"
+	_ "github.com/aaronland/gocloud-blob-s3"
 	_ "github.com/whosonfirst/go-reader-cachereader"
 	_ "github.com/whosonfirst/go-reader-findingaid"
 	_ "gocloud.dev/blob/fileblob"
 	_ "gocloud.dev/blob/s3blob"
-	_ "github.com/aaronland/gocloud-blob-s3"
 )
 
 import (
@@ -22,7 +22,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	
+
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
 	map_www "github.com/aaronland/go-http-maps/http/www"
@@ -41,34 +41,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"github.com/whosonfirst/go-writer/v3"
 )
-
-type RunOptions struct {
-	Logger *log.Logger
-
-	CacheURI  string
-	ReaderURI string
-
-	GitHubAccessTokenURI string
-
-	EnableCORS  bool
-	CORSOrigins bool
-
-	EnableHTML bool
-
-	EnableData      bool
-	EnableGeoJSON   bool
-	EnableGeoJSONLD bool
-	EnableSelect    bool
-	EnableSPR       bool
-	EnableNavPlace  bool
-	EnableWebFinger bool
-
-	EnableGraphics bool
-	EnablePNG      bool
-	EnableSVG      bool
-
-	URIPrefix string
-}
 
 func Run(ctx context.Context, logger *log.Logger) error {
 

@@ -30,7 +30,7 @@ type IDVars struct {
 	IsAlternate  bool
 	LastModified string
 	Endpoints    *Endpoints
-	MapProvider string	
+	MapProvider  string
 }
 
 func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
@@ -169,7 +169,7 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 			IsAlternate:  uri.IsAlternate,
 			LastModified: lastmod,
 			Endpoints:    opts.Endpoints,
-			MapProvider: opts.MapProvider,
+			MapProvider:  opts.MapProvider,
 		}
 
 		t := id_t
