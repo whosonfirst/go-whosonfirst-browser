@@ -42,6 +42,9 @@ type SendCommandInput struct {
 	// This member is required.
 	DocumentName *string
 
+	// The CloudWatch alarm you want to apply to your command.
+	AlarmConfiguration *types.AlarmConfiguration
+
 	// Enables Amazon Web Services Systems Manager to send Run Command output to Amazon
 	// CloudWatch Logs. Run Command is a capability of Amazon Web Services Systems
 	// Manager.
@@ -115,7 +118,11 @@ type SendCommandInput struct {
 
 	// The ARN of the Identity and Access Management (IAM) service role to use to
 	// publish Amazon Simple Notification Service (Amazon SNS) notifications for Run
-	// Command commands.
+	// Command commands. This role must provide the sns:Publish permission for your
+	// notification topic. For information about creating and using this service role,
+	// see Monitoring Systems Manager status changes using Amazon SNS notifications
+	// (https://docs.aws.amazon.com/systems-manager/latest/userguide/monitoring-sns-notifications.html)
+	// in the Amazon Web Services Systems Manager User Guide.
 	ServiceRoleArn *string
 
 	// An array of search criteria that targets managed nodes using a Key,Value
@@ -131,7 +138,7 @@ type SendCommandInput struct {
 
 	// If this time is reached and the command hasn't already started running, it won't
 	// run.
-	TimeoutSeconds int32
+	TimeoutSeconds *int32
 
 	noSmithyDocumentSerde
 }

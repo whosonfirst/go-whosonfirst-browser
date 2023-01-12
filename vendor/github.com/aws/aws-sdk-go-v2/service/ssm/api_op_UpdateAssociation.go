@@ -51,6 +51,10 @@ type UpdateAssociationInput struct {
 	// This member is required.
 	AssociationId *string
 
+	// The details for the CloudWatch alarm you want to apply to an automation or
+	// command.
+	AlarmConfiguration *types.AlarmConfiguration
+
 	// By default, when you update an association, the system runs it immediately after
 	// it is updated and then according to the schedule you specified. Specify this
 	// option if you don't want an association to run immediately after you update it.
@@ -159,7 +163,7 @@ type UpdateAssociationInput struct {
 	// in the Amazon Web Services Systems Manager User Guide. To use offsets, you must
 	// specify the ApplyOnlyAtCronInterval parameter. This option tells the system not
 	// to run an association immediately after you create it.
-	ScheduleOffset int32
+	ScheduleOffset *int32
 
 	// The mode for generating association compliance. You can specify AUTO or MANUAL.
 	// In AUTO mode, the system uses the status of the association execution to

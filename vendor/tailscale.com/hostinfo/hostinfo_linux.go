@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build linux && !android
-// +build linux,!android
 
 package hostinfo
 
@@ -13,6 +12,7 @@ import (
 	"strings"
 
 	"golang.org/x/sys/unix"
+	"tailscale.com/types/ptr"
 	"tailscale.com/util/lineread"
 	"tailscale.com/util/strs"
 	"tailscale.com/version/distro"
@@ -30,8 +30,8 @@ func init() {
 }
 
 var (
-	lazyVersionMeta = &lazyAtomicValue[versionMeta]{f: ptrTo(linuxVersionMeta)}
-	lazyOSVersion   = &lazyAtomicValue[string]{f: ptrTo(osVersionLinux)}
+	lazyVersionMeta = &lazyAtomicValue[versionMeta]{f: ptr.To(linuxVersionMeta)}
+	lazyOSVersion   = &lazyAtomicValue[string]{f: ptr.To(osVersionLinux)}
 )
 
 type versionMeta struct {

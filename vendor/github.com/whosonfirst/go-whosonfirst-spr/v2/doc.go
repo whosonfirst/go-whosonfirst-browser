@@ -8,4 +8,3 @@
 //
 // For a concrete example of a package that implements the `SPR` have a look at the [go-whosonfirst-sqlite-spr](https://github.com/whosonfirst/go-whosonfirst-sqlite-spr) package.
 package spr
-

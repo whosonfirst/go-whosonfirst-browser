@@ -13,8 +13,9 @@ import (
 
 // LeafletOptions provides a list of JavaScript and CSS link to include with HTML output.
 type LeafletOptions struct {
-	JS  []string
-	CSS []string
+	JS             []string
+	CSS            []string
+	DataAttributes map[string]string
 }
 
 // Append the Javascript and CSS URLs for the Leaflet.Fullscreen plugin.
@@ -28,10 +29,11 @@ func (opts *LeafletOptions) EnableHash() {
 	opts.JS = append(opts.JS, "/javascript/leaflet-hash.js")
 }
 
-// Append the Javascript and CSS URLs for the Leaflet.Draw plugin.
+// Append the Javascript and CSS URLs for the leaflet-geoman plugin.
+// https://github.com/geoman-io/leaflet-geoman/
 func (opts *LeafletOptions) EnableDraw() {
-	opts.CSS = append(opts.CSS, "/css/leaflet.draw.css")
-	opts.JS = append(opts.JS, "/javascript/leaflet.draw.js")
+	opts.CSS = append(opts.CSS, "/css/leaflet-geoman.css")
+	opts.JS = append(opts.JS, "/javascript/leaflet-geoman.min.js")
 }
 
 // Return a *LeafletOptions struct with default paths and URIs.
@@ -44,12 +46,13 @@ func DefaultLeafletOptions() *LeafletOptions {
 		JS: []string{
 			"/javascript/leaflet.js",
 		},
+		DataAttributes: make(map[string]string),
 	}
 
 	return opts
 }
 
-// AppendResourcesHandler will rewrite any HTML produced by previous handler to include the necessary markup to load Leaflet JavaScript files and related assets.
+// AppendResourcesHandler will rewrite any HTML produced by previous handler to include the necessary markup to load Leaflet JavaScript and CSS files and related assets.
 func AppendResourcesHandler(next http.Handler, opts *LeafletOptions) http.Handler {
 	return AppendResourcesHandlerWithPrefix(next, opts, "")
 }
@@ -57,23 +60,21 @@ func AppendResourcesHandler(next http.Handler, opts *LeafletOptions) http.Handle
 // AppendResourcesHandlerWithPrefix will rewrite any HTML produced by previous handler to include the necessary markup to load Leaflet JavaScript files and related assets ensuring that all URIs are prepended with a prefix.
 func AppendResourcesHandlerWithPrefix(next http.Handler, opts *LeafletOptions, prefix string) http.Handler {
 
-	js := opts.JS
-	css := opts.CSS
+	js := make([]string, len(opts.JS))
+	css := make([]string, len(opts.CSS))
 
-	if prefix != "" {
+	for i, path := range opts.JS {
+		js[i] = appendPrefix(prefix, path)
+	}
 
-		for i, path := range js {
-			js[i] = appendPrefix(prefix, path)
-		}
-
-		for i, path := range css {
-			css[i] = appendPrefix(prefix, path)
-		}
+	for i, path := range opts.CSS {
+		css[i] = appendPrefix(prefix, path)
 	}
 
 	ext_opts := &rewrite.AppendResourcesOptions{
-		JavaScript:  js,
-		Stylesheets: css,
+		JavaScript:     js,
+		Stylesheets:    css,
+		DataAttributes: opts.DataAttributes,
 	}
 
 	return rewrite.AppendResourcesHandler(next, ext_opts)
@@ -110,12 +111,12 @@ func AssetsHandlerWithPrefix(prefix string) (http.Handler, error) {
 	return rewrite_handler, nil
 }
 
-// Append all the files in the net/http FS instance containing the embedded Protomaps assets to an *http.ServeMux instance.
+// Append all the files in the net/http FS instance containing the embedded Leaflet assets to an *http.ServeMux instance.
 func AppendAssetHandlers(mux *http.ServeMux) error {
 	return AppendAssetHandlersWithPrefix(mux, "")
 }
 
-// Append all the files in the net/http FS instance containing the embedded Protomaps assets to an *http.ServeMux instance ensuring that all URLs are prepended with prefix.
+// Append all the files in the net/http FS instance containing the embedded Leaflet assets to an *http.ServeMux instance ensuring that all URLs are prepended with prefix.
 func AppendAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
 
 	asset_handler, err := AssetsHandlerWithPrefix(prefix)

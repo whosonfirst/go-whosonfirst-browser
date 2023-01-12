@@ -13,7 +13,7 @@ type StandardPlacesResult interface {
 	ParentId() string
 	// The name of the place result
 	Name() string
-	// The Who's On First placetype of the place result	
+	// The Who's On First placetype of the place result
 	Placetype() string
 	// The two-letter country code of the place result
 	Country() string
@@ -21,39 +21,39 @@ type StandardPlacesResult interface {
 	Repo() string
 	// The relative path for the Who's On First record associated with the place result
 	Path() string
-	// The fully-qualified URI (URL) for the Who's On First record associated with the place result	
+	// The fully-qualified URI (URL) for the Who's On First record associated with the place result
 	URI() string
 	// The EDTF inception date of the place result
 	Inception() *edtf.EDTFDate
-	// The EDTF cessation date of the place result	
+	// The EDTF cessation date of the place result
 	Cessation() *edtf.EDTFDate
 	// The latitude for the principal centroid (typically "label") of the place result
 	Latitude() float64
-	// The longitude for the principal centroid (typically "label") of the place result	
+	// The longitude for the principal centroid (typically "label") of the place result
 	Longitude() float64
 	// The minimum latitude of the bounding box of the place result
 	MinLatitude() float64
-	// The minimum longitude of the bounding box of the place result	
+	// The minimum longitude of the bounding box of the place result
 	MinLongitude() float64
-	// The maximum latitude of the bounding box of the place result	
+	// The maximum latitude of the bounding box of the place result
 	MaxLatitude() float64
-	// The maximum longitude of the bounding box of the place result	
+	// The maximum longitude of the bounding box of the place result
 	MaxLongitude() float64
 	// The Who's On First "existential" flag denoting whether the place result is "current" or not
 	IsCurrent() flags.ExistentialFlag
-	// The Who's On First "existential" flag denoting whether the place result is "ceased" or not	
+	// The Who's On First "existential" flag denoting whether the place result is "ceased" or not
 	IsCeased() flags.ExistentialFlag
-	// The Who's On First "existential" flag denoting whether the place result is superseded or not		
+	// The Who's On First "existential" flag denoting whether the place result is superseded or not
 	IsDeprecated() flags.ExistentialFlag
-	// The Who's On First "existential" flag denoting whether the place result has been superseded	
+	// The Who's On First "existential" flag denoting whether the place result has been superseded
 	IsSuperseded() flags.ExistentialFlag
-	// The Who's On First "existential" flag denoting whether the place result supersedes other records		
+	// The Who's On First "existential" flag denoting whether the place result supersedes other records
 	IsSuperseding() flags.ExistentialFlag
 	// The list of Who's On First IDs that supersede the place result
 	SupersededBy() []int64
-	// The list of Who's On First IDs that are superseded by the place result	
+	// The list of Who's On First IDs that are superseded by the place result
 	Supersedes() []int64
-	// The list of Who's On First IDs that are ancestors of the place result	
+	// The list of Who's On First IDs that are ancestors of the place result
 	BelongsTo() []int64
 	// The Unix timestamp indicating when the place result was last modified
 	LastModified() int64

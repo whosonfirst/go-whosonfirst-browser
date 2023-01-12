@@ -66,12 +66,6 @@ type ServerConfig struct {
 
 	hostKeys []Signer
 
-	// ImplicitAuthMethod is sent to the client in the list of acceptable
-	// authentication methods. To make an authentication decision based on
-	// connection metadata use NoClientAuthCallback. If NoClientAuthCallback is
-	// nil, the value is unused.
-	ImplicitAuthMethod string
-
 	// NoClientAuth is true if clients are allowed to connect without
 	// authenticating.
 	// To determine NoClientAuth at runtime, set NoClientAuth to true
@@ -120,6 +114,14 @@ type ServerConfig struct {
 	// AuthLogCallback, if non-nil, is called to log all authentication
 	// attempts.
 	AuthLogCallback func(conn ConnMetadata, method string, err error)
+
+	// NextAuthMethodCallback, if non-nil, is called whenever an authentication
+	// method fails. It's called after AuthLogCallback, if set. The return
+	// values are the SSH auth types (from
+	// https://www.iana.org/assignments/ssh-parameters/ssh-parameters.xhtml#ssh-parameters-10
+	// such as "password", "publickey", "keyboard-interactive", etc)
+	// to suggest that the client try next. If empty, authentication fails.
+	NextAuthMethodCallback func(conn ConnMetadata, prevErrors []error) []string
 
 	// ServerVersion is the version identification string to announce in
 	// the public handshake.
@@ -437,6 +439,7 @@ func (s *connection) serverAuthenticate(config *ServerConfig) (*Permissions, err
 
 	authFailures := 0
 	var authErrs []error
+	var displayedBanner bool
 
 userAuthLoop:
 	for {
@@ -469,7 +472,8 @@ userAuthLoop:
 
 		s.user = userAuthReq.User
 
-		if config.BannerCallback != nil {
+		if !displayedBanner && config.BannerCallback != nil {
+			displayedBanner = true
 			msg := config.BannerCallback(s)
 			if msg != "" {
 				if err := s.SendAuthBanner(msg); err != nil {
@@ -489,11 +493,6 @@ userAuthLoop:
 				} else {
 					authErr = nil
 				}
-			}
-
-			// allow initial attempt of 'none' without penalty
-			if authFailures == 0 {
-				authFailures--
 			}
 		case "password":
 			if config.PasswordCallback == nil {
@@ -673,17 +672,23 @@ userAuthLoop:
 		}
 		if errors.Is(authErr, ErrDenied) {
 			var failureMsg userAuthFailureMsg
-			if config.ImplicitAuthMethod != "" {
-				failureMsg.Methods = []string{config.ImplicitAuthMethod}
+			if config.NextAuthMethodCallback != nil {
+				// We also call the NextAuthMethodCallback here, even though
+				// we're hanging up by returning out of this func, as OpenSSH
+				// will render this last one in parentheses in the rejection
+				// error message which is a nice little place to put the product
+				// name, auth type, or a hint about why it might've failed.
+				failureMsg.Methods = config.NextAuthMethodCallback(s, authErrs)
 			}
 			if err := s.transport.writePacket(Marshal(failureMsg)); err != nil {
 				return nil, err
 			}
-
 			return nil, authErr
 		}
 
-		authFailures++
+		if userAuthReq.Method != "none" {
+			authFailures++
+		}
 		if config.MaxAuthTries > 0 && authFailures >= config.MaxAuthTries {
 			// If we have hit the max attempts, don't bother sending the
 			// final SSH_MSG_USERAUTH_FAILURE message, since there are
@@ -710,21 +715,22 @@ userAuthLoop:
 		}
 
 		var failureMsg userAuthFailureMsg
-		if config.NoClientAuthCallback != nil && config.ImplicitAuthMethod != "" {
-			failureMsg.Methods = append(failureMsg.Methods, config.ImplicitAuthMethod)
-		}
-		if config.PasswordCallback != nil {
-			failureMsg.Methods = append(failureMsg.Methods, "password")
-		}
-		if config.PublicKeyCallback != nil {
-			failureMsg.Methods = append(failureMsg.Methods, "publickey")
-		}
-		if config.KeyboardInteractiveCallback != nil {
-			failureMsg.Methods = append(failureMsg.Methods, "keyboard-interactive")
-		}
-		if config.GSSAPIWithMICConfig != nil && config.GSSAPIWithMICConfig.Server != nil &&
-			config.GSSAPIWithMICConfig.AllowLogin != nil {
-			failureMsg.Methods = append(failureMsg.Methods, "gssapi-with-mic")
+		if config.NextAuthMethodCallback != nil {
+			failureMsg.Methods = config.NextAuthMethodCallback(s, authErrs)
+		} else {
+			if config.PasswordCallback != nil {
+				failureMsg.Methods = append(failureMsg.Methods, "password")
+			}
+			if config.PublicKeyCallback != nil {
+				failureMsg.Methods = append(failureMsg.Methods, "publickey")
+			}
+			if config.KeyboardInteractiveCallback != nil {
+				failureMsg.Methods = append(failureMsg.Methods, "keyboard-interactive")
+			}
+			if config.GSSAPIWithMICConfig != nil && config.GSSAPIWithMICConfig.Server != nil &&
+				config.GSSAPIWithMICConfig.AllowLogin != nil {
+				failureMsg.Methods = append(failureMsg.Methods, "gssapi-with-mic")
+			}
 		}
 
 		if len(failureMsg.Methods) == 0 {

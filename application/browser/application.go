@@ -11,29 +11,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/aaronland/go-http-bootstrap"
-	"github.com/aaronland/go-http-ping/v2"
-	"github.com/aaronland/go-http-server"
-	"github.com/aaronland/go-http-tangramjs"
-	"github.com/protomaps/go-pmtiles/pmtiles"
-	"github.com/rs/cors"
-	"github.com/sfomuseum/go-flags/flagset"
-	"github.com/sfomuseum/go-http-auth"
-	"github.com/sfomuseum/go-http-protomaps"
-	tzhttp "github.com/sfomuseum/go-http-tilezen/http"
-	pmhttp "github.com/sfomuseum/go-sfomuseum-pmtiles/http"
-	tiles_http "github.com/tilezen/go-tilepacks/http"
-	"github.com/tilezen/go-tilepacks/tilepack"
-	"github.com/whosonfirst/go-cache"
-	"github.com/whosonfirst/go-reader"
-	github_reader "github.com/whosonfirst/go-reader-github"
-	"github.com/whosonfirst/go-whosonfirst-browser/v5/http/api"
-	"github.com/whosonfirst/go-whosonfirst-browser/v5/http/www"
-	"github.com/whosonfirst/go-whosonfirst-browser/v5/templates/html"
-	"github.com/whosonfirst/go-whosonfirst-export/v2"
-	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
-	"github.com/whosonfirst/go-writer/v3"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -43,7 +20,53 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	
+	"github.com/aaronland/go-http-bootstrap"
+	"github.com/aaronland/go-http-maps"
+	map_www "github.com/aaronland/go-http-maps/http/www"
+	"github.com/aaronland/go-http-maps/provider"
+	"github.com/aaronland/go-http-ping/v2"
+	"github.com/aaronland/go-http-server"
+	"github.com/rs/cors"
+	"github.com/sfomuseum/go-flags/flagset"
+	"github.com/sfomuseum/go-http-auth"
+	"github.com/whosonfirst/go-reader"
+	github_reader "github.com/whosonfirst/go-reader-github"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/http/api"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/http/www"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/templates/html"
+	"github.com/whosonfirst/go-whosonfirst-export/v2"
+	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
+	"github.com/whosonfirst/go-writer/v3"
 )
+
+type RunOptions struct {
+	Logger *log.Logger
+
+	CacheURI  string
+	ReaderURI string
+
+	GitHubAccessTokenURI string
+
+	EnableCORS  bool
+	CORSOrigins bool
+
+	EnableHTML bool
+
+	EnableData      bool
+	EnableGeoJSON   bool
+	EnableGeoJSONLD bool
+	EnableSelect    bool
+	EnableSPR       bool
+	EnableNavPlace  bool
+	EnableWebFinger bool
+
+	EnableGraphics bool
+	EnablePNG      bool
+	EnableSVG      bool
+
+	URIPrefix string
+}
 
 func Run(ctx context.Context, logger *log.Logger) error {
 
@@ -162,21 +185,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		return fmt.Errorf("Failed to create reader for '%s', %w", cr_uri.String(), err)
 	}
 
-	// start of sudo put me in a package
-
-	t := template.New("whosonfirst-browser").Funcs(template.FuncMap{
-		"Add": func(i int, offset int) int {
-			return i + offset
-		},
-	})
-
-	t, err = t.ParseFS(html.FS, "*.html")
+	t, err := html.LoadTemplates(ctx)
 
 	if err != nil {
-		return fmt.Errorf("Failed to parse templates, %w", err)
+		return fmt.Errorf("Failed to load templates, %w", err)
 	}
-
-	// end of sudo put me in a package
 
 	if static_prefix != "" {
 
@@ -415,7 +428,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			Logger:       logger,
 			Paths:        www_paths,
 			Capabilities: www_capabilities,
-			Hostname: webfinger_hostname,
+			Hostname:     webfinger_hostname,
 		}
 
 		webfinger_handler, err := www.WebfingerHandler(webfinger_opts)
@@ -512,6 +525,24 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to append static asset handlers, %w", err)
 		}
 
+		provider_uri, err := provider.ProviderURIFromFlagSet(fs)
+
+		if err != nil {
+			return fmt.Errorf("Failed to derive provider URI from flagset, %v", err)
+		}
+
+		map_provider, err := provider.NewProvider(ctx, provider_uri)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create new provider, %w", err)
+		}
+
+		err = map_provider.SetLogger(logger)
+
+		if err != nil {
+			return fmt.Errorf("Failed to set logger for provider, %w", err)
+		}
+
 		// Note that we append all the handler to mux at the end of this block so that they
 		// can be updated with map-related middleware where necessary
 
@@ -537,10 +568,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		id_opts := www.IDHandlerOptions{
-			Templates: t,
-			Endpoints: endpoints,
-			Reader:    cr,
-			Logger:    logger,
+			Templates:   t,
+			Endpoints:   endpoints,
+			Reader:      cr,
+			Logger:      logger,
+			MapProvider: map_provider.Scheme(),
 		}
 
 		id_h, err := www.IDHandler(id_opts)
@@ -561,9 +593,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			}
 
 			search_opts := www.SearchHandlerOptions{
-				Templates: t,
-				Endpoints: endpoints,
-				Database:  search_db,
+				Templates:   t,
+				Endpoints:   endpoints,
+				Database:    search_db,
+				MapProvider: map_provider.Scheme(),
 			}
 
 			search_h, err := www.SearchHandler(search_opts)
@@ -576,126 +609,22 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, static_prefix)
 		}
 
-		switch map_provider {
-		case "nextzen":
+		maps_opts := maps.DefaultMapsOptions()
 
-			if proxy_tiles {
+		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
 
-				tile_cache, err := cache.NewCache(ctx, proxy_tiles_cache)
-
-				if err != nil {
-					return fmt.Errorf("Failed to create proxy tiles cache for '%s', %w", proxy_tiles_cache, err)
-				}
-
-				timeout := time.Duration(proxy_tiles_timeout) * time.Second
-
-				proxy_opts := &tzhttp.TilezenProxyHandlerOptions{
-					Cache:   tile_cache,
-					Timeout: timeout,
-				}
-
-				proxy_handler, err := tzhttp.TilezenProxyHandler(proxy_opts)
-
-				if err != nil {
-					return fmt.Errorf("Failed to create proxy tiles handler, %w", err)
-				}
-
-				// the order here is important - we don't have a general-purpose "add to
-				// mux with prefix" function here, like we do in the tangram handler so
-				// we set the nextzen tile url with proxy_tiles_url and then update it
-				// (proxy_tiles_url) with a prefix if necessary (20190911/thisisaaronland)
-
-				nextzen_tile_url = fmt.Sprintf("%s{z}/{x}/{y}.mvt", proxy_tiles_url)
-
-				if static_prefix != "" {
-
-					proxy_tiles_url = filepath.Join(static_prefix, proxy_tiles_url)
-
-					if !strings.HasSuffix(proxy_tiles_url, "/") {
-						proxy_tiles_url = fmt.Sprintf("%s/", proxy_tiles_url)
-					}
-				}
-
-				mux.Handle(proxy_tiles_url, proxy_handler)
-			}
-
-			tangramjs_opts := tangramjs.DefaultTangramJSOptions()
-			tangramjs_opts.NextzenOptions.APIKey = nextzen_api_key
-			tangramjs_opts.NextzenOptions.StyleURL = nextzen_style_url
-			tangramjs_opts.NextzenOptions.TileURL = nextzen_tile_url
-
-			if tilepack_db != "" {
-				tangramjs_opts.NextzenOptions.TileURL = tilepack_uri
-			}
-
-			err = tangramjs.AppendAssetHandlersWithPrefix(mux, static_prefix)
-
-			if err != nil {
-				return fmt.Errorf("Failed to append Tangram.js asset handlers, %w", err)
-			}
-
-			if tilepack_db != "" {
-
-				tiles_reader, err := tilepack.NewMbtilesReader(tilepack_db)
-
-				if err != nil {
-					return fmt.Errorf("Failed to load tilepack, %v", err)
-				}
-
-				u := strings.TrimLeft(tilepack_uri, "/")
-				p := strings.Split(u, "/")
-				path_tiles := fmt.Sprintf("/%s/", p[0])
-
-				tiles_handler := tiles_http.MbtilesHandler(tiles_reader)
-				mux.Handle(path_tiles, tiles_handler)
-			}
-
-			id_handler = tangramjs.AppendResourcesHandlerWithPrefix(id_handler, tangramjs_opts, static_prefix)
-			search_handler = tangramjs.AppendResourcesHandlerWithPrefix(search_handler, tangramjs_opts, static_prefix)
-
-		case "protomaps":
-
-			err = protomaps.AppendAssetHandlers(mux)
-
-			if err != nil {
-				return fmt.Errorf("Failed to append leaflet-protomaps asset handler, %w", err)
-			}
-
-			loop, err := pmtiles.NewLoop(protomaps_bucket_uri, logger, protomaps_cache_size, "")
-
-			if err != nil {
-				return fmt.Errorf("Failed to create pmtiles.Loop, %w", err)
-			}
-
-			loop.Start()
-
-			pmtiles_handler := pmhttp.TileHandler(loop, logger)
-
-			strip_path := strings.TrimRight(path_protomaps_tiles, "/")
-			pmtiles_handler = http.StripPrefix(strip_path, pmtiles_handler)
-
-			mux.Handle(path_protomaps_tiles, pmtiles_handler)
-
-			// Because inevitably I will forget...
-			protomaps_tiles_database = strings.Replace(protomaps_tiles_database, ".pmtiles", "", 1)
-
-			pm_tile_url, err := url.JoinPath(path_protomaps_tiles, protomaps_tiles_database)
-
-			if err != nil {
-				return fmt.Errorf("Failed to join path to derive Protomaps tile URL, %w", err)
-			}
-
-			pm_tile_url = fmt.Sprintf("%s/{z}/{x}/{y}.mvt", pm_tile_url)
-
-			pm_opts := protomaps.DefaultProtomapsOptions()
-			pm_opts.TileURL = pm_tile_url
-
-			id_handler = protomaps.AppendResourcesHandlerWithPrefix(id_handler, pm_opts, static_prefix)
-			search_handler = protomaps.AppendResourcesHandlerWithPrefix(search_handler, pm_opts, static_prefix)
-
-		default:
-			return fmt.Errorf("Unrecognized map provider")
+		if err != nil {
+			return fmt.Errorf("Failed to append static asset handlers, %v")
 		}
+
+		err = map_provider.AppendAssetHandlersWithPrefix(mux, static_prefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append provider asset handlers, %v", err)
+		}
+
+		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, static_prefix)
+		search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, static_prefix)
 
 		mux.Handle("/", index_handler)
 		mux.Handle(path_id, id_handler)

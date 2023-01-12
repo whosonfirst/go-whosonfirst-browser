@@ -2,7 +2,7 @@ package www
 
 import (
 	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"log"
 	"net/http"
 )

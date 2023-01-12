@@ -55,6 +55,10 @@ type CreateAssociationInput struct {
 	// This member is required.
 	Name *string
 
+	// The details for the CloudWatch alarm you want to apply to an automation or
+	// command.
+	AlarmConfiguration *types.AlarmConfiguration
+
 	// By default, when you create a new association, the system runs it immediately
 	// after it is created and then according to the schedule you specified. Specify
 	// this option if you don't want an association to run immediately after you create
@@ -142,7 +146,7 @@ type CreateAssociationInput struct {
 	// in the Amazon Web Services Systems Manager User Guide. To use offsets, you must
 	// specify the ApplyOnlyAtCronInterval parameter. This option tells the system not
 	// to run an association immediately after you create it.
-	ScheduleOffset int32
+	ScheduleOffset *int32
 
 	// The mode for generating association compliance. You can specify AUTO or MANUAL.
 	// In AUTO mode, the system uses the status of the association execution to
@@ -154,6 +158,13 @@ type CreateAssociationInput struct {
 	// direct call to the PutComplianceItems API operation. By default, all
 	// associations use AUTO mode.
 	SyncCompliance types.AssociationSyncCompliance
+
+	// Adds or overwrites one or more tags for a State Manager association. Tags are
+	// metadata that you can assign to your Amazon Web Services resources. Tags enable
+	// you to categorize your resources in different ways, for example, by purpose,
+	// owner, or environment. Each tag consists of a key and an optional value, both of
+	// which you define.
+	Tags []types.Tag
 
 	// A location is a combination of Amazon Web Services Regions and Amazon Web
 	// Services accounts where you want to run the association. Use this action to

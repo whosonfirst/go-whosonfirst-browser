@@ -439,7 +439,7 @@ package main
 import (
 	"context"
 	_ "github.com/whosonfirst/go-reader-whosonfirst-data"
-	"github.com/whosonfirst/go-whosonfirst-browser/v5"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6"
 )
 
 func main() {
@@ -489,7 +489,7 @@ package main
 import (
 	"context"
 	_ "github.com/whosonfirst/go-reader-blob"
-	"github.com/whosonfirst/go-whosonfirst-browser/v5/application/browser"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/application/browser"
 )
 
 func main() {

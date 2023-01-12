@@ -127,10 +127,6 @@ type Impl struct {
 	connsOpenBySubnetIP map[netip.Addr]int
 }
 
-// handleSSH is initialized in ssh.go (on Linux only) to register an SSH server
-// handler. See https://github.com/tailscale/tailscale/issues/3802.
-var handleSSH func(logger.Logf, *ipnlocal.LocalBackend, net.Conn) error
-
 const nicID = 1
 const mtu = tstun.DefaultMTU
 
@@ -539,33 +535,38 @@ var viaRange = tsaddr.TailscaleViaRange()
 // WireGuard peer) should be handled by netstack.
 func (ns *Impl) shouldProcessInbound(p *packet.Parsed, t *tstun.Wrapper) bool {
 	// Handle incoming peerapi connections in netstack.
-	if ns.lb != nil && p.IPProto == ipproto.TCP {
+	dstIP := p.Dst.Addr()
+	isLocal := ns.isLocalIP(dstIP)
+
+	// Handle TCP connection to the Tailscale IP(s) in some cases:
+	if ns.lb != nil && p.IPProto == ipproto.TCP && isLocal {
 		var peerAPIPort uint16
-		dstIP := p.Dst.Addr()
-		if p.TCPFlags&packet.TCPSynAck == packet.TCPSyn && ns.isLocalIP(dstIP) {
-			if port, ok := ns.lb.GetPeerAPIPort(p.Dst.Addr()); ok {
+
+		if p.TCPFlags&packet.TCPSynAck == packet.TCPSyn {
+			if port, ok := ns.lb.GetPeerAPIPort(dstIP); ok {
 				peerAPIPort = port
 				atomic.StoreUint32(ns.peerAPIPortAtomic(dstIP), uint32(port))
 			}
 		} else {
 			peerAPIPort = uint16(atomic.LoadUint32(ns.peerAPIPortAtomic(dstIP)))
 		}
-		if p.IPProto == ipproto.TCP && p.Dst.Port() == peerAPIPort {
+		dport := p.Dst.Port()
+		if dport == peerAPIPort {
+			return true
+		}
+		// Also handle SSH connections, webserver, etc, if enabled:
+		if ns.lb.ShouldInterceptTCPPort(dport) {
 			return true
 		}
 	}
-	if ns.isInboundTSSH(p) && ns.processSSH() {
-		return true
-	}
-	if p.IPVersion == 6 && viaRange.Contains(p.Dst.Addr()) {
-		return ns.lb != nil && ns.lb.ShouldHandleViaIP(p.Dst.Addr())
+	if p.IPVersion == 6 && !isLocal && viaRange.Contains(dstIP) {
+		return ns.lb != nil && ns.lb.ShouldHandleViaIP(dstIP)
 	}
 	if !ns.ProcessLocalIPs && !ns.ProcessSubnets {
 		// Fast path for common case (e.g. Linux server in TUN mode) where
 		// netstack isn't used at all; don't even do an isLocalIP lookup.
 		return false
 	}
-	isLocal := ns.isLocalIP(p.Dst.Addr())
 	if ns.ProcessLocalIPs && isLocal {
 		return true
 	}
@@ -649,12 +650,6 @@ func (ns *Impl) userPing(dstIP netip.Addr, pingResPkt []byte) {
 	if err := ns.tundev.InjectOutbound(pingResPkt); err != nil {
 		ns.logf("InjectOutbound ping response: %v", err)
 	}
-}
-
-func (ns *Impl) isInboundTSSH(p *packet.Parsed) bool {
-	return p.IPProto == ipproto.TCP &&
-		p.Dst.Port() == 22 &&
-		ns.isLocalIP(p.Dst.Addr())
 }
 
 // injectInbound is installed as a packet hook on the 'inbound' (from a
@@ -789,6 +784,8 @@ func (ns *Impl) acceptTCP(r *tcp.ForwarderRequest) {
 		r.Complete(true) // sends a RST
 		return
 	}
+	clientRemotePort := reqDetails.RemotePort
+	clientRemoteAddrPort := netip.AddrPortFrom(clientRemoteIP, clientRemotePort)
 
 	dialIP := netaddrIPFromNetstackIP(reqDetails.LocalAddress)
 	isTailscaleIP := tsaddr.IsTailscaleIP(dialIP)
@@ -812,7 +809,7 @@ func (ns *Impl) acceptTCP(r *tcp.ForwarderRequest) {
 	// request until we're sure that the connection can be handled by this
 	// endpoint. This function sets up the TCP connection and should be
 	// called immediately before a connection is handled.
-	createConn := func() *gonet.TCPConn {
+	createConn := func(opts ...tcpip.SettableSocketOption) *gonet.TCPConn {
 		ep, err := r.CreateEndpoint(&wq)
 		if err != nil {
 			ns.logf("CreateEndpoint error for %s: %v", stringifyTEI(reqDetails), err)
@@ -820,7 +817,9 @@ func (ns *Impl) acceptTCP(r *tcp.ForwarderRequest) {
 			return nil
 		}
 		r.Complete(false)
-
+		for _, opt := range opts {
+			ep.SetSockOpt(opt)
+		}
 		// SetKeepAlive so that idle connections to peers that have forgotten about
 		// the connection or gone completely offline eventually time out.
 		// Applications might be setting this on a forwarded connection, but from
@@ -859,7 +858,14 @@ func (ns *Impl) acceptTCP(r *tcp.ForwarderRequest) {
 
 	if ns.lb != nil {
 		if reqDetails.LocalPort == 22 && ns.processSSH() && ns.isLocalIP(dialIP) {
-			c := createConn()
+			// Use a higher keepalive idle time for SSH connections, as they are
+			// typically long lived and idle connections are more likely to be
+			// intentional. Ideally we would turn this off entirely, but we can't
+			// tell the difference between a long lived connection that is idle
+			// vs a connection that is dead because the peer has gone away.
+			// We pick 72h as that is typically sufficient for a long weekend.
+			idle := tcpip.KeepaliveIdleOption(72 * time.Hour)
+			c := createConn(&idle)
 			if c == nil {
 				return
 			}
@@ -889,6 +895,17 @@ func (ns *Impl) acceptTCP(r *tcp.ForwarderRequest) {
 			ns.lb.HandleQuad100Port80Conn(c)
 			return
 		}
+		if ns.lb.ShouldInterceptTCPPort(reqDetails.LocalPort) && ns.isLocalIP(dialIP) {
+			getTCPConn := func() (_ net.Conn, ok bool) {
+				c := createConn()
+				return c, c != nil
+			}
+			sendRST := func() {
+				r.Complete(true)
+			}
+			ns.lb.HandleInterceptedTCPConn(reqDetails.LocalPort, clientRemoteAddrPort, getTCPConn, sendRST)
+			return
+		}
 	}
 
 	if ns.ForwardTCPIn != nil {
@@ -909,7 +926,7 @@ func (ns *Impl) acceptTCP(r *tcp.ForwarderRequest) {
 	}
 }
 
-func (ns *Impl) forwardTCP(getClient func() *gonet.TCPConn, clientRemoteIP netip.Addr, wq *waiter.Queue, dialAddr netip.AddrPort) (handled bool) {
+func (ns *Impl) forwardTCP(getClient func(...tcpip.SettableSocketOption) *gonet.TCPConn, clientRemoteIP netip.Addr, wq *waiter.Queue, dialAddr netip.AddrPort) (handled bool) {
 	dialAddrStr := dialAddr.String()
 	if debugNetstack() {
 		ns.logf("[v2] netstack: forwarding incoming connection to %s", dialAddrStr)

@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build !js
-// +build !js
 
 // Package controlhttp implements the Tailscale 2021 control protocol
 // base transport over HTTP.
@@ -60,7 +59,7 @@ var stdDialer net.Dialer
 //
 // The provided ctx is only used for the initial connection, until
 // Dial returns. It does not affect the connection once established.
-func (a *Dialer) Dial(ctx context.Context) (*controlbase.Conn, error) {
+func (a *Dialer) Dial(ctx context.Context) (*ClientConn, error) {
 	if a.Hostname == "" {
 		return nil, errors.New("required Dialer.Hostname empty")
 	}
@@ -91,7 +90,7 @@ func (a *Dialer) httpsFallbackDelay() time.Duration {
 
 var _ = envknob.RegisterBool("TS_USE_CONTROL_DIAL_PLAN") // to record at init time whether it's in use
 
-func (a *Dialer) dial(ctx context.Context) (*controlbase.Conn, error) {
+func (a *Dialer) dial(ctx context.Context) (*ClientConn, error) {
 	// If we don't have a dial plan, just fall back to dialing the single
 	// host we know about.
 	useDialPlan := envknob.BoolDefaultTrue("TS_USE_CONTROL_DIAL_PLAN")
@@ -117,7 +116,7 @@ func (a *Dialer) dial(ctx context.Context) (*controlbase.Conn, error) {
 
 	// Now, for each candidate, kick off a dial in parallel.
 	type dialResult struct {
-		conn     *controlbase.Conn
+		conn     *ClientConn
 		err      error
 		addr     netip.Addr
 		priority int
@@ -129,7 +128,7 @@ func (a *Dialer) dial(ctx context.Context) (*controlbase.Conn, error) {
 	for _, c := range candidates {
 		go func(ctx context.Context, c tailcfg.ControlIPCandidate) {
 			var (
-				conn *controlbase.Conn
+				conn *ClientConn
 				err  error
 			)
 
@@ -228,7 +227,7 @@ func (a *Dialer) dial(ctx context.Context) (*controlbase.Conn, error) {
 	})
 
 	var (
-		conn *controlbase.Conn
+		conn *ClientConn
 		errs []error
 	)
 	for i, result := range results {
@@ -252,7 +251,7 @@ func (a *Dialer) dial(ctx context.Context) (*controlbase.Conn, error) {
 // dialHost connects to the configured Dialer.Hostname and upgrades the
 // connection into a controlbase.Conn. If addr is valid, then no DNS is used
 // and the connection will be made to the provided address.
-func (a *Dialer) dialHost(ctx context.Context, addr netip.Addr) (*controlbase.Conn, error) {
+func (a *Dialer) dialHost(ctx context.Context, addr netip.Addr) (*ClientConn, error) {
 	// Create one shared context used by both port 80 and port 443 dials.
 	// If port 80 is still in flight when 443 returns, this deferred cancel
 	// will stop the port 80 dial.
@@ -274,8 +273,8 @@ func (a *Dialer) dialHost(ctx context.Context, addr netip.Addr) (*controlbase.Co
 	}
 
 	type tryURLRes struct {
-		u    *url.URL          // input (the URL conn+err are for/from)
-		conn *controlbase.Conn // result (mutually exclusive with err)
+		u    *url.URL    // input (the URL conn+err are for/from)
+		conn *ClientConn // result (mutually exclusive with err)
 		err  error
 	}
 	ch := make(chan tryURLRes) // must be unbuffered
@@ -331,7 +330,7 @@ func (a *Dialer) dialHost(ctx context.Context, addr netip.Addr) (*controlbase.Co
 }
 
 // dialURL attempts to connect to the given URL.
-func (a *Dialer) dialURL(ctx context.Context, u *url.URL, addr netip.Addr) (*controlbase.Conn, error) {
+func (a *Dialer) dialURL(ctx context.Context, u *url.URL, addr netip.Addr) (*ClientConn, error) {
 	init, cont, err := controlbase.ClientDeferred(a.MachineKey, a.ControlKey, a.ProtocolVersion)
 	if err != nil {
 		return nil, err
@@ -345,7 +344,9 @@ func (a *Dialer) dialURL(ctx context.Context, u *url.URL, addr netip.Addr) (*con
 		netConn.Close()
 		return nil, err
 	}
-	return cbConn, nil
+	return &ClientConn{
+		Conn: cbConn,
+	}, nil
 }
 
 // tryURLUpgrade connects to u, and tries to upgrade it to a net.Conn. If addr

@@ -2,7 +2,7 @@
 
 Package `orb` defines a set of types for working with 2d geo and planar/projected geometric data in Golang.
 There are a set of sub-packages that use these types to do interesting things.
-They each provider their own README with extra info.
+They each provide their own README with extra info.
 
 ## Interesting features
 
@@ -138,10 +138,10 @@ layers.Simplify(simplify.DouglasPeucker(1.0))
 layers.RemoveEmpty(1.0, 2.0)
 
 // encoding using the Mapbox Vector Tile protobuf encoding.
-data, err := layers.Marshal() // this data is NOT gzipped.
+data, err := mvt.Marshal(layers) // this data is NOT gzipped.
 
 // Sometimes MVT data is stored and transfered gzip compressed. In that case:
-data, err := layers.MarshalGzipped()
+data, err := mvt.MarshalGzipped(layers)
 ```
 
 ## Decoding WKB/EWKB from a database query

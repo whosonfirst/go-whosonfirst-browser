@@ -9,9 +9,11 @@ package tsnet
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net"
 	"net/http"
 	"net/netip"
@@ -37,6 +39,7 @@ import (
 	"tailscale.com/net/tsdial"
 	"tailscale.com/smallzstd"
 	"tailscale.com/types/logger"
+	"tailscale.com/util/mak"
 	"tailscale.com/wgengine"
 	"tailscale.com/wgengine/monitor"
 	"tailscale.com/wgengine/netstack"
@@ -80,6 +83,10 @@ type Server struct {
 	// previously stored in in Store), then this field is not
 	// used.
 	AuthKey string
+
+	// ControlURL optionally specifies the coordination server URL.
+	// If empty, the Tailscale default is used.
+	ControlURL string
 
 	initOnce         sync.Once
 	initErr          error
@@ -323,7 +330,7 @@ func (s *Server) start() (reterr error) {
 	if s.Ephemeral {
 		loginFlags = controlclient.LoginEphemeral
 	}
-	lb, err := ipnlocal.NewLocalBackend(logf, logid, s.Store, s.dialer, eng, loginFlags)
+	lb, err := ipnlocal.NewLocalBackend(logf, logid, s.Store, "", s.dialer, eng, loginFlags)
 	if err != nil {
 		return fmt.Errorf("NewLocalBackend: %v", err)
 	}
@@ -337,9 +344,9 @@ func (s *Server) start() (reterr error) {
 	prefs := ipn.NewPrefs()
 	prefs.Hostname = s.hostname
 	prefs.WantRunning = true
+	prefs.ControlURL = s.ControlURL
 	authKey := s.getAuthKey()
 	err = lb.Start(ipn.Options{
-		StateKey:    ipn.GlobalDaemonStateKey,
 		UpdatePrefs: prefs,
 		AuthKey:     authKey,
 	})
@@ -423,7 +430,7 @@ func (s *Server) printAuthURLLoop() {
 
 func (s *Server) forwardTCP(c net.Conn, port uint16) {
 	s.mu.Lock()
-	ln, ok := s.listeners[listenKey{"tcp", "", fmt.Sprint(port)}]
+	ln, ok := s.listeners[listenKey{"tcp", "", port}]
 	s.mu.Unlock()
 	if !ok {
 		c.Close()
@@ -481,19 +488,43 @@ func getTSNetDir(logf logger.Logf, confDir, prog string) (string, error) {
 	return newPath, nil
 }
 
-// Listen announces only on the Tailscale network.
-// It will start the server if it has not been started yet.
-func (s *Server) Listen(network, addr string) (net.Listener, error) {
-	host, port, err := net.SplitHostPort(addr)
-	if err != nil {
-		return nil, fmt.Errorf("tsnet: %w", err)
+// APIClient returns a tailscale.Client that can be used to make authenticated
+// requests to the Tailscale control server.
+// It requires the user to set tailscale.I_Acknowledge_This_API_Is_Unstable.
+func (s *Server) APIClient() (*tailscale.Client, error) {
+	if !tailscale.I_Acknowledge_This_API_Is_Unstable {
+		return nil, errors.New("use of Client without setting I_Acknowledge_This_API_Is_Unstable")
 	}
-
 	if err := s.Start(); err != nil {
 		return nil, err
 	}
 
-	key := listenKey{network, host, port}
+	c := tailscale.NewClient("-", nil)
+	c.HTTPClient = &http.Client{Transport: s.lb.KeyProvingNoiseRoundTripper()}
+	return c, nil
+}
+
+// Listen announces only on the Tailscale network.
+// It will start the server if it has not been started yet.
+func (s *Server) Listen(network, addr string) (net.Listener, error) {
+	switch network {
+	case "", "tcp", "tcp4", "tcp6":
+	default:
+		return nil, errors.New("unsupported network type")
+	}
+	host, portStr, err := net.SplitHostPort(addr)
+	if err != nil {
+		return nil, fmt.Errorf("tsnet: %w", err)
+	}
+	port, err := net.LookupPort(network, portStr)
+	if err != nil || port < 0 || port > math.MaxUint16 {
+		return nil, fmt.Errorf("invalid port: %w", err)
+	}
+	if err := s.Start(); err != nil {
+		return nil, err
+	}
+
+	key := listenKey{network, host, uint16(port)}
 	ln := &listener{
 		s:    s,
 		key:  key,
@@ -502,14 +533,11 @@ func (s *Server) Listen(network, addr string) (net.Listener, error) {
 		conn: make(chan net.Conn),
 	}
 	s.mu.Lock()
-	if s.listeners == nil {
-		s.listeners = map[listenKey]*listener{}
-	}
 	if _, ok := s.listeners[key]; ok {
 		s.mu.Unlock()
 		return nil, fmt.Errorf("tsnet: listener already open for %s, %s", network, addr)
 	}
-	s.listeners[key] = ln
+	mak.Set(&s.listeners, key, ln)
 	s.mu.Unlock()
 	return ln, nil
 }
@@ -517,7 +545,7 @@ func (s *Server) Listen(network, addr string) (net.Listener, error) {
 type listenKey struct {
 	network string
 	host    string
-	port    string
+	port    uint16
 }
 
 type listener struct {

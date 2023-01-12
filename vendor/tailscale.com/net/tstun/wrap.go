@@ -22,10 +22,9 @@ import (
 	"golang.zx2c4.com/wireguard/tun"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 	"tailscale.com/disco"
-	"tailscale.com/net/flowtrack"
+	"tailscale.com/net/connstats"
 	"tailscale.com/net/packet"
 	"tailscale.com/net/tsaddr"
-	"tailscale.com/net/tunstats"
 	"tailscale.com/syncs"
 	"tailscale.com/tstime/mono"
 	"tailscale.com/types/ipproto"
@@ -82,7 +81,7 @@ type Wrapper struct {
 
 	// lastActivityAtomic is read/written atomically.
 	// On 32 bit systems, if the fields above change,
-	// you might need to add a pad32.Four field here.
+	// you might need to add an align64 field here.
 	lastActivityAtomic mono.Time // time of last send or receive
 
 	destIPActivity syncs.AtomicValue[map[netip.Addr]func()]
@@ -170,10 +169,7 @@ type Wrapper struct {
 	disableTSMPRejected bool
 
 	// stats maintains per-connection counters.
-	stats struct {
-		enabled atomic.Bool
-		tunstats.Statistics
-	}
+	stats atomic.Pointer[connstats.Statistics]
 }
 
 // tunReadResult is the result of a TUN read, or an injected result pretending to be a TUN read.
@@ -568,8 +564,8 @@ func (t *Wrapper) Read(buf []byte, offset int) (int, error) {
 		}
 	}
 
-	if t.stats.enabled.Load() {
-		t.stats.UpdateTx(buf[offset:][:n])
+	if stats := t.stats.Load(); stats != nil {
+		stats.UpdateTxVirtual(buf[offset:][:n])
 	}
 	t.noteActivity()
 	return n, nil
@@ -701,8 +697,8 @@ func (t *Wrapper) Write(buf []byte, offset int) (int, error) {
 }
 
 func (t *Wrapper) tdevWrite(buf []byte, offset int) (int, error) {
-	if t.stats.enabled.Load() {
-		t.stats.UpdateRx(buf[offset:])
+	if stats := t.stats.Load(); stats != nil {
+		stats.UpdateRxVirtual(buf[offset:])
 	}
 	if t.isTAP {
 		return t.tapWrite(buf, offset)
@@ -843,16 +839,10 @@ func (t *Wrapper) Unwrap() tun.Device {
 	return t.tdev
 }
 
-// SetStatisticsEnabled enables per-connections packet counters.
-// ExtractStatistics must be called periodically to avoid unbounded memory use.
-func (t *Wrapper) SetStatisticsEnabled(enable bool) {
-	t.stats.enabled.Store(enable)
-}
-
-// ExtractStatistics extracts and resets the counters for all active connections.
-// It must be called periodically otherwise the memory used is unbounded.
-func (t *Wrapper) ExtractStatistics() map[flowtrack.Tuple]tunstats.Counts {
-	return t.stats.Extract()
+// SetStatistics specifies a per-connection statistics aggregator.
+// Nil may be specified to disable statistics gathering.
+func (t *Wrapper) SetStatistics(stats *connstats.Statistics) {
+	t.stats.Store(stats)
 }
 
 var (

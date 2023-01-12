@@ -5,4 +5,4 @@ cli:
 	go build -mod vendor -o bin/wof-valid-placetype cmd/wof-valid-placetype/main.go
 
 spec:
-	go run cmd/mk-spec/main.go > placetypes/spec.go
+	curl -o placetypes.json https://raw.githubusercontent.com/whosonfirst/whosonfirst-placetypes/master/data/placetypes-spec-latest.json

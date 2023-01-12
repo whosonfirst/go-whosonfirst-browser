@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
-	"github.com/whosonfirst/go-whosonfirst-browser/v5/webfinger"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/webfinger"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"log"
@@ -19,7 +19,7 @@ import (
 type WebfingerHandlerOptions struct {
 	Reader       reader.Reader
 	Logger       *log.Logger
-	Hostname string	
+	Hostname     string
 	Paths        *Paths
 	Capabilities *Capabilities
 }
@@ -41,7 +41,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 		} else {
 			wf_host = opts.Hostname
 		}
-		
+
 		wof_uri, err, status := wof_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {

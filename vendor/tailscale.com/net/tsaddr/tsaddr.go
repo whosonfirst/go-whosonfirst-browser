@@ -11,6 +11,7 @@ import (
 	"net/netip"
 	"sync"
 
+	"golang.org/x/exp/slices"
 	"tailscale.com/net/netaddr"
 )
 
@@ -56,9 +57,14 @@ func TailscaleServiceIP() netip.Addr {
 //
 // For IPv4, use TailscaleServiceIP.
 func TailscaleServiceIPv6() netip.Addr {
-	serviceIPv6.Do(func() { mustPrefix(&serviceIPv6.v, "fd7a:115c:a1e0::53/128") })
+	serviceIPv6.Do(func() { mustPrefix(&serviceIPv6.v, TailscaleServiceIPv6String+"/128") })
 	return serviceIPv6.v.Addr()
 }
+
+const (
+	TailscaleServiceIPString   = "100.100.100.100"
+	TailscaleServiceIPv6String = "fd7a:115c:a1e0::53"
+)
 
 // IsTailscaleIP reports whether ip is an IP address in a range that
 // Tailscale assigns from.
@@ -265,6 +271,16 @@ func AllIPv6() netip.Prefix { return allIPv6 }
 
 // ExitRoutes returns a slice containing AllIPv4 and AllIPv6.
 func ExitRoutes() []netip.Prefix { return []netip.Prefix{allIPv4, allIPv6} }
+
+// SortPrefixes sorts the prefixes in place.
+func SortPrefixes(p []netip.Prefix) {
+	slices.SortFunc(p, func(ri, rj netip.Prefix) bool {
+		if ri.Addr() == rj.Addr() {
+			return ri.Bits() < rj.Bits()
+		}
+		return ri.Addr().Less(rj.Addr())
+	})
+}
 
 // FilterPrefixes returns a new slice, not aliasing in, containing elements of
 // in that match f.

@@ -3,7 +3,7 @@ package www
 import (
 	"errors"
 	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"
@@ -16,10 +16,11 @@ import (
 )
 
 type IDHandlerOptions struct {
-	Templates *template.Template
-	Endpoints *Endpoints
-	Reader    reader.Reader
-	Logger    *log.Logger
+	Templates   *template.Template
+	Endpoints   *Endpoints
+	Reader      reader.Reader
+	Logger      *log.Logger
+	MapProvider string
 }
 
 type IDVars struct {

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-writer/v3"
 	"log"

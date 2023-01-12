@@ -3,7 +3,8 @@ package browser
 import (
 	"context"
 	"flag"
-	"github.com/aaronland/go-http-tangramjs"
+	"fmt"
+	"github.com/aaronland/go-http-maps/provider"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/multi"
 )
@@ -31,24 +32,6 @@ var exporter_uri string
 const WriterURIFlag string = "writer-uri"
 
 var writer_uris multi.MultiCSVString
-
-var map_provider string
-
-var nextzen_api_key string
-var nextzen_style_url string
-var nextzen_tile_url string
-
-var proxy_tiles bool
-var proxy_tiles_url string
-var proxy_tiles_cache string
-var proxy_tiles_timeout int
-
-var tilepack_db string
-var tilepack_uri string
-
-var protomaps_bucket_uri string
-var protomaps_cache_size int
-var protomaps_tiles_database string
 
 const EnableAllFlag string = "enable-all"
 
@@ -208,7 +191,6 @@ const WebFingerHostname string = "webfinger-hostname"
 // An optional hostname to use for WebFinger URLs.
 var webfinger_hostname string
 
-
 // DefaultFlagSet returns a `flag.FlagSet` instance with flags and defaults values assigned for use with `app`.
 func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
@@ -222,28 +204,6 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&cache_uri, CacheURIFlag, "gocache://", "A valid go-cache Cache URI string.")
 
 	fs.StringVar(&exporter_uri, ExporterURIFlag, "whosonfirst://", "A valid whosonfirst/go-whosonfirst-export/v2 URI.")
-
-	// START OF replace/reconcile with aaronland/go-http-maps
-
-	fs.StringVar(&map_provider, "map-provider", "nextzen", "Valid options are: nextzen, protomaps")
-
-	fs.StringVar(&nextzen_api_key, "nextzen-api-key", "", "A valid Nextzen API key (https://developers.nextzen.org/).")
-	fs.StringVar(&nextzen_style_url, "nextzen-style-url", "/tangram/refill-style.zip", "A valid Tangram scene file URL.")
-	fs.StringVar(&nextzen_tile_url, "nextzen-tile-url", tangramjs.NEXTZEN_MVT_ENDPOINT, "A valid Nextzen MVT tile URL.")
-
-	fs.StringVar(&tilepack_db, "nextzen-tilepack-database", "", "The path to a valid MBTiles database (tilepack) containing Nextzen MVT tiles.")
-	fs.StringVar(&tilepack_uri, "nextzen-tilepack-uri", "/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt", "The relative URI to serve Nextzen MVT tiles from a MBTiles database (tilepack).")
-
-	fs.BoolVar(&proxy_tiles, "proxy-tiles", false, "Proxy (and cache) Nextzen tiles.")
-	fs.StringVar(&proxy_tiles_url, "proxy-tiles-url", "/tiles/", "The URL (a relative path) for proxied tiles.")
-	fs.StringVar(&proxy_tiles_cache, "proxy-tiles-cache", "gocache://", "A valid `whosonfirst/go-cache` URI.")
-	fs.IntVar(&proxy_tiles_timeout, "proxy-tiles-timeout", 30, "The maximum number of seconds to allow for fetching a tile from the proxy.")
-
-	fs.StringVar(&protomaps_bucket_uri, "protomaps-bucket-uri", "", "A valid gocloud.dev/blob.Bucket URI containing Protomaps tile databases.")
-	fs.IntVar(&protomaps_cache_size, "protomaps-cache-size", 64, "The size in MB of the Protomaps tile cache.")
-	fs.StringVar(&protomaps_tiles_database, "protomaps-tiles-database", "", "The name of the Protomaps tiles database to use.")
-
-	// END OF replace/reconcile with aaronland/go-http-maps
 
 	fs.BoolVar(&enable_all, EnableAllFlag, false, "Enable all the available output handlers EXCEPT the search handlers which need to be explicitly enable using the -enable-search* flags.")
 	fs.BoolVar(&enable_graphics, EnableGraphicsFlag, false, "Enable the 'png' and 'svg' output handlers.")
@@ -311,13 +271,19 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&github_accesstoken_uri, "github-accesstoken-uri", "", "A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.")
 
 	fs.StringVar(&webfinger_hostname, WebFingerHostname, "", "An optional hostname to use for WebFinger URLs.")
-	
+
 	/*
 		fs.BoolVar(&enable_api, "enable-api", false, "Enable the API endpoints")
 		fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
 		fs.StringVar(&path_api_cessate, "path-api-cessate", "/api/cessate/", "...")
 		fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
 	*/
+
+	err := provider.AppendProviderFlags(fs)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to append map provider flags, %v", err)
+	}
 
 	return fs, nil
 }
