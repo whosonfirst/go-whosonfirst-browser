@@ -92,6 +92,7 @@ var _NodeCloneNeedsRegeneration = Node(struct {
 	KeepAlive               bool
 	MachineAuthorized       bool
 	Capabilities            []string
+	UnsignedPeerAPIOnly     bool
 	ComputedName            string
 	computedHostIfDifferent string
 	ComputedNameWithHost    string
@@ -133,6 +134,7 @@ var _HostinfoCloneNeedsRegeneration = Hostinfo(struct {
 	ShieldsUp       bool
 	ShareeNode      bool
 	NoLogsNoSupport bool
+	WireIngress     bool
 	GoArch          string
 	GoVersion       string
 	RoutableIPs     []netip.Prefix
@@ -239,7 +241,6 @@ var _DNSConfigCloneNeedsRegeneration = DNSConfig(struct {
 	Domains             []string
 	Proxied             bool
 	Nameservers         []netip.Addr
-	PerDomain           bool
 	CertDomains         []string
 	ExtraRecords        []DNSRecord
 	ExitNodeFilteredSet []string
@@ -254,6 +255,7 @@ func (src *RegisterResponse) Clone() *RegisterResponse {
 	dst := new(RegisterResponse)
 	*dst = *src
 	dst.User = *src.User.Clone()
+	dst.NodeKeySignature = append(src.NodeKeySignature[:0:0], src.NodeKeySignature...)
 	return dst
 }
 
@@ -264,6 +266,7 @@ var _RegisterResponseCloneNeedsRegeneration = RegisterResponse(struct {
 	NodeKeyExpired    bool
 	MachineAuthorized bool
 	AuthURL           string
+	NodeKeySignature  tkatype.MarshaledSignature
 	Error             string
 }{})
 

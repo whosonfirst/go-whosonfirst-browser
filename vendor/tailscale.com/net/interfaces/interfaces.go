@@ -232,10 +232,6 @@ func ForeachInterface(fn func(Interface, []netip.Prefix)) error {
 // all its addresses. The IPPrefix's IP is the IP address assigned to
 // the interface, and Bits are the subnet mask.
 func (ifaces List) ForeachInterface(fn func(Interface, []netip.Prefix)) error {
-	ifaces, err := GetList()
-	if err != nil {
-		return err
-	}
 	for _, iface := range ifaces {
 		addrs, err := iface.Addrs()
 		if err != nil {
@@ -402,6 +398,22 @@ func (s *State) EqualFiltered(s2 *State, useInterface InterfaceFilter, useIP IPF
 		}
 	}
 	return true
+}
+
+// HasIP reports whether any interface has the provided IP address.
+func (s *State) HasIP(ip netip.Addr) bool {
+	if s == nil {
+		return false
+	}
+	want := netip.PrefixFrom(ip, ip.BitLen())
+	for _, pv := range s.InterfaceIPs {
+		for _, p := range pv {
+			if p == want {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func interfacesEqual(a, b Interface) bool {

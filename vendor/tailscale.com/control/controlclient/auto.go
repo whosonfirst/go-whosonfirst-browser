@@ -88,11 +88,17 @@ func New(opts Options) (*Auto, error) {
 }
 
 // NewNoStart creates a new Auto, but without calling Start on it.
-func NewNoStart(opts Options) (*Auto, error) {
+func NewNoStart(opts Options) (_ *Auto, err error) {
 	direct, err := NewDirect(opts)
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		if err != nil {
+			direct.Close()
+		}
+	}()
+
 	if opts.Status == nil {
 		return nil, errors.New("missing required Options.Status")
 	}
@@ -555,6 +561,11 @@ func (c *Auto) SetNetInfo(ni *tailcfg.NetInfo) {
 	c.sendNewMapRequest()
 }
 
+// SetTKAHead updates the TKA head hash that map-request infrastructure sends.
+func (c *Auto) SetTKAHead(headHash string) {
+	c.direct.SetTKAHead(headHash)
+}
+
 func (c *Auto) sendStatus(who string, err error, url string, nm *netmap.NetworkMap) {
 	c.mu.Lock()
 	if c.closed {
@@ -569,7 +580,7 @@ func (c *Auto) sendStatus(who string, err error, url string, nm *netmap.NetworkM
 
 	c.logf("[v1] sendStatus: %s: %v", who, state)
 
-	var p *persist.Persist
+	var p *persist.PersistView
 	var loginFin, logoutFin *empty.Message
 	if state == StateAuthenticated {
 		loginFin = new(empty.Message)
@@ -697,7 +708,7 @@ func (c *Auto) Shutdown() {
 // used exclusively in tests.
 func (c *Auto) TestOnlyNodePublicKey() key.NodePublic {
 	priv := c.direct.GetPersist()
-	return priv.PrivateNodeKey.Public()
+	return priv.PrivateNodeKey().Public()
 }
 
 func (c *Auto) TestOnlySetAuthKey(authkey string) {
@@ -718,4 +729,14 @@ func (c *Auto) SetDNS(ctx context.Context, req *tailcfg.SetDNSRequest) error {
 
 func (c *Auto) DoNoiseRequest(req *http.Request) (*http.Response, error) {
 	return c.direct.DoNoiseRequest(req)
+}
+
+// GetSingleUseNoiseRoundTripper returns a RoundTripper that can be only be used
+// once (and must be used once) to make a single HTTP request over the noise
+// channel to the coordination server.
+//
+// In addition to the RoundTripper, it returns the HTTP/2 channel's early noise
+// payload, if any.
+func (c *Auto) GetSingleUseNoiseRoundTripper(ctx context.Context) (http.RoundTripper, *tailcfg.EarlyNoise, error) {
+	return c.direct.GetSingleUseNoiseRoundTripper(ctx)
 }

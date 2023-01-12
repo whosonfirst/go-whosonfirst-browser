@@ -171,6 +171,7 @@ func (v NodeView) Online() *bool {
 func (v NodeView) KeepAlive() bool                   { return v.ж.KeepAlive }
 func (v NodeView) MachineAuthorized() bool           { return v.ж.MachineAuthorized }
 func (v NodeView) Capabilities() views.Slice[string] { return views.SliceOf(v.ж.Capabilities) }
+func (v NodeView) UnsignedPeerAPIOnly() bool         { return v.ж.UnsignedPeerAPIOnly }
 func (v NodeView) ComputedName() string              { return v.ж.ComputedName }
 func (v NodeView) ComputedNameWithHost() string      { return v.ж.ComputedNameWithHost }
 func (v NodeView) DataPlaneAuditLogID() string       { return v.ж.DataPlaneAuditLogID }
@@ -201,6 +202,7 @@ var _NodeViewNeedsRegeneration = Node(struct {
 	KeepAlive               bool
 	MachineAuthorized       bool
 	Capabilities            []string
+	UnsignedPeerAPIOnly     bool
 	ComputedName            string
 	computedHostIfDifferent string
 	ComputedNameWithHost    string
@@ -269,6 +271,7 @@ func (v HostinfoView) Hostname() string       { return v.ж.Hostname }
 func (v HostinfoView) ShieldsUp() bool        { return v.ж.ShieldsUp }
 func (v HostinfoView) ShareeNode() bool       { return v.ж.ShareeNode }
 func (v HostinfoView) NoLogsNoSupport() bool  { return v.ж.NoLogsNoSupport }
+func (v HostinfoView) WireIngress() bool      { return v.ж.WireIngress }
 func (v HostinfoView) GoArch() string         { return v.ж.GoArch }
 func (v HostinfoView) GoVersion() string      { return v.ж.GoVersion }
 func (v HostinfoView) RoutableIPs() views.IPPrefixSlice {
@@ -302,6 +305,7 @@ var _HostinfoViewNeedsRegeneration = Hostinfo(struct {
 	ShieldsUp       bool
 	ShareeNode      bool
 	NoLogsNoSupport bool
+	WireIngress     bool
 	GoArch          string
 	GoVersion       string
 	RoutableIPs     []netip.Prefix
@@ -515,7 +519,6 @@ func (v DNSConfigView) FallbackResolvers() views.SliceView[*dnstype.Resolver, dn
 func (v DNSConfigView) Domains() views.Slice[string]         { return views.SliceOf(v.ж.Domains) }
 func (v DNSConfigView) Proxied() bool                        { return v.ж.Proxied }
 func (v DNSConfigView) Nameservers() views.Slice[netip.Addr] { return views.SliceOf(v.ж.Nameservers) }
-func (v DNSConfigView) PerDomain() bool                      { return v.ж.PerDomain }
 func (v DNSConfigView) CertDomains() views.Slice[string]     { return views.SliceOf(v.ж.CertDomains) }
 func (v DNSConfigView) ExtraRecords() views.Slice[DNSRecord] { return views.SliceOf(v.ж.ExtraRecords) }
 func (v DNSConfigView) ExitNodeFilteredSet() views.Slice[string] {
@@ -530,7 +533,6 @@ var _DNSConfigViewNeedsRegeneration = DNSConfig(struct {
 	Domains             []string
 	Proxied             bool
 	Nameservers         []netip.Addr
-	PerDomain           bool
 	CertDomains         []string
 	ExtraRecords        []DNSRecord
 	ExitNodeFilteredSet []string
@@ -581,12 +583,13 @@ func (v *RegisterResponseView) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (v RegisterResponseView) User() UserView          { return v.ж.User.View() }
-func (v RegisterResponseView) Login() Login            { return v.ж.Login }
-func (v RegisterResponseView) NodeKeyExpired() bool    { return v.ж.NodeKeyExpired }
-func (v RegisterResponseView) MachineAuthorized() bool { return v.ж.MachineAuthorized }
-func (v RegisterResponseView) AuthURL() string         { return v.ж.AuthURL }
-func (v RegisterResponseView) Error() string           { return v.ж.Error }
+func (v RegisterResponseView) User() UserView           { return v.ж.User.View() }
+func (v RegisterResponseView) Login() Login             { return v.ж.Login }
+func (v RegisterResponseView) NodeKeyExpired() bool     { return v.ж.NodeKeyExpired }
+func (v RegisterResponseView) MachineAuthorized() bool  { return v.ж.MachineAuthorized }
+func (v RegisterResponseView) AuthURL() string          { return v.ж.AuthURL }
+func (v RegisterResponseView) NodeKeySignature() mem.RO { return mem.B(v.ж.NodeKeySignature) }
+func (v RegisterResponseView) Error() string            { return v.ж.Error }
 
 // A compilation failure here means this code must be regenerated, with the command at the top of this file.
 var _RegisterResponseViewNeedsRegeneration = RegisterResponse(struct {
@@ -595,6 +598,7 @@ var _RegisterResponseViewNeedsRegeneration = RegisterResponse(struct {
 	NodeKeyExpired    bool
 	MachineAuthorized bool
 	AuthURL           string
+	NodeKeySignature  tkatype.MarshaledSignature
 	Error             string
 }{})
 

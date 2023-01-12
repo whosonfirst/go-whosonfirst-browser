@@ -55,6 +55,7 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 ### whosonfirst-browser
 
 ```
+$> ./bin/whosonfirst-browser -h
 > ./bin/whosonfirst-browser -h
   -authenticator-uri string
     	A valid sfomuseum/go-http-auth URI. (default "null://")
@@ -97,25 +98,29 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
   -enable-svg
     	Enable the 'svg' output handler.
   -enable-webfinger
-    	Enable the 'webfinger' output handler.	
+    	Enable the 'webfinger' output handler.
   -exporter-uri string
     	A valid whosonfirst/go-whosonfirst-export/v2 URI. (default "whosonfirst://")
   -github-accesstoken-uri string
     	A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.
+  -leaflet-enable-draw
+    	Enable the Leaflet.Draw plugin.
+  -leaflet-enable-fullscreen
+    	Enable the Leaflet.Fullscreen plugin.
+  -leaflet-enable-hash
+    	Enable the Leaflet.Hash plugin. (default true)
+  -leaflet-tile-url string
+    	A valid Leaflet 'tileLayer' layer URL. Only necessary if -map-provider is "leaflet".
   -map-provider string
-    	Valid options are: nextzen, protomaps (default "nextzen")
+    	The name of the map provider to use. Valid options are: leaflet, protomaps, tangram
   -navplace-max-features int
     	The maximum number of features to allow in a /navplace/{ID} URI string. (default 3)
-  -nextzen-api-key string
-    	A valid Nextzen API key (https://developers.nextzen.org/).
+  -nextzen-apikey string
+    	A valid Nextzen API key. Only necessary if -map-provider is "tangram".
   -nextzen-style-url string
-    	A valid Tangram scene file URL. (default "/tangram/refill-style.zip")
+    	A valid URL for loading a Tangram.js style bundle. Only necessary if -map-provider is "tangram". (default "/tangram/refill-style.zip")
   -nextzen-tile-url string
-    	A valid Nextzen MVT tile URL. (default "https://tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
-  -nextzen-tilepack-database string
-    	The path to a valid MBTiles database (tilepack) containing Nextzen MVT tiles.
-  -nextzen-tilepack-uri string
-    	The relative URI to serve Nextzen MVT tiles from a MBTiles database (tilepack). (default "/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
+    	A valid Nextzen tile URL template for loading map tiles. Only necessary if -map-provider is "tangram". (default "https://tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
   -path-geojson string
     	The path that GeoJSON requests should be served from. (default "/geojson/")
   -path-geojson-alt value
@@ -155,21 +160,21 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
   -path-webfinger string
     	The path that 'webfinger' requests should be served from. (default "/.well-known/webfinger/")
   -path-webfinger-alt value
-    	Zero or more alternate paths that 'webfinger' requests should be served from.	
+    	Zero or more alternate paths that 'webfinger' requests should be served from.
   -protomaps-bucket-uri string
-    	A valid gocloud.dev/blob.Bucket URI containing Protomaps tile databases.
-  -protomaps-cache-size int
-    	The size in MB of the Protomaps tile cache. (default 64)
-  -protomaps-tiles-database string
-    	The name of the Protomaps tiles database to use.
-  -proxy-tiles
-    	Proxy (and cache) Nextzen tiles.
-  -proxy-tiles-cache whosonfirst/go-cache
-    	A valid whosonfirst/go-cache URI. (default "gocache://")
-  -proxy-tiles-timeout int
-    	The maximum number of seconds to allow for fetching a tile from the proxy. (default 30)
-  -proxy-tiles-url string
-    	The URL (a relative path) for proxied tiles. (default "/tiles/")
+    	The gocloud.dev/blob.Bucket URI where Protomaps tiles are stored. Only necessary if -map-provider is "protomaps" and -protomaps-serve-tiles is true.
+  -protomaps-caches-size int
+    	The size of the internal Protomaps cache if serving tiles locally. Only necessary if -map-provider is "protomaps" and -protomaps-serve-tiles is true. (default 64)
+  -protomaps-database string
+    	The name of the Protomaps database to serve tiles from. Only necessary if -map-provider is "protomaps" and -protomaps-serve-tiles is true.
+  -protomaps-label-rules-uri gocloud.dev/runtimevar
+    	An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps label rules.
+  -protomaps-paint-rules-uri gocloud.dev/runtimevar
+    	An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps paint rules.
+  -protomaps-serve-tiles
+    	A boolean flag signaling whether to serve Protomaps tiles locally. Only necessary if -map-provider is "protomaps".
+  -protomaps-tile-url string
+    	A valid Protomaps .pmtiles URL for loading map tiles. Only necessary if -map-provider is "protomaps". (default "/tiles/")
   -reader-uri value
     	One or more valid go-reader Reader URI strings.
   -search-database-uri string
@@ -180,6 +185,10 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
     	A valid aaronland/go-http-server URI. (default "http://localhost:8080")
   -static-prefix string
     	Prepend this prefix to URLs for static assets.
+  -tilezen-enable-tilepack
+    	Enable to use of Tilezen MBTiles tilepack for tile-serving. Only necessary if -map-provider is "tangram".
+  -tilezen-tilepack-path string
+    	The path to the Tilezen MBTiles tilepack to use for serving tiles. Only necessary if -map-provider is "tangram" and -tilezen-enable-tilezen is true.
   -webfinger-hostname string
     	An optional hostname to use for WebFinger URLs.	
 ```
@@ -188,7 +197,7 @@ go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 
 ```
 $> bin/whosonfirst-browser \
-	-enable-all -nextzen-api-key {NEXTZEN_APIKEY} \
+	-enable-all \
 	-reader-uri {READER_URI}
 	
 2019/12/14 18:22:16 Listening on http://localhost:8080
@@ -200,11 +209,45 @@ Then if you visited `http://localhost:8080/id/101736545` in your web browser you
 
 By default Who's On First (WOF) properties are rendered as nested (and collapsed) trees but there is are handy `show raw` and `show pretty` toggles for viewing the raw WOF GeoJSON data.
 
-##### Protomaps
+##### Map Providers
+
+If you have started the `whosonfirst-browser` tool with either the `-enable-html` or `-enable-all` flags you will need to configure a map provider. Under the hood the code uses the [aaronland/go-http-maps](https://github.com/aaronland/go-http-maps) package which does not specify a default map provider. This is backwards incompatible change from `whosonfirst-browser/v5` and lower.
+
+###### Leaflet
+
+![](docs/images/wof-browser-leaflet.png)
+
+The `leaflet` map provider is for maps that use static TMS (or "slippy") -style raster tiles. For example:
+
+```
+$> bin/whosonfirst-browser/main.go \
+	-enable-all \
+	-reader-uri repo:///usr/local/data/sfomuseum-data-architecture \
+	-reader-uri repo:///usr/local/data/sfomuseum-data-whosonfirst \
+	-map-provider leaflet \
+	-leaflet-tile-url 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+
+2022/11/11 22:29:05 Listening on http://localhost:8080
+```
+
+###### Leaflet specific flags
+
+```
+  -leaflet-enable-draw
+    	Enable the Leaflet.Draw plugin.
+  -leaflet-enable-fullscreen
+    	Enable the Leaflet.Fullscreen plugin.
+  -leaflet-enable-hash
+    	Enable the Leaflet.Hash plugin. (default true)
+  -leaflet-tile-url string
+    	A valid Leaflet 'tileLayer' layer URL. Only necessary if -map-provider is "leaflet".
+```
+
+###### Protomaps
 
 ![](docs/images/wof-browser-protomaps.png)
 
-Other examples include reading data from two different sources and using [Protomaps](https://protomaps.com) as a map tile provider:
+The `protomaps` map provider is for maps that use a Protomaps tiles database and styles. For example:
 
 ```
 $> bin/whosonfirst-browser/main.go \
@@ -213,12 +256,71 @@ $> bin/whosonfirst-browser/main.go \
 	-reader-uri repo:///usr/local/data/sfomuseum-data-whosonfirst \
 	-map-provider protomaps \
 	-protomaps-bucket-uri file:///usr/local/data/ \
-	-protomaps-tiles-database sfo
+	-protomaps-database sfo
 
 2022/11/11 22:29:05 Listening on http://localhost:8080
 ```
 
 The `-protomaps-bucket-uri` is expected to be a valid [gocloud.dev/blob](https://gocloud.dev/howto/blob/) bucket URI. Only the [gocloud `fileblob` provider](https://gocloud.dev/howto/blob/#local) for accessing files on the local filesystem is enabled by default. If you need to enable other providers you will need to clone the [cmd/whosonfirst-browser/main.go](cmd/whosonfirst-browser/main.go) tool and add the relevant `import` statements. See the [Data sources and Caches](#data-sources-and-caches) section for examples.
+
+###### Protomaps specific flags
+
+```
+  -protomaps-bucket-uri string
+    	The gocloud.dev/blob.Bucket URI where Protomaps tiles are stored. Only necessary if -map-provider is "protomaps" and -protomaps-serve-tiles is true.
+  -protomaps-caches-size int
+    	The size of the internal Protomaps cache if serving tiles locally. Only necessary if -map-provider is "protomaps" and -protomaps-serve-tiles is true. (default 64)
+  -protomaps-database string
+    	The name of the Protomaps database to serve tiles from. Only necessary if -map-provider is "protomaps" and -protomaps-serve-tiles is true.
+  -protomaps-label-rules-uri gocloud.dev/runtimevar
+    	An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps label rules.
+  -protomaps-paint-rules-uri gocloud.dev/runtimevar
+    	An optional gocloud.dev/runtimevar URI referencing a custom Javascript variable used to define Protomaps paint rules.
+  -protomaps-serve-tiles
+    	A boolean flag signaling whether to serve Protomaps tiles locally. Only necessary if -map-provider is "protomaps".
+  -protomaps-tile-url string
+    	A valid Protomaps .pmtiles URL for loading map tiles. Only necessary if -map-provider is "protomaps". (default "/tiles/")
+```
+
+##### TangramJS and Nextzen
+
+![](docs/images/wof-browser-nextzen.png)
+
+The `tangram` map provider is for maps that use a Nextzen vector tiles and styles rendered by the TangramJS library. For example:
+
+```
+$> bin/whosonfirst-browser/main.go \
+	-enable-all \
+	-reader-uri repo:///usr/local/data/sfomuseum-data-architecture \
+	-reader-uri repo:///usr/local/data/sfomuseum-data-whosonfirst \
+	-map-provider tangram \
+	-nextzen-apikey {VALID_NEXTZEN_DEVELOPER_KEY}
+
+2022/11/11 22:29:05 Listening on http://localhost:8080
+```
+
+You can register for a Nextzen API key at https://developers.nextzen.org/
+
+###### Nextzen specific flags
+
+```
+  -nextzen-apikey string
+    	A valid Nextzen API key. Only necessary if -map-provider is "tangram".
+  -nextzen-style-url string
+    	A valid URL for loading a Tangram.js style bundle. Only necessary if -map-provider is "tangram". (default "/tangram/refill-style.zip")
+  -nextzen-tile-url string
+    	A valid Nextzen tile URL template for loading map tiles. Only necessary if -map-provider is "tangram". (default "https://tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt")
+  -tilezen-enable-tilepack
+    	Enable to use of Tilezen MBTiles tilepack for tile-serving. Only necessary if -map-provider is "tangram".
+  -tilezen-tilepack-path string
+    	The path to the Tilezen MBTiles tilepack to use for serving tiles. Only necessary if -map-provider is "tangram" and -tilezen-enable-tilezen is true.
+```	
+
+###### Fallback
+
+If no map provider is defined, or if not Nextzen API key is defined, then the browser tool will display the SVG rendering for a place's geometry. For example:
+
+![](docs/images/wof-browser-montreal-map-svg.png)
 
 ##### Tailscale
 
@@ -233,60 +335,13 @@ $> bin/whosonfirst-browser/main.go \
 	-reader-uri repo:///usr/local/data/sfomuseum-data-whosonfirst \
 	-map-provider protomaps \
 	-protomaps-bucket-uri file:///usr/local/data/ \
-	-protomaps-tiles-database sfo
+	-protomaps-database sfo
 	-server-uri 'tsnet://whosonfirst:80?auth-key={TAILSCALE_AUTH_KEY}'
 
 2022/11/11 22:25:47 Listening on http://whosonfirst:80
 ```
 
 Please consult the documentation for [aaronland/go-http-tsnet](https://github.com/aaronland/go-http-server-tsnet) for details on running `whosonfirst-browser` as a virtual private service.
-
-## Map providers
-
-`whosonfirst-provider` supports two map tile providers.
-
-### Nextzen
-
-By default, `whosonfirst-browser` uses [Nextzen](https://nextzen.org/) vector data tiles and the [Tangram.js](https://github.com/tangrams/tangram) rendering library for displaying maps. The Tangram code and styling assets are bundled with this tool and served directly but, by default, tile data is retrieved from the Nextzen servers.
-
-It is possible to cache those tiles locally using the `-proxy-tiles` flag at start up. The default cache for proxying tiles is an ephemiral in-memory cache but you can also specify an alternative [go-cache](https://github.com/whosonfirst/go-cache) `cache.Cache` source using the `-proxy-tiles-cache` flag. Caches are discussed in detail below.
-
-You will need a [valid Nextzen API key](https://developers.nextzen.org/) in order for map tiles to work. 
-
-#### Parameters (command line flags)
-
-| Name | Value | Required | Notes |
-| --- | --- | --- | --- |
-| nextzen-api-key | string | yes | A valid Nextzen developer API key. |
-| nextzen-style-url | string no | A valid Tangram scene file URL. Default is `/tangram/refill-style.zip` |
-| nextzen-tile-url string |  no | A valid Nextzen MVT tile URL. Default is `https://tile.nextzen.org/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt` |
-| nextzen-tilepack-uri | string | no | The relative URI to serve Nextzen MVT tiles from a MBTiles database (tilepack). Default is `/tilezen/vector/v1/512/all/{z}/{x}/{y}.mvt` |
-| proxy | bool | no | Proxy (and cache) Nextzen tiles. Default is false. |
-| proxy-tiles-cache string | string | no | A valid `whosonfirst/go-cache` URI. Default is `gocache://` |
-| proxy-tiles-timeout | int | no | The maximum number of seconds to allow for fetching a tile from the proxy. Default is 30. |
-| proxy-tiles-url | string | no | The URL (a relative path) for proxied tiles. Default is `/tiles` |
-
-### Protomaps
-
-It is possible to configure `whosonfirst-browser` to use [Protomaps](https://protomaps.com) to serve and render tiles for display maps. To do so pass the `-map-provider protomaps` flag at startup along with the other required Protomap-related flags.
-
-#### Parameters (command line flags)
-
-| Name | Value | Required | Notes |
-| --- | --- | --- | --- |
-| protomaps-bucket-uri | string | yes | A valid `gocloud.dev/blob.Bucket` URI. |
-| protomaps-tiles-database | string | yes | The name of the PMTiles database to serve tiles from. This name should not have the `.pmtiles` extension but it will be silently removed if it does. |
-| path-protomaps-tiles | string | no | The relative root URI from which PMTiles will be served. Default is `/tiles/` |
-
-As of this writing I haven't figured out how to support custom Protomaps styles yet. You can create custom Protomaps tiles databases, for small geographic areas, using the [Create Small Map](https://protomaps.com/downloads/small_map) on the [protomaps.com](https://protomaps.com/) website.
-
-![](wof-browser-protomaps-create)
-
-### Fallback
-
-If no map provider is defined, or if not Nextzen API key is defined, then the browser tool will display the SVG rendering for a place's geometry. For example:
-
-![](docs/images/wof-browser-montreal-map-svg.png)
 
 ## Output formats
 
@@ -439,7 +494,7 @@ package main
 import (
 	"context"
 	_ "github.com/whosonfirst/go-reader-whosonfirst-data"
-	"github.com/whosonfirst/go-whosonfirst-browser/v5"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6"
 )
 
 func main() {
@@ -455,7 +510,8 @@ If you wanted, instead, to read data from the local filesystem you would start t
 ```
 $> bin/whosonfirst-browser -enable-all \
 	-reader-source 'fs:///usr/local/data/whosonfirst-data-admin-us/data' \
-	-nextzen-api-key {NEXTZEN_APIKEY}	
+	-map-provider tangram \		
+	-nextzen-apikey {NEXTZEN_APIKEY}	
 ```
 
 Or if you wanted to cache WOF records to the local filesystem you would start the browser like this:
@@ -463,7 +519,8 @@ Or if you wanted to cache WOF records to the local filesystem you would start th
 ```
 $> bin/whosonfirst-browser -enable-all \
 	-cache-source 'fs:///usr/local/cache/whosonfirst' \
-	-nextzen-api-key {NEXTZEN_APIKEY}	
+	-map-provider tangram \		
+	-nextzen-apikey {NEXTZEN_APIKEY}	
 ```
 
 The browser tool will work with any WOF-like data including records outside of the "[core](https://github.com/whosonfirst-data)" dataset. For example this is how you might use the browser tool with the [SFO Museum architecture dataset](https://millsfield.sfomuseum.org/blog/2018/08/28/whosonfirst/):
@@ -471,7 +528,8 @@ The browser tool will work with any WOF-like data including records outside of t
 ```
 $> bin/whosonfirst-browser -enable-all \
 	-reader-source 'fs:///usr/local/data/sfomuseum-data-architecture/data' \
-	-nextzen-api-key {NEXTZEN_APIKEY}	
+	-map-provider tangram \		
+	-nextzen-apikey {NEXTZEN_APIKEY}	
 ```
 
 And then if you went to `http://localhost:8080/id/1159554801` in your browser you would see:
@@ -489,7 +547,7 @@ package main
 import (
 	"context"
 	_ "github.com/whosonfirst/go-reader-blob"
-	"github.com/whosonfirst/go-whosonfirst-browser/v5/application/browser"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/application/browser"
 )
 
 func main() {
@@ -504,7 +562,8 @@ And then you would start the browser tool like this:
 ```
 $> bin/blob-browser -enable-all \
 	-reader-source 's3://{BUCKET}?region={REGION}' \
-	-nextzen-api-key {NEXTZEN_APIKEY}
+	-map-provider tangram \		
+	-nextzen-apikey {NEXTZEN_APIKEY}
 
 2019/12/18 08:44:15 Listening on http://localhost:8080
 ```
@@ -544,7 +603,8 @@ Minimal viable Lambda environment variables:
 | Name | Value | Notes |
 | --- | --- | --- |
 | BROWSER_ENABLE_ALL | true | You don't have to enable all outputs, it's just the easiest example |
-| BROWSER_NEXTZEN_API_KEY| *** | You can signup for a Nextzen API key at [developers.nextzen.org](https://developers.nextzen.org/) |
+| BROWSER_MAP_PROVIDER | tangram | In this example we're using Tangram (and Nextzen) as a map provider. See documentation above for alternative providers. |
+| BROWSER_NEXTZEN_APIKEY | *** | You can signup for a Nextzen API key at [developers.nextzen.org](https://developers.nextzen.org/) |
 | BROWSER_READER_SOURCE | https://data.whosonfirst.org | |
 | BROWSER_SERVER_URI | lambda://?binary_type=image/png&binary_type=application/zip | The query parameters are necessary if you want output images (see below). |
 
@@ -585,7 +645,8 @@ $> docker run -it -p 8080:8080 whosonfirst-browser \
 	/usr/local/bin/whosonfirst-browser \
 	-server-uri 'http://0.0.0.0:8080' \
 	-enable-all \
-	-nextzen-api-key {NEXTZEN_APIKEY}
+	-map-provider tangram \	
+	-nextzen-apikey {NEXTZEN_APIKEY}
 	
 2019/12/17 16:27:04 Listening on http://0.0.0.0:8080
 ```
@@ -598,12 +659,8 @@ $> docker run -it -p 8080:8080 whosonfirst-browser \
 * https://github.com/whosonfirst/go-cache
 * https://github.com/whosonfirst/go-whosonfirst-search
 * https://github.com/aaronland/go-http-bootstrap
-* https://github.com/aaronland/go-http-tangramjs
+* https://github.com/aaronland/go-http-maps
 * https://github.com/aaronland/go-http-server
 * https://github.com/aaronland/go-http-server-tsnet
-* https://github.com/sfomuseum/go-http-tilezen
-* https://github.com/sfomuseum/go-http-protomaps
-* https://github.com/protomaps/go-pmtiles
-* https://github.com/sfomuseum/go-sfomuseum-pmtiles
 * https://github.com/whosonfirst/go-whosonfirst-svg
 * https://github.com/whosonfirst/go-whosonfirst-image

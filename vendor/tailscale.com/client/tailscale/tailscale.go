@@ -3,9 +3,8 @@
 // license that can be found in the LICENSE file.
 
 //go:build go1.19
-// +build go1.19
 
-// Package tailscale contains Go clients for the Tailscale Local API and
+// Package tailscale contains Go clients for the Tailscale LocalAPI and
 // Tailscale control plane API.
 //
 // Warning: this package is in development and makes no API compatibility

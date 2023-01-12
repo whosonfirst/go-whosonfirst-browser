@@ -21,9 +21,10 @@ type SearchAPIHandlerOptions struct {
 }
 
 type SearchHandlerOptions struct {
-	Templates *template.Template
-	Endpoints *Endpoints
-	Database  fulltext.FullTextDatabase
+	Templates   *template.Template
+	Endpoints   *Endpoints
+	Database    fulltext.FullTextDatabase
+	MapProvider string
 }
 
 type SearchVars struct {

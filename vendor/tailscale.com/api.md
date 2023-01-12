@@ -335,11 +335,12 @@ The response is 2xx on success. The response body is currently an empty JSON
 object.
 
 ## Tailnet
-A tailnet is the name of your Tailscale network.
-You can find it in the top left corner of the [Admin Panel](https://login.tailscale.com/admin) beside the Tailscale logo.
 
+A tailnet is your private network, composed of all the devices on it and their configuration. For more information on tailnets, see [our user-facing documentation](https://tailscale.com/kb/1136/tailnet/).
 
-`alice@example.com` belongs to the `example.com` tailnet and would use the following format for API calls:
+When making API requests, your tailnet is identified by the organization name. You can find it on the [Settings page](https://login.tailscale.com/admin/settings) of the admin console.
+
+For example, if `alice@example.com` belongs to the `example.com` tailnet, they would use the following format for API calls:
 
 ```
 GET /api/v2/tailnet/example.com/...
@@ -355,9 +356,14 @@ GET /api/v2/tailnet/alice@gmail.com/...
 curl https://api.tailscale.com/api/v2/tailnet/alice@gmail.com/...
 ```
 
-Tailnets are a top-level resource. ACL is an example of a resource that is tied to a top-level tailnet.
+Alternatively, you can specify the value "-" to refer to the default tailnet of
+the authenticated user making the API call.  For example:
+```
+GET /api/v2/tailnet/-/...
+curl https://api.tailscale.com/api/v2/tailnet/-/...
+```
 
-For more information on Tailscale networks/tailnets, click [here](https://tailscale.com/kb/1064/invite-team-members).
+Tailnets are a top-level resource. ACL is an example of a resource that is tied to a top-level tailnet.
 
 ### ACL
 
@@ -396,20 +402,20 @@ Etag: "e0b2816b418b3f266309d94426ac7668ab3c1fa87798785bf82f1085cc2f6d9c"
 
 // Example/default ACLs for unrestricted connections.
 {
-    "Tests": [],
+    "tests": [],
     // Declare static groups of users beyond those in the identity service.
-    "Groups": {
+    "groups": {
         "group:example": [
             "user1@example.com",
             "user2@example.com"
         ],
     },
     // Declare convenient hostname aliases to use in place of IP addresses.
-    "Hosts": {
+    "hosts": {
         "example-host-1": "100.100.100.100",
     },
     // Access control lists.
-    "ACLs": [
+    "acls": [
         // Match absolutely everything. Comment out this section if you want
         // to define specific ACL restrictions.
         {
@@ -479,6 +485,8 @@ Returns the updated ACL in JSON or HuJSON according to the `Accept` header on su
 ###### Headers
 `If-Match` - A request header. Set this value to the ETag header provided in an `ACL GET` request to avoid missed updates.
 
+A special value `ts-default` will ensure that ACL will be set only if current ACL is the default one (created automatically for each tailnet).
+
 `Accept` - Sets the return type of the updated ACL. Response is parsed `JSON` if `application/json` is explicitly named, otherwise HuJSON will be returned.
 
 ###### POST Body
@@ -486,11 +494,14 @@ Returns the updated ACL in JSON or HuJSON according to the `Accept` header on su
 The POST body should be a JSON or [HuJSON](https://github.com/tailscale/hujson#hujson---human-json) formatted JSON object.
 An ACL policy may contain the following top-level properties:
 
-* `Groups` - Static groups of users which can be used for ACL rules.
-* `Hosts` - Hostname aliases to use in place of IP addresses or subnets.
-* `ACLs` - Access control lists.
-* `TagOwners` - Defines who is allowed to use which tags.
-* `Tests` - Run on ACL updates to check correct functionality of defined ACLs.
+* `groups` - Static groups of users which can be used for ACL rules.
+* `hosts` - Hostname aliases to use in place of IP addresses or subnets.
+* `acls` - Access control lists.
+* `tagOwners` - Defines who is allowed to use which tags.
+* `tests` - Run on ACL updates to check correct functionality of defined ACLs.
+* `autoApprovers` - Defines which users can advertise routes or exit nodes without further approval.
+* `ssh` - Configures access policy for Tailscale SSH.
+* `nodeAttrs` - Defines which devices can use certain features.
 
 See https://tailscale.com/kb/1018/acls for more information on those properties.
 
@@ -503,22 +514,22 @@ curl 'https://api.tailscale.com/api/v2/tailnet/example.com/acl' \
   --data-binary '// Example/default ACLs for unrestricted connections.
 {
   // Declare tests to check functionality of ACL rules. User must be a valid user with registered machines.
-  "Tests": [
-    // {"User": "user1@example.com", "Allow": ["example-host-1:22"], "Deny": ["example-host-2:100"]},
+  "tests": [
+    // {"src": "user1@example.com", "accept": ["example-host-1:22"], "deny": ["example-host-2:100"]},
   ],
   // Declare static groups of users beyond those in the identity service.
-  "Groups": {
+  "groups": {
     "group:example": [ "user1@example.com", "user2@example.com" ],
   },
   // Declare convenient hostname aliases to use in place of IP addresses.
-  "Hosts": {
+  "hosts": {
     "example-host-1": "100.100.100.100",
   },
   // Access control lists.
-  "ACLs": [
+  "acls": [
     // Match absolutely everything. Comment out this section if you want
     // to define specific ACL restrictions.
-    { "Action": "accept", "Users": ["*"], "Ports": ["*:*"] },
+    { "action": "accept", "users": ["*"], "ports": ["*:*"] },
   ]
 }'
 ```
@@ -528,22 +539,22 @@ Response:
 // Example/default ACLs for unrestricted connections.
 {
   // Declare tests to check functionality of ACL rules. User must be a valid user with registered machines.
-  "Tests": [
-    // {"User": "user1@example.com", "Allow": ["example-host-1:22"], "Deny": ["example-host-2:100"]},
+  "tests": [
+    // {"src": "user1@example.com", "accept": ["example-host-1:22"], "deny": ["example-host-2:100"]},
   ],
   // Declare static groups of users beyond those in the identity service.
-  "Groups": {
+  "groups": {
     "group:example": [ "user1@example.com", "user2@example.com" ],
   },
   // Declare convenient hostname aliases to use in place of IP addresses.
-  "Hosts": {
+  "hosts": {
     "example-host-1": "100.100.100.100",
   },
   // Access control lists.
-  "ACLs": [
+  "acls": [
     // Match absolutely everything. Comment out this section if you want
     // to define specific ACL restrictions.
-    { "Action": "accept", "Users": ["*"], "Ports": ["*:*"] },
+    { "action": "accept", "users": ["*"], "ports": ["*:*"] },
   ]
 }
 ```
@@ -586,22 +597,22 @@ curl 'https://api.tailscale.com/api/v2/tailnet/example.com/acl/preview?previewFo
   --data-binary '// Example/default ACLs for unrestricted connections.
 {
   // Declare tests to check functionality of ACL rules. User must be a valid user with registered machines.
-  "Tests": [
-    // {"User": "user1@example.com", "Allow": ["example-host-1:22"], "Deny": ["example-host-2:100"]},
+  "tests": [
+    // {"src": "user1@example.com", "accept": ["example-host-1:22"], "deny": ["example-host-2:100"]},
   ],
   // Declare static groups of users beyond those in the identity service.
-  "Groups": {
+  "groups": {
     "group:example": [ "user1@example.com", "user2@example.com" ],
   },
   // Declare convenient hostname aliases to use in place of IP addresses.
-  "Hosts": {
+  "hosts": {
     "example-host-1": "100.100.100.100",
   },
   // Access control lists.
-  "ACLs": [
+  "acls": [
     // Match absolutely everything. Comment out this section if you want
     // to define specific ACL restrictions.
-    { "Action": "accept", "Users": ["*"], "Ports": ["*:*"] },
+    { "action": "accept", "users": ["*"], "ports": ["*:*"] },
   ]
 }'
 ```
@@ -637,7 +648,7 @@ curl 'https://api.tailscale.com/api/v2/tailnet/example.com/acl/validate' \
   -u "tskey-yourapikey123:" \
   --data-binary '
   [
-    {"User": "user1@example.com", "Allow": ["example-host-1:22"], "Deny": ["example-host-2:100"]}
+    {"src": "user1@example.com", "accept": ["example-host-1:22"], "deny": ["example-host-2:100"]}
   ]'
 ```
 
@@ -648,10 +659,10 @@ curl 'https://api.tailscale.com/api/v2/tailnet/example.com/acl/validate' \
   -u "tskey-yourapikey123:" \
   --data-binary '
   {
-    "ACLs": [
-     { "Action": "accept", "src": ["100.105.106.107"], "dst": ["1.2.3.4:*"] },
+    "acls": [
+     { "action": "accept", "src": ["100.105.106.107"], "dst": ["1.2.3.4:*"] },
     ],
-    "Tests", [
+    "tests", [
       {"src": "100.105.106.107", "allow": ["1.2.3.4:80"]}
     ],
   }'
@@ -813,6 +824,10 @@ Supply the tailnet in the path.
 
 ###### POST Body
 `capabilities` - A mapping of resources to permissible actions.
+
+`expirySeconds` - (Optional) How long the key is valid for in seconds.
+                  Defaults to 90d.
+
 ```
 {
   "capabilities": {
@@ -826,7 +841,8 @@ Supply the tailnet in the path.
         ]
       }
     }
-  }
+  },
+  "expirySeconds": 1440
 }
 ```
 

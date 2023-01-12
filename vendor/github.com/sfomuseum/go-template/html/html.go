@@ -35,5 +35,6 @@ func TemplatesFuncMap() template.FuncMap {
 	return template.FuncMap{
 		// For example: {{ if (IsAvailable "Account" .) }}
 		"IsAvailable": funcs.IsAvailable,
+		"Add":         funcs.Add,
 	}
 }

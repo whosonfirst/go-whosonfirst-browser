@@ -5,7 +5,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v5/http"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-svg"
 	"log"
 	"net/http"
@@ -102,7 +102,7 @@ func SVGHandler(opts *SVGHandlerOptions) (http.Handler, error) {
 		opts.Writer = rsp
 
 		// to do: support for custom styles:
-		// https://github.com/whosonfirst/go-whosonfirst-browser/v5issues/19
+		// https://github.com/whosonfirst/go-whosonfirst-browser/v6issues/19
 
 		opts.StyleFunction = func(f []byte) (map[string]string, error) {
 
@@ -125,7 +125,7 @@ func SVGHandler(opts *SVGHandlerOptions) (http.Handler, error) {
 				attrs["stroke"] = "#000"
 			case "Point", "MultiPoint":
 				// something something something
-				// https://github.com/whosonfirst/go-whosonfirst-browser/v5issues/18
+				// https://github.com/whosonfirst/go-whosonfirst-browser/v6issues/18
 			default:
 				// pass
 			}

@@ -10,12 +10,15 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/godbus/dbus/v5"
 	"tailscale.com/health"
 	"tailscale.com/net/netaddr"
 	"tailscale.com/types/logger"
+	"tailscale.com/util/clientmetric"
 	"tailscale.com/util/cmpver"
 )
 
@@ -27,10 +30,13 @@ func (kv kv) String() string {
 	return fmt.Sprintf("%s=%s", kv.k, kv.v)
 }
 
+var publishOnce sync.Once
+
 func NewOSConfigurator(logf logger.Logf, interfaceName string) (ret OSConfigurator, err error) {
 	env := newOSConfigEnv{
 		fs:                directFS{},
 		dbusPing:          dbusPing,
+		dbusReadString:    dbusReadString,
 		nmIsUsingResolved: nmIsUsingResolved,
 		nmVersionBetween:  nmVersionBetween,
 		resolvconfStyle:   resolvconfStyle,
@@ -39,6 +45,12 @@ func NewOSConfigurator(logf logger.Logf, interfaceName string) (ret OSConfigurat
 	if err != nil {
 		return nil, err
 	}
+	publishOnce.Do(func() {
+		sanitizedMode := strings.ReplaceAll(mode, "-", "_")
+		m := clientmetric.NewGauge(fmt.Sprintf("dns_manager_linux_mode_%s", sanitizedMode))
+		m.Set(1)
+	})
+	logf("dns: using %q mode", mode)
 	switch mode {
 	case "direct":
 		return newDirectManagerOnFS(logf, env.fs), nil
@@ -60,6 +72,7 @@ func NewOSConfigurator(logf logger.Logf, interfaceName string) (ret OSConfigurat
 type newOSConfigEnv struct {
 	fs                        wholeFileFS
 	dbusPing                  func(string, string) error
+	dbusReadString            func(string, string, string, string) (string, error)
 	nmIsUsingResolved         func() error
 	nmVersionBetween          func(v1, v2 string) (safe bool, err error)
 	resolvconfStyle           func() string
@@ -76,6 +89,25 @@ func dnsMode(logf logger.Logf, env newOSConfigEnv) (ret string, err error) {
 			dbg("ret", ret)
 		}
 		logf("dns: %v", debug)
+	}()
+
+	// In all cases that we detect systemd-resolved, try asking it what it
+	// thinks the current resolv.conf mode is so we can add it to our logs.
+	defer func() {
+		if ret != "systemd-resolved" {
+			return
+		}
+
+		// Try to ask systemd-resolved what it thinks the current
+		// status of resolv.conf is. This is documented at:
+		//    https://www.freedesktop.org/software/systemd/man/org.freedesktop.resolve1.html
+		mode, err := env.dbusReadString("org.freedesktop.resolve1", "/org/freedesktop/resolve1", "org.freedesktop.resolve1.Manager", "ResolvConfMode")
+		if err != nil {
+			logf("dns: ResolvConfMode error: %v", err)
+			dbg("resolv-conf-mode", "error")
+		} else {
+			dbg("resolv-conf-mode", mode)
+		}
 	}()
 
 	// Before we read /etc/resolv.conf (which might be in a broken
@@ -102,6 +134,7 @@ func dnsMode(logf logger.Logf, env newOSConfigEnv) (ret string, err error) {
 	switch resolvOwner(bs) {
 	case "systemd-resolved":
 		dbg("rc", "resolved")
+
 		// Some systems, for reasons known only to them, have a
 		// resolv.conf that has the word "systemd-resolved" in its
 		// header, but doesn't actually point to resolved. We mustn't
@@ -326,4 +359,30 @@ func dbusPing(name, objectPath string) error {
 	obj := conn.Object(name, dbus.ObjectPath(objectPath))
 	call := obj.CallWithContext(ctx, "org.freedesktop.DBus.Peer.Ping", 0)
 	return call.Err
+}
+
+// dbusReadString reads a string property from the provided name and object
+// path. property must be in "interface.member" notation.
+func dbusReadString(name, objectPath, iface, member string) (string, error) {
+	conn, err := dbus.SystemBus()
+	if err != nil {
+		// DBus probably not running.
+		return "", err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	obj := conn.Object(name, dbus.ObjectPath(objectPath))
+
+	var result dbus.Variant
+	err = obj.CallWithContext(ctx, "org.freedesktop.DBus.Properties.Get", 0, iface, member).Store(&result)
+	if err != nil {
+		return "", err
+	}
+
+	if s, ok := result.Value().(string); ok {
+		return s, nil
+	}
+	return result.String(), nil
 }

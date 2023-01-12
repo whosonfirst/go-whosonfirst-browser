@@ -755,6 +755,8 @@ const (
 	DocumentTypeChangeTemplate                 DocumentType = "Automation.ChangeTemplate"
 	DocumentTypeProblemAnalysis                DocumentType = "ProblemAnalysis"
 	DocumentTypeProblemAnalysisTemplate        DocumentType = "ProblemAnalysisTemplate"
+	DocumentTypeCloudFormation                 DocumentType = "CloudFormation"
+	DocumentTypeConformancePackTemplate        DocumentType = "ConformancePackTemplate"
 )
 
 // Values returns all known values for DocumentType. Note that this can be expanded
@@ -774,6 +776,8 @@ func (DocumentType) Values() []DocumentType {
 		"Automation.ChangeTemplate",
 		"ProblemAnalysis",
 		"ProblemAnalysisTemplate",
+		"CloudFormation",
+		"ConformancePackTemplate",
 	}
 }
 
@@ -792,6 +796,24 @@ func (ExecutionMode) Values() []ExecutionMode {
 	return []ExecutionMode{
 		"Auto",
 		"Interactive",
+	}
+}
+
+type ExternalAlarmState string
+
+// Enum values for ExternalAlarmState
+const (
+	ExternalAlarmStateUnknown ExternalAlarmState = "UNKNOWN"
+	ExternalAlarmStateAlarm   ExternalAlarmState = "ALARM"
+)
+
+// Values returns all known values for ExternalAlarmState. Note that this can be
+// expanded in the future, and so it is only as up to date as the client. The
+// ordering of this slice is not guaranteed to be stable across updates.
+func (ExternalAlarmState) Values() []ExternalAlarmState {
+	return []ExternalAlarmState{
+		"UNKNOWN",
+		"ALARM",
 	}
 }
 
@@ -1110,6 +1132,7 @@ const (
 	OperatingSystemWindows               OperatingSystem = "WINDOWS"
 	OperatingSystemAmazonLinux           OperatingSystem = "AMAZON_LINUX"
 	OperatingSystemAmazonLinux2          OperatingSystem = "AMAZON_LINUX_2"
+	OperatingSystemAmazonLinux2022       OperatingSystem = "AMAZON_LINUX_2022"
 	OperatingSystemUbuntu                OperatingSystem = "UBUNTU"
 	OperatingSystemRedhatEnterpriseLinux OperatingSystem = "REDHAT_ENTERPRISE_LINUX"
 	OperatingSystemSuse                  OperatingSystem = "SUSE"
@@ -1129,6 +1152,7 @@ func (OperatingSystem) Values() []OperatingSystem {
 		"WINDOWS",
 		"AMAZON_LINUX",
 		"AMAZON_LINUX_2",
+		"AMAZON_LINUX_2022",
 		"UBUNTU",
 		"REDHAT_ENTERPRISE_LINUX",
 		"SUSE",
@@ -1248,6 +1272,7 @@ const (
 	OpsItemFilterKeyChangeRequestTemplate             OpsItemFilterKey = "ChangeRequestByTemplate"
 	OpsItemFilterKeyChangeRequestTargetsResourceGroup OpsItemFilterKey = "ChangeRequestByTargetsResourceGroup"
 	OpsItemFilterKeyInsightType                       OpsItemFilterKey = "InsightByType"
+	OpsItemFilterKeyAccountId                         OpsItemFilterKey = "AccountId"
 )
 
 // Values returns all known values for OpsItemFilterKey. Note that this can be
@@ -1282,6 +1307,7 @@ func (OpsItemFilterKey) Values() []OpsItemFilterKey {
 		"ChangeRequestByTemplate",
 		"ChangeRequestByTargetsResourceGroup",
 		"InsightByType",
+		"AccountId",
 	}
 }
 
@@ -1770,6 +1796,7 @@ const (
 	ResourceTypeForTaggingOpsItem           ResourceTypeForTagging = "OpsItem"
 	ResourceTypeForTaggingOpsmetadata       ResourceTypeForTagging = "OpsMetadata"
 	ResourceTypeForTaggingAutomation        ResourceTypeForTagging = "Automation"
+	ResourceTypeForTaggingAssociation       ResourceTypeForTagging = "Association"
 )
 
 // Values returns all known values for ResourceTypeForTagging. Note that this can
@@ -1785,6 +1812,7 @@ func (ResourceTypeForTagging) Values() []ResourceTypeForTagging {
 		"OpsItem",
 		"OpsMetadata",
 		"Automation",
+		"Association",
 	}
 }
 

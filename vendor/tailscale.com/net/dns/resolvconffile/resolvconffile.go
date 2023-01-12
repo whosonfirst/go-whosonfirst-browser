@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"tailscale.com/util/dnsname"
+	"tailscale.com/util/strs"
 )
 
 // Path is the canonical location of resolv.conf.
@@ -68,8 +69,7 @@ func Parse(r io.Reader) (*Config, error) {
 		line, _, _ = strings.Cut(line, "#") // remove any comments
 		line = strings.TrimSpace(line)
 
-		if strings.HasPrefix(line, "nameserver") {
-			s := strings.TrimPrefix(line, "nameserver")
+		if s, ok := strs.CutPrefix(line, "nameserver"); ok {
 			nameserver := strings.TrimSpace(s)
 			if len(nameserver) == len(s) {
 				return nil, fmt.Errorf("missing space after \"nameserver\" in %q", line)
@@ -82,19 +82,27 @@ func Parse(r io.Reader) (*Config, error) {
 			continue
 		}
 
-		if strings.HasPrefix(line, "search") {
-			s := strings.TrimPrefix(line, "search")
-			domain := strings.TrimSpace(s)
-			if len(domain) == len(s) {
+		if s, ok := strs.CutPrefix(line, "search"); ok {
+			domains := strings.TrimSpace(s)
+			if len(domains) == len(s) {
 				// No leading space?!
-				return nil, fmt.Errorf("missing space after \"domain\" in %q", line)
+				return nil, fmt.Errorf("missing space after \"search\" in %q", line)
 			}
-			fqdn, err := dnsname.ToFQDN(domain)
-			if err != nil {
-				return nil, fmt.Errorf("parsing search domains %q: %w", line, err)
+			for len(domains) > 0 {
+				domain := domains
+				i := strings.IndexAny(domain, " \t")
+				if i != -1 {
+					domain = domain[:i]
+					domains = strings.TrimSpace(domains[i+1:])
+				} else {
+					domains = ""
+				}
+				fqdn, err := dnsname.ToFQDN(domain)
+				if err != nil {
+					return nil, fmt.Errorf("parsing search domain %q in %q: %w", domain, line, err)
+				}
+				config.SearchDomains = append(config.SearchDomains, fqdn)
 			}
-			config.SearchDomains = append(config.SearchDomains, fqdn)
-			continue
 		}
 	}
 	return config, nil

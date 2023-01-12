@@ -305,7 +305,7 @@ var protomaps = (() => {
         return [x1, y1, x22, y2];
       };
       VectorTileFeature.prototype.toGeoJSON = function(x2, y, z2) {
-        var size = this.extent * Math.pow(2, z2), x0 = this.extent * x2, y0 = this.extent * y, coords = this.loadGeometry(), type = VectorTileFeature.types[this.type], i2, j;
+        var size = this.extent * Math.pow(2, z2), x0 = this.extent * x2, y0 = this.extent * y, coords = this.loadGeometry(), type = VectorTileFeature.types[this.type], i3, j;
         function project3(line) {
           for (var j2 = 0; j2 < line.length; j2++) {
             var p2 = line[j2], y2 = 180 - (p2.y + y0) * 360 / size;
@@ -318,22 +318,22 @@ var protomaps = (() => {
         switch (this.type) {
           case 1:
             var points = [];
-            for (i2 = 0; i2 < coords.length; i2++) {
-              points[i2] = coords[i2][0];
+            for (i3 = 0; i3 < coords.length; i3++) {
+              points[i3] = coords[i3][0];
             }
             coords = points;
             project3(coords);
             break;
           case 2:
-            for (i2 = 0; i2 < coords.length; i2++) {
-              project3(coords[i2]);
+            for (i3 = 0; i3 < coords.length; i3++) {
+              project3(coords[i3]);
             }
             break;
           case 3:
             coords = classifyRings(coords);
-            for (i2 = 0; i2 < coords.length; i2++) {
-              for (j = 0; j < coords[i2].length; j++) {
-                project3(coords[i2][j]);
+            for (i3 = 0; i3 < coords.length; i3++) {
+              for (j = 0; j < coords[i3].length; j++) {
+                project3(coords[i3][j]);
               }
             }
             break;
@@ -361,8 +361,8 @@ var protomaps = (() => {
         if (len <= 1)
           return [rings];
         var polygons = [], polygon, ccw;
-        for (var i2 = 0; i2 < len; i2++) {
-          var area = signedArea(rings[i2]);
+        for (var i3 = 0; i3 < len; i3++) {
+          var area = signedArea(rings[i3]);
           if (area === 0)
             continue;
           if (ccw === void 0)
@@ -370,9 +370,9 @@ var protomaps = (() => {
           if (ccw === area < 0) {
             if (polygon)
               polygons.push(polygon);
-            polygon = [rings[i2]];
+            polygon = [rings[i3]];
           } else {
-            polygon.push(rings[i2]);
+            polygon.push(rings[i3]);
           }
         }
         if (polygon)
@@ -381,8 +381,8 @@ var protomaps = (() => {
       }
       function signedArea(ring) {
         var sum = 0;
-        for (var i2 = 0, len = ring.length, j = len - 1, p1, p2; i2 < len; j = i2++) {
-          p1 = ring[i2];
+        for (var i3 = 0, len = ring.length, j = len - 1, p1, p2; i3 < len; j = i3++) {
+          p1 = ring[i3];
           p2 = ring[j];
           sum += (p2.x - p1.x) * (p1.y + p2.y);
         }
@@ -431,10 +431,10 @@ var protomaps = (() => {
         }
         return value;
       }
-      VectorTileLayer.prototype.feature = function(i2) {
-        if (i2 < 0 || i2 >= this._features.length)
+      VectorTileLayer.prototype.feature = function(i3) {
+        if (i3 < 0 || i3 >= this._features.length)
           throw new Error("feature index out of bounds");
-        this._pbf.pos = this._features[i2];
+        this._pbf.pos = this._features[i3];
         var end = this._pbf.readVarint() + this._pbf.pos;
         return new VectorTileFeature(this._pbf, end, this.extent, this._keys, this._values);
       };
@@ -478,19 +478,19 @@ var protomaps = (() => {
         var eMax = (1 << eLen) - 1;
         var eBias = eMax >> 1;
         var nBits = -7;
-        var i2 = isLE ? nBytes - 1 : 0;
+        var i3 = isLE ? nBytes - 1 : 0;
         var d = isLE ? -1 : 1;
-        var s2 = buffer[offset + i2];
-        i2 += d;
+        var s2 = buffer[offset + i3];
+        i3 += d;
         e2 = s2 & (1 << -nBits) - 1;
         s2 >>= -nBits;
         nBits += eLen;
-        for (; nBits > 0; e2 = e2 * 256 + buffer[offset + i2], i2 += d, nBits -= 8) {
+        for (; nBits > 0; e2 = e2 * 256 + buffer[offset + i3], i3 += d, nBits -= 8) {
         }
         m = e2 & (1 << -nBits) - 1;
         e2 >>= -nBits;
         nBits += mLen;
-        for (; nBits > 0; m = m * 256 + buffer[offset + i2], i2 += d, nBits -= 8) {
+        for (; nBits > 0; m = m * 256 + buffer[offset + i3], i3 += d, nBits -= 8) {
         }
         if (e2 === 0) {
           e2 = 1 - eBias;
@@ -508,7 +508,7 @@ var protomaps = (() => {
         var eMax = (1 << eLen) - 1;
         var eBias = eMax >> 1;
         var rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0;
-        var i2 = isLE ? 0 : nBytes - 1;
+        var i3 = isLE ? 0 : nBytes - 1;
         var d = isLE ? 1 : -1;
         var s2 = value < 0 || value === 0 && 1 / value < 0 ? 1 : 0;
         value = Math.abs(value);
@@ -541,13 +541,13 @@ var protomaps = (() => {
             e2 = 0;
           }
         }
-        for (; mLen >= 8; buffer[offset + i2] = m & 255, i2 += d, m /= 256, mLen -= 8) {
+        for (; mLen >= 8; buffer[offset + i3] = m & 255, i3 += d, m /= 256, mLen -= 8) {
         }
         e2 = e2 << mLen | m;
         eLen += mLen;
-        for (; eLen > 0; buffer[offset + i2] = e2 & 255, i2 += d, e2 /= 256, eLen -= 8) {
+        for (; eLen > 0; buffer[offset + i3] = e2 & 255, i3 += d, e2 /= 256, eLen -= 8) {
         }
-        buffer[offset + i2 - d] |= s2 * 128;
+        buffer[offset + i3 - d] |= s2 * 128;
       };
     }
   });
@@ -853,8 +853,8 @@ var protomaps = (() => {
           var len = buffer.length;
           this.writeVarint(len);
           this.realloc(len);
-          for (var i2 = 0; i2 < len; i2++)
-            this.buf[this.pos++] = buffer[i2];
+          for (var i3 = 0; i3 < len; i3++)
+            this.buf[this.pos++] = buffer[i3];
         },
         writeRawMessage: function(fn, obj) {
           this.pos++;
@@ -1043,44 +1043,44 @@ var protomaps = (() => {
       function makeRoomForExtraLength(startPos, len, pbf) {
         var extraLen = len <= 16383 ? 1 : len <= 2097151 ? 2 : len <= 268435455 ? 3 : Math.floor(Math.log(len) / (Math.LN2 * 7));
         pbf.realloc(extraLen);
-        for (var i2 = pbf.pos - 1; i2 >= startPos; i2--)
-          pbf.buf[i2 + extraLen] = pbf.buf[i2];
+        for (var i3 = pbf.pos - 1; i3 >= startPos; i3--)
+          pbf.buf[i3 + extraLen] = pbf.buf[i3];
       }
       function writePackedVarint(arr2, pbf) {
-        for (var i2 = 0; i2 < arr2.length; i2++)
-          pbf.writeVarint(arr2[i2]);
+        for (var i3 = 0; i3 < arr2.length; i3++)
+          pbf.writeVarint(arr2[i3]);
       }
       function writePackedSVarint(arr2, pbf) {
-        for (var i2 = 0; i2 < arr2.length; i2++)
-          pbf.writeSVarint(arr2[i2]);
+        for (var i3 = 0; i3 < arr2.length; i3++)
+          pbf.writeSVarint(arr2[i3]);
       }
       function writePackedFloat(arr2, pbf) {
-        for (var i2 = 0; i2 < arr2.length; i2++)
-          pbf.writeFloat(arr2[i2]);
+        for (var i3 = 0; i3 < arr2.length; i3++)
+          pbf.writeFloat(arr2[i3]);
       }
       function writePackedDouble(arr2, pbf) {
-        for (var i2 = 0; i2 < arr2.length; i2++)
-          pbf.writeDouble(arr2[i2]);
+        for (var i3 = 0; i3 < arr2.length; i3++)
+          pbf.writeDouble(arr2[i3]);
       }
       function writePackedBoolean(arr2, pbf) {
-        for (var i2 = 0; i2 < arr2.length; i2++)
-          pbf.writeBoolean(arr2[i2]);
+        for (var i3 = 0; i3 < arr2.length; i3++)
+          pbf.writeBoolean(arr2[i3]);
       }
       function writePackedFixed32(arr2, pbf) {
-        for (var i2 = 0; i2 < arr2.length; i2++)
-          pbf.writeFixed32(arr2[i2]);
+        for (var i3 = 0; i3 < arr2.length; i3++)
+          pbf.writeFixed32(arr2[i3]);
       }
       function writePackedSFixed32(arr2, pbf) {
-        for (var i2 = 0; i2 < arr2.length; i2++)
-          pbf.writeSFixed32(arr2[i2]);
+        for (var i3 = 0; i3 < arr2.length; i3++)
+          pbf.writeSFixed32(arr2[i3]);
       }
       function writePackedFixed64(arr2, pbf) {
-        for (var i2 = 0; i2 < arr2.length; i2++)
-          pbf.writeFixed64(arr2[i2]);
+        for (var i3 = 0; i3 < arr2.length; i3++)
+          pbf.writeFixed64(arr2[i3]);
       }
       function writePackedSFixed64(arr2, pbf) {
-        for (var i2 = 0; i2 < arr2.length; i2++)
-          pbf.writeSFixed64(arr2[i2]);
+        for (var i3 = 0; i3 < arr2.length; i3++)
+          pbf.writeSFixed64(arr2[i3]);
       }
       function readUInt32(buf, pos) {
         return (buf[pos] | buf[pos + 1] << 8 | buf[pos + 2] << 16) + buf[pos + 3] * 16777216;
@@ -1096,12 +1096,12 @@ var protomaps = (() => {
       }
       function readUtf8(buf, pos, end) {
         var str = "";
-        var i2 = pos;
-        while (i2 < end) {
-          var b0 = buf[i2];
+        var i3 = pos;
+        while (i3 < end) {
+          var b0 = buf[i3];
           var c2 = null;
           var bytesPerSequence = b0 > 239 ? 4 : b0 > 223 ? 3 : b0 > 191 ? 2 : 1;
-          if (i2 + bytesPerSequence > end)
+          if (i3 + bytesPerSequence > end)
             break;
           var b1, b2, b3;
           if (bytesPerSequence === 1) {
@@ -1109,7 +1109,7 @@ var protomaps = (() => {
               c2 = b0;
             }
           } else if (bytesPerSequence === 2) {
-            b1 = buf[i2 + 1];
+            b1 = buf[i3 + 1];
             if ((b1 & 192) === 128) {
               c2 = (b0 & 31) << 6 | b1 & 63;
               if (c2 <= 127) {
@@ -1117,8 +1117,8 @@ var protomaps = (() => {
               }
             }
           } else if (bytesPerSequence === 3) {
-            b1 = buf[i2 + 1];
-            b2 = buf[i2 + 2];
+            b1 = buf[i3 + 1];
+            b2 = buf[i3 + 2];
             if ((b1 & 192) === 128 && (b2 & 192) === 128) {
               c2 = (b0 & 15) << 12 | (b1 & 63) << 6 | b2 & 63;
               if (c2 <= 2047 || c2 >= 55296 && c2 <= 57343) {
@@ -1126,9 +1126,9 @@ var protomaps = (() => {
               }
             }
           } else if (bytesPerSequence === 4) {
-            b1 = buf[i2 + 1];
-            b2 = buf[i2 + 2];
-            b3 = buf[i2 + 3];
+            b1 = buf[i3 + 1];
+            b2 = buf[i3 + 2];
+            b3 = buf[i3 + 3];
             if ((b1 & 192) === 128 && (b2 & 192) === 128 && (b3 & 192) === 128) {
               c2 = (b0 & 15) << 18 | (b1 & 63) << 12 | (b2 & 63) << 6 | b3 & 63;
               if (c2 <= 65535 || c2 >= 1114112) {
@@ -1145,7 +1145,7 @@ var protomaps = (() => {
             c2 = 56320 | c2 & 1023;
           }
           str += String.fromCharCode(c2);
-          i2 += bytesPerSequence;
+          i3 += bytesPerSequence;
         }
         return str;
       }
@@ -1153,8 +1153,8 @@ var protomaps = (() => {
         return utf8TextDecoder.decode(buf.subarray(pos, end));
       }
       function writeUtf8(buf, str, pos) {
-        for (var i2 = 0, c2, lead; i2 < str.length; i2++) {
-          c2 = str.charCodeAt(i2);
+        for (var i3 = 0, c2, lead; i3 < str.length; i3++) {
+          c2 = str.charCodeAt(i3);
           if (c2 > 55295 && c2 < 57344) {
             if (lead) {
               if (c2 < 56320) {
@@ -1168,7 +1168,7 @@ var protomaps = (() => {
                 lead = null;
               }
             } else {
-              if (c2 > 56319 || i2 + 1 === str.length) {
+              if (c2 > 56319 || i3 + 1 === str.length) {
                 buf[pos++] = 239;
                 buf[pos++] = 191;
                 buf[pos++] = 189;
@@ -1208,8 +1208,8 @@ var protomaps = (() => {
   // node_modules/rbush/rbush.min.js
   var require_rbush_min = __commonJS({
     "node_modules/rbush/rbush.min.js"(exports, module) {
-      !function(t2, i2) {
-        typeof exports == "object" && typeof module != "undefined" ? module.exports = i2() : typeof define == "function" && define.amd ? define(i2) : (t2 = t2 || self).RBush = i2();
+      !function(t2, i3) {
+        typeof exports == "object" && typeof module != "undefined" ? module.exports = i3() : typeof define == "function" && define.amd ? define(i3) : (t2 = t2 || self).RBush = i3();
       }(exports, function() {
         "use strict";
         function t2(t3, r3, e3, a3, h2) {
@@ -1220,53 +1220,53 @@ var protomaps = (() => {
                 t4(n3, r4, m2, c3, h3);
               }
               var p3 = n3[r4], d2 = e4, x2 = a4;
-              for (i2(n3, e4, r4), h3(n3[a4], p3) > 0 && i2(n3, e4, a4); d2 < x2; ) {
-                for (i2(n3, d2, x2), d2++, x2--; h3(n3[d2], p3) < 0; )
+              for (i3(n3, e4, r4), h3(n3[a4], p3) > 0 && i3(n3, e4, a4); d2 < x2; ) {
+                for (i3(n3, d2, x2), d2++, x2--; h3(n3[d2], p3) < 0; )
                   d2++;
                 for (; h3(n3[x2], p3) > 0; )
                   x2--;
               }
-              h3(n3[e4], p3) === 0 ? i2(n3, e4, x2) : i2(n3, ++x2, a4), x2 <= r4 && (e4 = x2 + 1), r4 <= x2 && (a4 = x2 - 1);
+              h3(n3[e4], p3) === 0 ? i3(n3, e4, x2) : i3(n3, ++x2, a4), x2 <= r4 && (e4 = x2 + 1), r4 <= x2 && (a4 = x2 - 1);
             }
           }(t3, r3, e3 || 0, a3 || t3.length - 1, h2 || n2);
         }
-        function i2(t3, i3, n3) {
-          var r3 = t3[i3];
-          t3[i3] = t3[n3], t3[n3] = r3;
+        function i3(t3, i4, n3) {
+          var r3 = t3[i4];
+          t3[i4] = t3[n3], t3[n3] = r3;
         }
-        function n2(t3, i3) {
-          return t3 < i3 ? -1 : t3 > i3 ? 1 : 0;
+        function n2(t3, i4) {
+          return t3 < i4 ? -1 : t3 > i4 ? 1 : 0;
         }
         var r2 = function(t3) {
           t3 === void 0 && (t3 = 9), this._maxEntries = Math.max(4, t3), this._minEntries = Math.max(2, Math.ceil(0.4 * this._maxEntries)), this.clear();
         };
-        function e2(t3, i3, n3) {
+        function e2(t3, i4, n3) {
           if (!n3)
-            return i3.indexOf(t3);
-          for (var r3 = 0; r3 < i3.length; r3++)
-            if (n3(t3, i3[r3]))
+            return i4.indexOf(t3);
+          for (var r3 = 0; r3 < i4.length; r3++)
+            if (n3(t3, i4[r3]))
               return r3;
           return -1;
         }
-        function a2(t3, i3) {
-          h(t3, 0, t3.children.length, i3, t3);
+        function a2(t3, i4) {
+          h(t3, 0, t3.children.length, i4, t3);
         }
-        function h(t3, i3, n3, r3, e3) {
+        function h(t3, i4, n3, r3, e3) {
           e3 || (e3 = p2(null)), e3.minX = 1 / 0, e3.minY = 1 / 0, e3.maxX = -1 / 0, e3.maxY = -1 / 0;
-          for (var a3 = i3; a3 < n3; a3++) {
+          for (var a3 = i4; a3 < n3; a3++) {
             var h2 = t3.children[a3];
             o2(e3, t3.leaf ? r3(h2) : h2);
           }
           return e3;
         }
-        function o2(t3, i3) {
-          return t3.minX = Math.min(t3.minX, i3.minX), t3.minY = Math.min(t3.minY, i3.minY), t3.maxX = Math.max(t3.maxX, i3.maxX), t3.maxY = Math.max(t3.maxY, i3.maxY), t3;
+        function o2(t3, i4) {
+          return t3.minX = Math.min(t3.minX, i4.minX), t3.minY = Math.min(t3.minY, i4.minY), t3.maxX = Math.max(t3.maxX, i4.maxX), t3.maxY = Math.max(t3.maxY, i4.maxY), t3;
         }
-        function s2(t3, i3) {
-          return t3.minX - i3.minX;
+        function s2(t3, i4) {
+          return t3.minX - i4.minX;
         }
-        function l2(t3, i3) {
-          return t3.minY - i3.minY;
+        function l2(t3, i4) {
+          return t3.minY - i4.minY;
         }
         function f2(t3) {
           return (t3.maxX - t3.minX) * (t3.maxY - t3.minY);
@@ -1274,58 +1274,58 @@ var protomaps = (() => {
         function u2(t3) {
           return t3.maxX - t3.minX + (t3.maxY - t3.minY);
         }
-        function m(t3, i3) {
-          return t3.minX <= i3.minX && t3.minY <= i3.minY && i3.maxX <= t3.maxX && i3.maxY <= t3.maxY;
+        function m(t3, i4) {
+          return t3.minX <= i4.minX && t3.minY <= i4.minY && i4.maxX <= t3.maxX && i4.maxY <= t3.maxY;
         }
-        function c2(t3, i3) {
-          return i3.minX <= t3.maxX && i3.minY <= t3.maxY && i3.maxX >= t3.minX && i3.maxY >= t3.minY;
+        function c2(t3, i4) {
+          return i4.minX <= t3.maxX && i4.minY <= t3.maxY && i4.maxX >= t3.minX && i4.maxY >= t3.minY;
         }
         function p2(t3) {
           return { children: t3, height: 1, leaf: true, minX: 1 / 0, minY: 1 / 0, maxX: -1 / 0, maxY: -1 / 0 };
         }
-        function d(i3, n3, r3, e3, a3) {
+        function d(i4, n3, r3, e3, a3) {
           for (var h2 = [n3, r3]; h2.length; )
             if (!((r3 = h2.pop()) - (n3 = h2.pop()) <= e3)) {
               var o3 = n3 + Math.ceil((r3 - n3) / e3 / 2) * e3;
-              t2(i3, o3, n3, r3, a3), h2.push(n3, o3, o3, r3);
+              t2(i4, o3, n3, r3, a3), h2.push(n3, o3, o3, r3);
             }
         }
         return r2.prototype.all = function() {
           return this._all(this.data, []);
         }, r2.prototype.search = function(t3) {
-          var i3 = this.data, n3 = [];
-          if (!c2(t3, i3))
+          var i4 = this.data, n3 = [];
+          if (!c2(t3, i4))
             return n3;
-          for (var r3 = this.toBBox, e3 = []; i3; ) {
-            for (var a3 = 0; a3 < i3.children.length; a3++) {
-              var h2 = i3.children[a3], o3 = i3.leaf ? r3(h2) : h2;
-              c2(t3, o3) && (i3.leaf ? n3.push(h2) : m(t3, o3) ? this._all(h2, n3) : e3.push(h2));
+          for (var r3 = this.toBBox, e3 = []; i4; ) {
+            for (var a3 = 0; a3 < i4.children.length; a3++) {
+              var h2 = i4.children[a3], o3 = i4.leaf ? r3(h2) : h2;
+              c2(t3, o3) && (i4.leaf ? n3.push(h2) : m(t3, o3) ? this._all(h2, n3) : e3.push(h2));
             }
-            i3 = e3.pop();
+            i4 = e3.pop();
           }
           return n3;
         }, r2.prototype.collides = function(t3) {
-          var i3 = this.data;
-          if (!c2(t3, i3))
+          var i4 = this.data;
+          if (!c2(t3, i4))
             return false;
-          for (var n3 = []; i3; ) {
-            for (var r3 = 0; r3 < i3.children.length; r3++) {
-              var e3 = i3.children[r3], a3 = i3.leaf ? this.toBBox(e3) : e3;
+          for (var n3 = []; i4; ) {
+            for (var r3 = 0; r3 < i4.children.length; r3++) {
+              var e3 = i4.children[r3], a3 = i4.leaf ? this.toBBox(e3) : e3;
               if (c2(t3, a3)) {
-                if (i3.leaf || m(t3, a3))
+                if (i4.leaf || m(t3, a3))
                   return true;
                 n3.push(e3);
               }
             }
-            i3 = n3.pop();
+            i4 = n3.pop();
           }
           return false;
         }, r2.prototype.load = function(t3) {
           if (!t3 || !t3.length)
             return this;
           if (t3.length < this._minEntries) {
-            for (var i3 = 0; i3 < t3.length; i3++)
-              this.insert(t3[i3]);
+            for (var i4 = 0; i4 < t3.length; i4++)
+              this.insert(t3[i4]);
             return this;
           }
           var n3 = this._build(t3.slice(), 0, t3.length - 1, 0);
@@ -1346,12 +1346,12 @@ var protomaps = (() => {
           return t3 && this._insert(t3, this.data.height - 1), this;
         }, r2.prototype.clear = function() {
           return this.data = p2([]), this;
-        }, r2.prototype.remove = function(t3, i3) {
+        }, r2.prototype.remove = function(t3, i4) {
           if (!t3)
             return this;
           for (var n3, r3, a3, h2 = this.data, o3 = this.toBBox(t3), s3 = [], l3 = []; h2 || s3.length; ) {
             if (h2 || (h2 = s3.pop(), r3 = s3[s3.length - 1], n3 = l3.pop(), a3 = true), h2.leaf) {
-              var f3 = e2(t3, h2.children, i3);
+              var f3 = e2(t3, h2.children, i4);
               if (f3 !== -1)
                 return h2.children.splice(f3, 1), s3.push(h2), this._condense(s3), this;
             }
@@ -1360,26 +1360,26 @@ var protomaps = (() => {
           return this;
         }, r2.prototype.toBBox = function(t3) {
           return t3;
-        }, r2.prototype.compareMinX = function(t3, i3) {
-          return t3.minX - i3.minX;
-        }, r2.prototype.compareMinY = function(t3, i3) {
-          return t3.minY - i3.minY;
+        }, r2.prototype.compareMinX = function(t3, i4) {
+          return t3.minX - i4.minX;
+        }, r2.prototype.compareMinY = function(t3, i4) {
+          return t3.minY - i4.minY;
         }, r2.prototype.toJSON = function() {
           return this.data;
         }, r2.prototype.fromJSON = function(t3) {
           return this.data = t3, this;
-        }, r2.prototype._all = function(t3, i3) {
+        }, r2.prototype._all = function(t3, i4) {
           for (var n3 = []; t3; )
-            t3.leaf ? i3.push.apply(i3, t3.children) : n3.push.apply(n3, t3.children), t3 = n3.pop();
-          return i3;
-        }, r2.prototype._build = function(t3, i3, n3, r3) {
-          var e3, h2 = n3 - i3 + 1, o3 = this._maxEntries;
+            t3.leaf ? i4.push.apply(i4, t3.children) : n3.push.apply(n3, t3.children), t3 = n3.pop();
+          return i4;
+        }, r2.prototype._build = function(t3, i4, n3, r3) {
+          var e3, h2 = n3 - i4 + 1, o3 = this._maxEntries;
           if (h2 <= o3)
-            return a2(e3 = p2(t3.slice(i3, n3 + 1)), this.toBBox), e3;
+            return a2(e3 = p2(t3.slice(i4, n3 + 1)), this.toBBox), e3;
           r3 || (r3 = Math.ceil(Math.log(h2) / Math.log(o3)), o3 = Math.ceil(h2 / Math.pow(o3, r3 - 1))), (e3 = p2([])).leaf = false, e3.height = r3;
           var s3 = Math.ceil(h2 / o3), l3 = s3 * Math.ceil(Math.sqrt(o3));
-          d(t3, i3, n3, l3, this.compareMinX);
-          for (var f3 = i3; f3 <= n3; f3 += l3) {
+          d(t3, i4, n3, l3, this.compareMinX);
+          for (var f3 = i4; f3 <= n3; f3 += l3) {
             var u3 = Math.min(f3 + l3 - 1, n3);
             d(t3, f3, u3, s3, this.compareMinY);
             for (var m2 = f3; m2 <= u3; m2 += s3) {
@@ -1388,54 +1388,54 @@ var protomaps = (() => {
             }
           }
           return a2(e3, this.toBBox), e3;
-        }, r2.prototype._chooseSubtree = function(t3, i3, n3, r3) {
-          for (; r3.push(i3), !i3.leaf && r3.length - 1 !== n3; ) {
-            for (var e3 = 1 / 0, a3 = 1 / 0, h2 = void 0, o3 = 0; o3 < i3.children.length; o3++) {
-              var s3 = i3.children[o3], l3 = f2(s3), u3 = (m2 = t3, c3 = s3, (Math.max(c3.maxX, m2.maxX) - Math.min(c3.minX, m2.minX)) * (Math.max(c3.maxY, m2.maxY) - Math.min(c3.minY, m2.minY)) - l3);
+        }, r2.prototype._chooseSubtree = function(t3, i4, n3, r3) {
+          for (; r3.push(i4), !i4.leaf && r3.length - 1 !== n3; ) {
+            for (var e3 = 1 / 0, a3 = 1 / 0, h2 = void 0, o3 = 0; o3 < i4.children.length; o3++) {
+              var s3 = i4.children[o3], l3 = f2(s3), u3 = (m2 = t3, c3 = s3, (Math.max(c3.maxX, m2.maxX) - Math.min(c3.minX, m2.minX)) * (Math.max(c3.maxY, m2.maxY) - Math.min(c3.minY, m2.minY)) - l3);
               u3 < a3 ? (a3 = u3, e3 = l3 < e3 ? l3 : e3, h2 = s3) : u3 === a3 && l3 < e3 && (e3 = l3, h2 = s3);
             }
-            i3 = h2 || i3.children[0];
+            i4 = h2 || i4.children[0];
           }
           var m2, c3;
-          return i3;
-        }, r2.prototype._insert = function(t3, i3, n3) {
-          var r3 = n3 ? t3 : this.toBBox(t3), e3 = [], a3 = this._chooseSubtree(r3, this.data, i3, e3);
-          for (a3.children.push(t3), o2(a3, r3); i3 >= 0 && e3[i3].children.length > this._maxEntries; )
-            this._split(e3, i3), i3--;
-          this._adjustParentBBoxes(r3, e3, i3);
-        }, r2.prototype._split = function(t3, i3) {
-          var n3 = t3[i3], r3 = n3.children.length, e3 = this._minEntries;
+          return i4;
+        }, r2.prototype._insert = function(t3, i4, n3) {
+          var r3 = n3 ? t3 : this.toBBox(t3), e3 = [], a3 = this._chooseSubtree(r3, this.data, i4, e3);
+          for (a3.children.push(t3), o2(a3, r3); i4 >= 0 && e3[i4].children.length > this._maxEntries; )
+            this._split(e3, i4), i4--;
+          this._adjustParentBBoxes(r3, e3, i4);
+        }, r2.prototype._split = function(t3, i4) {
+          var n3 = t3[i4], r3 = n3.children.length, e3 = this._minEntries;
           this._chooseSplitAxis(n3, e3, r3);
           var h2 = this._chooseSplitIndex(n3, e3, r3), o3 = p2(n3.children.splice(h2, n3.children.length - h2));
-          o3.height = n3.height, o3.leaf = n3.leaf, a2(n3, this.toBBox), a2(o3, this.toBBox), i3 ? t3[i3 - 1].children.push(o3) : this._splitRoot(n3, o3);
-        }, r2.prototype._splitRoot = function(t3, i3) {
-          this.data = p2([t3, i3]), this.data.height = t3.height + 1, this.data.leaf = false, a2(this.data, this.toBBox);
-        }, r2.prototype._chooseSplitIndex = function(t3, i3, n3) {
-          for (var r3, e3, a3, o3, s3, l3, u3, m2 = 1 / 0, c3 = 1 / 0, p3 = i3; p3 <= n3 - i3; p3++) {
+          o3.height = n3.height, o3.leaf = n3.leaf, a2(n3, this.toBBox), a2(o3, this.toBBox), i4 ? t3[i4 - 1].children.push(o3) : this._splitRoot(n3, o3);
+        }, r2.prototype._splitRoot = function(t3, i4) {
+          this.data = p2([t3, i4]), this.data.height = t3.height + 1, this.data.leaf = false, a2(this.data, this.toBBox);
+        }, r2.prototype._chooseSplitIndex = function(t3, i4, n3) {
+          for (var r3, e3, a3, o3, s3, l3, u3, m2 = 1 / 0, c3 = 1 / 0, p3 = i4; p3 <= n3 - i4; p3++) {
             var d2 = h(t3, 0, p3, this.toBBox), x2 = h(t3, p3, n3, this.toBBox), v = (e3 = d2, a3 = x2, o3 = void 0, s3 = void 0, l3 = void 0, u3 = void 0, o3 = Math.max(e3.minX, a3.minX), s3 = Math.max(e3.minY, a3.minY), l3 = Math.min(e3.maxX, a3.maxX), u3 = Math.min(e3.maxY, a3.maxY), Math.max(0, l3 - o3) * Math.max(0, u3 - s3)), M = f2(d2) + f2(x2);
             v < m2 ? (m2 = v, r3 = p3, c3 = M < c3 ? M : c3) : v === m2 && M < c3 && (c3 = M, r3 = p3);
           }
-          return r3 || n3 - i3;
-        }, r2.prototype._chooseSplitAxis = function(t3, i3, n3) {
+          return r3 || n3 - i4;
+        }, r2.prototype._chooseSplitAxis = function(t3, i4, n3) {
           var r3 = t3.leaf ? this.compareMinX : s2, e3 = t3.leaf ? this.compareMinY : l2;
-          this._allDistMargin(t3, i3, n3, r3) < this._allDistMargin(t3, i3, n3, e3) && t3.children.sort(r3);
-        }, r2.prototype._allDistMargin = function(t3, i3, n3, r3) {
+          this._allDistMargin(t3, i4, n3, r3) < this._allDistMargin(t3, i4, n3, e3) && t3.children.sort(r3);
+        }, r2.prototype._allDistMargin = function(t3, i4, n3, r3) {
           t3.children.sort(r3);
-          for (var e3 = this.toBBox, a3 = h(t3, 0, i3, e3), s3 = h(t3, n3 - i3, n3, e3), l3 = u2(a3) + u2(s3), f3 = i3; f3 < n3 - i3; f3++) {
+          for (var e3 = this.toBBox, a3 = h(t3, 0, i4, e3), s3 = h(t3, n3 - i4, n3, e3), l3 = u2(a3) + u2(s3), f3 = i4; f3 < n3 - i4; f3++) {
             var m2 = t3.children[f3];
             o2(a3, t3.leaf ? e3(m2) : m2), l3 += u2(a3);
           }
-          for (var c3 = n3 - i3 - 1; c3 >= i3; c3--) {
+          for (var c3 = n3 - i4 - 1; c3 >= i4; c3--) {
             var p3 = t3.children[c3];
             o2(s3, t3.leaf ? e3(p3) : p3), l3 += u2(s3);
           }
           return l3;
-        }, r2.prototype._adjustParentBBoxes = function(t3, i3, n3) {
+        }, r2.prototype._adjustParentBBoxes = function(t3, i4, n3) {
           for (var r3 = n3; r3 >= 0; r3--)
-            o2(i3[r3], t3);
+            o2(i4[r3], t3);
         }, r2.prototype._condense = function(t3) {
-          for (var i3 = t3.length - 1, n3 = void 0; i3 >= 0; i3--)
-            t3[i3].children.length === 0 ? i3 > 0 ? (n3 = t3[i3 - 1].children).splice(n3.indexOf(t3[i3]), 1) : this.clear() : a2(t3[i3], this.toBBox);
+          for (var i4 = t3.length - 1, n3 = void 0; i4 >= 0; i4--)
+            t3[i4].children.length === 0 ? i4 > 0 ? (n3 = t3[i4 - 1].children).splice(n3.indexOf(t3[i4]), 1) : this.clear() : a2(t3[i4], this.toBBox);
         }, r2;
       });
     }
@@ -1463,8 +1463,8 @@ var protomaps = (() => {
           this.length = this.data.length;
           this.compare = compare2;
           if (this.length > 0) {
-            for (var i2 = (this.length >> 1) - 1; i2 >= 0; i2--) {
-              this._down(i2);
+            for (var i3 = (this.length >> 1) - 1; i3 >= 0; i3--) {
+              this._down(i3);
             }
           }
         };
@@ -1547,15 +1547,15 @@ var protomaps = (() => {
       function polylabel2(polygon, precision, debug) {
         precision = precision || 1;
         var minX, minY, maxX, maxY;
-        for (var i2 = 0; i2 < polygon[0].length; i2++) {
-          var p2 = polygon[0][i2];
-          if (!i2 || p2[0] < minX)
+        for (var i3 = 0; i3 < polygon[0].length; i3++) {
+          var p2 = polygon[0][i3];
+          if (!i3 || p2[0] < minX)
             minX = p2[0];
-          if (!i2 || p2[1] < minY)
+          if (!i3 || p2[1] < minY)
             minY = p2[1];
-          if (!i2 || p2[0] > maxX)
+          if (!i3 || p2[0] > maxX)
             maxX = p2[0];
-          if (!i2 || p2[1] > maxY)
+          if (!i3 || p2[1] > maxY)
             maxY = p2[1];
         }
         var width = maxX - minX;
@@ -1617,8 +1617,8 @@ var protomaps = (() => {
         var minDistSq = Infinity;
         for (var k = 0; k < polygon.length; k++) {
           var ring = polygon[k];
-          for (var i2 = 0, len = ring.length, j = len - 1; i2 < len; j = i2++) {
-            var a2 = ring[i2];
+          for (var i3 = 0, len = ring.length, j = len - 1; i3 < len; j = i3++) {
+            var a2 = ring[i3];
             var b = ring[j];
             if (a2[1] > y !== b[1] > y && x2 < (b[0] - a2[0]) * (y - a2[1]) / (b[1] - a2[1]) + a2[0])
               inside = !inside;
@@ -1632,8 +1632,8 @@ var protomaps = (() => {
         var x2 = 0;
         var y = 0;
         var points = polygon[0];
-        for (var i2 = 0, len = points.length, j = len - 1; i2 < len; j = i2++) {
-          var a2 = points[i2];
+        for (var i3 = 0, len = points.length, j = len - 1; i3 < len; j = i3++) {
+          var a2 = points[i3];
           var b = points[j];
           var f2 = a2[0] * b[1] - b[0] * a2[1];
           x2 += (a2[0] + b[0]) * f2;
@@ -1770,13 +1770,13 @@ var protomaps = (() => {
   var clim = new u8([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
   var freb = function(eb, start) {
     var b = new u16(31);
-    for (var i2 = 0; i2 < 31; ++i2) {
-      b[i2] = start += 1 << eb[i2 - 1];
+    for (var i3 = 0; i3 < 31; ++i3) {
+      b[i3] = start += 1 << eb[i3 - 1];
     }
     var r2 = new u32(b[30]);
-    for (var i2 = 1; i2 < 30; ++i2) {
-      for (var j = b[i2]; j < b[i2 + 1]; ++j) {
-        r2[j] = j - b[i2] << 5 | i2;
+    for (var i3 = 1; i3 < 30; ++i3) {
+      for (var j = b[i3]; j < b[i3 + 1]; ++j) {
+        r2[j] = j - b[i3] << 5 | i3;
       }
     }
     return [b, r2];
@@ -1789,34 +1789,35 @@ var protomaps = (() => {
   var fd = _b[0];
   var revfd = _b[1];
   var rev = new u16(32768);
-  for (var i2 = 0; i2 < 32768; ++i2) {
-    x = (i2 & 43690) >>> 1 | (i2 & 21845) << 1;
+  for (i = 0; i < 32768; ++i) {
+    x = (i & 43690) >>> 1 | (i & 21845) << 1;
     x = (x & 52428) >>> 2 | (x & 13107) << 2;
     x = (x & 61680) >>> 4 | (x & 3855) << 4;
-    rev[i2] = ((x & 65280) >>> 8 | (x & 255) << 8) >>> 1;
+    rev[i] = ((x & 65280) >>> 8 | (x & 255) << 8) >>> 1;
   }
   var x;
+  var i;
   var hMap = function(cd, mb, r2) {
     var s2 = cd.length;
-    var i2 = 0;
+    var i3 = 0;
     var l2 = new u16(mb);
-    for (; i2 < s2; ++i2) {
-      if (cd[i2])
-        ++l2[cd[i2] - 1];
+    for (; i3 < s2; ++i3) {
+      if (cd[i3])
+        ++l2[cd[i3] - 1];
     }
     var le = new u16(mb);
-    for (i2 = 0; i2 < mb; ++i2) {
-      le[i2] = le[i2 - 1] + l2[i2 - 1] << 1;
+    for (i3 = 0; i3 < mb; ++i3) {
+      le[i3] = le[i3 - 1] + l2[i3 - 1] << 1;
     }
     var co;
     if (r2) {
       co = new u16(1 << mb);
       var rvb = 15 - mb;
-      for (i2 = 0; i2 < s2; ++i2) {
-        if (cd[i2]) {
-          var sv = i2 << 4 | cd[i2];
-          var r_1 = mb - cd[i2];
-          var v = le[cd[i2] - 1]++ << r_1;
+      for (i3 = 0; i3 < s2; ++i3) {
+        if (cd[i3]) {
+          var sv = i3 << 4 | cd[i3];
+          var r_1 = mb - cd[i3];
+          var v = le[cd[i3] - 1]++ << r_1;
           for (var m = v | (1 << r_1) - 1; v <= m; ++v) {
             co[rev[v] >>> rvb] = sv;
           }
@@ -1824,33 +1825,38 @@ var protomaps = (() => {
       }
     } else {
       co = new u16(s2);
-      for (i2 = 0; i2 < s2; ++i2) {
-        if (cd[i2]) {
-          co[i2] = rev[le[cd[i2] - 1]++] >>> 15 - cd[i2];
+      for (i3 = 0; i3 < s2; ++i3) {
+        if (cd[i3]) {
+          co[i3] = rev[le[cd[i3] - 1]++] >>> 15 - cd[i3];
         }
       }
     }
     return co;
   };
   var flt = new u8(288);
-  for (var i2 = 0; i2 < 144; ++i2)
-    flt[i2] = 8;
-  for (var i2 = 144; i2 < 256; ++i2)
-    flt[i2] = 9;
-  for (var i2 = 256; i2 < 280; ++i2)
-    flt[i2] = 7;
-  for (var i2 = 280; i2 < 288; ++i2)
-    flt[i2] = 8;
+  for (i = 0; i < 144; ++i)
+    flt[i] = 8;
+  var i;
+  for (i = 144; i < 256; ++i)
+    flt[i] = 9;
+  var i;
+  for (i = 256; i < 280; ++i)
+    flt[i] = 7;
+  var i;
+  for (i = 280; i < 288; ++i)
+    flt[i] = 8;
+  var i;
   var fdt = new u8(32);
-  for (var i2 = 0; i2 < 32; ++i2)
-    fdt[i2] = 5;
+  for (i = 0; i < 32; ++i)
+    fdt[i] = 5;
+  var i;
   var flrm = /* @__PURE__ */ hMap(flt, 9, 1);
   var fdrm = /* @__PURE__ */ hMap(fdt, 5, 1);
   var max = function(a2) {
     var m = a2[0];
-    for (var i2 = 1; i2 < a2.length; ++i2) {
-      if (a2[i2] > m)
-        m = a2[i2];
+    for (var i3 = 1; i3 < a2.length; ++i3) {
+      if (a2[i3] > m)
+        m = a2[i3];
     }
     return m;
   };
@@ -1944,28 +1950,28 @@ var protomaps = (() => {
           pos += 14;
           var ldt = new u8(tl);
           var clt = new u8(19);
-          for (var i2 = 0; i2 < hcLen; ++i2) {
-            clt[clim[i2]] = bits(dat, pos + i2 * 3, 7);
+          for (var i3 = 0; i3 < hcLen; ++i3) {
+            clt[clim[i3]] = bits(dat, pos + i3 * 3, 7);
           }
           pos += hcLen * 3;
           var clb = max(clt), clbmsk = (1 << clb) - 1;
           var clm = hMap(clt, clb, 1);
-          for (var i2 = 0; i2 < tl; ) {
+          for (var i3 = 0; i3 < tl; ) {
             var r2 = clm[bits(dat, pos, clbmsk)];
             pos += r2 & 15;
             var s2 = r2 >>> 4;
             if (s2 < 16) {
-              ldt[i2++] = s2;
+              ldt[i3++] = s2;
             } else {
               var c2 = 0, n2 = 0;
               if (s2 == 16)
-                n2 = 3 + bits(dat, pos, 3), pos += 2, c2 = ldt[i2 - 1];
+                n2 = 3 + bits(dat, pos, 3), pos += 2, c2 = ldt[i3 - 1];
               else if (s2 == 17)
                 n2 = 3 + bits(dat, pos, 7), pos += 3;
               else if (s2 == 18)
                 n2 = 11 + bits(dat, pos, 127), pos += 7;
               while (n2--)
-                ldt[i2++] = c2;
+                ldt[i3++] = c2;
             }
           }
           var lt = ldt.subarray(0, hLit), dt = ldt.subarray(hLit);
@@ -2003,8 +2009,8 @@ var protomaps = (() => {
         } else {
           var add = sym - 254;
           if (sym > 264) {
-            var i2 = sym - 257, b = fleb[i2];
-            add = bits(dat, pos, (1 << b) - 1) + fl[i2];
+            var i3 = sym - 257, b = fleb[i3];
+            add = bits(dat, pos, (1 << b) - 1) + fl[i3];
             pos += b;
           }
           var d = dm[bits16(dat, pos) & dms], dsym = d >>> 4;
@@ -2073,7 +2079,6 @@ var protomaps = (() => {
   function decompressSync(data, out) {
     return data[0] == 31 && data[1] == 139 && data[2] == 8 ? gunzipSync(data, out) : (data[0] & 15) != 8 || data[0] >> 4 > 7 || (data[0] << 8 | data[1]) % 31 ? inflateSync(data, out) : unzlibSync(data, out);
   }
-  var te = typeof TextEncoder != "undefined" && /* @__PURE__ */ new TextEncoder();
   var td = typeof TextDecoder != "undefined" && /* @__PURE__ */ new TextDecoder();
   var tds = 0;
   try {
@@ -2081,9 +2086,6 @@ var protomaps = (() => {
     tds = 1;
   } catch (e2) {
   }
-  var mt = typeof queueMicrotask == "function" ? queueMicrotask : typeof setTimeout == "function" ? setTimeout : function(fn) {
-    fn();
-  };
   var shift = (n2, shift2) => {
     return n2 * Math.pow(2, shift2);
   };
@@ -2096,13 +2098,13 @@ var protomaps = (() => {
   var getUint48 = (view, pos) => {
     return shift(view.getUint32(pos + 2, true), 16) + view.getUint16(pos, true);
   };
-  var compare = (tz, tx, ty, view, i2) => {
-    if (tz != view.getUint8(i2))
-      return tz - view.getUint8(i2);
-    const x2 = getUint24(view, i2 + 1);
+  var compare = (tz, tx, ty, view, i3) => {
+    if (tz != view.getUint8(i3))
+      return tz - view.getUint8(i3);
+    const x2 = getUint24(view, i3 + 1);
     if (tx != x2)
       return tx - x2;
-    const y = getUint24(view, i2 + 4);
+    const y = getUint24(view, i3 + 4);
     if (ty != y)
       return ty - y;
     return 0;
@@ -2166,23 +2168,23 @@ var protomaps = (() => {
     }
     return a2.y - b.y;
   };
-  var parseEntry = (dataview, i2) => {
-    const z_raw = dataview.getUint8(i2 * 17);
+  var parseEntry = (dataview, i3) => {
+    const z_raw = dataview.getUint8(i3 * 17);
     const z2 = z_raw & 127;
     return {
       z: z2,
-      x: getUint24(dataview, i2 * 17 + 1),
-      y: getUint24(dataview, i2 * 17 + 4),
-      offset: getUint48(dataview, i2 * 17 + 7),
-      length: dataview.getUint32(i2 * 17 + 13, true),
+      x: getUint24(dataview, i3 * 17 + 1),
+      y: getUint24(dataview, i3 * 17 + 4),
+      offset: getUint48(dataview, i3 * 17 + 7),
+      length: dataview.getUint32(i3 * 17 + 13, true),
       is_dir: z_raw >> 7 === 1
     };
   };
   var sortDir = (a2) => {
     const entries = [];
     const view = new DataView(a2);
-    for (let i2 = 0; i2 < view.byteLength / 17; i2++) {
-      entries.push(parseEntry(view, i2));
+    for (let i3 = 0; i3 < view.byteLength / 17; i3++) {
+      entries.push(parseEntry(view, i3));
     }
     return createDirectory(entries);
   };
@@ -2190,28 +2192,28 @@ var protomaps = (() => {
     entries.sort(entrySort);
     const buffer = new ArrayBuffer(17 * entries.length);
     const arr2 = new Uint8Array(buffer);
-    for (let i2 = 0; i2 < entries.length; i2++) {
-      const entry = entries[i2];
+    for (let i3 = 0; i3 < entries.length; i3++) {
+      const entry = entries[i3];
       let z2 = entry.z;
       if (entry.is_dir)
         z2 = z2 | 128;
-      arr2[i2 * 17] = z2;
-      arr2[i2 * 17 + 1] = entry.x & 255;
-      arr2[i2 * 17 + 2] = entry.x >> 8 & 255;
-      arr2[i2 * 17 + 3] = entry.x >> 16 & 255;
-      arr2[i2 * 17 + 4] = entry.y & 255;
-      arr2[i2 * 17 + 5] = entry.y >> 8 & 255;
-      arr2[i2 * 17 + 6] = entry.y >> 16 & 255;
-      arr2[i2 * 17 + 7] = entry.offset & 255;
-      arr2[i2 * 17 + 8] = unshift(entry.offset, 8) & 255;
-      arr2[i2 * 17 + 9] = unshift(entry.offset, 16) & 255;
-      arr2[i2 * 17 + 10] = unshift(entry.offset, 24) & 255;
-      arr2[i2 * 17 + 11] = unshift(entry.offset, 32) & 255;
-      arr2[i2 * 17 + 12] = unshift(entry.offset, 48) & 255;
-      arr2[i2 * 17 + 13] = entry.length & 255;
-      arr2[i2 * 17 + 14] = entry.length >> 8 & 255;
-      arr2[i2 * 17 + 15] = entry.length >> 16 & 255;
-      arr2[i2 * 17 + 16] = entry.length >> 24 & 255;
+      arr2[i3 * 17] = z2;
+      arr2[i3 * 17 + 1] = entry.x & 255;
+      arr2[i3 * 17 + 2] = entry.x >> 8 & 255;
+      arr2[i3 * 17 + 3] = entry.x >> 16 & 255;
+      arr2[i3 * 17 + 4] = entry.y & 255;
+      arr2[i3 * 17 + 5] = entry.y >> 8 & 255;
+      arr2[i3 * 17 + 6] = entry.y >> 16 & 255;
+      arr2[i3 * 17 + 7] = entry.offset & 255;
+      arr2[i3 * 17 + 8] = unshift(entry.offset, 8) & 255;
+      arr2[i3 * 17 + 9] = unshift(entry.offset, 16) & 255;
+      arr2[i3 * 17 + 10] = unshift(entry.offset, 24) & 255;
+      arr2[i3 * 17 + 11] = unshift(entry.offset, 32) & 255;
+      arr2[i3 * 17 + 12] = unshift(entry.offset, 48) & 255;
+      arr2[i3 * 17 + 13] = entry.length & 255;
+      arr2[i3 * 17 + 14] = entry.length >> 8 & 255;
+      arr2[i3 * 17 + 15] = entry.length >> 16 & 255;
+      arr2[i3 * 17 + 16] = entry.length >> 24 & 255;
     }
     return buffer;
   };
@@ -2221,7 +2223,7 @@ var protomaps = (() => {
     const numEntries = view.byteLength / 17;
     const entry = parseEntry(view, numEntries - 1);
     if (entry.is_dir) {
-      let leaf_level = entry.z;
+      const leaf_level = entry.z;
       const level_diff = tile.z - leaf_level;
       const leaf_x = Math.trunc(tile.x / (1 << level_diff));
       const leaf_y = Math.trunc(tile.y / (1 << level_diff));
@@ -2231,15 +2233,15 @@ var protomaps = (() => {
   };
   function getHeader(source) {
     return __async2(this, null, function* () {
-      let resp = yield source.getBytes(0, 512e3);
+      const resp = yield source.getBytes(0, 512e3);
       const dataview = new DataView(resp.data);
       const json_size = dataview.getUint32(4, true);
       const root_entries = dataview.getUint16(8, true);
       const dec = new TextDecoder("utf-8");
       const json_metadata = JSON.parse(dec.decode(new DataView(resp.data, 10, json_size)));
-      let tile_compression = Compression.Unknown;
+      let tile_compression = 0;
       if (json_metadata.compression === "gzip") {
-        tile_compression = Compression.Gzip;
+        tile_compression = 2;
       }
       let minzoom = 0;
       if ("minzoom" in json_metadata) {
@@ -2257,14 +2259,14 @@ var protomaps = (() => {
       let max_lon = 180;
       let max_lat = 85;
       if (json_metadata.bounds) {
-        let split = json_metadata.bounds.split(",");
+        const split = json_metadata.bounds.split(",");
         min_lon = +split[0];
         min_lat = +split[1];
         max_lon = +split[2];
         max_lat = +split[3];
       }
       if (json_metadata.center) {
-        let split = json_metadata.center.split(",");
+        const split = json_metadata.center.split(",");
         center_lon = +split[0];
         center_lat = +split[1];
         center_zoom = +split[2];
@@ -2283,9 +2285,9 @@ var protomaps = (() => {
         numTileEntries: 0,
         numTileContents: 0,
         clustered: false,
-        internalCompression: Compression.None,
+        internalCompression: 1,
         tileCompression: tile_compression,
-        tileType: TileType.Mvt,
+        tileType: 1,
         minZoom: minzoom,
         maxZoom: maxzoom,
         minLon: min_lon,
@@ -2308,9 +2310,9 @@ var protomaps = (() => {
       }
       const entry = queryTile(new DataView(root_dir), z2, x2, y);
       if (entry) {
-        let resp = yield source.getBytes(entry.offset, entry.length, signal);
+        const resp = yield source.getBytes(entry.offset, entry.length, signal);
         let tile_data = resp.data;
-        let view = new DataView(tile_data);
+        const view = new DataView(tile_data);
         if (view.getUint8(0) == 31 && view.getUint8(1) == 139) {
           tile_data = decompressSync(new Uint8Array(tile_data));
         }
@@ -2326,11 +2328,11 @@ var protomaps = (() => {
           if (header.specVersion === 1) {
             leaf_dir = sortDir(leaf_dir);
           }
-          let tile_entry = queryTile(new DataView(leaf_dir), z2, x2, y);
+          const tile_entry = queryTile(new DataView(leaf_dir), z2, x2, y);
           if (tile_entry) {
-            let resp = yield source.getBytes(tile_entry.offset, tile_entry.length, signal);
+            const resp = yield source.getBytes(tile_entry.offset, tile_entry.length, signal);
             let tile_data = resp.data;
-            let view = new DataView(tile_data);
+            const view = new DataView(tile_data);
             if (view.getUint8(0) == 31 && view.getUint8(1) == 139) {
               tile_data = decompressSync(new Uint8Array(tile_data));
             }
@@ -2435,32 +2437,17 @@ var protomaps = (() => {
     }
     return acc + d;
   }
-  var ENTRY_SIZE_BYTES = 32;
-  var Compression;
-  (function(Compression2) {
-    Compression2[Compression2["Unknown"] = 0] = "Unknown";
-    Compression2[Compression2["None"] = 1] = "None";
-    Compression2[Compression2["Gzip"] = 2] = "Gzip";
-    Compression2[Compression2["Brotli"] = 3] = "Brotli";
-    Compression2[Compression2["Zstd"] = 4] = "Zstd";
-  })(Compression || (Compression = {}));
-  function tryDecompress(buf, compression) {
-    if (compression === 1 || compression === 0) {
-      return buf;
-    } else if (compression === 2) {
-      return decompressSync(new Uint8Array(buf));
-    } else {
-      throw Error("Compression method not supported");
-    }
+  function fflateDecompress(buf, compression) {
+    return __async2(this, null, function* () {
+      if (compression === 1 || compression === 0) {
+        return buf;
+      } else if (compression === 2) {
+        return decompressSync(new Uint8Array(buf));
+      } else {
+        throw Error("Compression method not supported");
+      }
+    });
   }
-  var TileType;
-  (function(TileType2) {
-    TileType2[TileType2["Unknown"] = 0] = "Unknown";
-    TileType2[TileType2["Mvt"] = 1] = "Mvt";
-    TileType2[TileType2["Png"] = 2] = "Png";
-    TileType2[TileType2["Jpeg"] = 3] = "Jpeg";
-    TileType2[TileType2["Webp"] = 4] = "Webp";
-  })(TileType || (TileType = {}));
   var HEADER_SIZE_BYTES = 127;
   function findTile(entries, tileId) {
     let m = 0;
@@ -2500,15 +2487,29 @@ var protomaps = (() => {
           controller = new AbortController();
           signal = controller.signal;
         }
-        const resp = yield fetch(this.url, {
+        let resp = yield fetch(this.url, {
           signal,
           headers: { Range: "bytes=" + offset + "-" + (offset + length - 1) }
         });
-        const contentLength = resp.headers.get("Content-Length");
-        if (!contentLength || +contentLength !== length) {
-          console.error("Content-Length mismatch indicates byte serving not supported; aborting.");
+        if (resp.status === 416 && offset === 0) {
+          const content_range = resp.headers.get("Content-Range");
+          if (!content_range || !content_range.startsWith("bytes */")) {
+            throw Error("Missing content-length on 416 response");
+          }
+          const actual_length = +content_range.substr(8);
+          resp = yield fetch(this.url, {
+            signal,
+            headers: { Range: "bytes=0-" + (actual_length - 1) }
+          });
+        }
+        if (resp.status >= 300) {
+          throw Error("Bad response code: " + resp.status);
+        }
+        const content_length = resp.headers.get("Content-Length");
+        if (resp.status === 200 && (!content_length || +content_length > length)) {
           if (controller)
             controller.abort();
+          throw Error("Server returned no content-length header or content-length exceeding request. Check that your storage backend supports HTTP Byte Serving.");
         }
         const a2 = yield resp.arrayBuffer();
         return {
@@ -2520,21 +2521,30 @@ var protomaps = (() => {
       });
     }
   };
+  function getUint64(v, offset) {
+    const wh = v.getUint32(offset + 4, true);
+    const wl = v.getUint32(offset + 0, true);
+    return wh * Math.pow(2, 32) + wl;
+  }
   function bytesToHeader(bytes, etag) {
     const v = new DataView(bytes);
+    const spec_version = v.getUint8(7);
+    if (spec_version > 3) {
+      throw Error(`Archive is spec version ${spec_version} but this library supports up to spec version 3`);
+    }
     return {
-      specVersion: 3,
-      rootDirectoryOffset: Number(v.getBigUint64(8, true)),
-      rootDirectoryLength: Number(v.getBigUint64(16, true)),
-      jsonMetadataOffset: Number(v.getBigUint64(24, true)),
-      jsonMetadataLength: Number(v.getBigUint64(32, true)),
-      leafDirectoryOffset: Number(v.getBigUint64(40, true)),
-      leafDirectoryLength: Number(v.getBigUint64(48, true)),
-      tileDataOffset: Number(v.getBigUint64(56, true)),
-      tileDataLength: Number(v.getBigUint64(64, true)),
-      numAddressedTiles: Number(v.getBigUint64(72, true)),
-      numTileEntries: Number(v.getBigUint64(80, true)),
-      numTileContents: Number(v.getBigUint64(88, true)),
+      specVersion: spec_version,
+      rootDirectoryOffset: getUint64(v, 8),
+      rootDirectoryLength: getUint64(v, 16),
+      jsonMetadataOffset: getUint64(v, 24),
+      jsonMetadataLength: getUint64(v, 32),
+      leafDirectoryOffset: getUint64(v, 40),
+      leafDirectoryLength: getUint64(v, 48),
+      tileDataOffset: getUint64(v, 56),
+      tileDataLength: getUint64(v, 64),
+      numAddressedTiles: getUint64(v, 72),
+      numTileEntries: getUint64(v, 80),
+      numTileContents: getUint64(v, 88),
       clustered: v.getUint8(96) === 1,
       internalCompression: v.getUint8(97),
       tileCompression: v.getUint8(98),
@@ -2556,23 +2566,23 @@ var protomaps = (() => {
     const numEntries = readVarint(p2);
     const entries = [];
     let lastId = 0;
-    for (let i2 = 0; i2 < numEntries; i2++) {
+    for (let i3 = 0; i3 < numEntries; i3++) {
       const v = readVarint(p2);
       entries.push({ tileId: lastId + v, offset: 0, length: 0, runLength: 1 });
       lastId += v;
     }
-    for (let i2 = 0; i2 < numEntries; i2++) {
-      entries[i2].runLength = readVarint(p2);
+    for (let i3 = 0; i3 < numEntries; i3++) {
+      entries[i3].runLength = readVarint(p2);
     }
-    for (let i2 = 0; i2 < numEntries; i2++) {
-      entries[i2].length = readVarint(p2);
+    for (let i3 = 0; i3 < numEntries; i3++) {
+      entries[i3].length = readVarint(p2);
     }
-    for (let i2 = 0; i2 < numEntries; i2++) {
+    for (let i3 = 0; i3 < numEntries; i3++) {
       const v = readVarint(p2);
-      if (v === 0 && i2 > 0) {
-        entries[i2].offset = entries[i2 - 1].offset + entries[i2 - 1].length;
+      if (v === 0 && i3 > 0) {
+        entries[i3].offset = entries[i3 - 1].offset + entries[i3 - 1].length;
       } else {
-        entries[i2].offset = v - 1;
+        entries[i3].offset = v - 1;
       }
     }
     return entries;
@@ -2588,11 +2598,11 @@ var protomaps = (() => {
     }
     return 3;
   }
-  var VersionMismatch = class extends Error {
+  var EtagMismatch = class extends Error {
   };
-  function getHeaderAndRoot(source, prefetch) {
+  function getHeaderAndRoot(source, decompress, prefetch, current_etag) {
     return __async2(this, null, function* () {
-      let resp = yield source.getBytes(0, 16384);
+      const resp = yield source.getBytes(0, 16384);
       const v = new DataView(resp.data);
       if (v.getUint16(0, true) !== 19792) {
         throw new Error("Wrong magic number for PMTiles archive");
@@ -2601,23 +2611,28 @@ var protomaps = (() => {
         return [yield v2_default.getHeader(source)];
       }
       const headerData = resp.data.slice(0, HEADER_SIZE_BYTES);
-      const header = bytesToHeader(headerData, resp.etag);
+      let resp_etag = resp.etag;
+      if (current_etag && resp.etag != current_etag) {
+        console.warn("ETag conflict detected; your HTTP server might not support content-based ETag headers. ETags disabled for " + source.getKey());
+        resp_etag = void 0;
+      }
+      const header = bytesToHeader(headerData, resp_etag);
       if (prefetch) {
         const rootDirData = resp.data.slice(header.rootDirectoryOffset, header.rootDirectoryOffset + header.rootDirectoryLength);
         const dirKey = source.getKey() + "|" + (header.etag || "") + "|" + header.rootDirectoryOffset + "|" + header.rootDirectoryLength;
-        const rootDir = deserializeIndex(tryDecompress(rootDirData, header.internalCompression));
-        return [header, [dirKey, ENTRY_SIZE_BYTES * rootDir.length, rootDir]];
+        const rootDir = deserializeIndex(yield decompress(rootDirData, header.internalCompression));
+        return [header, [dirKey, rootDir.length, rootDir]];
       }
       return [header, void 0];
     });
   }
-  function getDirectory(source, offset, length, header) {
+  function getDirectory(source, decompress, offset, length, header) {
     return __async2(this, null, function* () {
-      let resp = yield source.getBytes(offset, length);
+      const resp = yield source.getBytes(offset, length);
       if (header.etag && header.etag !== resp.etag) {
-        throw new VersionMismatch("ETag mismatch: " + header.etag);
+        throw new EtagMismatch(resp.etag);
       }
-      const data = tryDecompress(resp.data, header.internalCompression);
+      const data = yield decompress(resp.data, header.internalCompression);
       const directory = deserializeIndex(data);
       if (directory.length === 0) {
         throw new Error("Empty directory is invalid");
@@ -2626,14 +2641,14 @@ var protomaps = (() => {
     });
   }
   var SharedPromiseCache = class {
-    constructor(maxSizeBytes = 64e6, prefetch = true) {
-      this.cache = new Map();
-      this.sizeBytes = 0;
-      this.maxSizeBytes = maxSizeBytes;
+    constructor(maxCacheEntries = 100, prefetch = true, decompress = fflateDecompress) {
+      this.cache = /* @__PURE__ */ new Map();
+      this.maxCacheEntries = maxCacheEntries;
       this.counter = 1;
       this.prefetch = prefetch;
+      this.decompress = decompress;
     }
-    getHeader(source) {
+    getHeader(source, current_etag) {
       return __async2(this, null, function* () {
         const cacheKey = source.getKey();
         if (this.cache.has(cacheKey)) {
@@ -2642,15 +2657,10 @@ var protomaps = (() => {
           return data;
         }
         const p2 = new Promise((resolve, reject) => {
-          getHeaderAndRoot(source, this.prefetch).then((res) => {
-            if (this.cache.has(cacheKey)) {
-              this.cache.get(cacheKey).size = HEADER_SIZE_BYTES;
-              this.sizeBytes += HEADER_SIZE_BYTES;
-            }
+          getHeaderAndRoot(source, this.decompress, this.prefetch, current_etag).then((res) => {
             if (res[1]) {
               this.cache.set(res[1][0], {
                 lastUsed: this.counter++,
-                size: res[1][1],
                 data: Promise.resolve(res[1][2])
               });
             }
@@ -2660,7 +2670,7 @@ var protomaps = (() => {
             reject(e2);
           });
         });
-        this.cache.set(cacheKey, { lastUsed: this.counter++, data: p2, size: 0 });
+        this.cache.set(cacheKey, { lastUsed: this.counter++, data: p2 });
         return p2;
       });
     }
@@ -2673,18 +2683,14 @@ var protomaps = (() => {
           return data;
         }
         const p2 = new Promise((resolve, reject) => {
-          getDirectory(source, offset, length, header).then((directory) => {
+          getDirectory(source, this.decompress, offset, length, header).then((directory) => {
             resolve(directory);
-            if (this.cache.has(cacheKey)) {
-              this.cache.get(cacheKey).size = ENTRY_SIZE_BYTES * directory.length;
-              this.sizeBytes += ENTRY_SIZE_BYTES * directory.length;
-            }
             this.prune();
           }).catch((e2) => {
             reject(e2);
           });
         });
-        this.cache.set(cacheKey, { lastUsed: this.counter++, data: p2, size: 0 });
+        this.cache.set(cacheKey, { lastUsed: this.counter++, data: p2 });
         return p2;
       });
     }
@@ -2699,24 +2705,22 @@ var protomaps = (() => {
         const p2 = new Promise((resolve, reject) => {
           source.getBytes(offset, length).then((resp) => {
             if (header.etag && header.etag !== resp.etag) {
-              throw new VersionMismatch("ETag mismatch: " + header.etag);
+              throw new EtagMismatch(resp.etag);
             }
             resolve(resp.data);
             if (this.cache.has(cacheKey)) {
-              this.cache.get(cacheKey).size = resp.data.byteLength;
-              this.sizeBytes += resp.data.byteLength;
             }
             this.prune();
           }).catch((e2) => {
             reject(e2);
           });
         });
-        this.cache.set(cacheKey, { lastUsed: this.counter++, data: p2, size: 0 });
+        this.cache.set(cacheKey, { lastUsed: this.counter++, data: p2 });
         return p2;
       });
     }
     prune() {
-      while (this.sizeBytes > this.maxSizeBytes) {
+      if (this.cache.size >= this.maxCacheEntries) {
         let minUsed = Infinity;
         let minKey = void 0;
         this.cache.forEach((cache_value, key) => {
@@ -2726,38 +2730,34 @@ var protomaps = (() => {
           }
         });
         if (minKey) {
-          this.sizeBytes -= this.cache.get(minKey).size;
           this.cache.delete(minKey);
         }
       }
     }
-    invalidate(source) {
-      this.cache.delete(source.getKey());
+    invalidate(source, current_etag) {
+      return __async2(this, null, function* () {
+        this.cache.delete(source.getKey());
+        yield this.getHeader(source, current_etag);
+      });
     }
   };
   var PMTiles = class {
-    constructor(source, cache) {
+    constructor(source, cache, decompress) {
       if (typeof source === "string") {
         this.source = new FetchSource(source);
       } else {
         this.source = source;
+      }
+      if (decompress) {
+        this.decompress = decompress;
+      } else {
+        this.decompress = fflateDecompress;
       }
       if (cache) {
         this.cache = cache;
       } else {
         this.cache = new SharedPromiseCache();
       }
-    }
-    root_entries() {
-      return __async2(this, null, function* () {
-        const header = yield this.cache.getHeader(this.source);
-        if (header.specVersion < 3) {
-          return [];
-        }
-        let d_o = header.rootDirectoryOffset;
-        let d_l = header.rootDirectoryLength;
-        return yield this.cache.getDirectory(this.source, d_o, d_l, header);
-      });
     }
     getHeader() {
       return __async2(this, null, function* () {
@@ -2776,17 +2776,17 @@ var protomaps = (() => {
         }
         let d_o = header.rootDirectoryOffset;
         let d_l = header.rootDirectoryLength;
-        for (let depth = 0; depth < 5; depth++) {
+        for (let depth = 0; depth <= 3; depth++) {
           const directory = yield this.cache.getDirectory(this.source, d_o, d_l, header);
           const entry = findTile(directory, tile_id);
           if (entry) {
             if (entry.runLength > 0) {
               const resp = yield this.source.getBytes(header.tileDataOffset + entry.offset, entry.length, signal);
               if (header.etag && header.etag !== resp.etag) {
-                throw new VersionMismatch("ETag mismatch: " + header.etag);
+                throw new EtagMismatch(resp.etag);
               }
               return {
-                data: tryDecompress(resp.data, header.tileCompression),
+                data: yield this.decompress(resp.data, header.tileCompression),
                 cacheControl: resp.cacheControl,
                 expires: resp.expires
               };
@@ -2806,8 +2806,8 @@ var protomaps = (() => {
         try {
           return yield this.getZxyAttempt(z2, x2, y, signal);
         } catch (e2) {
-          if (e2 instanceof VersionMismatch) {
-            this.cache.invalidate(this.source);
+          if (e2 instanceof EtagMismatch) {
+            this.cache.invalidate(this.source, e2.message);
             return yield this.getZxyAttempt(z2, x2, y, signal);
           } else {
             throw e2;
@@ -2820,9 +2820,9 @@ var protomaps = (() => {
         const header = yield this.cache.getHeader(this.source);
         const resp = yield this.source.getBytes(header.jsonMetadataOffset, header.jsonMetadataLength);
         if (header.etag && header.etag !== resp.etag) {
-          throw new VersionMismatch("Etag mismatch: " + header.etag);
+          throw new EtagMismatch(resp.etag);
         }
-        const decompressed = tryDecompress(resp.data, header.internalCompression);
+        const decompressed = yield this.decompress(resp.data, header.internalCompression);
         const dec = new TextDecoder("utf-8");
         return JSON.parse(dec.decode(decompressed));
       });
@@ -2832,8 +2832,8 @@ var protomaps = (() => {
         try {
           return yield this.getMetadataAttempt();
         } catch (e2) {
-          if (e2 instanceof VersionMismatch) {
-            this.cache.invalidate(this.source);
+          if (e2 instanceof EtagMismatch) {
+            this.cache.invalidate(this.source, e2.message);
             return yield this.getMetadataAttempt();
           } else {
             throw e2;
@@ -2898,18 +2898,18 @@ var protomaps = (() => {
     for (let [key, value] of Object.entries(v.layers)) {
       let features = [];
       let layer = value;
-      for (let i2 = 0; i2 < layer.length; i2++) {
-        let loaded = loadGeomAndBbox(layer.feature(i2)._pbf, layer.feature(i2)._geometry, tileSize / layer.extent);
+      for (let i3 = 0; i3 < layer.length; i3++) {
+        let loaded = loadGeomAndBbox(layer.feature(i3)._pbf, layer.feature(i3)._geometry, tileSize / layer.extent);
         let numVertices = 0;
         for (let part of loaded.geom)
           numVertices += part.length;
         features.push({
-          id: layer.feature(i2).id,
-          geomType: layer.feature(i2).type,
+          id: layer.feature(i3).id,
+          geomType: layer.feature(i3).type,
           geom: loaded.geom,
           numVertices,
           bbox: loaded.bbox,
-          props: layer.feature(i2).properties
+          props: layer.feature(i3).properties
         });
       }
       result.set(key, features);
@@ -3008,8 +3008,8 @@ var protomaps = (() => {
   }
   function isInRing(point, ring) {
     var inside = false;
-    for (var i2 = 0, j = ring.length - 1; i2 < ring.length; j = i2++) {
-      var xi = ring[i2].x, yi = ring[i2].y;
+    for (var i3 = 0, j = ring.length - 1; i3 < ring.length; j = i3++) {
+      var xi = ring[i3].x, yi = ring[i3].y;
       var xj = ring[j].x, yj = ring[j].y;
       var intersect = yi > point.y != yj > point.y && point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi;
       if (intersect)
@@ -3019,10 +3019,10 @@ var protomaps = (() => {
   }
   function isCCW(ring) {
     var area = 0;
-    for (var i2 = 0; i2 < ring.length; i2++) {
-      let j = (i2 + 1) % ring.length;
-      area += ring[i2].x * ring[j].y;
-      area -= ring[j].x * ring[i2].y;
+    for (var i3 = 0; i3 < ring.length; i3++) {
+      let j = (i3 + 1) % ring.length;
+      area += ring[i3].x * ring[j].y;
+      area -= ring[j].x * ring[i3].y;
     }
     return area < 0;
   }
@@ -3053,8 +3053,8 @@ var protomaps = (() => {
   function pointMinDistToLines(point, geom) {
     let min = Infinity;
     for (let l2 of geom) {
-      for (var i2 = 0; i2 < l2.length - 1; i2++) {
-        let dist = Math.sqrt(distToSegmentSquared(point, l2[i2], l2[i2 + 1]));
+      for (var i3 = 0; i3 < l2.length - 1; i3++) {
+        let dist = Math.sqrt(distToSegmentSquared(point, l2[i3], l2[i3 + 1]));
         if (dist < min)
           min = dist;
       }
@@ -3270,8 +3270,8 @@ var protomaps = (() => {
       return __async(this, null, function* () {
         let needed = this.dataTilesForBounds(display_zoom, bounds);
         let result = yield Promise.all(needed.map((tt) => this.tileCache.get(tt.data_tile)));
-        return result.map((data, i2) => {
-          let tt = needed[i2];
+        return result.map((data, i3) => {
+          let tt = needed[i3];
           return {
             data,
             z: display_zoom,
@@ -3881,7 +3881,7 @@ var protomaps = (() => {
       const t2 = Array.from(f2).slice(1);
       return [...t2.slice(0, 3).map((t3) => parseInt(_(t3, 2), 16)), parseInt(_(t2[3] || "f", 2), 16) / 255];
     }
-    const p2 = i.exec(e2);
+    const p2 = i2.exec(e2);
     if (p2) {
       const t2 = Array.from(p2).slice(1);
       return [...t2.slice(0, 3).map((t3) => parseInt(t3, 16)), parseInt(t2[3] || "ff", 16) / 255];
@@ -3912,7 +3912,7 @@ var protomaps = (() => {
   }, {});
   var _ = (t2, n2) => Array.from(Array(n2)).map(() => t2).join("");
   var s = new RegExp(`^#${_("([a-f0-9])", 3)}([a-f0-9])?$`, "i");
-  var i = new RegExp(`^#${_("([a-f0-9]{2})", 3)}([a-f0-9]{2})?$`, "i");
+  var i2 = new RegExp(`^#${_("([a-f0-9]{2})", 3)}([a-f0-9]{2})?$`, "i");
   var a = new RegExp(`^rgba?\\(\\s*(\\d+)\\s*${_(",\\s*(\\d+)\\s*", 2)}(?:,\\s*([\\d.]+))?\\s*\\)$`, "i");
   var c = /^hsla?\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%(?:\s*,\s*([\d.]+))?\s*\)$/i;
   var u = /^[a-z]+$/i;
@@ -3922,17 +3922,17 @@ var protomaps = (() => {
     if (n2 === 0)
       return [e2, e2, e2].map(f);
     const o2 = (t2 % 360 + 360) % 360 / 60, _2 = (1 - Math.abs(2 * e2 - 1)) * (n2 / 100), s2 = _2 * (1 - Math.abs(o2 % 2 - 1));
-    let i2 = 0, a2 = 0, c2 = 0;
-    o2 >= 0 && o2 < 1 ? (i2 = _2, a2 = s2) : o2 >= 1 && o2 < 2 ? (i2 = s2, a2 = _2) : o2 >= 2 && o2 < 3 ? (a2 = _2, c2 = s2) : o2 >= 3 && o2 < 4 ? (a2 = s2, c2 = _2) : o2 >= 4 && o2 < 5 ? (i2 = s2, c2 = _2) : o2 >= 5 && o2 < 6 && (i2 = _2, c2 = s2);
+    let i3 = 0, a2 = 0, c2 = 0;
+    o2 >= 0 && o2 < 1 ? (i3 = _2, a2 = s2) : o2 >= 1 && o2 < 2 ? (i3 = s2, a2 = _2) : o2 >= 2 && o2 < 3 ? (a2 = _2, c2 = s2) : o2 >= 3 && o2 < 4 ? (a2 = s2, c2 = _2) : o2 >= 4 && o2 < 5 ? (i3 = s2, c2 = _2) : o2 >= 5 && o2 < 6 && (i3 = _2, c2 = s2);
     const u2 = e2 - _2 / 2;
-    return [i2 + u2, a2 + u2, c2 + u2].map(f);
+    return [i3 + u2, a2 + u2, c2 + u2].map(f);
   };
   function p(t2) {
-    const [n2, e2, o2, _2] = r(t2).map((t3, n3) => n3 === 3 ? t3 : t3 / 255), s2 = Math.max(n2, e2, o2), i2 = Math.min(n2, e2, o2), a2 = (s2 + i2) / 2;
-    if (s2 === i2)
+    const [n2, e2, o2, _2] = r(t2).map((t3, n3) => n3 === 3 ? t3 : t3 / 255), s2 = Math.max(n2, e2, o2), i3 = Math.min(n2, e2, o2), a2 = (s2 + i3) / 2;
+    if (s2 === i3)
       return [0, 0, a2, _2];
-    const c2 = s2 - i2;
-    return [60 * (n2 === s2 ? (e2 - o2) / c2 + (e2 < o2 ? 6 : 0) : e2 === s2 ? (o2 - n2) / c2 + 2 : (n2 - e2) / c2 + 4), a2 > 0.5 ? c2 / (2 - s2 - i2) : c2 / (s2 + i2), a2, _2];
+    const c2 = s2 - i3;
+    return [60 * (n2 === s2 ? (e2 - o2) / c2 + (e2 < o2 ? 6 : 0) : e2 === s2 ? (o2 - n2) / c2 + 2 : (n2 - e2) / c2 + 4), a2 > 0.5 ? c2 / (2 - s2 - i3) : c2 / (s2 + i3), a2, _2];
   }
   function z(n2, r2, e2, o2) {
     return `hsla(${(n2 % 360).toFixed()}, ${t(0, 100, 100 * r2).toFixed()}%, ${t(0, 100, 100 * e2).toFixed()}%, ${parseFloat(t(0, 1, o2).toFixed(3))})`;
@@ -4080,7 +4080,7 @@ var protomaps = (() => {
   var import_point_geometry5 = __toModule(require_point_geometry());
   var linelabel = (pts, max_angle_delta, targetLen) => {
     var chunks = [];
-    var a2, b, c2, i2 = 0, n2 = 0, d = 0;
+    var a2, b, c2, i3 = 0, n2 = 0, d = 0;
     var abmag = 0, bcmag = 0;
     var abx = 0, aby = 0;
     var bcx = 0, bcy = 0;
@@ -4102,10 +4102,10 @@ var protomaps = (() => {
       ];
     }
     abmag = Math.sqrt(Math.pow(pts[1].x - pts[0].x, 2) + Math.pow(pts[1].y - pts[0].y, 2));
-    for (i2 = 1, n2 = pts.length - 1; i2 < n2; i2++) {
-      a2 = pts[i2 - 1];
-      b = pts[i2];
-      c2 = pts[i2 + 1];
+    for (i3 = 1, n2 = pts.length - 1; i3 < n2; i3++) {
+      a2 = pts[i3 - 1];
+      b = pts[i3];
+      c2 = pts[i3 + 1];
       abx = b.x - a2.x;
       aby = b.y - a2.y;
       bcx = c2.x - b.x;
@@ -4118,20 +4118,20 @@ var protomaps = (() => {
           length: d - d_start,
           beginDistance: d_start,
           beginIndex: i_start,
-          endIndex: i2 + 1,
+          endIndex: i3 + 1,
           endDistance: d
         });
-        i_start = i2;
+        i_start = i3;
         d_start = d;
       }
       abmag = bcmag;
     }
-    if (i2 - i_start > 0) {
+    if (i3 - i_start > 0) {
       chunks.push({
         length: d - d_start + bcmag,
         beginIndex: i_start,
         beginDistance: d_start,
-        endIndex: i2 + 1,
+        endIndex: i3 + 1,
         endDistance: d + bcmag
       });
     }
@@ -4150,10 +4150,10 @@ var protomaps = (() => {
           let start = new import_point_geometry5.default(ls[segment.beginIndex].x, ls[segment.beginIndex].y);
           let end = ls[segment.endIndex - 1];
           let normalized = new import_point_geometry5.default((end.x - start.x) / segment.length, (end.y - start.y) / segment.length);
-          for (var i2 = cellSize; i2 < segment.length - minimum; i2 += repeatDistance) {
+          for (var i3 = cellSize; i3 < segment.length - minimum; i3 += repeatDistance) {
             candidates.push({
-              start: start.add(normalized.mult(i2)),
-              end: start.add(normalized.mult(i2 + minimum))
+              start: start.add(normalized.mult(i3)),
+              end: start.add(normalized.mult(i3 + minimum))
             });
           }
         }
@@ -4166,8 +4166,8 @@ var protomaps = (() => {
     let dy = b.y - a2.y;
     let dist = Math.sqrt(Math.pow(b.x - a2.x, 2) + Math.pow(b.y - a2.y, 2));
     let retval = [];
-    for (var i2 = 0; i2 < length + spacing; i2 += 2 * spacing) {
-      let factor = i2 * 1 / dist;
+    for (var i3 = 0; i3 < length + spacing; i3 += 2 * spacing) {
+      let factor = i3 * 1 / dist;
       retval.push({ x: a2.x + factor * dx, y: a2.y + factor * dy });
     }
     return retval;
@@ -4337,9 +4337,9 @@ var protomaps = (() => {
       if (stops.length < 1)
         return 0;
       let retval = output0;
-      for (let i2 = 0; i2 < stops.length; i2++) {
-        if (z2 >= stops[i2][0])
-          retval = stops[i2][1];
+      for (let i3 = 0; i3 < stops.length; i3++) {
+        if (z2 >= stops[i3][0])
+          retval = stops[i3][1];
       }
       return retval;
     };
@@ -4548,8 +4548,8 @@ var protomaps = (() => {
       let height = bbox.maxY - bbox.minY;
       let draws = [{ draw: label.draw, translate: { x: 0, y: 0 } }];
       let newGeom = [[new import_point_geometry6.default(geom[0][0].x, geom[0][0].y + height)]];
-      for (let i2 = 1; i2 < this.list.length; i2++) {
-        labels = this.list[i2].place(layout, newGeom, feature);
+      for (let i3 = 1; i3 < this.list.length; i3++) {
+        labels = this.list[i3].place(layout, newGeom, feature);
         if (labels) {
           label = labels[0];
           bbox = mergeBbox(bbox, label.bboxes[0]);
@@ -4590,8 +4590,8 @@ var protomaps = (() => {
       let anchor = label.anchor;
       let bbox = label.bboxes[0];
       let draws = [label.draw];
-      for (let i2 = 1; i2 < this.list.length; i2++) {
-        labels = this.list[i2].place(layout, geom, feature);
+      for (let i3 = 1; i3 < this.list.length; i3++) {
+        labels = this.list[i3].place(layout, geom, feature);
         if (!labels)
           return void 0;
         label = labels[0];
@@ -5895,8 +5895,8 @@ var protomaps = (() => {
     let width = 0;
     let height = 0;
     for (const box of boxes) {
-      for (let i2 = spaces.length - 1; i2 >= 0; i2--) {
-        const space = spaces[i2];
+      for (let i3 = spaces.length - 1; i3 >= 0; i3--) {
+        const space = spaces[i3];
         if (box.w > space.w || box.h > space.h)
           continue;
         box.x = space.x;
@@ -5905,8 +5905,8 @@ var protomaps = (() => {
         width = Math.max(width, box.x + box.w);
         if (box.w === space.w && box.h === space.h) {
           const last = spaces.pop();
-          if (i2 < spaces.length)
-            spaces[i2] = last;
+          if (i3 < spaces.length)
+            spaces[i3] = last;
         } else if (box.h === space.h) {
           space.x += box.w;
           space.w -= box.w;
@@ -6077,8 +6077,8 @@ var protomaps = (() => {
     } else if (obj[0] == "interpolate" && obj[1][0] == "exponential" && obj[2] == "zoom") {
       let slice = obj.slice(3);
       let stops = [];
-      for (var i2 = 0; i2 < slice.length; i2 += 2) {
-        stops.push([slice[i2], slice[i2 + 1]]);
+      for (var i3 = 0; i3 < slice.length; i3 += 2) {
+        stops.push([slice[i3], slice[i3 + 1]]);
       }
       return (z2) => {
         return exp(obj[1][1], stops)(z2 - 1);
@@ -6091,9 +6091,9 @@ var protomaps = (() => {
         if (typeof val === "number") {
           if (val < slice[1])
             return slice[0];
-          for (i2 = 1; i2 < slice.length; i2 += 2) {
-            if (val <= slice[i2])
-              return slice[i2 + 1];
+          for (i3 = 1; i3 < slice.length; i3 += 2) {
+            if (val <= slice[i3])
+              return slice[i3 + 1];
           }
         }
         return slice[slice.length - 1];

@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build !js
-// +build !js
 
 // Package tun creates a tuntap device, working around OS-specific
 // quirks if necessary.
@@ -31,6 +30,9 @@ func New(logf logger.Logf, tunName string) (tun.Device, string, error) {
 	if strings.HasPrefix(tunName, "tap:") {
 		if runtime.GOOS != "linux" {
 			return nil, "", errors.New("tap only works on Linux")
+		}
+		if createTAP == nil { // if the ts_omit_tap tag is used
+			return nil, "", errors.New("tap is not supported in this build")
 		}
 		f := strings.Split(tunName, ":")
 		var tapName, bridgeName string

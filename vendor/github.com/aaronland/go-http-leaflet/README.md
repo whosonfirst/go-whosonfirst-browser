@@ -1,6 +1,6 @@
 # go-http-leaflet
 
-`go-http-leaflet` is an HTTP middleware package for including Leaflet.js (v1.7.1) assets in web applications.
+`go-http-leaflet` is an HTTP middleware package for including Leaflet.js (v1.9.3) assets in web applications.
 
 ## Documentation
 
@@ -13,7 +13,7 @@
 
 This package doesn't specify any code or methods for how Leaflet.js is used. It only provides method for making Leaflet.js available to existing applications.
 
-By default this package only appends assets and resources for Leaflet.js but it also includes the necessary assets to enable the use of the [leaflet-hash](https://github.com/mlevans/leaflet-hash), [Leaflet.fullscreen](https://github.com/Leaflet/Leaflet.fullscreen) and [Leaflet.Draw](https://leaflet.github.io/Leaflet.draw/docs/leaflet-draw-latest.html) plugins. These are enabled by invoking the corresponding `EnableHash`, `EnableFullscreen` and `EnableDraw` methods on the `leaflet.LeafletOptions` instance.
+By default this package only appends assets and resources for Leaflet.js but it also includes the necessary assets to enable the use of the [leaflet-hash](https://github.com/mlevans/leaflet-hash), [Leaflet.fullscreen](https://github.com/Leaflet/Leaflet.fullscreen) and [leaflet-geoman](https://github.com/geoman-io/leaflet-geoman) plugins. These are enabled by invoking the corresponding `EnableHash`, `EnableFullscreen` and `EnableDraw` methods on the `leaflet.LeafletOptions` instance.
 
 ## Example
 
@@ -80,19 +80,9 @@ The when you open the URL `http://localhost:8080` in a web browser you should se
 
 ![](docs/images/go-http-leaflet-example.png)
 
-### Notes
-
-The default `leaflet.draw.css` causes sprites to be misaligned, at least when using Firefox. I have found the following CSS declaration to fix the problem:
-
-```
-.leaflet-draw-toolbar a {
-	background-size: 300px 30px !important;
-}
-```
-
 ## See also
 
 * https://leafletjs.com
 * https://github.com/mlevans/leaflet-hash
 * https://github.com/Leaflet/Leaflet.fullscreen
-* https://leaflet.github.io/Leaflet.draw/docs/leaflet-draw-latest.html
+* https://github.com/geoman-io/leaflet-geoman
