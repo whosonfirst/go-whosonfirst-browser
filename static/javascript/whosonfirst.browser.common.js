@@ -8,7 +8,7 @@ whosonfirst.browser.common = (function(){
     var self = {
 
 	'init_map': function(){
-		
+
 	    var map_svg = document.getElementById("map-svg");
 
 	    if (map_svg){

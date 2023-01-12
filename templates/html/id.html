@@ -56,7 +56,7 @@
 
 	  <div class="container">
 
-	      <div id="map" class="row">
+	      <div id="map" class="row" data-map-provider="{{ .MapProvider }}">
 		  <img src="{{ .Endpoints.Svg }}{{ .URI }}" style="width:inherit; height:inherit; max-height:90%; max-width:90%;" id="map-svg" />
 	      </div>
 
