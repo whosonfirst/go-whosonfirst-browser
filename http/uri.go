@@ -22,20 +22,18 @@ type URI struct {
 	IsAlternate bool
 }
 
-func ParseURIFromRequest(req *go_http.Request, r reader.Reader) (*URI, error, int) {
-
-	ctx := req.Context()
+func DerivePathFromRequest(req *go_http.Request) (string, error, int) {
 
 	path, err := sanitize.GetString(req, "id")
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to derive ?id= parameter, %w", err), go_http.StatusBadRequest
+		return "", fmt.Errorf("Failed to derive ?id= parameter, %w", err), go_http.StatusBadRequest
 	}
 
 	resource, err := sanitize.GetString(req, "resource")
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to derive ?resource= parameter, %w", err), go_http.StatusBadRequest
+		return "", fmt.Errorf("Failed to derive ?resource= parameter, %w", err), go_http.StatusBadRequest
 	}
 
 	if path == "" && resource != "" {
@@ -43,7 +41,7 @@ func ParseURIFromRequest(req *go_http.Request, r reader.Reader) (*URI, error, in
 		wof_uri, err := webfinger.DeriveWhosOnFirstURIFromResource(resource)
 
 		if err != nil {
-
+			return "", fmt.Errorf("Failed to derive URI from WebFinger resource, %w", err), go_http.StatusBadRequest
 		}
 
 		path = wof_uri
@@ -51,6 +49,19 @@ func ParseURIFromRequest(req *go_http.Request, r reader.Reader) (*URI, error, in
 
 	if path == "" {
 		path = req.URL.Path
+	}
+
+	return path, nil, 0
+}
+
+func ParseURIFromRequest(req *go_http.Request, r reader.Reader) (*URI, error, int) {
+
+	ctx := req.Context()
+
+	path, err, status := DerivePathFromRequest(req)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive path, %w", err), status
 	}
 
 	return ParseURIFromPath(ctx, path, r)

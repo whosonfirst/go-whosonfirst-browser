@@ -1,12 +1,14 @@
 package www
 
 import (
-	"github.com/sfomuseum/go-http-auth"
-	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/sfomuseum/go-http-auth"
+	"github.com/whosonfirst/go-reader"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
+	"github.com/whosonfirst/go-whosonfirst-uri"
 )
 
 type EditGeometryHandlerOptions struct {
@@ -19,15 +21,13 @@ type EditGeometryHandlerOptions struct {
 
 type EditGeometryVars struct {
 	MapProvider string
-	Geometry    string
 	Id          int64
+	// To do: Support alternate geometries
 }
 
 func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
-
-		// ctx := req.Context()
 
 		_, err := opts.Authenticator.GetAccountForRequest(req)
 
@@ -36,7 +36,14 @@ func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error)
 			return
 		}
 
-		uri, err, _ := wof_http.ParseURIFromRequest(req, opts.Reader)
+		path, err, status := wof_http.DerivePathFromRequest(req)
+
+		if err != nil {
+			http.Error(rsp, err.Error(), status)
+			return
+		}
+
+		id, _, err := uri.ParseURI(path)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
@@ -45,7 +52,7 @@ func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error)
 
 		vars := EditGeometryVars{
 			MapProvider: opts.MapProvider,
-			Id:          uri.Id,
+			Id:          id,
 		}
 
 		RenderTemplate(rsp, opts.Template, vars)
