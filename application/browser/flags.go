@@ -112,6 +112,10 @@ var enable_api bool
 var path_api_deprecate string
 var path_api_cessate string
 
+const PathAPIEditGeometry string = "path-api-edit-geometry"
+
+var path_api_edit_geometry string
+
 var search_database_uri string
 
 // A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.
@@ -169,6 +173,11 @@ var path_protomaps_tiles string
 
 var path_search_api string
 var path_search_html string
+
+const PathEditGeometry string = "path-edit-geometry"
+const PathEditGeometryDefault string = "/geometry/"
+
+var path_edit_geometry string
 
 var path_id string
 
@@ -261,23 +270,27 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.StringVar(&path_id, "path-id", "/id/", "The URL that Who's On First documents should be served from.")
 
+	fs.StringVar(&path_edit_geometry, PathEditGeometry, PathEditGeometryDefault, "...")
+
 	fs.IntVar(&navplace_max_features, "navplace-max-features", 3, "The maximum number of features to allow in a /navplace/{ID} URI string.")
 
 	fs.BoolVar(&enable_cors, "enable-cors", true, "A boolean flag to enable CORS headers")
 	fs.Var(&cors_origins, "cors-origin", "One or more hosts to restrict CORS support to on the API endpoint. If no origins are defined (and -cors is enabled) then the server will default to all hosts.")
 
-	fs.StringVar(&authenticator_uri, "authenticator-uri", "null://", "A valid sfomuseum/go-http-auth URI.")
+	fs.StringVar(&authenticator_uri, "authenticator-uri", "none://", "A valid sfomuseum/go-http-auth URI.")
 
 	fs.StringVar(&github_accesstoken_uri, "github-accesstoken-uri", "", "A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.")
 
 	fs.StringVar(&webfinger_hostname, WebFingerHostname, "", "An optional hostname to use for WebFinger URLs.")
 
-	/*
-		fs.BoolVar(&enable_api, "enable-api", false, "Enable the API endpoints")
-		fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
-		fs.StringVar(&path_api_cessate, "path-api-cessate", "/api/cessate/", "...")
-		fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
-	*/
+	// API edit/write stuff
+
+	fs.BoolVar(&enable_api, "enable-api", false, "Enable the API endpoints")
+	fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
+	fs.StringVar(&path_api_cessate, "path-api-cessate", "/api/cessate/", "...")
+	fs.StringVar(&path_api_edit_geometry, PathAPIEditGeometry, "/api/geometry/", "...")
+
+	fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
 
 	err := provider.AppendProviderFlags(fs)
 

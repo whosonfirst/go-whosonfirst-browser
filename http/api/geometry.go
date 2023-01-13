@@ -21,7 +21,7 @@ type UpdateGeometryHandlerOptions struct {
 	Logger        *log.Logger
 }
 
-func UpdateGeometryHandler(opts *CessateFeatureHandlerOptions) (http.Handler, error) {
+func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 

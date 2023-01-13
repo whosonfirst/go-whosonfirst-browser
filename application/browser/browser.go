@@ -583,6 +583,28 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, static_prefix)
 		}
 
+		// Edit geometry
+
+		geom_t := t.Lookup("geometry")
+
+		if geom_t == nil {
+			return fmt.Errorf("Failed to load 'geometry' template")
+		}
+
+		geom_opts := &www.EditGeometryHandlerOptions{
+			Authenticator: authenticator,
+			MapProvider:   map_provider.Scheme(),
+			Template:      geom_t,
+			Logger:        logger,
+			Reader:        cr,
+		}
+
+		geom_handler, err := www.EditGeometryHandler(geom_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create edit geometry handler, %w", err)
+		}
+
 		maps_opts := maps.DefaultMapsOptions()
 
 		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
@@ -598,11 +620,19 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, static_prefix)
-		search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, static_prefix)
+		mux.Handle(path_id, id_handler)
+
+		if enable_search_html {
+			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, static_prefix)
+			mux.Handle(path_search_html, search_handler)
+		}
+
+		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, map_provider, maps_opts, static_prefix)
+		mux.Handle(path_edit_geometry, geom_handler)
+
+		// log.Printf("Enable edit geometry handler at %s", path_edit_geometry)
 
 		mux.Handle("/", index_handler)
-		mux.Handle(path_id, id_handler)
-		mux.Handle(path_search_html, search_handler)
 
 		null_handler := www.NewNullHandler()
 
@@ -643,6 +673,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create multi writer, %w", err)
 		}
 
+		// Deprecate a record
+
 		deprecate_opts := &api.DeprecateFeatureHandlerOptions{
 			Reader:        cr,
 			Logger:        logger,
@@ -659,6 +691,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		deprecate_handler = authenticator.WrapHandler(deprecate_handler)
 		mux.Handle(path_api_deprecate, deprecate_handler)
+
+		// Mark a record as ceased
 
 		cessate_opts := &api.CessateFeatureHandlerOptions{
 			Reader:        cr,
@@ -677,6 +711,24 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		cessate_handler = authenticator.WrapHandler(cessate_handler)
 		mux.Handle(path_api_cessate, cessate_handler)
 
+		// Edit geometry
+
+		geom_opts := &api.UpdateGeometryHandlerOptions{
+			Reader:        cr,
+			Logger:        logger,
+			Authenticator: authenticator,
+			Exporter:      ex,
+			Writer:        multi_wr,
+		}
+
+		geom_handler, err := api.UpdateGeometryHandler(geom_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create cessate feature handler, %w", err)
+		}
+
+		geom_handler = authenticator.WrapHandler(geom_handler)
+		mux.Handle(path_api_edit_geometry, geom_handler)
 	}
 
 	s, err := server.NewServer(ctx, server_uri)
