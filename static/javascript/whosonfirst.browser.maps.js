@@ -5,8 +5,6 @@ whosonfirst.browser.maps = (function(){
 
     var attribution;
    
-    var maps = {};
-
     var self = {
 
 	'getMap': function(map_el, args){

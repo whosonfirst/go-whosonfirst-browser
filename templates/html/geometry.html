@@ -1,0 +1,58 @@
+{{ define "geometry" }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>{{ .SPR.Name }} | {{ .SPR.Id }} | Who's On First</title>
+      {{ template "inc_common_meta" }}
+      <meta property="html:lastmodified" content="{{ .LastModified }}" />
+	        
+      <script src="/javascript/localforage.min.js"></script>	  
+      <script src="/javascript/slippymap.crosshairs.js"></script>
+      
+      <script src="/javascript/whosonfirst.www.js"></script>	 
+      <script src="/javascript/whosonfirst.render.js"></script>
+      <script src="/javascript/whosonfirst.properties.js"></script>
+      
+      <script src="/javascript/whosonfirst.cache.js"></script>	 
+      <script src="/javascript/whosonfirst.uri.js"></script>
+      <script src="/javascript/whosonfirst.net.js"></script>
+      <script src="/javascript/whosonfirst.namify.js"></script> 	 	 
+      
+      <script src="/javascript/whosonfirst.geojson.js"></script>	 
+      <script src="/javascript/whosonfirst.leaflet.utils.js"></script>
+      <script src="/javascript/whosonfirst.leaflet.styles.js"></script>
+      <script src="/javascript/whosonfirst.leaflet.handlers.js"></script> 	 	 
+
+      <script src="/javascript/whosonfirst.browser.maps.js"></script>
+      <script src="/javascript/whosonfirst.browser.common.js"></script>
+      
+      <script src="/javascript/whosonfirst.browser.geometry.js"></script>
+      <script src="/javascript/whosonfirst.browser.geometry.init.js"></script>	 
+      
+      {{ template "inc_common_css" }}
+
+      <link rel="stylesheet" href="/css/whosonfirst.browser.id.css">
+      
+  </head>
+  <body data-whosonfirst-uri-endpoint="{{ .Endpoints.Data }}">
+
+      <div class="container">
+      {{ template "inc_common_header" .}}
+
+      <main class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .Id }}">
+
+	  <div class="container">
+
+	      <div id="map" class="row" data-map-provider="{{ .MapProvider }}">
+	      </div>
+
+	  </div>
+      
+      </main>
+
+      {{ template "inc_common_footer" .}}
+
+    </div>      
+  </body>
+</html>
+{{ end }}
