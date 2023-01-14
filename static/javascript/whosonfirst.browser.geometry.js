@@ -26,7 +26,7 @@ whosonfirst.browser.geometry = (function(){
 		
 	'init_map': function() {
 
-	    map = whosonfirst.browser.common.init_map();	    
+	    // map = whosonfirst.browser.common.init_map();	    
 	},
 	
 	'init_geometry': function(){
@@ -45,9 +45,34 @@ whosonfirst.browser.geometry = (function(){
 		return;
 	    }
 
-	    var data_url = whosonfirst.uri.id2abspath(id)
-	    console.log("FETCH", data_url);
+	    var map_el = document.getElementById("map");
 	    
+	    var data_url = whosonfirst.uri.id2abspath(wof_id)
+
+	    var on_success = function(feature){
+		console.log(feature);
+
+		var bbox = whosonfirst.geojson.derive_bbox(feature);
+
+		var bounds = [
+		    [ bbox[1], bbox[0] ],
+		    [ bbox[3], bbox[2] ],
+		];
+
+		var map_args = {};
+		
+		map = whosonfirst.browser.maps.getMap(map_el, map_args);
+		map.fitBounds(bounds);
+		
+		var layer = L.geoJson(feature);
+		layer.addTo(map);    
+	    };
+
+	    var on_error = function(err){
+		console.log("SAD", err);
+	    };
+	    
+	    whosonfirst.net.fetch(data_url, on_success, on_error);	    
 	}
     }
     

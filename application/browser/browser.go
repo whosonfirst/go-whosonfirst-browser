@@ -594,7 +594,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		geom_opts := &www.EditGeometryHandlerOptions{
 			Authenticator: authenticator,
 			MapProvider:   map_provider.Scheme(),
-			Endpoints:   endpoints,			
+			Endpoints:     endpoints,
 			Template:      geom_t,
 			Logger:        logger,
 			Reader:        cr,
