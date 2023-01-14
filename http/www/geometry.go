@@ -17,11 +17,13 @@ type EditGeometryHandlerOptions struct {
 	Logger        *log.Logger
 	Template      *template.Template
 	MapProvider   string
+	Endpoints    *Endpoints	
 }
 
 type EditGeometryVars struct {
 	MapProvider string
 	Id          int64
+	Endpoints    *Endpoints		
 	// To do: Support alternate geometries
 }
 
@@ -51,6 +53,7 @@ func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error)
 		}
 
 		vars := EditGeometryVars{
+			Endpoints: opts.Endpoints,
 			MapProvider: opts.MapProvider,
 			Id:          id,
 		}

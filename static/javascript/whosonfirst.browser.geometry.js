@@ -30,6 +30,24 @@ whosonfirst.browser.geometry = (function(){
 	},
 	
 	'init_geometry': function(){
+
+	    var pl = document.getElementById("whosonfirst-place");
+
+	    if (! pl){
+		console.log("Missing 'whosonfirst-place' element");
+		return false;
+	    }
+
+	    var wof_id = pl.getAttribute("data-whosonfirst-id");
+
+	    if (! wof_id){
+		console.log("Missing 'data-whosonfirst-id' attribute");
+		return;
+	    }
+
+	    var data_url = whosonfirst.uri.id2abspath(id)
+	    console.log("FETCH", data_url);
+	    
 	}
     }
     
