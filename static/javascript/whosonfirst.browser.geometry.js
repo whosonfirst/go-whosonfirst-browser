@@ -46,11 +46,15 @@ whosonfirst.browser.geometry = (function(){
 	    }
 
 	    var map_el = document.getElementById("map");
-	    
+
+	    if (! map_el){
+		console.log("Missing 'map' element");
+		return false
+	    }
+
 	    var data_url = whosonfirst.uri.id2abspath(wof_id)
 
 	    var on_success = function(feature){
-		console.log(feature);
 
 		var bbox = whosonfirst.geojson.derive_bbox(feature);
 
@@ -64,8 +68,54 @@ whosonfirst.browser.geometry = (function(){
 		map = whosonfirst.browser.maps.getMap(map_el, map_args);
 		map.fitBounds(bounds);
 		
-		var layer = L.geoJson(feature);
-		layer.addTo(map);    
+		if (! map.pm){
+		    
+		    var layer = L.geoJson(feature);
+		    layer.addTo(map);
+
+		    console.log("Missing map.pm");
+		    return;
+		}
+		
+		var on_update = function(){
+		    var feature_group = map.pm.getGeomanLayers(true);
+		    var feature_collection = feature_group.toGeoJSON();
+		    console.log("UPDATE", feature_collection);
+		};
+		
+		map.pm.addControls({
+		    position: 'topleft',
+		});
+		
+		map.on("pm:drawend", function(e){
+		    console.log("draw end");
+		    on_update();
+		});
+		
+		map.on('pm:remove', function (e) {
+		    console.log("remove");
+		    on_update();
+		});
+		
+		// This does not appear to capture drag or edit-vertex events
+		// Not sure what's up with that...
+		    
+		    map.on('pm:globaleditmodetoggled', (e) => {
+			console.log("remove");
+			on_update();
+		    });
+
+		const geojson_layer = L.geoJson(feature, {
+		    pointToLayer: (feature, latlng) => {
+			if (feature.properties.customGeometry) {
+			    return new L.Circle(latlng, feature.properties.customGeometry.radius);
+			} else {
+			    return new L.Marker(latlng);
+			}
+		    },
+		});
+		
+		geojson_layer.addTo(map);
 	    };
 
 	    var on_error = function(err){
