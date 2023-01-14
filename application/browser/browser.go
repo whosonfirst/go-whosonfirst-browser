@@ -621,18 +621,24 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, static_prefix)
+		id_handler = authenticator.WrapHandler(id_handler)
+
 		mux.Handle(path_id, id_handler)
 
 		if enable_search_html {
 			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, static_prefix)
+			search_handler = authenticator.WrapHandler(search_handler)
 			mux.Handle(path_search_html, search_handler)
 		}
 
 		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, map_provider, maps_opts, static_prefix)
+		geom_handler = authenticator.WrapHandler(geom_handler)
+
 		mux.Handle(path_edit_geometry, geom_handler)
 
 		// log.Printf("Enable edit geometry handler at %s", path_edit_geometry)
 
+		index_handler = authenticator.WrapHandler(index_handler)
 		mux.Handle("/", index_handler)
 
 		null_handler := www.NewNullHandler()
@@ -731,6 +737,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		geom_handler = authenticator.WrapHandler(geom_handler)
 		mux.Handle(path_api_edit_geometry, geom_handler)
 	}
+
+	// Finally, start the server
 
 	s, err := server.NewServer(ctx, server_uri)
 
