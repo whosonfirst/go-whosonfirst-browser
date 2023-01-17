@@ -91,7 +91,7 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 			Logger:     opts.Logger,
 			WriterURIs: opts.WriterURIs,
 			Exporter:   opts.Exporter,
-			URI:        uri.URI,
+			URI:        uri,
 		}
 
 		final, err := publishFeature(ctx, publish_opts, new_body)

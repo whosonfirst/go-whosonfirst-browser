@@ -6,16 +6,18 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/writer"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
+	"github.com/whosonfirst/go-whosonfirst-uri"
 )
 
 type publishFeatureOptions struct {
 	Logger     *log.Logger
 	WriterURIs []string
 	Exporter   export.Exporter
-	URI        string
+	URI        *http.URI
 }
 
 func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byte) ([]byte, error) {
@@ -46,7 +48,13 @@ func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byt
 
 	br := bytes.NewReader(exp_body)
 
-	_, err = wr.Write(ctx, opts.URI, br)
+	rel_path, err := uri.Id2RelPath(opts.URI.Id, opts.URI.URIArgs)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive rel path, %w", err)
+	}
+
+	_, err = wr.Write(ctx, rel_path, br)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to write body, %w", err)
