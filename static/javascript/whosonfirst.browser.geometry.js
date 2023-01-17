@@ -128,6 +128,13 @@ whosonfirst.browser.geometry = (function(){
 
 	'init_controls': function(){
 
+	    self.init_save_control();
+	},
+
+	'init_save_control': function(){
+
+	    // Eventually this should become a Leaflet control... maybe?
+	    
 	    var save_button = document.getElementById("save");
 
 	    save_button.onclick = function(){
@@ -151,6 +158,14 @@ whosonfirst.browser.geometry = (function(){
 		    var feature_collection = feature_group.toGeoJSON();
 		    
 		    var first = feature_collection.features[0];
+
+		    var uri = "/api/geometry/" + wof_id;
+
+		    whosonfirst.browser.api.do("POST", uri, first).then((data) => {
+			console.log("OKAY", data);
+		    }).catch((err) => {
+			console.log("NOT OKAY", err);
+		    });			
 		    
 		    console.log("SAVE", wof_id, first);
 		    

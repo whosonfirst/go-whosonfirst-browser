@@ -55,8 +55,10 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 			return
 		}
 
+		geojson_geometry := geojson.NewGeometry(f.Geometry)
+
 		updates := map[string]interface{}{
-			"geometry": f.Geometry,
+			"geometry": geojson_geometry,
 		}
 
 		body := uri.Feature
@@ -88,6 +90,7 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 			}
 		}
 
+		// TBD: return updated body here?
 		return
 	}
 

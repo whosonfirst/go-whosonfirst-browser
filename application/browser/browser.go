@@ -736,6 +736,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		geom_handler = authenticator.WrapHandler(geom_handler)
 		mux.Handle(path_api_edit_geometry, geom_handler)
+
+		// logger.Printf("Listening at %s\n", path_api_edit_geometry)
 	}
 
 	// Finally, start the server
