@@ -12,6 +12,7 @@ whosonfirst.browser.geometry = (function(){
 	    self.init_endpoints();
 	    self.init_map();
 	    self.init_geometry();
+	    self.init_controls();	    
 	},
 	
 	'init_endpoints': function() {
@@ -123,7 +124,43 @@ whosonfirst.browser.geometry = (function(){
 	    };
 	    
 	    whosonfirst.net.fetch(data_url, on_success, on_error);	    
-	}
+	},
+
+	'init_controls': function(){
+
+	    var save_button = document.getElementById("save");
+
+	    save_button.onclick = function(){
+
+		var pl = document.getElementById("whosonfirst-place");
+		
+		if (! pl){
+		    console.log("Missing 'whosonfirst-place' element");
+		    return false;
+		}
+		
+		var wof_id = pl.getAttribute("data-whosonfirst-id");
+		
+		if (! wof_id){
+		    console.log("Missing 'data-whosonfirst-id' attribute");
+		    return;
+		}
+
+		try {
+		    var feature_group = map.pm.getGeomanLayers(true);
+		    var feature_collection = feature_group.toGeoJSON();
+		    
+		    var first = feature_collection.features[0];
+		    
+		    console.log("SAVE", wof_id, first);
+		    
+		} catch (err) {
+		    console.log("SAD", err);
+		}
+		
+		return false;
+	    };
+	},
     }
     
     return self;

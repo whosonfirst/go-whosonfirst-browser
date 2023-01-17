@@ -25,7 +25,8 @@
 
       <script src="/javascript/whosonfirst.browser.maps.js"></script>
       <script src="/javascript/whosonfirst.browser.common.js"></script>
-      
+
+      <script src="/javascript/whosonfirst.browser.api.js"></script>      
       <script src="/javascript/whosonfirst.browser.geometry.js"></script>
       <script src="/javascript/whosonfirst.browser.geometry.init.js"></script>	 
       
@@ -46,6 +47,9 @@
 	      <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true" style="height:80vh !important;">
 	      </div>
 
+	      <div id="controls" class="row">
+		  <button class="btn" id="save">Save</button>
+	      </div>
 	  </div>
       
       </main>
