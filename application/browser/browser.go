@@ -142,7 +142,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			reader_uris[idx] = r_uri
 		}
 	}
-	
+
 	browser_reader, err := reader.NewMultiReaderFromURIs(ctx, reader_uris...)
 
 	if err != nil {
@@ -669,28 +669,29 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		// method which in turn calls writer/writer.go#NewWriter
 
 		// START OF Point in polygon service setup
-		
+
 		// We're doing this the long way because we need/want to pass in 'cr' and I am
 		// not sure what the interface/signature changes to do that should be...
-		
+
 		spatial_db, err := database.NewSpatialDatabase(ctx, spatial_database_uri)
-		
+
 		if err != nil {
 			return fmt.Errorf("Failed to create spatial database, %w", err)
 		}
-				
+
 		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithDatabaseAndReader(ctx, spatial_db, cr)
-		
+
 		if err != nil {
 			return fmt.Errorf("Failed to create point in polygon service, %w", err)
 		}
 
 		// END OF Point in polygon service setup
-		
+
 		// Deprecate a record
 
 		deprecate_opts := &api.DeprecateFeatureHandlerOptions{
 			Reader:        cr,
+			Cache:         browser_cache,
 			Logger:        logger,
 			Authenticator: authenticator,
 			Exporter:      ex,
@@ -710,6 +711,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		cessate_opts := &api.CessateFeatureHandlerOptions{
 			Reader:        cr,
+			Cache:         browser_cache,
 			Logger:        logger,
 			Authenticator: authenticator,
 			Exporter:      ex,
@@ -729,6 +731,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		geom_opts := &api.UpdateGeometryHandlerOptions{
 			Reader:                cr,
+			Cache:                 browser_cache,
 			Logger:                logger,
 			Authenticator:         authenticator,
 			Exporter:              ex,

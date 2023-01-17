@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/writer"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
@@ -17,6 +18,7 @@ type publishFeatureOptions struct {
 	Logger     *log.Logger
 	WriterURIs []string
 	Exporter   export.Exporter
+	Cache      cache.Cache
 	URI        *http.URI
 }
 
@@ -58,6 +60,12 @@ func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byt
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to write body, %w", err)
+	}
+
+	err = opts.Cache.Unset(ctx, rel_path)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to unset cache for '%s', %w", rel_path, err)
 	}
 
 	return exp_body, nil

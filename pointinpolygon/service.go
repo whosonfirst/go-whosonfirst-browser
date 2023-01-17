@@ -9,7 +9,7 @@ import (
 import (
 	"context"
 	"fmt"
-	
+
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
@@ -66,7 +66,7 @@ func NewPointInPolygonServiceWithDatabaseAndReader(ctx context.Context, spatial_
 		UpdateCallback:  update_cb,
 	}
 
-	return s, nil	
+	return s, nil
 }
 
 func (s *PointInPolygonService) Update(ctx context.Context, body []byte) (bool, []byte, error) {

@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/sfomuseum/go-http-auth"
+	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
@@ -15,6 +16,7 @@ type DeprecateFeatureHandlerOptions struct {
 	Exporter      export.Exporter
 	Authenticator auth.Authenticator
 	Logger        *log.Logger
+	Cache         cache.Cache
 }
 
 func DeprecateFeatureHandler(opts *DeprecateFeatureHandlerOptions) (http.Handler, error) {
@@ -50,6 +52,7 @@ func DeprecateFeatureHandler(opts *DeprecateFeatureHandlerOptions) (http.Handler
 			WriterURIs: opts.WriterURIs,
 			Exporter:   opts.Exporter,
 			URI:        uri,
+			Cache:      opts.Cache,
 		}
 
 		final, err := publishFeature(ctx, publish_opts, new_body)

@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/sfomuseum/go-http-auth"
+	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
@@ -15,6 +16,7 @@ type CessateFeatureHandlerOptions struct {
 	Exporter      export.Exporter
 	Authenticator auth.Authenticator
 	Logger        *log.Logger
+	Cache         cache.Cache
 }
 
 func CessateFeatureHandler(opts *CessateFeatureHandlerOptions) (http.Handler, error) {
@@ -50,6 +52,7 @@ func CessateFeatureHandler(opts *CessateFeatureHandlerOptions) (http.Handler, er
 			Logger:     opts.Logger,
 			WriterURIs: opts.WriterURIs,
 			Exporter:   opts.Exporter,
+			Cache:      opts.Cache,
 			URI:        uri,
 		}
 

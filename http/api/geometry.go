@@ -7,6 +7,7 @@ import (
 
 	"github.com/paulmach/orb/geojson"
 	"github.com/sfomuseum/go-http-auth"
+	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/pointinpolygon"
@@ -14,8 +15,8 @@ import (
 )
 
 type UpdateGeometryHandlerOptions struct {
-	Reader reader.Reader
-	// Writer                writer.Writer
+	Reader                reader.Reader
+	Cache                 cache.Cache
 	WriterURIs            []string
 	Exporter              export.Exporter
 	Authenticator         auth.Authenticator
@@ -91,6 +92,7 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 			Logger:     opts.Logger,
 			WriterURIs: opts.WriterURIs,
 			Exporter:   opts.Exporter,
+			Cache:      opts.Cache,
 			URI:        uri,
 		}
 
