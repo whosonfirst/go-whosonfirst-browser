@@ -40,7 +40,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/templates/html"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
-	"github.com/whosonfirst/go-writer/v3"
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -659,33 +658,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create new exporter, %w", err)
 		}
 
-		// Writers - Given that we will need to resolve certain writer
-		// URIs on the fly (for example which -{REPO} GitHub repository
-		// to publish data to this will eventually need some finessing
-
-		writers := make([]writer.Writer, len(writer_uris))
-
-		for idx, wr_uri := range writer_uris {
-
-			wr, err := writer.NewWriter(ctx, wr_uri)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create writer for '%s', %w", wr_uri, err)
-			}
-
-			writers[idx] = wr
-		}
-
-		multi_opts := &writer.MultiWriterOptions{
-			Logger:  logger,
-			Writers: writers,
-		}
-
-		multi_wr, err := writer.NewMultiWriterWithOptions(ctx, multi_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create multi writer, %w", err)
-		}
+		// Writers are created at runtime using the http/api/publish.go#publishFeature
+		// method which in turn calls writer/writer.go#NewWriter
 
 		// Point in polygon service
 
@@ -702,7 +676,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			Logger:        logger,
 			Authenticator: authenticator,
 			Exporter:      ex,
-			Writer:        multi_wr,
+			WriterURIs:    writer_uris,
 		}
 
 		deprecate_handler, err := api.DeprecateFeatureHandler(deprecate_opts)
@@ -721,7 +695,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			Logger:        logger,
 			Authenticator: authenticator,
 			Exporter:      ex,
-			Writer:        multi_wr,
+			WriterURIs:    writer_uris,
 		}
 
 		cessate_handler, err := api.CessateFeatureHandler(cessate_opts)
@@ -740,7 +714,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			Logger:                logger,
 			Authenticator:         authenticator,
 			Exporter:              ex,
-			Writer:                multi_wr,
+			WriterURIs:            writer_uris,
 			PointInPolygonService: pip_service,
 		}
 

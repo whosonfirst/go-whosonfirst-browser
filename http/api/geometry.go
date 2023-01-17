@@ -1,22 +1,22 @@
 package api
 
 import (
-	"bytes"
+	"io"
+	"log"
+	"net/http"
+
 	"github.com/paulmach/orb/geojson"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
-	"github.com/whosonfirst/go-writer/v3"
-	"io"
-	"log"
-	"net/http"
 )
 
 type UpdateGeometryHandlerOptions struct {
-	Reader                reader.Reader
-	Writer                writer.Writer
+	Reader reader.Reader
+	// Writer                writer.Writer
+	WriterURIs            []string
 	Exporter              export.Exporter
 	Authenticator         auth.Authenticator
 	Logger                *log.Logger
@@ -87,26 +87,21 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 			return
 		}
 
-		// START OF make me common code, somewhere...
+		publish_opts := &publishFeatureOptions{
+			Logger:     opts.Logger,
+			WriterURIs: opts.WriterURIs,
+			Exporter:   opts.Exporter,
+			URI:        uri.URI,
+		}
 
-		exp_body, err := opts.Exporter.Export(ctx, new_body)
+		final, err := publishFeature(ctx, publish_opts, new_body)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		br := bytes.NewReader(exp_body)
-
-		_, err = opts.Writer.Write(ctx, uri.URI, br)
-
-		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusInternalServerError)
-		}
-
-		// END OF make me common code, somewhere...
-
-		// TBD: return updated body here?
+		rsp.Write(final)
 		return
 	}
 

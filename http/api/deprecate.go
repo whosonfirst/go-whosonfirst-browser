@@ -1,19 +1,17 @@
 package api
 
 import (
-	"bytes"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
-	"github.com/whosonfirst/go-writer/v3"
 	"log"
 	"net/http"
 )
 
 type DeprecateFeatureHandlerOptions struct {
 	Reader        reader.Reader
-	Writer        writer.Writer
+	WriterURIs    []string
 	Exporter      export.Exporter
 	Authenticator auth.Authenticator
 	Logger        *log.Logger
@@ -43,16 +41,25 @@ func DeprecateFeatureHandler(opts *DeprecateFeatureHandlerOptions) (http.Handler
 
 		new_body, err := export.DeprecateRecord(ctx, opts.Exporter, body)
 
-		// Something something something superseded by...
-
-		br := bytes.NewReader(new_body)
-
-		_, err = opts.Writer.Write(ctx, uri.URI, br)
-
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 		}
 
+		publish_opts := &publishFeatureOptions{
+			Logger:     opts.Logger,
+			WriterURIs: opts.WriterURIs,
+			Exporter:   opts.Exporter,
+			URI:        uri.URI,
+		}
+
+		final, err := publishFeature(ctx, publish_opts, new_body)
+
+		if err != nil {
+			http.Error(rsp, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		rsp.Write(final)
 		return
 	}
 
