@@ -19,7 +19,7 @@ require (
 	github.com/sfomuseum/go-template v1.4.0
 	github.com/tidwall/gjson v1.14.4
 	github.com/whosonfirst/go-reader v1.0.2
-	github.com/whosonfirst/go-reader-cachereader v1.0.0
+	github.com/whosonfirst/go-reader-cachereader v1.1.0
 	github.com/whosonfirst/go-reader-findingaid v0.14.2
 	github.com/whosonfirst/go-reader-github v0.6.3
 	github.com/whosonfirst/go-sanitize v0.1.0
