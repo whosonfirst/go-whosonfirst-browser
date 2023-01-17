@@ -67,6 +67,7 @@ whosonfirst.browser.geometry = (function(){
 		var map_args = {};
 		
 		map = whosonfirst.browser.maps.getMap(map_el, map_args);
+		
 		map.fitBounds(bounds);
 		
 		if (! map.pm){

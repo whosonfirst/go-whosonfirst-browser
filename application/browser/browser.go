@@ -38,6 +38,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/templates/html"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/chrome"	
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"github.com/whosonfirst/go-whosonfirst-spatial/database"
@@ -187,6 +188,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		return fmt.Errorf("Failed to create authenticator, %w", err)
 	}
 
+	chrome_uri := "none://"
+	custom, err := chrome.NewChrome(ctx, chrome_uri)
+
+	if err != nil {
+		return fmt.Errorf("Failed to create custom chrome, %w", err)
+	}
+	
 	www_paths := &www.Paths{
 		GeoJSON:   path_geojson,
 		GeoJSONLD: path_geojsonld,
@@ -639,6 +647,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, map_provider, maps_opts, static_prefix)
+
+		// TBD: custom middleware goes here?
+		geom_handler = custom.WrapHandler(geom_handler)
+		
 		geom_handler = authenticator.WrapHandler(geom_handler)
 
 		mux.Handle(path_edit_geometry, geom_handler)
