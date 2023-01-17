@@ -58,12 +58,29 @@ github.com/aaronland/go-http-server-tsnet
 ## explicit; go 1.16
 github.com/aaronland/go-http-tangramjs
 github.com/aaronland/go-http-tangramjs/static
+# github.com/aaronland/go-json-query v0.1.3
+## explicit; go 1.18
+github.com/aaronland/go-json-query
+# github.com/aaronland/go-pagination v0.2.0
+## explicit; go 1.16
+github.com/aaronland/go-pagination
+github.com/aaronland/go-pagination/countable
+# github.com/aaronland/go-pagination-sql v0.2.0
+## explicit; go 1.16
+github.com/aaronland/go-pagination-sql
 # github.com/aaronland/go-pool/v2 v2.0.0
 ## explicit; go 1.18
 github.com/aaronland/go-pool/v2
 # github.com/aaronland/go-roster v1.0.0
 ## explicit; go 1.16
 github.com/aaronland/go-roster
+# github.com/aaronland/go-sqlite-modernc v0.0.1
+## explicit; go 1.18
+github.com/aaronland/go-sqlite-modernc
+# github.com/aaronland/go-sqlite/v2 v2.2.0
+## explicit; go 1.18
+github.com/aaronland/go-sqlite/v2
+github.com/aaronland/go-sqlite/v2/database
 # github.com/aaronland/go-string v1.0.0
 ## explicit; go 1.16
 github.com/aaronland/go-string/dsn
@@ -80,9 +97,12 @@ github.com/aaronland/go-uid-proxy
 # github.com/aaronland/go-uid-whosonfirst v0.0.2
 ## explicit; go 1.18
 github.com/aaronland/go-uid-whosonfirst
-# github.com/aaronland/gocloud-blob-s3 v0.2.1
-## explicit; go 1.16
+# github.com/aaronland/gocloud-blob-s3 v0.2.2
+## explicit; go 1.18
 github.com/aaronland/gocloud-blob-s3
+# github.com/aaronland/gocloud-docstore v0.0.4
+## explicit; go 1.19
+github.com/aaronland/gocloud-docstore
 # github.com/akrylysov/algnhsa v0.12.1
 ## explicit; go 1.12
 github.com/akrylysov/algnhsa
@@ -97,8 +117,8 @@ github.com/alexbrainman/sspi/negotiate
 # github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129
 ## explicit
 github.com/andres-erbsen/clock
-# github.com/aws/aws-lambda-go v1.13.3
-## explicit; go 1.12
+# github.com/aws/aws-lambda-go v1.36.0
+## explicit; go 1.18
 github.com/aws/aws-lambda-go/events
 github.com/aws/aws-lambda-go/lambda
 github.com/aws/aws-lambda-go/lambda/handlertrace
@@ -311,6 +331,9 @@ github.com/go-ole/go-ole/oleutil
 # github.com/godbus/dbus/v5 v5.0.6
 ## explicit; go 1.12
 github.com/godbus/dbus/v5
+# github.com/gogo/protobuf v1.3.2
+## explicit; go 1.15
+github.com/gogo/protobuf/proto
 # github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 ## explicit
 github.com/golang/groupcache/lru
@@ -378,9 +401,15 @@ github.com/josharian/native
 ## explicit; go 1.13
 github.com/jsimonetti/rtnetlink
 github.com/jsimonetti/rtnetlink/internal/unix
+# github.com/json-iterator/go v1.1.12
+## explicit; go 1.12
+github.com/json-iterator/go
 # github.com/jtacoma/uritemplates v1.0.0
 ## explicit
 github.com/jtacoma/uritemplates
+# github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
+## explicit
+github.com/kballard/go-shellquote
 # github.com/klauspost/compress v1.15.4
 ## explicit; go 1.16
 github.com/klauspost/compress
@@ -422,6 +451,12 @@ github.com/mitchellh/colorstring
 # github.com/mitchellh/go-ps v1.0.0
 ## explicit; go 1.13
 github.com/mitchellh/go-ps
+# github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+## explicit
+github.com/modern-go/concurrent
+# github.com/modern-go/reflect2 v1.0.2
+## explicit; go 1.12
+github.com/modern-go/reflect2
 # github.com/mschoch/smat v0.2.0
 ## explicit; go 1.13
 github.com/mschoch/smat
@@ -437,10 +472,19 @@ github.com/paulmach/go.geojson
 # github.com/paulmach/orb v0.8.0
 ## explicit; go 1.15
 github.com/paulmach/orb
+github.com/paulmach/orb/clip
+github.com/paulmach/orb/encoding/mvt
+github.com/paulmach/orb/encoding/mvt/vectortile
+github.com/paulmach/orb/encoding/wkt
 github.com/paulmach/orb/geojson
 github.com/paulmach/orb/internal/length
+github.com/paulmach/orb/internal/mercator
+github.com/paulmach/orb/maptile
 github.com/paulmach/orb/planar
 github.com/paulmach/orb/project
+# github.com/paulmach/protoscan v0.2.1
+## explicit; go 1.15
+github.com/paulmach/protoscan
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
@@ -473,6 +517,7 @@ github.com/sfomuseum/go-edtf/tests
 # github.com/sfomuseum/go-flags v0.10.0
 ## explicit; go 1.16
 github.com/sfomuseum/go-flags/flagset
+github.com/sfomuseum/go-flags/lookup
 github.com/sfomuseum/go-flags/multi
 # github.com/sfomuseum/go-geojsonld v1.0.0
 ## explicit; go 1.13
@@ -484,6 +529,9 @@ github.com/sfomuseum/go-http-auth
 ## explicit; go 1.18
 github.com/sfomuseum/go-http-protomaps
 github.com/sfomuseum/go-http-protomaps/static
+# github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1
+## explicit; go 1.12
+github.com/sfomuseum/go-sfomuseum-mapshaper
 # github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3
 ## explicit; go 1.19
 github.com/sfomuseum/go-sfomuseum-pmtiles/http
@@ -575,9 +623,15 @@ github.com/whosonfirst/go-reader-github
 # github.com/whosonfirst/go-reader-http v0.3.1
 ## explicit; go 1.16
 github.com/whosonfirst/go-reader-http
+# github.com/whosonfirst/go-rfc-5646 v0.1.0
+## explicit; go 1.12
+github.com/whosonfirst/go-rfc-5646
 # github.com/whosonfirst/go-sanitize v0.1.0
 ## explicit; go 1.12
 github.com/whosonfirst/go-sanitize
+# github.com/whosonfirst/go-whosonfirst-crawl v0.2.1
+## explicit; go 1.12
+github.com/whosonfirst/go-whosonfirst-crawl
 # github.com/whosonfirst/go-whosonfirst-export/v2 v2.6.2
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-export/v2
@@ -593,6 +647,7 @@ github.com/whosonfirst/go-whosonfirst-findingaid/v2/resolver
 # github.com/whosonfirst/go-whosonfirst-flags v0.4.4
 ## explicit; go 1.16
 github.com/whosonfirst/go-whosonfirst-flags
+github.com/whosonfirst/go-whosonfirst-flags/date
 github.com/whosonfirst/go-whosonfirst-flags/existential
 github.com/whosonfirst/go-whosonfirst-flags/geometry
 github.com/whosonfirst/go-whosonfirst-flags/placetypes
@@ -605,9 +660,21 @@ github.com/whosonfirst/go-whosonfirst-id
 # github.com/whosonfirst/go-whosonfirst-image v0.1.0
 ## explicit; go 1.19
 github.com/whosonfirst/go-whosonfirst-image
+# github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.1
+## explicit; go 1.18
+github.com/whosonfirst/go-whosonfirst-iterate/v2/emitter
+github.com/whosonfirst/go-whosonfirst-iterate/v2/filters
+github.com/whosonfirst/go-whosonfirst-iterate/v2/iterator
+# github.com/whosonfirst/go-whosonfirst-names v0.1.0
+## explicit; go 1.12
+github.com/whosonfirst/go-whosonfirst-names
+github.com/whosonfirst/go-whosonfirst-names/tags
 # github.com/whosonfirst/go-whosonfirst-placetypes v0.4.2
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-placetypes
+# github.com/whosonfirst/go-whosonfirst-reader v1.0.1
+## explicit; go 1.16
+github.com/whosonfirst/go-whosonfirst-reader
 # github.com/whosonfirst/go-whosonfirst-search v0.1.0
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-search/filter
@@ -616,6 +683,23 @@ github.com/whosonfirst/go-whosonfirst-search/fulltext
 ## explicit; go 1.12
 github.com/whosonfirst/go-whosonfirst-sources
 github.com/whosonfirst/go-whosonfirst-sources/sources
+# github.com/whosonfirst/go-whosonfirst-spatial v0.5.4
+## explicit; go 1.18
+github.com/whosonfirst/go-whosonfirst-spatial
+github.com/whosonfirst/go-whosonfirst-spatial/database
+github.com/whosonfirst/go-whosonfirst-spatial/filter
+github.com/whosonfirst/go-whosonfirst-spatial/flags
+github.com/whosonfirst/go-whosonfirst-spatial/geo
+# github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.3.3
+## explicit; go 1.18
+github.com/whosonfirst/go-whosonfirst-spatial-hierarchy
+github.com/whosonfirst/go-whosonfirst-spatial-hierarchy/filter
+# github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.16
+## explicit; go 1.18
+github.com/whosonfirst/go-whosonfirst-spatial-pmtiles
+# github.com/whosonfirst/go-whosonfirst-spatial-sqlite v0.6.4
+## explicit; go 1.18
+github.com/whosonfirst/go-whosonfirst-spatial-sqlite
 # github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.8
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-spr-geojson
@@ -623,6 +707,13 @@ github.com/whosonfirst/go-whosonfirst-spr-geojson
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-spr/v2
 github.com/whosonfirst/go-whosonfirst-spr/v2/util
+# github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.0
+## explicit; go 1.18
+github.com/whosonfirst/go-whosonfirst-sqlite-features/v2
+github.com/whosonfirst/go-whosonfirst-sqlite-features/v2/tables
+# github.com/whosonfirst/go-whosonfirst-sqlite-spr/v2 v2.0.0
+## explicit; go 1.18
+github.com/whosonfirst/go-whosonfirst-sqlite-spr/v2
 # github.com/whosonfirst/go-whosonfirst-svg v0.1.0
 ## explicit; go 1.16
 github.com/whosonfirst/go-whosonfirst-svg
@@ -635,6 +726,9 @@ github.com/whosonfirst/go-writer-featurecollection/v3
 # github.com/whosonfirst/go-writer/v3 v3.1.0
 ## explicit; go 1.18
 github.com/whosonfirst/go-writer/v3
+# github.com/whosonfirst/walk v0.0.1
+## explicit; go 1.12
+github.com/whosonfirst/walk
 # github.com/x448/float16 v0.8.4
 ## explicit; go 1.11
 github.com/x448/float16
@@ -675,6 +769,7 @@ gocloud.dev/docstore
 gocloud.dev/docstore/awsdynamodb
 gocloud.dev/docstore/driver
 gocloud.dev/docstore/internal/fields
+gocloud.dev/docstore/memdocstore
 gocloud.dev/gcerrors
 gocloud.dev/internal/escape
 gocloud.dev/internal/gcerr
@@ -984,8 +1079,17 @@ gvisor.dev/gvisor/pkg/waiter
 # inet.af/peercred v0.0.0-20210906144145-0893ea02156a
 ## explicit; go 1.14
 inet.af/peercred
-# modernc.org/libc v1.16.7
-## explicit; go 1.16
+# lukechampine.com/uint128 v1.2.0
+## explicit; go 1.12
+lukechampine.com/uint128
+# modernc.org/cc/v3 v3.40.0
+## explicit; go 1.17
+modernc.org/cc/v3
+# modernc.org/ccgo/v3 v3.16.13
+## explicit; go 1.17
+modernc.org/ccgo/v3/lib
+# modernc.org/libc v1.21.5
+## explicit; go 1.17
 modernc.org/libc
 modernc.org/libc/errno
 modernc.org/libc/fcntl
@@ -1012,15 +1116,25 @@ modernc.org/libc/utime
 modernc.org/libc/uuid
 modernc.org/libc/uuid/uuid
 modernc.org/libc/wctype
-# modernc.org/mathutil v1.4.1
+# modernc.org/mathutil v1.5.0
 ## explicit; go 1.13
 modernc.org/mathutil
-# modernc.org/memory v1.1.1
-## explicit; go 1.16
+# modernc.org/memory v1.4.0
+## explicit; go 1.18
 modernc.org/memory
-# modernc.org/sqlite v1.17.3
-## explicit; go 1.16
+# modernc.org/opt v0.1.3
+## explicit; go 1.13
+modernc.org/opt
+# modernc.org/sqlite v1.20.0
+## explicit; go 1.17
+modernc.org/sqlite
 modernc.org/sqlite/lib
+# modernc.org/strutil v1.1.3
+## explicit; go 1.18
+modernc.org/strutil
+# modernc.org/token v1.0.1
+## explicit
+modernc.org/token
 # nhooyr.io/websocket v1.8.7
 ## explicit; go 1.13
 nhooyr.io/websocket
