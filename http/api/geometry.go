@@ -6,7 +6,7 @@ import (
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
-	"github.com/whosonfirst/go-whosonfirst-browser/v6/pointinpolygon"	
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-writer/v3"
 	"io"
@@ -15,12 +15,12 @@ import (
 )
 
 type UpdateGeometryHandlerOptions struct {
-	Reader        reader.Reader
-	Writer        writer.Writer
-	Exporter      export.Exporter
-	Authenticator auth.Authenticator
-	Logger        *log.Logger
-	PointInPolygonServer *pointinpolygon.PointInPolygonService
+	Reader                reader.Reader
+	Writer                writer.Writer
+	Exporter              export.Exporter
+	Authenticator         auth.Authenticator
+	Logger                *log.Logger
+	PointInPolygonService *pointinpolygon.PointInPolygonService
 }
 
 func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, error) {
@@ -76,7 +76,7 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 			return
 		}
 
-		has_changes, new_body, err = opts.PointInPolygonServer.Update(ctx, new_body)
+		has_changes, new_body, err = opts.PointInPolygonService.Update(ctx, new_body)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
@@ -88,23 +88,23 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 		}
 
 		// START OF make me common code, somewhere...
-		
+
 		exp_body, err := opts.Exporter.Export(ctx, new_body)
-		
+
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		
+
 		br := bytes.NewReader(exp_body)
-		
+
 		_, err = opts.Writer.Write(ctx, uri.URI, br)
-		
+
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 		}
 
-		// END OF make me common code, somewhere...		
+		// END OF make me common code, somewhere...
 
 		// TBD: return updated body here?
 		return

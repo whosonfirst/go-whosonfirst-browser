@@ -36,6 +36,7 @@ import (
 	github_reader "github.com/whosonfirst/go-reader-github"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/http/www"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/templates/html"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
@@ -650,11 +651,17 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_api {
 
+		// Exporter
+
 		ex, err := export.NewExporter(ctx, exporter_uri)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create new exporter, %w", err)
 		}
+
+		// Writers - Given that we will need to resolve certain writer
+		// URIs on the fly (for example which -{REPO} GitHub repository
+		// to publish data to this will eventually need some finessing
 
 		writers := make([]writer.Writer, len(writer_uris))
 
@@ -678,6 +685,14 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		if err != nil {
 			return fmt.Errorf("Failed to create multi writer, %w", err)
+		}
+
+		// Point in polygon service
+
+		pip_service, err := pointinpolygon.NewPointInPolygonService(ctx, spatial_database_uri, cr_uri.String())
+
+		if err != nil {
+			return fmt.Errorf("Failed to create point in polygon service, %w", err)
 		}
 
 		// Deprecate a record
@@ -721,11 +736,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		// Edit geometry
 
 		geom_opts := &api.UpdateGeometryHandlerOptions{
-			Reader:        cr,
-			Logger:        logger,
-			Authenticator: authenticator,
-			Exporter:      ex,
-			Writer:        multi_wr,
+			Reader:                cr,
+			Logger:                logger,
+			Authenticator:         authenticator,
+			Exporter:              ex,
+			Writer:                multi_wr,
+			PointInPolygonService: pip_service,
 		}
 
 		geom_handler, err := api.UpdateGeometryHandler(geom_opts)

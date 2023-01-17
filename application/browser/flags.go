@@ -200,6 +200,10 @@ const WebFingerHostname string = "webfinger-hostname"
 // An optional hostname to use for WebFinger URLs.
 var webfinger_hostname string
 
+const SpatialDatabaseURIFlag string = "spatial-database-uri"
+
+var spatial_database_uri string
+
 // DefaultFlagSet returns a `flag.FlagSet` instance with flags and defaults values assigned for use with `app`.
 func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
@@ -292,6 +296,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
 
+	fs.StringVar(&spatial_database_uri, SpatialDatabaseURIFlag, "", "...")
+
 	err := provider.AppendProviderFlags(fs)
 
 	if err != nil {
@@ -299,4 +305,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	}
 
 	return fs, nil
+}
+
+func ConfigFromFlagSet(fs *flag.FlagSet) (*Config, error) {
+	return nil, fmt.Errorf("Not implemented")
 }
