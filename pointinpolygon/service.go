@@ -9,6 +9,7 @@ import (
 import (
 	"context"
 	"fmt"
+	
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
@@ -44,6 +45,11 @@ func NewPointInPolygonService(ctx context.Context, spatial_database_uri string, 
 		return nil, fmt.Errorf("Failed to create spatial database, %w", err)
 	}
 
+	return NewPointInPolygonServiceWithDatabaseAndReader(ctx, spatial_db, parent_reader)
+}
+
+func NewPointInPolygonServiceWithDatabaseAndReader(ctx context.Context, spatial_db database.SpatialDatabase, parent_reader reader.Reader) (*PointInPolygonService, error) {
+
 	resolver, err := hierarchy.NewPointInPolygonHierarchyResolver(ctx, spatial_db, nil)
 
 	if err != nil {
@@ -60,7 +66,7 @@ func NewPointInPolygonService(ctx context.Context, spatial_database_uri string, 
 		UpdateCallback:  update_cb,
 	}
 
-	return s, nil
+	return s, nil	
 }
 
 func (s *PointInPolygonService) Update(ctx context.Context, body []byte) (bool, []byte, error) {

@@ -40,6 +40,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/templates/html"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
+	"github.com/whosonfirst/go-whosonfirst-spatial/database"
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -141,42 +142,22 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			reader_uris[idx] = r_uri
 		}
 	}
-
-	/*
-		cr_q := url.Values{}
-
-		// go-reader-cachereader is configured to accept multiple readers
-		// and to manage them all using reader.NewMultiReader
-		cr_q["reader"] = reader_uris
-
-		cr_q.Set("cache", cache_uri)
-
-		cr_uri := url.URL{}
-		cr_uri.Scheme = "cachereader"
-		cr_uri.RawQuery = cr_q.Encode()
-
-		cr, err := reader.NewReader(ctx, cr_uri.String())
-
-		if err != nil {
-			return fmt.Errorf("Failed to create reader for '%s', %w", cr_uri.String(), err)
-		}
-	*/
-
-	r, err := reader.NewMultiReaderFromURIs(ctx, reader_uris...)
+	
+	browser_reader, err := reader.NewMultiReaderFromURIs(ctx, reader_uris...)
 
 	if err != nil {
 		return fmt.Errorf("Failed to create reader, %w", err)
 	}
 
-	c, err := cache.NewCache(ctx, cache_uri)
+	browser_cache, err := cache.NewCache(ctx, cache_uri)
 
 	if err != nil {
 		return fmt.Errorf("Failed to create new cache, %w", err)
 	}
 
 	cr_opts := &cachereader.CacheReaderOptions{
-		Reader: r,
-		Cache:  c,
+		Reader: browser_reader,
+		Cache:  browser_cache,
 	}
 
 	cr, err := cachereader.NewCacheReaderWithOptions(ctx, cr_opts)
@@ -687,14 +668,25 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		// Writers are created at runtime using the http/api/publish.go#publishFeature
 		// method which in turn calls writer/writer.go#NewWriter
 
-		// Point in polygon service
-
-		pip_service, err := pointinpolygon.NewPointInPolygonService(ctx, spatial_database_uri, "fixme://")
-
+		// START OF Point in polygon service setup
+		
+		// We're doing this the long way because we need/want to pass in 'cr' and I am
+		// not sure what the interface/signature changes to do that should be...
+		
+		spatial_db, err := database.NewSpatialDatabase(ctx, spatial_database_uri)
+		
+		if err != nil {
+			return fmt.Errorf("Failed to create spatial database, %w", err)
+		}
+				
+		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithDatabaseAndReader(ctx, spatial_db, cr)
+		
 		if err != nil {
 			return fmt.Errorf("Failed to create point in polygon service, %w", err)
 		}
 
+		// END OF Point in polygon service setup
+		
 		// Deprecate a record
 
 		deprecate_opts := &api.DeprecateFeatureHandlerOptions{
