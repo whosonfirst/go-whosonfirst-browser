@@ -54,11 +54,11 @@ whosonfirst.browser.geometry = (function(){
 	    }
 
 	    var data_url = whosonfirst.uri.id2abspath(wof_id)
-
+	    
 	    var on_success = function(feature){
 
 		var bbox = whosonfirst.geojson.derive_bbox(feature);
-
+		
 		var bounds = [
 		    [ bbox[1], bbox[0] ],
 		    [ bbox[3], bbox[2] ],
@@ -68,7 +68,16 @@ whosonfirst.browser.geometry = (function(){
 		
 		map = whosonfirst.browser.maps.getMap(map_el, map_args);
 		
-		map.fitBounds(bounds);
+		switch (map_el.getAttribute("data-map-provider")) {
+			
+		    case "protomaps":
+			break; 	// Y U NO WORK PROTOMAPS?
+		    default:
+			map.fitBounds(bounds);
+			break;
+		}
+
+		console.log("WUB");
 		
 		if (! map.pm){
 		    
