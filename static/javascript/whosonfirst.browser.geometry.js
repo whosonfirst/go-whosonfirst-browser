@@ -53,6 +53,14 @@ whosonfirst.browser.geometry = (function(){
 		return false
 	    }
 
+	    var map_args = {};
+	    
+	    map = whosonfirst.browser.maps.getMap(map_el, map_args);
+
+	    var geojson_pane_name = "geometry"
+	    var geojson_pane = map.createPane(geojson_pane_name);
+	    geojson_pane.style.zIndex = 8000;
+	    
 	    var data_url = whosonfirst.uri.id2abspath(wof_id)
 	    
 	    var on_success = function(feature){
@@ -63,10 +71,6 @@ whosonfirst.browser.geometry = (function(){
 		    [ bbox[1], bbox[0] ],
 		    [ bbox[3], bbox[2] ],
 		];
-
-		var map_args = {};
-		
-		map = whosonfirst.browser.maps.getMap(map_el, map_args);
 		
 		switch (map_el.getAttribute("data-map-provider")) {
 			
@@ -77,8 +81,6 @@ whosonfirst.browser.geometry = (function(){
 			break;
 		}
 
-		console.log("WUB");
-		
 		if (! map.pm){
 		    
 		    var layer = L.geoJson(feature);
@@ -119,11 +121,12 @@ whosonfirst.browser.geometry = (function(){
 		const geojson_layer = L.geoJson(feature, {
 		    pointToLayer: (feature, latlng) => {
 			if (feature.properties.customGeometry) {
-			    return new L.Circle(latlng, feature.properties.customGeometry.radius);
+			    return new L.Circle(latlng, {"pane": geojson_pane_name, "radius": feature.properties.customGeometry.radius});
 			} else {
-			    return new L.Marker(latlng);
+			    return new L.Marker(latlng, {"pane": geojson_pane_name});
 			}
 		    },
+		    pane: geojson_pane_name,
 		});
 		
 		geojson_layer.addTo(map);
