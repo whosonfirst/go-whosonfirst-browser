@@ -4,12 +4,13 @@ go 1.18
 
 require (
 	github.com/aaronland/go-http-bootstrap v0.2.0
-	github.com/aaronland/go-http-maps v0.0.13
+	github.com/aaronland/go-http-maps v0.0.14
 	github.com/aaronland/go-http-ping/v2 v2.0.0
-	github.com/aaronland/go-http-rewrite v1.0.1
 	github.com/aaronland/go-http-sanitize v0.0.6
 	github.com/aaronland/go-http-server v1.0.0
 	github.com/aaronland/go-http-server-tsnet v0.9.1
+	github.com/aaronland/go-http-static v0.0.2
+	github.com/aaronland/go-roster v1.0.0
 	github.com/aaronland/gocloud-blob-s3 v0.2.2
 	github.com/paulmach/orb v0.8.0
 	github.com/rs/cors v1.8.3
@@ -18,6 +19,7 @@ require (
 	github.com/sfomuseum/go-http-auth v0.0.6
 	github.com/sfomuseum/go-template v1.4.0
 	github.com/tidwall/gjson v1.14.4
+	github.com/whosonfirst/go-cache v0.5.2
 	github.com/whosonfirst/go-reader v1.0.2
 	github.com/whosonfirst/go-reader-cachereader v1.1.0
 	github.com/whosonfirst/go-reader-findingaid v0.14.2
@@ -48,12 +50,12 @@ require (
 	github.com/aaronland/go-aws-session v0.1.0 // indirect
 	github.com/aaronland/go-brooklynintegers-api v1.2.6 // indirect
 	github.com/aaronland/go-http-leaflet v0.2.0 // indirect
+	github.com/aaronland/go-http-rewrite v1.0.1 // indirect
 	github.com/aaronland/go-http-tangramjs v0.1.3 // indirect
 	github.com/aaronland/go-json-query v0.1.3 // indirect
 	github.com/aaronland/go-pagination v0.2.0 // indirect
 	github.com/aaronland/go-pagination-sql v0.2.0 // indirect
 	github.com/aaronland/go-pool/v2 v2.0.0 // indirect
-	github.com/aaronland/go-roster v1.0.0 // indirect
 	github.com/aaronland/go-sqlite-modernc v0.0.1 // indirect
 	github.com/aaronland/go-sqlite/v2 v2.2.0 // indirect
 	github.com/aaronland/go-string v1.0.0 // indirect
@@ -160,7 +162,6 @@ require (
 	github.com/u-root/uio v0.0.0-20220204230159-dac05f7d2cb4 // indirect
 	github.com/vishvananda/netlink v1.1.1-0.20211118161826-650dca95af54 // indirect
 	github.com/vishvananda/netns v0.0.0-20211101163701-50045581ed74 // indirect
-	github.com/whosonfirst/go-cache v0.5.2 // indirect
 	github.com/whosonfirst/go-geojson-svg v0.0.5 // indirect
 	github.com/whosonfirst/go-ioutil v1.0.2 // indirect
 	github.com/whosonfirst/go-reader-http v0.3.1 // indirect
