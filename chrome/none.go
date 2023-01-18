@@ -21,11 +21,19 @@ type NoneChrome struct {
 //
 //	none://
 func NewNoneChrome(ctx context.Context, uri string) (Chrome, error) {
-	a := &NoneChrome{}
-	return a, nil
+	c := &NoneChrome{}
+	return c, nil
 }
 
 // WrapHandler returns 'h' unchanged.
-func (a *NoneChrome) WrapHandler(h http.Handler) http.Handler {
+func (c *NoneChrome) WrapHandler(h http.Handler) http.Handler {
 	return h
+}
+
+func (c *NoneChrome) AppendStaticAssetHandlers(*http.ServeMux) error {
+	return nil
+}
+
+func (c *NoneChrome) AppendStaticAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
+	return nil
 }

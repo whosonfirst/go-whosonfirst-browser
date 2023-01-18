@@ -34,11 +34,11 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-reader-cachereader"
 	github_reader "github.com/whosonfirst/go-reader-github"
+	"github.com/whosonfirst/go-whosonfirst-browser/v6/chrome"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/templates/html"
-	"github.com/whosonfirst/go-whosonfirst-browser/v6/chrome"	
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"github.com/whosonfirst/go-whosonfirst-spatial/database"
@@ -188,13 +188,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		return fmt.Errorf("Failed to create authenticator, %w", err)
 	}
 
-	chrome_uri := "none://"
-	custom, err := chrome.NewChrome(ctx, chrome_uri)
+	custom, err := chrome.NewChrome(ctx, custom_chrome_uri)
 
 	if err != nil {
 		return fmt.Errorf("Failed to create custom chrome, %w", err)
 	}
-	
+
 	www_paths := &www.Paths{
 		GeoJSON:   path_geojson,
 		GeoJSONLD: path_geojsonld,
@@ -514,6 +513,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to append static asset handlers, %w", err)
 		}
 
+		err = custom.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append custom asset handlers, %w", err)
+		}
+
 		provider_uri, err := provider.ProviderURIFromFlagSet(fs)
 
 		if err != nil {
@@ -650,7 +655,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		// TBD: custom middleware goes here?
 		geom_handler = custom.WrapHandler(geom_handler)
-		
+
 		geom_handler = authenticator.WrapHandler(geom_handler)
 
 		mux.Handle(path_edit_geometry, geom_handler)

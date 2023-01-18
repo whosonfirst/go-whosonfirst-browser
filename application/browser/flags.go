@@ -204,6 +204,10 @@ const SpatialDatabaseURIFlag string = "spatial-database-uri"
 
 var spatial_database_uri string
 
+const CustomChromeURIFlag string = "custom-chrome-uri"
+
+var custom_chrome_uri string
+
 // DefaultFlagSet returns a `flag.FlagSet` instance with flags and defaults values assigned for use with `app`.
 func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
@@ -297,6 +301,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
 
 	fs.StringVar(&spatial_database_uri, SpatialDatabaseURIFlag, "", "...")
+
+	fs.StringVar(&custom_chrome_uri, CustomChromeURIFlag, "none://", "...")
 
 	err := provider.AppendProviderFlags(fs)
 

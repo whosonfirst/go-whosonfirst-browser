@@ -16,6 +16,8 @@ import (
 type Chrome interface {
 	// WrapHandler wraps a `http.Handler` with any implementation-specific middleware.
 	WrapHandler(http.Handler) http.Handler
+	AppendStaticAssetHandlers(*http.ServeMux) error
+	AppendStaticAssetHandlersWithPrefix(*http.ServeMux, string) error
 }
 
 var chrome_roster roster.Roster
