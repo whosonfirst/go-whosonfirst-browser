@@ -9,7 +9,6 @@ import (
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 )
@@ -45,13 +44,6 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			return
 		}
 
-		uri, err, _ := wof_http.ParseURIFromRequest(req, opts.Reader)
-
-		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 		body, err := io.ReadAll(req.Body)
 
 		if err != nil {
@@ -80,7 +72,6 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			WriterURIs: opts.WriterURIs,
 			Exporter:   opts.Exporter,
 			Cache:      opts.Cache,
-			URI:        uri,
 		}
 
 		final, err := publishFeature(ctx, publish_opts, new_body)

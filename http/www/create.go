@@ -8,7 +8,7 @@ import (
 
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-placetypes"	
+	"github.com/whosonfirst/go-whosonfirst-placetypes"
 )
 
 type CreateFeatureHandlerOptions struct {
@@ -23,7 +23,7 @@ type CreateFeatureHandlerOptions struct {
 type CreateFeatureVars struct {
 	MapProvider string
 	Endpoints   *Endpoints
-	Placetypes []*placetypes.WOFPlacetype
+	Placetypes  []*placetypes.WOFPlacetype
 	// To do: Support alternate geometries
 }
 
@@ -38,11 +38,11 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 	roles := []string{
 		"common",
 		"common_optional",
-		"optional",		
+		"optional",
 	}
-	
+
 	all_placetypes := placetypes.DescendantsForRoles(pt, roles)
-	
+
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		_, err := opts.Authenticator.GetAccountForRequest(req)
@@ -55,7 +55,7 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		vars := CreateFeatureVars{
 			Endpoints:   opts.Endpoints,
 			MapProvider: opts.MapProvider,
-			Placetypes: all_placetypes,
+			Placetypes:  all_placetypes,
 		}
 
 		RenderTemplate(rsp, opts.Template, vars)

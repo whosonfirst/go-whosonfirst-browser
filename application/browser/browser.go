@@ -604,7 +604,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		// START OF wrap me in a(nother) feature flag
-		
+
 		// Edit geometry
 
 		geom_t := t.Lookup("geometry")
@@ -652,9 +652,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		// END OF wrap me in a(nother) feature flag
-		
+
 		// Final map stuff
-		
+
 		maps_opts := maps.DefaultMapsOptions()
 
 		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
@@ -670,7 +670,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, static_prefix)
-		id_handler = custom.WrapHandler(id_handler)		
+		id_handler = custom.WrapHandler(id_handler)
 		id_handler = authenticator.WrapHandler(id_handler)
 
 		mux.Handle(path_id, id_handler)
@@ -682,7 +682,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		// START OF wrap me in a(nother) feature flag
-		
+
 		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, map_provider, maps_opts, static_prefix)
 		geom_handler = custom.WrapHandler(geom_handler)
 		geom_handler = authenticator.WrapHandler(geom_handler)
@@ -696,14 +696,14 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		mux.Handle(path_create_feature, create_handler)
 
 		// END OF wrap me in a(nother) feature flag
-		
+
 		// Basic landing page
 
 		index_handler = authenticator.WrapHandler(index_handler)
 		mux.Handle("/", index_handler)
 
 		// Null handler for annoying things like favicons
-		
+
 		null_handler := www.NewNullHandler()
 
 		favicon_path := filepath.Join(path_id, "favicon.ico")
@@ -823,7 +823,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		create_handler = authenticator.WrapHandler(create_handler)
-		mux.Handle(path_api_create_feature, create_handler)		
+		mux.Handle(path_api_create_feature, create_handler)
 	}
 
 	// Finally, start the server

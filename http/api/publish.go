@@ -48,13 +48,34 @@ func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byt
 		return nil, fmt.Errorf("Failed to export body, %w", err)
 	}
 
-	br := bytes.NewReader(exp_body)
+	var rel_path string
 
-	rel_path, err := uri.Id2RelPath(opts.URI.Id, opts.URI.URIArgs)
+	if opts.URI == nil {
 
-	if err != nil {
-		return nil, fmt.Errorf("Failed to derive rel path, %w", err)
+		wof_id, err := properties.Id(exp_body)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to derive ID from body, %w", err)
+		}
+
+		// To do: alternate geometries
+
+		rel_path, err = uri.Id2RelPath(wof_id)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to derive rel path, %w", err)
+		}
+
+	} else {
+
+		rel_path, err = uri.Id2RelPath(opts.URI.Id, opts.URI.URIArgs)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to derive rel path, %w", err)
+		}
 	}
+
+	br := bytes.NewReader(exp_body)
 
 	_, err = wr.Write(ctx, rel_path, br)
 

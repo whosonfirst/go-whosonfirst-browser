@@ -30,7 +30,7 @@ func CessateFeatureHandler(opts *CessateFeatureHandlerOptions) (http.Handler, er
 			http.Error(rsp, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		
+
 		ctx := req.Context()
 
 		_, err := opts.Authenticator.GetAccountForRequest(req)

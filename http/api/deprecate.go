@@ -30,7 +30,7 @@ func DeprecateFeatureHandler(opts *DeprecateFeatureHandlerOptions) (http.Handler
 			http.Error(rsp, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		
+
 		ctx := req.Context()
 
 		_, err := opts.Authenticator.GetAccountForRequest(req)

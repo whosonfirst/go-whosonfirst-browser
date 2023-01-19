@@ -290,7 +290,7 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&path_id, "path-id", "/id/", "The URL that Who's On First documents should be served from.")
 
 	fs.StringVar(&path_edit_geometry, PathEditGeometryFlag, PathEditGeometryDefault, "...")
-	fs.StringVar(&path_create_feature, PathCreateFeatureFlag, PathCreateFeatureDefault, "...")	
+	fs.StringVar(&path_create_feature, PathCreateFeatureFlag, PathCreateFeatureDefault, "...")
 
 	fs.IntVar(&navplace_max_features, "navplace-max-features", 3, "The maximum number of features to allow in a /navplace/{ID} URI string.")
 
@@ -310,7 +310,7 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&path_api_cessate, "path-api-cessate", "/api/cessate/", "...")
 	fs.StringVar(&path_api_edit_geometry, PathAPIEditGeometryFlag, "/api/geometry/", "...")
 	fs.StringVar(&path_api_create_feature, PathAPICreateFeatureFlag, PathAPICreateFeatureDefault, "...")
-	
+
 	fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
 
 	fs.StringVar(&spatial_database_uri, SpatialDatabaseURIFlag, "", "...")
