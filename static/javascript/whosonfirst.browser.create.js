@@ -48,6 +48,18 @@ whosonfirst.browser.create = (function(){
 		var feature_collection = feature_group.toGeoJSON();
 		console.log("UPDATE", feature_collection);
 	    };
+
+	    var geojson_pane_name = "geometry"
+	    var geojson_pane = map.createPane(geojson_pane_name);
+	    geojson_pane.style.zIndex = 8000;
+	    
+	    map.pm.setGlobalOptions({
+		'panes': {
+		    vertexPane: geojson_pane_name,
+		    layerPane: geojson_pane_name,
+		    markerPane: geojson_pane_name,
+		}
+	    });
 	    
 	    map.pm.addControls({
 		position: 'topleft',
