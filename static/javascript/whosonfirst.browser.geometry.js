@@ -10,7 +10,6 @@ whosonfirst.browser.geometry = (function(){
 	'init': function() {
 	    
 	    self.init_endpoints();
-	    self.init_map();
 	    self.init_geometry();
 	    self.init_controls();	    
 	},
