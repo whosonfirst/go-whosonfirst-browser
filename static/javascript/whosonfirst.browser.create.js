@@ -34,6 +34,7 @@ whosonfirst.browser.create = (function(){
 		return false
 	    }
 
+	    // To do: Determine how much of this code can be reconciled with whosonfirst.browser.geometry
 	    
 	    L.PM.setOptIn(true);
 	    
@@ -122,6 +123,8 @@ whosonfirst.browser.create = (function(){
 		    var feature_group = map.pm.getGeomanLayers(true);
 		    var feature_collection = feature_group.toGeoJSON();
 
+		    // START OF reconcile with whosonfirst.browser.geometry
+		    
 		    var count = feature_collection.features.length;
 		    var geom;
 
@@ -148,6 +151,8 @@ whosonfirst.browser.create = (function(){
 
 			    break;
 		    }
+
+		    // END OF reconcile with whosonfirst.browser.geometry
 		    
 		    var feature = {
 			'type': 'Feature',
@@ -155,19 +160,13 @@ whosonfirst.browser.create = (function(){
 			'geometry': geom,
 		    };
 		    
-		    console.log(feature);
-		    
 		    var uri = "/api/create/";
 
-		    console.log("PUT");
-		    
 		    whosonfirst.browser.api.do("PUT", uri, feature).then((data) => {
 			console.log("OKAY", data);
 		    }).catch((err) => {
 			console.log("NOT OKAY", err);
 		    });			
-		    
-		    console.log("SAVE", feature);
 		    
 		} catch (err) {
 		    console.log("SAD", err);

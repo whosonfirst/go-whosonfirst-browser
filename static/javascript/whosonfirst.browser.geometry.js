@@ -47,7 +47,13 @@ whosonfirst.browser.geometry = (function(){
 		return false
 	    }
 
-	    var map_args = {};
+	    // To do: Determine how much of this code can be reconciled with whosonfirst.browser.create
+	    
+	    L.PM.setOptIn(true);
+	    
+	    var map_args = {
+		pmIgnore: false,
+	    };
 	    
 	    map = whosonfirst.browser.maps.getMap(map_el, map_args);
 
@@ -89,9 +95,22 @@ whosonfirst.browser.geometry = (function(){
 		    var feature_collection = feature_group.toGeoJSON();
 		    console.log("UPDATE", feature_collection);
 		};
+
+		map.pm.setGlobalOptions({
+		    'panes': {
+			vertexPane: geojson_pane_name,
+			layerPane: geojson_pane_name,
+			markerPane: geojson_pane_name,
+		    }
+		});
 		
 		map.pm.addControls({
 		    position: 'topleft',
+		});
+
+		map.on('pm:create', (e) => {
+		    e.layer.options.pmIgnore = false;
+		    L.PM.reInitLayer(e.layer);
 		});
 		
 		map.on("pm:drawend", function(e){
@@ -115,14 +134,22 @@ whosonfirst.browser.geometry = (function(){
 		const geojson_layer = L.geoJson(feature, {
 		    pointToLayer: (feature, latlng) => {
 			if (feature.properties.customGeometry) {
-			    return new L.Circle(latlng, {"pane": geojson_pane_name, "radius": feature.properties.customGeometry.radius});
+			    return new L.Circle(latlng, {
+				pane: geojson_pane_name,
+				radius: feature.properties.customGeometry.radius,
+				pmIgnore: false,
+			    });
 			} else {
-			    return new L.Marker(latlng, {"pane": geojson_pane_name});
+			    return new L.Marker(latlng, {
+				pane: geojson_pane_name,
+				pmIgnore: false,				
+			    });
 			}
 		    },
 		    pane: geojson_pane_name,
+		    pmIgnore: false,
 		});
-		
+
 		geojson_layer.addTo(map);
 	    };
 
@@ -161,20 +188,54 @@ whosonfirst.browser.geometry = (function(){
 		}
 
 		try {
+		    
 		    var feature_group = map.pm.getGeomanLayers(true);
 		    var feature_collection = feature_group.toGeoJSON();
-		    
-		    var first = feature_collection.features[0];
 
+		    // START OF reconcile with whosonfirst.browser.create
+		    
+		    var count = feature_collection.features.length;
+		    var geom;
+
+		    switch (count){
+			case 0:
+			    console.log("Missing geometry");
+			    return false;
+			    break;
+			case 1:
+			    geom = feature_collection.features[0].geometry;
+			    break;
+			default:
+
+			    _geoms = [];
+
+			    for (var i=0; i < count; i++){
+				_geoms.push(feature_collection.features[i].geometry);
+			    }
+
+			    geom = {
+				'type':'GeometryCollection',
+				'geometries': _geoms,
+			    };
+
+			    break;
+		    }
+
+		    // END OF reconcile with whosonfirst.browser.create
+		    
+		    var feature = {
+			'type': 'Feature',
+			'properties': {},
+			'geometry': geom,
+		    };
+		    
 		    var uri = "/api/geometry/" + wof_id;
 
-		    whosonfirst.browser.api.do("POST", uri, first).then((data) => {
+		    whosonfirst.browser.api.do("POST", uri, feature).then((data) => {
 			console.log("OKAY", data);
 		    }).catch((err) => {
 			console.log("NOT OKAY", err);
 		    });			
-		    
-		    console.log("SAVE", wof_id, first);
 		    
 		} catch (err) {
 		    console.log("SAD", err);
