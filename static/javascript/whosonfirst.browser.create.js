@@ -125,8 +125,6 @@ whosonfirst.browser.create = (function(){
 		    var count = feature_collection.features.length;
 		    var geom;
 
-		    console.log("COUNT", count);
-		    
 		    switch (count){
 			case 0:
 			    console.log("Missing geometry");

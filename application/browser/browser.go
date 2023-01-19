@@ -798,13 +798,32 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		geom_handler, err := api.UpdateGeometryHandler(geom_opts)
 
 		if err != nil {
-			return fmt.Errorf("Failed to create cessate feature handler, %w", err)
+			return fmt.Errorf("Failed to create uupdate geometry handler, %w", err)
 		}
 
 		geom_handler = authenticator.WrapHandler(geom_handler)
 		mux.Handle(path_api_edit_geometry, geom_handler)
 
-		// logger.Printf("Listening at %s\n", path_api_edit_geometry)
+		// Create a new feature
+
+		create_opts := &api.CreateFeatureHandlerOptions{
+			Reader:                cr,
+			Cache:                 browser_cache,
+			Logger:                logger,
+			Authenticator:         authenticator,
+			Exporter:              ex,
+			WriterURIs:            writer_uris,
+			PointInPolygonService: pip_service,
+		}
+
+		create_handler, err := api.CreateFeatureHandler(create_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create create feature handler, %w", err)
+		}
+
+		create_handler = authenticator.WrapHandler(create_handler)
+		mux.Handle(path_api_create_feature, create_handler)		
 	}
 
 	// Finally, start the server
