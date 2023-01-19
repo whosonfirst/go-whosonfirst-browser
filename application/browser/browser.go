@@ -603,6 +603,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, static_prefix)
 		}
 
+		// START OF wrap me in a(nother) feature flag
+		
 		// Edit geometry
 
 		geom_t := t.Lookup("geometry")
@@ -626,10 +628,34 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create edit geometry handler, %w", err)
 		}
 
-		maps_opts := maps.DefaultMapsOptions()
+		// Create geometry
 
-		// TBD... update maps_opts... but really only (n) handlers
-		// maps_opts = custom.UpdateMapsOptions(maps_opts)
+		create_t := t.Lookup("create")
+
+		if create_t == nil {
+			return fmt.Errorf("Failed to load 'create' template")
+		}
+
+		create_opts := &www.CreateFeatureHandlerOptions{
+			Authenticator: authenticator,
+			MapProvider:   map_provider.Scheme(),
+			Endpoints:     endpoints,
+			Template:      create_t,
+			Logger:        logger,
+			Reader:        cr,
+		}
+
+		create_handler, err := www.CreateFeatureHandler(create_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create create feature handler, %w", err)
+		}
+
+		// END OF wrap me in a(nother) feature flag
+		
+		// Final map stuff
+		
+		maps_opts := maps.DefaultMapsOptions()
 
 		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
 
@@ -644,6 +670,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, static_prefix)
+		id_handler = custom.WrapHandler(id_handler)		
 		id_handler = authenticator.WrapHandler(id_handler)
 
 		mux.Handle(path_id, id_handler)
@@ -654,20 +681,29 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			mux.Handle(path_search_html, search_handler)
 		}
 
+		// START OF wrap me in a(nother) feature flag
+		
 		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, map_provider, maps_opts, static_prefix)
-
-		// TBD: custom middleware goes here?
 		geom_handler = custom.WrapHandler(geom_handler)
-
 		geom_handler = authenticator.WrapHandler(geom_handler)
 
 		mux.Handle(path_edit_geometry, geom_handler)
 
-		// log.Printf("Enable edit geometry handler at %s", path_edit_geometry)
+		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, map_provider, maps_opts, static_prefix)
+		create_handler = custom.WrapHandler(create_handler)
+		create_handler = authenticator.WrapHandler(create_handler)
+
+		mux.Handle(path_create_feature, create_handler)
+
+		// END OF wrap me in a(nother) feature flag
+		
+		// Basic landing page
 
 		index_handler = authenticator.WrapHandler(index_handler)
 		mux.Handle("/", index_handler)
 
+		// Null handler for annoying things like favicons
+		
 		null_handler := www.NewNullHandler()
 
 		favicon_path := filepath.Join(path_id, "favicon.ico")

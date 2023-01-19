@@ -23,6 +23,14 @@ func CessateFeatureHandler(opts *CessateFeatureHandlerOptions) (http.Handler, er
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
+		switch req.Method {
+		case "POST":
+			// pass
+		default:
+			http.Error(rsp, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		
 		ctx := req.Context()
 
 		_, err := opts.Authenticator.GetAccountForRequest(req)

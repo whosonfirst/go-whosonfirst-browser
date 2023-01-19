@@ -27,14 +27,57 @@ whosonfirst.browser.create = (function(){
 		
 	'init_map': function() {
 
-	    // map = whosonfirst.browser.common.init_map();	    
+	    var map_el = document.getElementById("map");
+
+	    if (! map_el){
+		console.log("Missing 'map' element");
+		return false
+	    }
+
+	    var map_args = {};
+	    
+	    map = whosonfirst.browser.maps.getMap(map_el, map_args);
+
+	    if (! map.pm){
+		console.log("Missing map.pm");
+		return;
+	    }
+	    
+	    var on_update = function(){
+		var feature_group = map.pm.getGeomanLayers(true);
+		var feature_collection = feature_group.toGeoJSON();
+		console.log("UPDATE", feature_collection);
+	    };
+	    
+	    map.pm.addControls({
+		position: 'topleft',
+	    });
+	    
+	    map.on("pm:drawend", function(e){
+		console.log("draw end");
+		on_update();
+	    });
+	    
+	    map.on('pm:remove', function (e) {
+		console.log("remove");
+		on_update();
+	    });
+	    
+	    // This does not appear to capture drag or edit-vertex events
+	    // Not sure what's up with that...
+	    
+	    map.on('pm:globaleditmodetoggled', (e) => {
+		console.log("remove");
+		on_update();
+	    });	    
+	    
 	},
 	
 	'init_controls': function(){
 
 	    self.init_save_control();
 	},
-
+	
 	'init_save_control': function(){
 
 	    // Eventually this should become a Leaflet control... maybe?

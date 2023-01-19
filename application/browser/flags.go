@@ -112,9 +112,15 @@ var enable_api bool
 var path_api_deprecate string
 var path_api_cessate string
 
-const PathAPIEditGeometry string = "path-api-edit-geometry"
+const PathAPIEditGeometryFlag string = "path-api-edit-geometry"
+const PathAPIEditGeometryDefault string = "/api/geometry/"
 
 var path_api_edit_geometry string
+
+const PathAPICreateFeatureFlag string = "path-api-create-feature"
+const PathAPICreateFeatureDefault string = "/api/create/"
+
+var path_api_create_feature string
 
 var search_database_uri string
 
@@ -174,10 +180,15 @@ var path_protomaps_tiles string
 var path_search_api string
 var path_search_html string
 
-const PathEditGeometry string = "path-edit-geometry"
+const PathEditGeometryFlag string = "path-edit-geometry"
 const PathEditGeometryDefault string = "/geometry/"
 
 var path_edit_geometry string
+
+const PathCreateFeatureFlag string = "path-create-feature"
+const PathCreateFeatureDefault string = "/create/"
+
+var path_create_feature string
 
 var path_id string
 
@@ -278,7 +289,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.StringVar(&path_id, "path-id", "/id/", "The URL that Who's On First documents should be served from.")
 
-	fs.StringVar(&path_edit_geometry, PathEditGeometry, PathEditGeometryDefault, "...")
+	fs.StringVar(&path_edit_geometry, PathEditGeometryFlag, PathEditGeometryDefault, "...")
+	fs.StringVar(&path_create_feature, PathCreateFeatureFlag, PathCreateFeatureDefault, "...")	
 
 	fs.IntVar(&navplace_max_features, "navplace-max-features", 3, "The maximum number of features to allow in a /navplace/{ID} URI string.")
 
@@ -296,8 +308,9 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.BoolVar(&enable_api, "enable-api", false, "Enable the API endpoints")
 	fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
 	fs.StringVar(&path_api_cessate, "path-api-cessate", "/api/cessate/", "...")
-	fs.StringVar(&path_api_edit_geometry, PathAPIEditGeometry, "/api/geometry/", "...")
-
+	fs.StringVar(&path_api_edit_geometry, PathAPIEditGeometryFlag, "/api/geometry/", "...")
+	fs.StringVar(&path_api_create_feature, PathAPICreateFeatureFlag, PathAPICreateFeatureDefault, "...")
+	
 	fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
 
 	fs.StringVar(&spatial_database_uri, SpatialDatabaseURIFlag, "", "...")

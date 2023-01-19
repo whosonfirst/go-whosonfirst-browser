@@ -25,11 +25,6 @@ whosonfirst.browser.geometry = (function(){
 	    }			
 	},
 		
-	'init_map': function() {
-
-	    // map = whosonfirst.browser.common.init_map();	    
-	},
-	
 	'init_geometry': function(){
 
 	    var pl = document.getElementById("whosonfirst-place");
