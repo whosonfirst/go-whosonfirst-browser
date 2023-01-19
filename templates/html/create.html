@@ -1,0 +1,65 @@
+{{ define "create" }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Who's On First</title>
+      {{ template "inc_common_meta" }}
+      <!-- <meta property="html:lastmodified" content="" /> -->
+	        
+      <script src="/javascript/localforage.min.js"></script>	  
+      <script src="/javascript/slippymap.crosshairs.js"></script>
+      
+      <script src="/javascript/whosonfirst.www.js"></script>	 
+      <script src="/javascript/whosonfirst.render.js"></script>
+      <script src="/javascript/whosonfirst.properties.js"></script>
+      
+      <script src="/javascript/whosonfirst.cache.js"></script>	 
+      <script src="/javascript/whosonfirst.uri.js"></script>
+      <script src="/javascript/whosonfirst.net.js"></script>
+      <script src="/javascript/whosonfirst.namify.js"></script> 	 	 
+      
+      <script src="/javascript/whosonfirst.geojson.js"></script>	 
+      <script src="/javascript/whosonfirst.leaflet.utils.js"></script>
+      <script src="/javascript/whosonfirst.leaflet.styles.js"></script>
+      <script src="/javascript/whosonfirst.leaflet.handlers.js"></script> 	 	 
+
+      <script src="/javascript/whosonfirst.browser.maps.js"></script>
+      <script src="/javascript/whosonfirst.browser.common.js"></script>
+
+      <script src="/javascript/whosonfirst.browser.api.js"></script>      
+      <script src="/javascript/whosonfirst.browser.create.js"></script>
+      <script src="/javascript/whosonfirst.browser.create.init.js"></script>	 
+      
+      {{ template "inc_common_css" }}
+
+      <link rel="stylesheet" href="/css/whosonfirst.browser.create.css">
+      
+  </head>
+  <body data-whosonfirst-uri-endpoint="{{ .Endpoints.Data }}">
+
+      <div class="container">
+      {{ template "inc_common_header" .}}
+
+      <main class="whosonfirst">
+
+	  <div class="container">
+
+	      <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true" style="height:80vh !important;">
+	      </div>
+
+	      <div id="properties">
+	      </div>
+	      
+	      <div id="controls" class="row">
+		  <button class="btn" id="save">Save</button>
+	      </div>
+	  </div>
+      
+      </main>
+
+      {{ template "inc_common_footer" .}}
+
+    </div>      
+  </body>
+</html>
+{{ end }}
