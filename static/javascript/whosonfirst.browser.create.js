@@ -34,24 +34,24 @@ whosonfirst.browser.create = (function(){
 		return false
 	    }
 
-	    var map_args = {};
+	    
+	    L.PM.setOptIn(true);
+	    
+	    var map_args = {
+		pmIgnore: false,
+	    };
 	    
 	    map = whosonfirst.browser.maps.getMap(map_el, map_args);
 
-	    if (! map.pm){
-		console.log("Missing map.pm");
-		return;
-	    }
+	    var geojson_pane_name = "geometry"
+	    var geojson_pane = map.createPane(geojson_pane_name);
+	    geojson_pane.style.zIndex = 8000;
 	    
 	    var on_update = function(){
 		var feature_group = map.pm.getGeomanLayers(true);
 		var feature_collection = feature_group.toGeoJSON();
 		console.log("UPDATE", feature_collection);
 	    };
-
-	    var geojson_pane_name = "geometry"
-	    var geojson_pane = map.createPane(geojson_pane_name);
-	    geojson_pane.style.zIndex = 8000;
 	    
 	    map.pm.setGlobalOptions({
 		'panes': {
@@ -60,11 +60,12 @@ whosonfirst.browser.create = (function(){
 		    markerPane: geojson_pane_name,
 		}
 	    });
-	    
-	    map.pm.addControls({
-		position: 'topleft',
+
+	    map.on('pm:create', (e) => {
+		e.layer.options.pmIgnore = false;
+		L.PM.reInitLayer(e.layer);
 	    });
-	    
+	    	    
 	    map.on("pm:drawend", function(e){
 		console.log("draw end");
 		on_update();
@@ -82,6 +83,10 @@ whosonfirst.browser.create = (function(){
 		console.log("remove");
 		on_update();
 	    });	    
+
+	    map.pm.addControls({
+		position: 'topleft',
+	    });
 	    
 	},
 	
@@ -113,24 +118,58 @@ whosonfirst.browser.create = (function(){
 		}
 
 		try {
+		    
 		    var feature_group = map.pm.getGeomanLayers(true);
 		    var feature_collection = feature_group.toGeoJSON();
-		    
-		    var first = feature_collection.features[0];
-		    first.properties = props;
 
-		    console.log(first);
-		    return false;
+		    var count = feature_collection.features.length;
+		    var geom;
+
+		    console.log("COUNT", count);
+		    
+		    switch (count){
+			case 0:
+			    console.log("Missing geometry");
+			    return false;
+			    break;
+			case 1:
+			    geom = feature_collection.features[0].geometry;
+			    break;
+			default:
+
+			    _geoms = [];
+
+			    for (var i=0; i < count; i++){
+				_geoms.push(feature_collection.features[i].geometry);
+			    }
+
+			    geom = {
+				'type':'GeometryCollection',
+				'geometries': _geoms,
+			    };
+
+			    break;
+		    }
+		    
+		    var feature = {
+			'type': 'Feature',
+			'properties': props,
+			'geometry': geom,
+		    };
+		    
+		    console.log(feature);
 		    
 		    var uri = "/api/create/";
 
-		    whosonfirst.browser.api.do("PUT", uri, first).then((data) => {
+		    console.log("PUT");
+		    
+		    whosonfirst.browser.api.do("PUT", uri, feature).then((data) => {
 			console.log("OKAY", data);
 		    }).catch((err) => {
 			console.log("NOT OKAY", err);
 		    });			
 		    
-		    console.log("SAVE", first);
+		    console.log("SAVE", feature);
 		    
 		} catch (err) {
 		    console.log("SAD", err);

@@ -502,8 +502,8 @@ github.com/aaronland/go-http-bootstrap v0.2.0/go.mod h1:Dd4Z7H55XdgB7JyVma3cFvKQ
 github.com/aaronland/go-http-leaflet v0.1.0/go.mod h1:M6Brt/UMWXsT+3qK5idwxr3y6kELHHi7OhgoiecMt6U=
 github.com/aaronland/go-http-leaflet v0.2.0 h1:XmDlhQt4kzEUaX8Gl3Hi1hyESthAI6x3q5sAkcNlGuI=
 github.com/aaronland/go-http-leaflet v0.2.0/go.mod h1:YzB0424E9/Y5zKqE+GOtjLSY08Ce3nSAfI+Fp7gHTvc=
-github.com/aaronland/go-http-maps v0.0.14 h1:hPZcFaPe+7e8rEt4W0kNt5EOIWBStHl1/QbeGbgYXTk=
-github.com/aaronland/go-http-maps v0.0.14/go.mod h1:/G/L9BQpaNzoHZkX3scJVfjdgaz45C5MF5UJWK0LQ1g=
+github.com/aaronland/go-http-maps v0.0.15 h1:aJzEfEeYp+yNqYUcc+P0112/ioVMqtRbPp8lGtH8t5A=
+github.com/aaronland/go-http-maps v0.0.15/go.mod h1:/G/L9BQpaNzoHZkX3scJVfjdgaz45C5MF5UJWK0LQ1g=
 github.com/aaronland/go-http-ping v1.0.0/go.mod h1:zU9CSFLh2XzPlrFgoyCysNED+DoLRioCKaa2Kl+O6DA=
 github.com/aaronland/go-http-ping/v2 v2.0.0 h1:PO/CfpNwxPSMqEuDAA+2/IzSoArAa/0deSHCmCuvfiA=
 github.com/aaronland/go-http-ping/v2 v2.0.0/go.mod h1:fXKuw0WvfXMyt09ibXILN4LzEIhCnxoAhmZqoC5iBm8=

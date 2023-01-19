@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/aaronland/go-http-bootstrap v0.2.0
-	github.com/aaronland/go-http-maps v0.0.14
+	github.com/aaronland/go-http-maps v0.0.15
 	github.com/aaronland/go-http-ping/v2 v2.0.0
 	github.com/aaronland/go-http-sanitize v0.0.6
 	github.com/aaronland/go-http-server v1.0.0
@@ -28,6 +28,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-export/v2 v2.6.2
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.26
 	github.com/whosonfirst/go-whosonfirst-image v0.1.0
+	github.com/whosonfirst/go-whosonfirst-placetypes v0.4.2
 	github.com/whosonfirst/go-whosonfirst-reader v1.0.1
 	github.com/whosonfirst/go-whosonfirst-search v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spatial v0.5.4
@@ -173,7 +174,6 @@ require (
 	github.com/whosonfirst/go-whosonfirst-id v1.2.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.1 // indirect
 	github.com/whosonfirst/go-whosonfirst-names v0.1.0 // indirect
-	github.com/whosonfirst/go-whosonfirst-placetypes v0.4.2 // indirect
 	github.com/whosonfirst/go-whosonfirst-sources v0.1.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-spatial-sqlite v0.6.4 // indirect
 	github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.0 // indirect
