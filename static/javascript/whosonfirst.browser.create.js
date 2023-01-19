@@ -86,19 +86,30 @@ whosonfirst.browser.create = (function(){
 
 	    save_button.onclick = function(){
 
-		var pl = document.getElementById("whosonfirst-place");
+		var props = {};
 		
-		if (! pl){
-		    console.log("Missing 'whosonfirst-place' element");
-		    return false;
+		var inputs = document.getElementsByClassName("wof:property");
+		var count = inputs.length;
+
+		for (var i=0; i < count; i++){
+
+		    var el = inputs[i];
+		    var k = el.getAttribute("id");
+		    var v = el.value;
+
+		    props[k] = v;
 		}
-		
+
 		try {
 		    var feature_group = map.pm.getGeomanLayers(true);
 		    var feature_collection = feature_group.toGeoJSON();
 		    
 		    var first = feature_collection.features[0];
+		    first.properties = props;
 
+		    console.log(first);
+		    return false;
+		    
 		    var uri = "/api/create/";
 
 		    whosonfirst.browser.api.do("PUT", uri, first).then((data) => {
@@ -107,7 +118,7 @@ whosonfirst.browser.create = (function(){
 			console.log("NOT OKAY", err);
 		    });			
 		    
-		    console.log("SAVE", wof_id, first);
+		    console.log("SAVE", first);
 		    
 		} catch (err) {
 		    console.log("SAD", err);

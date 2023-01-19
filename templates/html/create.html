@@ -50,12 +50,46 @@
 		  </div>
 
 		  <div id="properties">
+
+		      <form class="form" class="row g-3">
+
+			    <div class="col-auto">
+				<label for="wof:name" class="visually-hidden">wof:name</label>
+				<input type="text" class="form-control-plaintext wof:property" id="wof:name" value="" />
+			    </div>
+
+			    <label for="wof:placetype" class="form-label">wof:placetype</label>
+			    <input class="form-control wof:property" list="wof:placetype_options" id="wof:placetype" placeholder="Type to search...">
+			    <datalist id="wof:placetype_options">
+				{{ range $i, $pt := .Placetypes }}
+				<option value="{{ $pt.Name }}" />
+				{{ end }}
+			    </datalist>
+
+			    <div class="col-auto">
+				<label for="edtf:inception" class="visually-hidden">edtf:inception</label>
+				<input type="text" class="form-control-plaintext wof:property" id="edtf:inception" value="" />
+			    </div>
+
+			    <div class="col-auto">
+				<label for="edtf:cessation" class="visually-hidden">edtf:cessation</label>
+				<input type="text" class="form-control-plaintext wof:property" id="edtf:cessation" value="" />
+			    </div>
+			    
+			    <div class="col-auto">
+				<label for="wof:repo" class="visually-hidden">wof:repo</label>
+				<input type="text" class="form-control-plaintext wof:property" id="wof:repo" value="" />
+			    </div>
+			    
+		      </form>
+
+		      <div id="controls" class="row">
+			  <button class="btn" id="save">Save</button>
+		      </div>
+		      
 		  </div>
 	      </div>
 	      
-	      <div id="controls" class="row">
-		  <button class="btn" id="save">Save</button>
-	      </div>
 	  </div>
       
       </main>
