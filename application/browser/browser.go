@@ -42,6 +42,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"github.com/whosonfirst/go-whosonfirst-spatial/database"
+	github_writer "github.com/whosonfirst/go-writer-github/v3"
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -132,9 +133,20 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if github_accesstoken_uri != "" {
 
+		if github_reader_accesstoken_uri == "" {
+			github_reader_accesstoken_uri = github_accesstoken_uri
+		}
+
+		if github_writer_accesstoken_uri == "" {
+			github_writer_accesstoken_uri = github_accesstoken_uri
+		}
+	}
+
+	if github_reader_accesstoken_uri != "" {
+
 		for idx, r_uri := range reader_uris {
 
-			r_uri, err := github_reader.EnsureGitHubAccessToken(ctx, r_uri, github_accesstoken_uri)
+			r_uri, err := github_reader.EnsureGitHubAccessToken(ctx, r_uri, github_reader_accesstoken_uri)
 
 			if err != nil {
 				return fmt.Errorf("Failed to ensure GitHub access token for '%s', %w", r_uri, err)
@@ -142,6 +154,21 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 			reader_uris[idx] = r_uri
 		}
+	}
+
+	if github_writer_accesstoken_uri != "" {
+
+		for idx, wr_uri := range writer_uris {
+
+			wr_uri, err := github_writer.EnsureGitHubAccessToken(ctx, wr_uri, github_writer_accesstoken_uri)
+
+			if err != nil {
+				return fmt.Errorf("Failed to ensure GitHub access token for '%s', %w", wr_uri, err)
+			}
+
+			writer_uris[idx] = wr_uri
+		}
+
 	}
 
 	browser_reader, err := reader.NewMultiReaderFromURIs(ctx, reader_uris...)

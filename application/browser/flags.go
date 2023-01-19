@@ -124,8 +124,21 @@ var path_api_create_feature string
 
 var search_database_uri string
 
+const GitHubAccessTokenURIFlag string = "github-accesstoken-uri"
+const GitHubAccessTokenURIDefault string = ""
+
 // A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.
 var github_accesstoken_uri string
+
+const GitHubReaderAccessTokenURIFlag string = "github-reader-accesstoken-uri"
+const GitHubReaderAccessTokenURIDefault string = ""
+
+var github_reader_accesstoken_uri string
+
+const GitHubWriterAccessTokenURIFlag string = "github-writer-accesstoken-uri"
+const GitHubWriterAccessTokenURIDefault string = ""
+
+var github_writer_accesstoken_uri string
 
 // The path that PNG requests should be served from.
 var path_png string
@@ -299,7 +312,11 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.StringVar(&authenticator_uri, "authenticator-uri", "none://", "A valid sfomuseum/go-http-auth URI.")
 
-	fs.StringVar(&github_accesstoken_uri, "github-accesstoken-uri", "", "A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.")
+	fs.StringVar(&github_accesstoken_uri, GitHubAccessTokenURIFlag, GitHubAccessTokenURIDefault, "A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token.")
+
+	fs.StringVar(&github_reader_accesstoken_uri, GitHubReaderAccessTokenURIFlag, GitHubReaderAccessTokenURIDefault, "...")
+
+	fs.StringVar(&github_writer_accesstoken_uri, GitHubWriterAccessTokenURIFlag, GitHubWriterAccessTokenURIDefault, "...")
 
 	fs.StringVar(&webfinger_hostname, WebFingerHostname, "", "An optional hostname to use for WebFinger URLs.")
 

@@ -1,6 +1,10 @@
 package writer
 
 import (
+	_ "github.com/whosonfirst/go-writer-github/v3"
+)
+
+import (
 	"context"
 	"fmt"
 	wof_writer "github.com/whosonfirst/go-writer/v3"

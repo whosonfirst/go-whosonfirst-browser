@@ -38,6 +38,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.3
 	github.com/whosonfirst/go-whosonfirst-svg v0.1.0
 	github.com/whosonfirst/go-whosonfirst-uri v1.2.0
+	github.com/whosonfirst/go-writer-github/v3 v3.0.2
 	github.com/whosonfirst/go-writer/v3 v3.1.0
 	gocloud.dev v0.28.0
 )
