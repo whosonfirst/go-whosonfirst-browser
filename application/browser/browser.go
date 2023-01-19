@@ -630,7 +630,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		// TBD... update maps_opts... but really only (n) handlers
 		// maps_opts = custom.UpdateMapsOptions(maps_opts)
-		
+
 		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
 
 		if err != nil {
