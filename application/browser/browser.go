@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -224,6 +225,140 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 	}
 
+	www_paths := &www.Paths{
+		URIPrefix: static_prefix,
+	}
+
+	www_capabilities := &www.Capabilities{}
+
+	if enable_geojson {
+
+		if static_prefix != "" {
+
+			path_geojson, err = url.JoinPath(static_prefix, path_geojson)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_geojson)
+			}
+		}
+
+		www_capabilities.GeoJSON = true
+		www_paths.GeoJSON = path_geojson
+	}
+
+	if enable_geojsonld {
+
+		if static_prefix != "" {
+
+			path_geojsonld, err = url.JoinPath(static_prefix, path_geojsonld)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_geojsonld)
+			}
+		}
+
+		www_capabilities.GeoJSONLD = true
+		www_paths.GeoJSONLD = path_geojsonld
+	}
+
+	if enable_svg {
+
+		if static_prefix != "" {
+
+			path_svg, err = url.JoinPath(static_prefix, path_svg)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_svg)
+			}
+		}
+
+		www_capabilities.SVG = true
+		www_paths.SVG = path_svg
+	}
+
+	if enable_png {
+
+		if static_prefix != "" {
+
+			path_png, err = url.JoinPath(static_prefix, path_png)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_png)
+			}
+		}
+
+		www_capabilities.PNG = true
+		www_paths.PNG = path_png
+	}
+
+	if enable_select {
+
+		if static_prefix != "" {
+
+			path_select, err = url.JoinPath(static_prefix, path_select)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_select)
+			}
+		}
+
+		www_capabilities.Select = true
+		www_paths.Select = path_select
+	}
+
+	if enable_navplace {
+
+		if static_prefix != "" {
+
+			path_navplace, err = url.JoinPath(static_prefix, path_navplace)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_navplace)
+			}
+		}
+
+		www_capabilities.NavPlace = true
+		www_paths.NavPlace = path_navplace
+	}
+
+	if enable_spr {
+
+		if static_prefix != "" {
+
+			path_spr, err = url.JoinPath(static_prefix, path_spr)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_spr)
+			}
+		}
+
+		www_capabilities.SPR = true
+		www_paths.SPR = path_spr
+	}
+
+	if enable_html {
+
+		if static_prefix != "" {
+
+			path_id, err = url.JoinPath(static_prefix, path_id)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_id)
+			}
+		}
+
+		www_capabilities.HTML = true
+		www_paths.HTML = path_id
+	}
+
+	if enable_edit_ui {
+
+	}
+
+	if enable_edit_api {
+
+	}
+
 	authenticator, err := auth.NewAuthenticator(ctx, authenticator_uri)
 
 	if err != nil {
@@ -234,30 +369,6 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if err != nil {
 		return fmt.Errorf("Failed to create custom chrome, %w", err)
-	}
-
-	www_paths := &www.Paths{
-		GeoJSON:   path_geojson,
-		GeoJSONLD: path_geojsonld,
-		SVG:       path_svg,
-		PNG:       path_png,
-		Select:    path_select,
-		NavPlace:  path_navplace,
-		SPR:       path_spr,
-		HTML:      path_id,
-		// To do: API stuff
-	}
-
-	www_capabilities := &www.Capabilities{
-		HTML:      enable_html,
-		GeoJSON:   enable_geojson,
-		GeoJSONLD: enable_geojsonld,
-		SVG:       enable_svg,
-		PNG:       enable_png,
-		Select:    enable_select,
-		NavPlace:  enable_navplace,
-		SPR:       enable_spr,
-		// To do: API stuff
 	}
 
 	mux := http.NewServeMux()
