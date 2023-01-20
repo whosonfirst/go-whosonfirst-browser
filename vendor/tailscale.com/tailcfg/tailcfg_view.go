@@ -148,6 +148,7 @@ func (v NodeView) Endpoints() views.Slice[string]  { return views.SliceOf(v.ж.E
 func (v NodeView) DERP() string                    { return v.ж.DERP }
 func (v NodeView) Hostinfo() HostinfoView          { return v.ж.Hostinfo }
 func (v NodeView) Created() time.Time              { return v.ж.Created }
+func (v NodeView) Cap() CapabilityVersion          { return v.ж.Cap }
 func (v NodeView) Tags() views.Slice[string]       { return views.SliceOf(v.ж.Tags) }
 func (v NodeView) PrimaryRoutes() views.IPPrefixSlice {
 	return views.IPPrefixSliceOf(v.ж.PrimaryRoutes)
@@ -175,6 +176,7 @@ func (v NodeView) UnsignedPeerAPIOnly() bool         { return v.ж.UnsignedPeerA
 func (v NodeView) ComputedName() string              { return v.ж.ComputedName }
 func (v NodeView) ComputedNameWithHost() string      { return v.ж.ComputedNameWithHost }
 func (v NodeView) DataPlaneAuditLogID() string       { return v.ж.DataPlaneAuditLogID }
+func (v NodeView) Expired() bool                     { return v.ж.Expired }
 func (v NodeView) Equal(v2 NodeView) bool            { return v.ж.Equal(v2.ж) }
 
 // A compilation failure here means this code must be regenerated, with the command at the top of this file.
@@ -195,6 +197,7 @@ var _NodeViewNeedsRegeneration = Node(struct {
 	DERP                    string
 	Hostinfo                HostinfoView
 	Created                 time.Time
+	Cap                     CapabilityVersion
 	Tags                    []string
 	PrimaryRoutes           []netip.Prefix
 	LastSeen                *time.Time
@@ -207,6 +210,7 @@ var _NodeViewNeedsRegeneration = Node(struct {
 	computedHostIfDifferent string
 	ComputedNameWithHost    string
 	DataPlaneAuditLogID     string
+	Expired                 bool
 }{})
 
 // View returns a readonly view of Hostinfo.

@@ -114,6 +114,7 @@ func (lc *LocalClient) defaultDialer(ctx context.Context, network, addr string) 
 //
 // DoLocalRequest may mutate the request to add Authorization headers.
 func (lc *LocalClient) DoLocalRequest(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Tailscale-Cap", strconv.Itoa(int(tailcfg.CurrentCapabilityVersion)))
 	lc.tsClientOnce.Do(func() {
 		lc.tsClient = &http.Client{
 			Transport: &http.Transport{
@@ -255,6 +256,23 @@ func (lc *LocalClient) Goroutines(ctx context.Context) ([]byte, error) {
 // the Prometheus text exposition format.
 func (lc *LocalClient) DaemonMetrics(ctx context.Context) ([]byte, error) {
 	return lc.get200(ctx, "/localapi/v0/metrics")
+}
+
+// TailDaemonLogs returns a stream the Tailscale daemon's logs as they arrive.
+// Close the context to stop the stream.
+func (lc *LocalClient) TailDaemonLogs(ctx context.Context) (io.Reader, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", "http://"+apitype.LocalAPIHost+"/localapi/v0/logtap", nil)
+	if err != nil {
+		return nil, err
+	}
+	res, err := lc.doLocalRequestNiceError(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, errors.New(res.Status)
+	}
+	return res.Body, nil
 }
 
 // Pprof returns a pprof profile of the Tailscale daemon.
@@ -805,7 +823,7 @@ func (lc *LocalClient) NetworkLockInit(ctx context.Context, keys []tka.Key, disa
 }
 
 // NetworkLockModify adds and/or removes key(s) to the tailnet key authority.
-func (lc *LocalClient) NetworkLockModify(ctx context.Context, addKeys, removeKeys []tka.Key) (*ipnstate.NetworkLockStatus, error) {
+func (lc *LocalClient) NetworkLockModify(ctx context.Context, addKeys, removeKeys []tka.Key) error {
 	var b bytes.Buffer
 	type modifyRequest struct {
 		AddKeys    []tka.Key
@@ -813,14 +831,13 @@ func (lc *LocalClient) NetworkLockModify(ctx context.Context, addKeys, removeKey
 	}
 
 	if err := json.NewEncoder(&b).Encode(modifyRequest{AddKeys: addKeys, RemoveKeys: removeKeys}); err != nil {
-		return nil, err
+		return err
 	}
 
-	body, err := lc.send(ctx, "POST", "/localapi/v0/tka/modify", 200, &b)
-	if err != nil {
-		return nil, fmt.Errorf("error: %w", err)
+	if _, err := lc.send(ctx, "POST", "/localapi/v0/tka/modify", 204, &b); err != nil {
+		return fmt.Errorf("error: %w", err)
 	}
-	return decodeJSON[*ipnstate.NetworkLockStatus](body)
+	return nil
 }
 
 // NetworkLockSign signs the specified node-key and transmits that signature to the control plane.
@@ -866,7 +883,6 @@ func (lc *LocalClient) NetworkLockForceLocalDisable(ctx context.Context) error {
 	}
 	return nil
 }
-
 
 // SetServeConfig sets or replaces the serving settings.
 // If config is nil, settings are cleared and serving is disabled.

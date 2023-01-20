@@ -28,13 +28,17 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/tailscale/wireguard-go/conn"
 	"go4.org/mem"
-	"golang.zx2c4.com/wireguard/conn"
+	"golang.org/x/net/ipv4"
+	"golang.org/x/net/ipv6"
 	"tailscale.com/control/controlclient"
 	"tailscale.com/derp"
 	"tailscale.com/derp/derphttp"
 	"tailscale.com/disco"
+	"tailscale.com/envknob"
 	"tailscale.com/health"
+	"tailscale.com/hostinfo"
 	"tailscale.com/ipn/ipnstate"
 	"tailscale.com/logtail/backoff"
 	"tailscale.com/net/connstats"
@@ -269,6 +273,9 @@ type Conn struct {
 	pconn4 RebindingUDPConn
 	pconn6 RebindingUDPConn
 
+	receiveBatchPool sync.Pool
+	sendBatchPool    sync.Pool
+
 	// closeDisco4 and closeDisco6 are io.Closers to shut down the raw
 	// disco packet receivers. If nil, no raw disco receiver is
 	// running for the given family.
@@ -346,7 +353,8 @@ type Conn struct {
 	mu     sync.Mutex
 	muCond *sync.Cond
 
-	closed bool // Close was called
+	closed  bool        // Close was called
+	closing atomic.Bool // Close is in progress (or done)
 
 	// derpCleanupTimer is the timer that fires to occasionally clean
 	// up idle DERP connections. It's only used when there is a non-home
@@ -575,6 +583,30 @@ func newConn() *Conn {
 		discoInfo:    make(map[key.DiscoPublic]*discoInfo),
 	}
 	c.bind = &connBind{Conn: c, closed: true}
+	c.receiveBatchPool = sync.Pool{New: func() any {
+		msgs := make([]ipv6.Message, c.bind.BatchSize())
+		for i := range msgs {
+			msgs[i].Buffers = make([][]byte, 1)
+		}
+		batch := &receiveBatch{
+			msgs: msgs,
+		}
+		return batch
+	}}
+	c.sendBatchPool = sync.Pool{New: func() any {
+		ua := &net.UDPAddr{
+			IP: make([]byte, 16),
+		}
+		msgs := make([]ipv6.Message, c.bind.BatchSize())
+		for i := range msgs {
+			msgs[i].Buffers = make([][]byte, 1)
+			msgs[i].Addr = ua
+		}
+		return &sendBatch{
+			ua:   ua,
+			msgs: msgs,
+		}
+	}}
 	c.muCond = sync.NewCond(&c.mu)
 	c.networkUp.Store(true) // assume up until told otherwise
 	return c
@@ -1214,13 +1246,14 @@ var errNetworkDown = errors.New("magicsock: network down")
 
 func (c *Conn) networkDown() bool { return !c.networkUp.Load() }
 
-func (c *Conn) Send(b []byte, ep conn.Endpoint) error {
-	metricSendData.Add(1)
+func (c *Conn) Send(buffs [][]byte, ep conn.Endpoint) error {
+	n := int64(len(buffs))
+	metricSendData.Add(n)
 	if c.networkDown() {
-		metricSendDataNetworkDown.Add(1)
+		metricSendDataNetworkDown.Add(n)
 		return errNetworkDown
 	}
-	return ep.(*endpoint).send(b)
+	return ep.(*endpoint).send(buffs)
 }
 
 var errConnClosed = errors.New("Conn closed")
@@ -1228,6 +1261,46 @@ var errConnClosed = errors.New("Conn closed")
 var errDropDerpPacket = errors.New("too many DERP packets queued; dropping")
 
 var errNoUDP = errors.New("no UDP available on platform")
+
+var (
+	// This acts as a compile-time check for our usage of ipv6.Message in
+	// udpConnWithBatchOps for both IPv6 and IPv4 operations.
+	_ ipv6.Message = ipv4.Message{}
+)
+
+type sendBatch struct {
+	ua   *net.UDPAddr
+	msgs []ipv6.Message // ipv4.Message and ipv6.Message are the same underlying type
+}
+
+func (c *Conn) sendUDPBatch(addr netip.AddrPort, buffs [][]byte) (sent bool, err error) {
+	batch := c.sendBatchPool.Get().(*sendBatch)
+	defer c.sendBatchPool.Put(batch)
+
+	isIPv6 := false
+	switch {
+	case addr.Addr().Is4():
+	case addr.Addr().Is6():
+		isIPv6 = true
+	default:
+		panic("bogus sendUDPBatch addr type")
+	}
+
+	as16 := addr.Addr().As16()
+	copy(batch.ua.IP, as16[:])
+	batch.ua.Port = int(addr.Port())
+	for i, buff := range buffs {
+		batch.msgs[i].Buffers[0] = buff
+		batch.msgs[i].Addr = batch.ua
+	}
+
+	if isIPv6 {
+		_, err = c.pconn6.WriteBatch(batch.msgs[:len(buffs)], 0)
+	} else {
+		_, err = c.pconn4.WriteBatch(batch.msgs[:len(buffs)], 0)
+	}
+	return err == nil, err
+}
 
 // sendUDP sends UDP packet b to ipp.
 // See sendAddr's docs on the return value meanings.
@@ -1671,34 +1744,93 @@ func (c *Conn) runDerpWriter(ctx context.Context, dc *derphttp.Client, ch <-chan
 	}
 }
 
-// receiveIPv6 receives a UDP IPv6 packet. It is called by wireguard-go.
-func (c *Conn) receiveIPv6(b []byte) (int, conn.Endpoint, error) {
+type receiveBatch struct {
+	msgs []ipv6.Message
+}
+
+func (c *Conn) getReceiveBatch() *receiveBatch {
+	batch := c.receiveBatchPool.Get().(*receiveBatch)
+	return batch
+}
+
+func (c *Conn) putReceiveBatch(batch *receiveBatch) {
+	for i := range batch.msgs {
+		batch.msgs[i] = ipv6.Message{Buffers: batch.msgs[i].Buffers}
+	}
+	c.receiveBatchPool.Put(batch)
+}
+
+func (c *Conn) receiveIPv6(buffs [][]byte, sizes []int, eps []conn.Endpoint) (int, error) {
 	health.ReceiveIPv6.Enter()
 	defer health.ReceiveIPv6.Exit()
+
+	batch := c.getReceiveBatch()
+	defer c.putReceiveBatch(batch)
 	for {
-		n, ipp, err := c.pconn6.ReadFromNetaddr(b)
-		if err != nil {
-			return 0, nil, err
+		for i := range buffs {
+			batch.msgs[i].Buffers[0] = buffs[i]
 		}
-		if ep, ok := c.receiveIP(b[:n], ipp, &c.ippEndpoint6, c.closeDisco6 == nil); ok {
-			metricRecvDataIPv6.Add(1)
-			return n, ep, nil
+		numMsgs, err := c.pconn6.ReadBatch(batch.msgs, 0)
+		if err != nil {
+			if neterror.PacketWasTruncated(err) {
+				// TODO(raggi): discuss whether to log?
+				continue
+			}
+			return 0, err
+		}
+
+		reportToCaller := false
+		for i, msg := range batch.msgs[:numMsgs] {
+			ipp := msg.Addr.(*net.UDPAddr).AddrPort()
+			if ep, ok := c.receiveIP(msg.Buffers[0][:msg.N], ipp, &c.ippEndpoint6, c.closeDisco6 == nil); ok {
+				metricRecvDataIPv6.Add(1)
+				eps[i] = ep
+				sizes[i] = msg.N
+				reportToCaller = true
+			} else {
+				sizes[i] = 0
+			}
+		}
+
+		if reportToCaller {
+			return numMsgs, nil
 		}
 	}
 }
 
-// receiveIPv4 receives a UDP IPv4 packet. It is called by wireguard-go.
-func (c *Conn) receiveIPv4(b []byte) (n int, ep conn.Endpoint, err error) {
+func (c *Conn) receiveIPv4(buffs [][]byte, sizes []int, eps []conn.Endpoint) (int, error) {
 	health.ReceiveIPv4.Enter()
 	defer health.ReceiveIPv4.Exit()
+
+	batch := c.getReceiveBatch()
+	defer c.putReceiveBatch(batch)
 	for {
-		n, ipp, err := c.pconn4.ReadFromNetaddr(b)
-		if err != nil {
-			return 0, nil, err
+		for i := range buffs {
+			batch.msgs[i].Buffers[0] = buffs[i]
 		}
-		if ep, ok := c.receiveIP(b[:n], ipp, &c.ippEndpoint4, c.closeDisco4 == nil); ok {
-			metricRecvDataIPv4.Add(1)
-			return n, ep, nil
+		numMsgs, err := c.pconn4.ReadBatch(batch.msgs, 0)
+		if err != nil {
+			if neterror.PacketWasTruncated(err) {
+				// TODO(raggi): discuss whether to log?
+				continue
+			}
+			return 0, err
+		}
+
+		reportToCaller := false
+		for i, msg := range batch.msgs[:numMsgs] {
+			ipp := msg.Addr.(*net.UDPAddr).AddrPort()
+			if ep, ok := c.receiveIP(msg.Buffers[0][:msg.N], ipp, &c.ippEndpoint4, c.closeDisco4 == nil); ok {
+				metricRecvDataIPv4.Add(1)
+				eps[i] = ep
+				sizes[i] = msg.N
+				reportToCaller = true
+			} else {
+				sizes[i] = 0
+			}
+		}
+		if reportToCaller {
+			return numMsgs, nil
 		}
 	}
 }
@@ -1748,27 +1880,25 @@ func (c *Conn) receiveIP(b []byte, ipp netip.AddrPort, cache *ippEndpointCache, 
 	return ep, true
 }
 
-// receiveDERP reads a packet from c.derpRecvCh into b and returns the associated endpoint.
-// It is called by wireguard-go.
-//
-// If the packet was a disco message or the peer endpoint wasn't
-// found, the returned error is errLoopAgain.
-func (c *connBind) receiveDERP(b []byte) (n int, ep conn.Endpoint, err error) {
+func (c *connBind) receiveDERP(buffs [][]byte, sizes []int, eps []conn.Endpoint) (int, error) {
 	health.ReceiveDERP.Enter()
 	defer health.ReceiveDERP.Exit()
+
 	for dm := range c.derpRecvCh {
 		if c.Closed() {
 			break
 		}
-		n, ep := c.processDERPReadResult(dm, b)
+		n, ep := c.processDERPReadResult(dm, buffs[0])
 		if n == 0 {
 			// No data read occurred. Wait for another packet.
 			continue
 		}
 		metricRecvDataDERP.Add(1)
-		return n, ep, nil
+		sizes[0] = n
+		eps[0] = ep
+		return 1, nil
 	}
-	return 0, nil, net.ErrClosed
+	return 0, net.ErrClosed
 }
 
 func (c *Conn) processDERPReadResult(dm derpReadResult, b []byte) (n int, ep *endpoint) {
@@ -1818,6 +1948,12 @@ const (
 	discoVerboseLog
 )
 
+// TS_DISCO_PONG_IPV4_DELAY, if set, is a time.Duration string that is how much
+// fake latency to add before replying to disco pings. This can be used to bias
+// peers towards using IPv6 when both IPv4 and IPv6 are available at similar
+// speeds.
+var debugIPv4DiscoPingPenalty = envknob.RegisterDuration("TS_DISCO_PONG_IPV4_DELAY")
+
 // sendDiscoMessage sends discovery message m to dstDisco at dst.
 //
 // If dst is a DERP IP:port, then dstKey must be non-zero.
@@ -1825,6 +1961,11 @@ const (
 // The dstKey should only be non-zero if the dstDisco key
 // unambiguously maps to exactly one peer.
 func (c *Conn) sendDiscoMessage(dst netip.AddrPort, dstKey key.NodePublic, dstDisco key.DiscoPublic, m disco.Message, logLevel discoLogLevel) (sent bool, err error) {
+	isDERP := dst.Addr() == derpMagicIPAddr
+	if _, isPong := m.(*disco.Pong); isPong && !isDERP && dst.Addr().Is4() {
+		time.Sleep(debugIPv4DiscoPingPenalty())
+	}
+
 	c.mu.Lock()
 	if c.closed {
 		c.mu.Unlock()
@@ -1840,7 +1981,6 @@ func (c *Conn) sendDiscoMessage(dst netip.AddrPort, dstKey key.NodePublic, dstDi
 	di := c.discoInfoLocked(dstDisco)
 	c.mu.Unlock()
 
-	isDERP := dst.Addr() == derpMagicIPAddr
 	if isDERP {
 		metricSendDiscoDERP.Add(1)
 	} else {
@@ -2645,6 +2785,16 @@ type connBind struct {
 	closed bool
 }
 
+func (c *connBind) BatchSize() int {
+	// TODO(raggi): determine by properties rather than hardcoding platform behavior
+	switch runtime.GOOS {
+	case "linux":
+		return conn.DefaultBatchSize
+	default:
+		return 1
+	}
+}
+
 // Open is called by WireGuard to create a UDP binding.
 // The ignoredPort comes from wireguard-go, via the wgcfg config.
 // We ignore that port value here, since we have the local port available easily.
@@ -2710,6 +2860,7 @@ func (c *Conn) Close() error {
 	if c.closed {
 		return nil
 	}
+	c.closing.Store(true)
 	if c.derpCleanupTimerArmed {
 		c.derpCleanupTimer.Stop()
 	}
@@ -2856,13 +3007,13 @@ func (c *Conn) bindSocket(ruc *RebindingUDPConn, network string, curPortFate cur
 	defer ruc.mu.Unlock()
 
 	if runtime.GOOS == "js" {
-		ruc.setConnLocked(newBlockForeverConn())
+		ruc.setConnLocked(newBlockForeverConn(), "")
 		return nil
 	}
 
 	if debugAlwaysDERP() {
 		c.logf("disabled %v per TS_DEBUG_ALWAYS_USE_DERP", network)
-		ruc.setConnLocked(newBlockForeverConn())
+		ruc.setConnLocked(newBlockForeverConn(), "")
 		return nil
 	}
 
@@ -2897,7 +3048,7 @@ func (c *Conn) bindSocket(ruc *RebindingUDPConn, network string, curPortFate cur
 		}
 		trySetSocketBuffer(pconn, c.logf)
 		// Success.
-		ruc.setConnLocked(pconn)
+		ruc.setConnLocked(pconn, network)
 		if network == "udp4" {
 			health.SetUDP4Unbound(false)
 		}
@@ -2908,7 +3059,7 @@ func (c *Conn) bindSocket(ruc *RebindingUDPConn, network string, curPortFate cur
 	// Set pconn to a dummy conn whose reads block until closed.
 	// This keeps the receive funcs alive for a future in which
 	// we get a link change and we can try binding again.
-	ruc.setConnLocked(newBlockForeverConn())
+	ruc.setConnLocked(newBlockForeverConn(), "")
 	if network == "udp4" {
 		health.SetUDP4Unbound(true)
 	}
@@ -3005,6 +3156,51 @@ func (c *Conn) ParseEndpoint(nodeKeyStr string) (conn.Endpoint, error) {
 	return ep, nil
 }
 
+type batchReaderWriter interface {
+	batchReader
+	batchWriter
+}
+
+type batchWriter interface {
+	WriteBatch([]ipv6.Message, int) (int, error)
+}
+
+type batchReader interface {
+	ReadBatch([]ipv6.Message, int) (int, error)
+}
+
+// udpConnWithBatchOps wraps a *net.UDPConn in order to extend it to support
+// batch operations.
+//
+// TODO(jwhited): This wrapping is temporary. https://github.com/golang/go/issues/45886
+type udpConnWithBatchOps struct {
+	*net.UDPConn
+	xpc batchReaderWriter
+}
+
+func newUDPConnWithBatchOps(conn *net.UDPConn, network string) udpConnWithBatchOps {
+	ucbo := udpConnWithBatchOps{
+		UDPConn: conn,
+	}
+	switch network {
+	case "udp4":
+		ucbo.xpc = ipv4.NewPacketConn(conn)
+	case "udp6":
+		ucbo.xpc = ipv6.NewPacketConn(conn)
+	default:
+		panic("bogus network")
+	}
+	return ucbo
+}
+
+func (u udpConnWithBatchOps) WriteBatch(ms []ipv6.Message, flags int) (int, error) {
+	return u.xpc.WriteBatch(ms, flags)
+}
+
+func (u udpConnWithBatchOps) ReadBatch(ms []ipv6.Message, flags int) (int, error) {
+	return u.xpc.ReadBatch(ms, flags)
+}
+
 // RebindingUDPConn is a UDP socket that can be re-bound.
 // Unix has no notion of re-binding a socket, so we swap it out for a new one.
 type RebindingUDPConn struct {
@@ -3022,9 +3218,36 @@ type RebindingUDPConn struct {
 	port  uint16
 }
 
-func (c *RebindingUDPConn) setConnLocked(p nettype.PacketConn) {
-	c.pconn = p
-	c.pconnAtomic.Store(&p)
+// upgradePacketConn may upgrade a nettype.PacketConn to a udpConnWithBatchOps.
+func upgradePacketConn(p nettype.PacketConn, network string) nettype.PacketConn {
+	uc, ok := p.(*net.UDPConn)
+	if ok && runtime.GOOS == "linux" && (network == "udp4" || network == "udp6") {
+		// recvmmsg/sendmmsg were added in 2.6.33 but we support down to 2.6.32
+		// for old NAS devices. See https://github.com/tailscale/tailscale/issues/6807.
+		// As a cheap heuristic: if the Linux kernel starts with "2", just consider
+		// it too old for the fast paths. Nobody who cares about performance runs such
+		// ancient kernels.
+		if strings.HasPrefix(hostinfo.GetOSVersion(), "2") {
+			return p
+		}
+		// Non-Linux does not support batch operations. x/net will fall back to
+		// recv/sendmsg, but not all platforms have recv/sendmsg support. Keep
+		// this simple for now.
+		return newUDPConnWithBatchOps(uc, network)
+	}
+	return p
+}
+
+// setConnLocked sets the provided nettype.PacketConn. It should be called only
+// after acquiring RebindingUDPConn.mu. It upgrades the provided
+// nettype.PacketConn to a udpConnWithBatchOps when appropriate. This upgrade
+// is intentionally pushed closest to where read/write ops occur in order to
+// avoid disrupting surrounding code that assumes nettype.PacketConn is a
+// *net.UDPConn.
+func (c *RebindingUDPConn) setConnLocked(p nettype.PacketConn, network string) {
+	upc := upgradePacketConn(p, network)
+	c.pconn = upc
+	c.pconnAtomic.Store(&upc)
 	c.port = uint16(c.localAddrLocked().Port)
 }
 
@@ -3084,6 +3307,60 @@ func (c *RebindingUDPConn) ReadFromNetaddr(b []byte) (n int, ipp netip.AddrPort,
 			continue
 		}
 		return n, ipp, err
+	}
+}
+
+func (c *RebindingUDPConn) WriteBatch(msgs []ipv6.Message, flags int) (int, error) {
+	var (
+		n     int
+		err   error
+		start int
+	)
+	for {
+		pconn := *c.pconnAtomic.Load()
+		bw, ok := pconn.(batchWriter)
+		if !ok {
+			for _, msg := range msgs {
+				_, err = pconn.WriteTo(msg.Buffers[0], msg.Addr)
+				if err != nil {
+					return n, err
+				}
+				n++
+			}
+			return n, nil
+		}
+
+		n, err = bw.WriteBatch(msgs[start:], flags)
+		if err != nil {
+			if pconn != c.currentConn() {
+				continue
+			}
+			return n, err
+		} else if n == len(msgs[start:]) {
+			return len(msgs), nil
+		} else {
+			start += n
+		}
+	}
+}
+
+func (c *RebindingUDPConn) ReadBatch(msgs []ipv6.Message, flags int) (int, error) {
+	for {
+		pconn := *c.pconnAtomic.Load()
+		br, ok := pconn.(batchReader)
+		if !ok {
+			var err error
+			msgs[0].N, msgs[0].Addr, err = c.ReadFrom(msgs[0].Buffers[0])
+			if err == nil {
+				return 1, nil
+			}
+			return 0, err
+		}
+		n, err := br.ReadBatch(msgs, flags)
+		if err != nil && pconn != c.currentConn() {
+			continue
+		}
+		return n, err
 	}
 }
 
@@ -3171,6 +3448,20 @@ func (c *blockForeverConn) WriteTo(p []byte, addr net.Addr) (n int, err error) {
 }
 
 func (c *blockForeverConn) WriteToUDPAddrPort(p []byte, addr netip.AddrPort) (int, error) {
+	// Silently drop writes.
+	return len(p), nil
+}
+
+func (c *blockForeverConn) ReadBatch(p []ipv6.Message, flags int) (int, error) {
+	c.mu.Lock()
+	for !c.closed {
+		c.cond.Wait()
+	}
+	c.mu.Unlock()
+	return 0, net.ErrClosed
+}
+
+func (c *blockForeverConn) WriteBatch(p []ipv6.Message, flags int) (int, error) {
 	// Silently drop writes.
 	return len(p), nil
 }
@@ -3276,12 +3567,14 @@ func (c *Conn) UpdateStatus(sb *ipnstate.StatusBuilder) {
 		ss.TailscaleIPs = tailscaleIPs
 	})
 
-	c.peerMap.forEachEndpoint(func(ep *endpoint) {
-		ps := &ipnstate.PeerStatus{InMagicSock: true}
-		//ps.Addrs = append(ps.Addrs, n.Endpoints...)
-		ep.populatePeerStatus(ps)
-		sb.AddPeer(ep.publicKey, ps)
-	})
+	if sb.WantPeers {
+		c.peerMap.forEachEndpoint(func(ep *endpoint) {
+			ps := &ipnstate.PeerStatus{InMagicSock: true}
+			//ps.Addrs = append(ps.Addrs, n.Endpoints...)
+			ep.populatePeerStatus(ps)
+			sb.AddPeer(ep.publicKey, ps)
+		})
+	}
 
 	c.foreachActiveDerpSortedLocked(func(node int, ad activeDerp) {
 		// TODO(bradfitz): add to ipnstate.StatusBuilder
@@ -3302,7 +3595,7 @@ func ippDebugString(ua netip.AddrPort) string {
 	return ua.String()
 }
 
-// endpointSendFunc is a func that writes an encrypted Wireguard payload from
+// endpointSendFunc is a func that writes encrypted Wireguard payloads from
 // WireGuard to a peer. It might write via UDP, DERP, both, or neither.
 //
 // What these funcs should NOT do is too much work. Minimize use of mutexes, map
@@ -3313,7 +3606,7 @@ func ippDebugString(ua netip.AddrPort) string {
 //
 // A nil value means the current fast path has expired and needs to be
 // recalculated.
-type endpointSendFunc func([]byte) error
+type endpointSendFunc func([][]byte) error
 
 // discoEndpoint is a wireguard/conn.Endpoint that picks the best
 // available path to communicate with a peer, based on network
@@ -3356,6 +3649,8 @@ type endpoint struct {
 	// See #540 for background.
 	heartbeatDisabled bool
 	pathFinderRunning bool
+
+	expired bool // whether the node has expired
 }
 
 type pendingCLIPing struct {
@@ -3608,6 +3903,12 @@ func (de *endpoint) cliPing(res *ipnstate.PingResult, cb func(*ipnstate.PingResu
 	de.mu.Lock()
 	defer de.mu.Unlock()
 
+	if de.expired {
+		res.Err = errExpired.Error()
+		cb(res)
+		return
+	}
+
 	de.pendingCLIPings = append(de.pendingCLIPings, pendingCLIPing{res, cb})
 
 	now := mono.Now()
@@ -3629,12 +3930,21 @@ func (de *endpoint) cliPing(res *ipnstate.PingResult, cb func(*ipnstate.PingResu
 	de.noteActiveLocked()
 }
 
-func (de *endpoint) send(b []byte) error {
+var (
+	errExpired     = errors.New("peer's node key has expired")
+	errNoUDPOrDERP = errors.New("no UDP or DERP addr")
+)
+
+func (de *endpoint) send(buffs [][]byte) error {
 	if fn := de.sendFunc.Load(); fn != nil {
-		return fn(b)
+		return fn(buffs)
 	}
 
 	de.mu.Lock()
+	if de.expired {
+		de.mu.Unlock()
+		return errExpired
+	}
 
 	// if heartbeat disabled, kick off pathfinder
 	if de.heartbeatDisabled {
@@ -3652,24 +3962,33 @@ func (de *endpoint) send(b []byte) error {
 	de.mu.Unlock()
 
 	if !udpAddr.IsValid() && !derpAddr.IsValid() {
-		return errors.New("no UDP or DERP addr")
+		return errNoUDPOrDERP
 	}
 	var err error
 	if udpAddr.IsValid() {
-		_, err = de.c.sendAddr(udpAddr, de.publicKey, b)
+		_, err = de.c.sendUDPBatch(udpAddr, buffs)
+		// TODO(raggi): needs updating for accuracy, as in error conditions we may have partial sends.
 		if stats := de.c.stats.Load(); err == nil && stats != nil {
-			stats.UpdateTxPhysical(de.nodeAddr, udpAddr, len(b))
+			var txBytes int
+			for _, b := range buffs {
+				txBytes += len(b)
+			}
+			stats.UpdateTxPhysical(de.nodeAddr, udpAddr, txBytes)
 		}
 	}
 	if derpAddr.IsValid() {
-		if ok, _ := de.c.sendAddr(derpAddr, de.publicKey, b); ok {
+		allOk := true
+		for _, buff := range buffs {
+			ok, _ := de.c.sendAddr(derpAddr, de.publicKey, buff)
 			if stats := de.c.stats.Load(); stats != nil {
-				stats.UpdateTxPhysical(de.nodeAddr, derpAddr, len(b))
+				stats.UpdateTxPhysical(de.nodeAddr, derpAddr, len(buff))
 			}
-			if err != nil {
-				// UDP failed but DERP worked, so good enough:
-				return nil
+			if !ok {
+				allOk = false
 			}
+		}
+		if allOk {
+			return nil
 		}
 	}
 	return err
@@ -3812,6 +4131,7 @@ func (de *endpoint) updateFromNode(n *tailcfg.Node, heartbeatDisabled bool) {
 	defer de.mu.Unlock()
 
 	de.heartbeatDisabled = heartbeatDisabled
+	de.expired = n.Expired
 
 	if de.discoKey != n.DiscoKey {
 		de.c.logf("[v1] magicsock: disco: node %s changed from discokey %s to %s", de.publicKey.ShortString(), de.discoKey, n.DiscoKey)
@@ -4123,7 +4443,9 @@ func (de *endpoint) stopAndReset() {
 	de.mu.Lock()
 	defer de.mu.Unlock()
 
-	de.c.logf("[v1] magicsock: doing cleanup for discovery key %s", de.discoKey.ShortString())
+	if closing := de.c.closing.Load(); !closing {
+		de.c.logf("[v1] magicsock: doing cleanup for discovery key %s", de.discoKey.ShortString())
+	}
 
 	de.resetLocked()
 	if de.heartBeatTimer != nil {

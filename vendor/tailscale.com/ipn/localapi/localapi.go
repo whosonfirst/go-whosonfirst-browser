@@ -34,6 +34,7 @@ import (
 	"tailscale.com/ipn"
 	"tailscale.com/ipn/ipnlocal"
 	"tailscale.com/ipn/ipnstate"
+	"tailscale.com/logtail"
 	"tailscale.com/net/netutil"
 	"tailscale.com/safesocket"
 	"tailscale.com/tailcfg"
@@ -61,39 +62,42 @@ var handler = map[string]localAPIHandler{
 
 	// The other /localapi/v0/NAME handlers are exact matches and contain only NAME
 	// without a trailing slash:
-	"bugreport":               (*Handler).serveBugReport,
-	"check-ip-forwarding":     (*Handler).serveCheckIPForwarding,
-	"check-prefs":             (*Handler).serveCheckPrefs,
-	"component-debug-logging": (*Handler).serveComponentDebugLogging,
-	"debug":                   (*Handler).serveDebug,
-	"debug-derp-region":       (*Handler).serveDebugDERPRegion,
-	"derpmap":                 (*Handler).serveDERPMap,
-	"dev-set-state-store":     (*Handler).serveDevSetStateStore,
-	"dial":                    (*Handler).serveDial,
-	"file-targets":            (*Handler).serveFileTargets,
-	"goroutines":              (*Handler).serveGoroutines,
-	"id-token":                (*Handler).serveIDToken,
-	"login-interactive":       (*Handler).serveLoginInteractive,
-	"logout":                  (*Handler).serveLogout,
-	"metrics":                 (*Handler).serveMetrics,
-	"ping":                    (*Handler).servePing,
-	"prefs":                   (*Handler).servePrefs,
-	"pprof":                   (*Handler).servePprof,
-	"serve-config":            (*Handler).serveServeConfig,
-	"set-dns":                 (*Handler).serveSetDNS,
-	"set-expiry-sooner":       (*Handler).serveSetExpirySooner,
-	"start":                   (*Handler).serveStart,
-	"status":                  (*Handler).serveStatus,
-	"tka/init":                (*Handler).serveTKAInit,
-	"tka/log":                 (*Handler).serveTKALog,
-	"tka/modify":              (*Handler).serveTKAModify,
-	"tka/sign":                (*Handler).serveTKASign,
-	"tka/status":              (*Handler).serveTKAStatus,
-	"tka/disable":             (*Handler).serveTKADisable,
-	"tka/force-local-disable": (*Handler).serveTKALocalDisable,
-	"upload-client-metrics":   (*Handler).serveUploadClientMetrics,
-	"watch-ipn-bus":           (*Handler).serveWatchIPNBus,
-	"whois":                   (*Handler).serveWhoIs,
+	"bugreport":                   (*Handler).serveBugReport,
+	"check-ip-forwarding":         (*Handler).serveCheckIPForwarding,
+	"check-prefs":                 (*Handler).serveCheckPrefs,
+	"component-debug-logging":     (*Handler).serveComponentDebugLogging,
+	"debug":                       (*Handler).serveDebug,
+	"debug-derp-region":           (*Handler).serveDebugDERPRegion,
+	"debug-packet-filter-matches": (*Handler).serveDebugPacketFilterMatches,
+	"debug-packet-filter-rules":   (*Handler).serveDebugPacketFilterRules,
+	"derpmap":                     (*Handler).serveDERPMap,
+	"dev-set-state-store":         (*Handler).serveDevSetStateStore,
+	"dial":                        (*Handler).serveDial,
+	"file-targets":                (*Handler).serveFileTargets,
+	"goroutines":                  (*Handler).serveGoroutines,
+	"id-token":                    (*Handler).serveIDToken,
+	"login-interactive":           (*Handler).serveLoginInteractive,
+	"logout":                      (*Handler).serveLogout,
+	"logtap":                      (*Handler).serveLogTap,
+	"metrics":                     (*Handler).serveMetrics,
+	"ping":                        (*Handler).servePing,
+	"prefs":                       (*Handler).servePrefs,
+	"pprof":                       (*Handler).servePprof,
+	"serve-config":                (*Handler).serveServeConfig,
+	"set-dns":                     (*Handler).serveSetDNS,
+	"set-expiry-sooner":           (*Handler).serveSetExpirySooner,
+	"start":                       (*Handler).serveStart,
+	"status":                      (*Handler).serveStatus,
+	"tka/init":                    (*Handler).serveTKAInit,
+	"tka/log":                     (*Handler).serveTKALog,
+	"tka/modify":                  (*Handler).serveTKAModify,
+	"tka/sign":                    (*Handler).serveTKASign,
+	"tka/status":                  (*Handler).serveTKAStatus,
+	"tka/disable":                 (*Handler).serveTKADisable,
+	"tka/force-local-disable":     (*Handler).serveTKALocalDisable,
+	"upload-client-metrics":       (*Handler).serveUploadClientMetrics,
+	"watch-ipn-bus":               (*Handler).serveWatchIPNBus,
+	"whois":                       (*Handler).serveWhoIs,
 }
 
 func randHex(n int) string {
@@ -151,6 +155,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Tailscale-Version", version.Long)
+	w.Header().Set("Tailscale-Cap", strconv.Itoa(int(tailcfg.CurrentCapabilityVersion)))
 	w.Header().Set("Content-Security-Policy", `default-src 'none'; frame-ancestors 'none'; script-src 'none'; script-src-elem 'none'; script-src-attr 'none'`)
 	w.Header().Set("X-Frame-Options", "DENY")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -290,6 +295,7 @@ func (h *Handler) serveBugReport(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "only POST allowed", http.StatusMethodNotAllowed)
 		return
 	}
+	defer h.b.TryFlushLogs() // kick off upload after bugreport's done logging
 
 	logMarker := func() string {
 		return fmt.Sprintf("BUG-%v-%v-%v", h.backendLogID, time.Now().UTC().Format("20060102150405Z"), randHex(8))
@@ -418,6 +424,45 @@ func (h *Handler) serveGoroutines(w http.ResponseWriter, r *http.Request) {
 	w.Write(buf)
 }
 
+// serveLogTap taps into the tailscaled/logtail server output and streams
+// it to the client.
+func (h *Handler) serveLogTap(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Require write access (~root) as the logs could contain something
+	// sensitive.
+	if !h.PermitWrite {
+		http.Error(w, "logtap access denied", http.StatusForbidden)
+		return
+	}
+	if r.Method != "GET" {
+		http.Error(w, "GET required", http.StatusMethodNotAllowed)
+		return
+	}
+	f, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+
+	io.WriteString(w, `{"text":"[logtap connected]\n"}`+"\n")
+	f.Flush()
+
+	msgc := make(chan string, 16)
+	unreg := logtail.RegisterLogTap(msgc)
+	defer unreg()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case msg := <-msgc:
+			io.WriteString(w, msg)
+			f.Flush()
+		}
+	}
+}
+
 func (h *Handler) serveMetrics(w http.ResponseWriter, r *http.Request) {
 	// Require write access out of paranoia that the metrics
 	// might contain something sensitive.
@@ -506,6 +551,40 @@ func (h *Handler) serveDevSetStateStore(w http.ResponseWriter, r *http.Request) 
 	io.WriteString(w, "done\n")
 }
 
+func (h *Handler) serveDebugPacketFilterRules(w http.ResponseWriter, r *http.Request) {
+	if !h.PermitWrite {
+		http.Error(w, "debug access denied", http.StatusForbidden)
+		return
+	}
+	nm := h.b.NetMap()
+	if nm == nil {
+		http.Error(w, "no netmap", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "\t")
+	enc.Encode(nm.PacketFilterRules)
+}
+
+func (h *Handler) serveDebugPacketFilterMatches(w http.ResponseWriter, r *http.Request) {
+	if !h.PermitWrite {
+		http.Error(w, "debug access denied", http.StatusForbidden)
+		return
+	}
+	nm := h.b.NetMap()
+	if nm == nil {
+		http.Error(w, "no netmap", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "\t")
+	enc.Encode(nm.PacketFilter)
+}
+
 func (h *Handler) serveComponentDebugLogging(w http.ResponseWriter, r *http.Request) {
 	if !h.PermitWrite {
 		http.Error(w, "debug access denied", http.StatusForbidden)
@@ -543,37 +622,32 @@ func (h *Handler) servePprof(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) serveServeConfig(w http.ResponseWriter, r *http.Request) {
-	if !h.PermitWrite {
-		http.Error(w, "serve config denied", http.StatusForbidden)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
 	switch r.Method {
 	case "GET":
+		if !h.PermitRead {
+			http.Error(w, "serve config denied", http.StatusForbidden)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
 		config := h.b.ServeConfig()
 		json.NewEncoder(w).Encode(config)
 	case "POST":
-		configIn := new(ipn.ServeConfig)
-		if err := json.NewDecoder(r.Body).Decode(configIn); err != nil {
-			json.NewEncoder(w).Encode(struct {
-				Error error
-			}{
-				Error: fmt.Errorf("decoding config: %w", err),
-			})
+		if !h.PermitWrite {
+			http.Error(w, "serve config denied", http.StatusForbidden)
 			return
 		}
-		err := h.b.SetServeConfig(configIn)
-		if err != nil {
-			json.NewEncoder(w).Encode(struct {
-				Error error
-			}{
-				Error: fmt.Errorf("updating config: %w", err),
-			})
+		configIn := new(ipn.ServeConfig)
+		if err := json.NewDecoder(r.Body).Decode(configIn); err != nil {
+			writeErrorJSON(w, fmt.Errorf("decoding config: %w", err))
+			return
+		}
+		if err := h.b.SetServeConfig(configIn); err != nil {
+			writeErrorJSON(w, fmt.Errorf("updating config: %w", err))
 			return
 		}
 		w.WriteHeader(http.StatusOK)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -648,7 +722,6 @@ func (h *Handler) serveWatchIPNBus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	f.Flush()
 
 	var mask ipn.NotifyWatchOpt
 	if s := r.FormValue("mask"); s != "" {
@@ -660,7 +733,7 @@ func (h *Handler) serveWatchIPNBus(w http.ResponseWriter, r *http.Request) {
 		mask = ipn.NotifyWatchOpt(v)
 	}
 	ctx := r.Context()
-	h.b.WatchNotifications(ctx, mask, func(roNotify *ipn.Notify) (keepGoing bool) {
+	h.b.WatchNotifications(ctx, mask, f.Flush, func(roNotify *ipn.Notify) (keepGoing bool) {
 		js, err := json.Marshal(roNotify)
 		if err != nil {
 			h.logf("json.Marshal: %v", err)
@@ -1259,14 +1332,7 @@ func (h *Handler) serveTKAModify(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "network-lock modify failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	j, err := json.MarshalIndent(h.b.NetworkLockStatus(), "", "\t")
-	if err != nil {
-		http.Error(w, "JSON encoding error", 500)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(j)
+	w.WriteHeader(204)
 }
 
 func (h *Handler) serveTKADisable(w http.ResponseWriter, r *http.Request) {

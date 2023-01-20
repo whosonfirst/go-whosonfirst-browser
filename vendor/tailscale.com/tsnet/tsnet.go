@@ -116,6 +116,18 @@ func (s *Server) Dial(ctx context.Context, network, address string) (net.Conn, e
 	return s.dialer.UserDial(ctx, network, address)
 }
 
+// HTTPClient returns an HTTP client that is configured to connect over Tailscale.
+//
+// This is useful if you need to have your tsnet services connect to other devices on
+// your tailnet.
+func (s *Server) HTTPClient() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			DialContext: s.Dial,
+		},
+	}
+}
+
 // LocalClient returns a LocalClient that speaks to s.
 //
 // It will start the server if it has not been started yet. If the server's
@@ -305,9 +317,6 @@ func (s *Server) start() (reterr error) {
 	}
 	ns.ProcessLocalIPs = true
 	ns.ForwardTCPIn = s.forwardTCP
-	if err := ns.Start(); err != nil {
-		return fmt.Errorf("failed to start netstack: %w", err)
-	}
 	s.netstack = ns
 	s.dialer.UseNetstackForIP = func(ip netip.Addr) bool {
 		_, ok := eng.PeerForIP(ip)
@@ -337,6 +346,9 @@ func (s *Server) start() (reterr error) {
 	lb.SetVarRoot(s.rootPath)
 	logf("tsnet starting with hostname %q, varRoot %q", s.hostname, s.rootPath)
 	s.lb = lb
+	if err := ns.Start(lb); err != nil {
+		return fmt.Errorf("failed to start netstack: %w", err)
+	}
 	closePool.addFunc(func() { s.lb.Shutdown() })
 	lb.SetDecompressor(func() (controlclient.Decompressor, error) {
 		return smallzstd.NewDecoder(nil)

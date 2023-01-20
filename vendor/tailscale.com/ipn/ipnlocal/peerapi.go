@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hash/adler32"
 	"hash/crc32"
 	"html"
 	"io"
@@ -47,6 +48,7 @@ import (
 	"tailscale.com/net/netutil"
 	"tailscale.com/tailcfg"
 	"tailscale.com/util/clientmetric"
+	"tailscale.com/util/multierr"
 	"tailscale.com/util/strs"
 	"tailscale.com/wgengine"
 	"tailscale.com/wgengine/filter"
@@ -341,11 +343,68 @@ func (s *peerAPIServer) DeleteFile(baseName string) error {
 // accidentally logging actual filenames anywhere.
 const redacted = "redacted"
 
-func redactErr(err error) error {
-	if pe, ok := err.(*os.PathError); ok {
-		pe.Path = redacted
+type redactedErr struct {
+	msg   string
+	inner error
+}
+
+func (re *redactedErr) Error() string {
+	return re.msg
+}
+
+func (re *redactedErr) Unwrap() error {
+	return re.inner
+}
+
+func redactString(s string) string {
+	hash := adler32.Checksum([]byte(s))
+
+	var buf [len(redacted) + len(".12345678")]byte
+	b := append(buf[:0], []byte(redacted)...)
+	b = append(b, '.')
+	b = strconv.AppendUint(b, uint64(hash), 16)
+	return string(b)
+}
+
+func redactErr(root error) error {
+	// redactStrings is a list of sensitive strings that were redacted.
+	// It is not sufficient to just snub out sensitive fields in Go errors
+	// since some wrapper errors like fmt.Errorf pre-cache the error string,
+	// which would unfortunately remain unaffected.
+	var redactStrings []string
+
+	// Redact sensitive fields in known Go error types.
+	var unknownErrors int
+	multierr.Range(root, func(err error) bool {
+		switch err := err.(type) {
+		case *os.PathError:
+			redactStrings = append(redactStrings, err.Path)
+			err.Path = redactString(err.Path)
+		case *os.LinkError:
+			redactStrings = append(redactStrings, err.New, err.Old)
+			err.New = redactString(err.New)
+			err.Old = redactString(err.Old)
+		default:
+			unknownErrors++
+		}
+		return true
+	})
+
+	// If there are no redacted strings or no unknown error types,
+	// then we can return the possibly modified root error verbatim.
+	// Otherwise, we must replace redacted strings from any wrappers.
+	if len(redactStrings) == 0 || unknownErrors == 0 {
+		return root
 	}
-	return err
+
+	// Stringify and replace any paths that we found above, then return
+	// the error wrapped in a type that uses the newly-redacted string
+	// while also allowing Unwrap()-ing to the inner error type(s).
+	s := root.Error()
+	for _, toRedact := range redactStrings {
+		s = strings.ReplaceAll(s, toRedact, redactString(toRedact))
+	}
+	return &redactedErr{msg: s, inner: root}
 }
 
 func touchFile(path string) error {
@@ -844,6 +903,9 @@ func (h *peerAPIHandler) canDebug() bool {
 
 // canWakeOnLAN reports whether h can send a Wake-on-LAN packet from this node.
 func (h *peerAPIHandler) canWakeOnLAN() bool {
+	if h.peerNode.UnsignedPeerAPIOnly {
+		return false
+	}
 	return h.isSelf || h.peerHasCap(tailcfg.CapabilityWakeOnLAN)
 }
 

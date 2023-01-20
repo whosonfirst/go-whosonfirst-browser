@@ -29,7 +29,8 @@ import (
 // single monotonically increasing integer, rather than the relatively
 // complex x.y.z-xxxxx semver+hash(es). Whenever the client gains a
 // capability or wants to negotiate a change in semantics with the
-// server (control plane), bump this number and document what's new.
+// server (control plane),  peers (over PeerAPI), or frontend (over
+// LocalAPI), bump this number and document what's new.
 //
 // Previously (prior to 2022-03-06), it was known as the "MapRequest
 // version" or "mapVer" or "map cap" and that name and usage persists
@@ -88,7 +89,10 @@ type CapabilityVersion int
 //   - 49: 2022-11-03: Client understands EarlyNoise
 //   - 50: 2022-11-14: Client understands CapabilityIngress
 //   - 51: 2022-11-30: Client understands CapabilityTailnetLockAlpha
-const CurrentCapabilityVersion CapabilityVersion = 51
+//   - 52: 2023-01-05: client can handle c2n POST /logtail/flush
+//   - 53: 2023-01-18: client respects explicit Node.Expired + auto-sets based on Node.KeyExpiry
+//   - 54: 2023-01-19: Node.Cap added, PeersChangedPatch.Cap, uses Node.Cap for ExitDNS before Hostinfo.Services fallback
+const CurrentCapabilityVersion CapabilityVersion = 54
 
 type StableID string
 
@@ -187,7 +191,7 @@ type Node struct {
 	Sharer UserID `json:",omitempty"`
 
 	Key          key.NodePublic
-	KeyExpiry    time.Time
+	KeyExpiry    time.Time                  // the zero value if this node does not expire
 	KeySignature tkatype.MarshaledSignature `json:",omitempty"`
 	Machine      key.MachinePublic
 	DiscoKey     key.DiscoPublic
@@ -197,6 +201,7 @@ type Node struct {
 	DERP         string         `json:",omitempty"` // DERP-in-IP:port ("127.3.3.40:N") endpoint
 	Hostinfo     HostinfoView
 	Created      time.Time
+	Cap          CapabilityVersion `json:",omitempty"` // if non-zero, the node's capability version; old servers might not send
 
 	// Tags are the list of ACL tags applied to this node.
 	// Tags take the form of `tag:<value>` where value starts
@@ -254,6 +259,12 @@ type Node struct {
 
 	// DataPlaneAuditLogID is the per-node logtail ID used for data plane audit logging.
 	DataPlaneAuditLogID string `json:",omitempty"`
+
+	// Expired is whether this node's key has expired. Control may send
+	// this; clients are only allowed to set this from false to true. On
+	// the client, this is calculated client-side based on a timestamp sent
+	// from control, to avoid clock skew issues.
+	Expired bool `json:",omitempty"`
 }
 
 // DisplayName returns the user-facing name for a node which should
@@ -1619,6 +1630,7 @@ func (n *Node) Equal(n2 *Node) bool {
 		eqCIDRs(n.PrimaryRoutes, n2.PrimaryRoutes) &&
 		eqStrings(n.Endpoints, n2.Endpoints) &&
 		n.DERP == n2.DERP &&
+		n.Cap == n2.Cap &&
 		n.Hostinfo.Equal(n2.Hostinfo) &&
 		n.Created.Equal(n2.Created) &&
 		eqTimePtr(n.LastSeen, n2.LastSeen) &&
@@ -1627,7 +1639,8 @@ func (n *Node) Equal(n2 *Node) bool {
 		n.ComputedName == n2.ComputedName &&
 		n.computedHostIfDifferent == n2.computedHostIfDifferent &&
 		n.ComputedNameWithHost == n2.ComputedNameWithHost &&
-		eqStrings(n.Tags, n2.Tags)
+		eqStrings(n.Tags, n2.Tags) &&
+		n.Expired == n2.Expired
 }
 
 func eqBoolPtr(a, b *bool) bool {
@@ -1991,6 +2004,9 @@ type PeerChange struct {
 	// DERPRegion, if non-zero, means that NodeID's home DERP
 	// region ID is now this number.
 	DERPRegion int `json:",omitempty"`
+
+	// Cap, if non-zero, means that NodeID's capability version has changed.
+	Cap CapabilityVersion `json:",omitempty"`
 
 	// Endpoints, if non-empty, means that NodeID's UDP Endpoints
 	// have changed to these.
