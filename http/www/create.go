@@ -17,13 +17,15 @@ type CreateFeatureHandlerOptions struct {
 	Logger        *log.Logger
 	Template      *template.Template
 	MapProvider   string
-	Endpoints     *Endpoints
+	Paths         *Paths
+	Capabilities  *Capabilities
 }
 
 type CreateFeatureVars struct {
-	MapProvider string
-	Endpoints   *Endpoints
-	Placetypes  []*placetypes.WOFPlacetype
+	MapProvider  string
+	Placetypes   []*placetypes.WOFPlacetype
+	Paths        *Paths
+	Capabilities *Capabilities
 	// To do: Support alternate geometries
 }
 
@@ -63,9 +65,10 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		}
 
 		vars := CreateFeatureVars{
-			Endpoints:   opts.Endpoints,
-			MapProvider: opts.MapProvider,
-			Placetypes:  all_placetypes,
+			Paths:        opts.Paths,
+			Capabilities: opts.Capabilities,
+			MapProvider:  opts.MapProvider,
+			Placetypes:   all_placetypes,
 		}
 
 		RenderTemplate(rsp, opts.Template, vars)

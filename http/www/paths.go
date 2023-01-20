@@ -9,7 +9,9 @@ type Paths struct {
 	SPR                 string
 	Select              string
 	URIPrefix           string
-	HTML                string
+	Id                  string
+	Index               string
+	Search              string
 	CreateFeature       string
 	CreateFeatureAPI    string
 	DeprecateFeatureAPI string

@@ -24,7 +24,7 @@
 
 	      <p>There aren't any records matching the term <q>{{ .Query }}</q>. Would you like to search for something else?</p>
 	      
-	      <form method="GET" action="{{ .Endpoints.Search }}" style="inline-block">	
+	      <form method="GET" action="{{ .Paths.Search }}" style="inline-block">	
 		  <input type="text" value="" id="term" name="term" placeholder="Lookup a Who's On First record" style="display:inline;"/>
 		  <button type="submit" style="background-color:#fff;border: none;max-width:2rem;display:inline;">🔍</button>
 	      </form>
@@ -35,7 +35,7 @@
 	      {{ range $i, $s := .Results }}	      
 		  <li class="search-result {{ if eq $s.IsCurrent.StringFlag "0" }}not-current{{ end }} {{ if eq $s.IsSuperseded.StringFlag "1" }}superseded{{ end }}" data-whosonfirst-id="{{ $s.Id }}" data-parent-id="{{ $s.ParentId }}" data-latitude="{{ $s.Latitude }}" data-longitude="{{ $s.Longitude }}">
 		      <code>{{ $s.Id }}</code>
-		      <a href="{{ $.Endpoints.Id }}{{ $s.Id }}">{{ $s.Name }}</a> ({{ $s.Country }}),
+		      <a href="{{ $.Paths.Id }}{{ $s.Id }}">{{ $s.Name }}</a> ({{ $s.Country }}),
 		      <small>
 			  is a {{ $s.Placetype }}.
 			  {{ if eq $s.IsCurrent.StringFlag "0" }}
@@ -56,7 +56,7 @@
 	      
 	      <h2>Search for Who's On First records</h2>
 
-	      <form method="GET" action="{{ .Endpoints.Search }}" style="inline-block">	
+	      <form method="GET" action="{{ .Paths.Search }}" style="inline-block">	
 		  <input type="text" value="" id="term" name="term" placeholder="Lookup a Who's On First record" style="display:inline;"/>
 		  <button type="submit" style="background-color:#fff;border: none;max-width:2rem;display:inline;">🔍</button>
 	      </form>

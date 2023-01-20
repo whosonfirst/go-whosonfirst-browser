@@ -10,7 +10,7 @@
       <meta property="og:site_name" content="Who's On First" />
       <meta property="og:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
       <meta property="og:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
-      <meta property="og:image" content="{{ .Endpoints.Png }}{{ .SPR.Id }}?size=xsm" />
+      <meta property="og:image" content="{{ .Paths.PNG }}{{ .SPR.Id }}?size=xsm" />
       
       <meta property="twitter:card" value="summary" />
       <meta property="twitter:site" content="@alloftheplaces" />
@@ -18,7 +18,7 @@
       <meta property="twitter:url" content="/id/{{ .SPR.Id }}" />
       <meta property="twitter:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
       <meta property="twitter:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
-      <meta property="twitter:image" content="{{ .Endpoints.Png }}{{ .SPR.Id }}?size=xsm" />
+      <meta property="twitter:image" content="{{ .Paths.PNG }}{{ .SPR.Id }}?size=xsm" />
       
       <script src="/javascript/localforage.min.js"></script>	  
       <script src="/javascript/slippymap.crosshairs.js"></script>
@@ -47,7 +47,7 @@
       <link rel="stylesheet" href="/css/whosonfirst.browser.id.css">
       
   </head>
-  <body data-whosonfirst-uri-endpoint="{{ .Endpoints.Data }}">
+  <body data-whosonfirst-uri-endpoint="{{ .Paths.GeoJSON }}">
 
       <div class="container">
       {{ template "inc_common_header" .}}
@@ -57,7 +57,7 @@
 	  <div class="container">
 
 	      <div id="map" class="row">
-		  <img src="{{ .Endpoints.Svg }}{{ .URI }}" style="width:inherit; height:inherit; max-height:90%; max-width:90%;" id="map-svg" />
+		  <img src="{{ .Paths.SVG }}{{ .URI }}" style="width:inherit; height:inherit; max-height:90%; max-width:90%;" id="map-svg" />
 	      </div>
 
 	      <div class="row">

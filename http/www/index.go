@@ -8,12 +8,14 @@ import (
 )
 
 type IndexHandlerOptions struct {
-	Templates *template.Template
-	Endpoints *Endpoints
+	Templates    *template.Template
+	Paths        *Paths
+	Capabilities *Capabilities
 }
 
 type IndexVars struct {
-	Endpoints *Endpoints
+	Paths        *Paths
+	Capabilities *Capabilities
 }
 
 func IndexHandler(opts IndexHandlerOptions) (http.Handler, error) {
@@ -27,7 +29,8 @@ func IndexHandler(opts IndexHandlerOptions) (http.Handler, error) {
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		vars := IndexVars{
-			Endpoints: opts.Endpoints,
+			Paths:        opts.Paths,
+			Capabilities: opts.Capabilities,
 		}
 
 		RenderTemplate(rsp, t, vars)

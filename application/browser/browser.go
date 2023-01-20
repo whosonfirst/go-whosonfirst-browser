@@ -118,6 +118,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		enable_edit_api = true
 	}
 
+	// CORS... for a "good time"...
+
 	var cors_wrapper *cors.Cors
 
 	if enable_cors {
@@ -127,25 +129,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		cors_wrapper = cors.New(cors.Options{
-			AllowedOrigins: cors_origins,
+			AllowedOrigins:   cors_origins,
+			AllowCredentials: cors_allow_credentials,
 		})
 	}
 
-	if cache_uri == "tmp://" {
-
-		now := time.Now()
-		prefix := fmt.Sprintf("go-whosonfirst-browser-%d", now.Unix())
-
-		tempdir, err := ioutil.TempDir("", prefix)
-
-		if err != nil {
-			return fmt.Errorf("Failed to derive tmp dir, %w", err)
-		}
-
-		defer os.RemoveAll(tempdir)
-
-		cache_uri = fmt.Sprintf("fs://%s", tempdir)
-	}
+	// Fetch and assign GitHub access tokens to reader/writer URIs
 
 	if github_accesstoken_uri != "" {
 
@@ -187,6 +176,26 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	}
 
+	// Set up reader and reader cache. Note that we create a "cachereader"
+	// manually since we want to be able to purge records from the cache (assuming
+	// the edit hooks are enabled)
+
+	if cache_uri == "tmp://" {
+
+		now := time.Now()
+		prefix := fmt.Sprintf("go-whosonfirst-browser-%d", now.Unix())
+
+		tempdir, err := ioutil.TempDir("", prefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to derive tmp dir, %w", err)
+		}
+
+		defer os.RemoveAll(tempdir)
+
+		cache_uri = fmt.Sprintf("fs://%s", tempdir)
+	}
+
 	browser_reader, err := reader.NewMultiReaderFromURIs(ctx, reader_uris...)
 
 	if err != nil {
@@ -210,11 +219,19 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		return fmt.Errorf("Failed to create cache reader, %w", err)
 	}
 
+	// Set up templates
+	// To do: Once we have config/settings stuff working this needs to be able to
+	// specify a custom fs.FS for reading templates from
+
 	t, err := html.LoadTemplates(ctx)
 
 	if err != nil {
 		return fmt.Errorf("Failed to load templates, %w", err)
 	}
+
+	// URI prefix stuff
+
+	path_index := "/"
 
 	if static_prefix != "" {
 
@@ -223,10 +240,25 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		if !strings.HasPrefix(static_prefix, "/") {
 			return fmt.Errorf("Invalid -static-prefix value")
 		}
+
+		path_index, err = url.JoinPath(static_prefix, path_index)
+
+		if err != nil {
+			return fmt.Errorf("Failed to assign prefix to %s, %w", path_index)
+		}
+
+		path_ping, err = url.JoinPath(static_prefix, path_ping)
+
+		if err != nil {
+			return fmt.Errorf("Failed to assign prefix to %s, %w", path_ping)
+		}
 	}
+
+	// Set up www.Paths and www.Capabilities structs for passing between handlers
 
 	www_paths := &www.Paths{
 		URIPrefix: static_prefix,
+		Index:     path_index,
 	}
 
 	www_capabilities := &www.Capabilities{}
@@ -348,16 +380,77 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		www_capabilities.HTML = true
-		www_paths.HTML = path_id
+		www_paths.Id = path_id
 	}
 
 	if enable_edit_ui {
 
+		if static_prefix != "" {
+
+			path_create_feature, err = url.JoinPath(static_prefix, path_create_feature)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_create_feature)
+			}
+
+			path_edit_geometry, err = url.JoinPath(static_prefix, path_edit_geometry)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_edit_geometry)
+			}
+		}
+
+		www_paths.CreateFeature = path_create_feature
+		www_paths.EditGeometry = path_edit_geometry
+
+		www_capabilities.CreateFeature = true
+		www_capabilities.DeprecateFeature = true
+		www_capabilities.CessateFeature = true
+		www_capabilities.EditGeometry = true
 	}
 
 	if enable_edit_api {
 
+		if static_prefix != "" {
+
+			path_api_create_feature, err = url.JoinPath(static_prefix, path_api_create_feature)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_api_create_feature)
+			}
+
+			path_api_cessate_feature, err = url.JoinPath(static_prefix, path_api_cessate_feature)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_api_cessate_feature)
+			}
+
+			path_api_deprecate_feature, err = url.JoinPath(static_prefix, path_api_deprecate_feature)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_api_deprecate_feature)
+			}
+
+			path_api_edit_geometry, err = url.JoinPath(static_prefix, path_api_edit_geometry)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign prefix to %s, %w", path_api_edit_geometry)
+			}
+
+		}
+
+		www_paths.CreateFeatureAPI = path_api_create_feature
+		www_paths.DeprecateFeatureAPI = path_api_deprecate_feature
+		www_paths.CessateFeatureAPI = path_api_cessate_feature
+		www_paths.EditGeometryAPI = path_api_edit_geometry
+
+		www_capabilities.CreateFeatureAPI = true
+		www_capabilities.DeprecateFeatureAPI = true
+		www_capabilities.CessateFeatureAPI = true
+		www_capabilities.EditGeometryAPI = true
 	}
+
+	// Auth hooks
 
 	authenticator, err := auth.NewAuthenticator(ctx, authenticator_uri)
 
@@ -365,11 +458,15 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		return fmt.Errorf("Failed to create authenticator, %w", err)
 	}
 
+	// Custom chrome (this is still in flux)
+
 	custom, err := chrome.NewChrome(ctx, custom_chrome_uri)
 
 	if err != nil {
 		return fmt.Errorf("Failed to create custom chrome, %w", err)
 	}
+
+	// Start setting up handlers
 
 	mux := http.NewServeMux()
 
@@ -379,7 +476,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		return fmt.Errorf("Failed to create ping handler, %w", err)
 	}
 
-	mux.Handle("/ping", ping_handler)
+	mux.Handle(path_ping, ping_handler)
 
 	if enable_png {
 
@@ -634,20 +731,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	var bootstrap_opts *bootstrap.BootstrapOptions
 	var map_provider provider.Provider
 	var maps_opts *maps.MapsOptions
-	var endpoints *www.Endpoints
 
 	if enable_html || enable_edit_ui {
-
-		endpoints = &www.Endpoints{
-			Data:  path_geojson,
-			Png:   path_png,
-			Svg:   path_svg,
-			Spr:   path_spr,
-			Id:    path_id,
-			Index: "/",
-
-			// To do: Add API stuff?
-		}
 
 		bootstrap_opts = bootstrap.DefaultBootstrapOptions()
 
@@ -718,10 +803,6 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_html {
 
-		if enable_search_html {
-			endpoints.Search = path_search_html
-		}
-
 		// Note that we append all the handler to mux at the end of this block so that they
 		// can be updated with map-related middleware where necessary
 
@@ -732,8 +813,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		if enable_index {
 
 			index_opts := www.IndexHandlerOptions{
-				Templates: t,
-				Endpoints: endpoints,
+				Templates:    t,
+				Paths:        www_paths,
+				Capabilities: www_capabilities,
 			}
 
 			index_h, err := www.IndexHandler(index_opts)
@@ -747,11 +829,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		id_opts := www.IDHandlerOptions{
-			Templates:   t,
-			Endpoints:   endpoints,
-			Reader:      cr,
-			Logger:      logger,
-			MapProvider: map_provider.Scheme(),
+			Templates:    t,
+			Paths:        www_paths,
+			Capabilities: www_capabilities,
+			Reader:       cr,
+			Logger:       logger,
+			MapProvider:  map_provider.Scheme(),
 		}
 
 		id_h, err := www.IDHandler(id_opts)
@@ -772,10 +855,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			}
 
 			search_opts := www.SearchHandlerOptions{
-				Templates:   t,
-				Endpoints:   endpoints,
-				Database:    search_db,
-				MapProvider: map_provider.Scheme(),
+				Templates:    t,
+				Paths:        www_paths,
+				Capabilities: www_capabilities,
+				Database:     search_db,
+				MapProvider:  map_provider.Scheme(),
 			}
 
 			search_h, err := www.SearchHandler(search_opts)
@@ -819,7 +903,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		geom_opts := &www.EditGeometryHandlerOptions{
 			Authenticator: authenticator,
 			MapProvider:   map_provider.Scheme(),
-			Endpoints:     endpoints,
+			Paths:         www_paths,
+			Capabilities:  www_capabilities,
 			Template:      geom_t,
 			Logger:        logger,
 			Reader:        cr,
@@ -844,7 +929,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		create_opts := &www.CreateFeatureHandlerOptions{
 			Authenticator: authenticator,
 			MapProvider:   map_provider.Scheme(),
-			Endpoints:     endpoints,
+			Paths:         www_paths,
+			Capabilities:  www_capabilities,
 			Template:      create_t,
 			Logger:        logger,
 			Reader:        cr,
@@ -919,7 +1005,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		deprecate_handler = authenticator.WrapHandler(deprecate_handler)
-		mux.Handle(path_api_deprecate, deprecate_handler)
+		mux.Handle(path_api_deprecate_feature, deprecate_handler)
 
 		// Mark a record as ceased
 
@@ -939,7 +1025,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		cessate_handler = authenticator.WrapHandler(cessate_handler)
-		mux.Handle(path_api_cessate, cessate_handler)
+		mux.Handle(path_api_cessate_feature, cessate_handler)
 
 		// Edit geometry
 

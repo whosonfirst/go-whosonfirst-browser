@@ -16,11 +16,12 @@ import (
 )
 
 type IDHandlerOptions struct {
-	Templates   *template.Template
-	Endpoints   *Endpoints
-	Reader      reader.Reader
-	Logger      *log.Logger
-	MapProvider string
+	Templates    *template.Template
+	Paths        *Paths
+	Capabilities *Capabilities
+	Reader       reader.Reader
+	Logger       *log.Logger
+	MapProvider  string
 }
 
 type IDVars struct {
@@ -29,7 +30,8 @@ type IDVars struct {
 	URIArgs      *uri.URIArgs
 	IsAlternate  bool
 	LastModified string
-	Endpoints    *Endpoints
+	Paths        *Paths
+	Capabilities *Capabilities
 	MapProvider  string
 }
 
@@ -64,7 +66,7 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 		if endpoint == "" {
 
 			vars := NotFoundVars{
-				Endpoints: opts.Endpoints,
+				Paths: opts.Paths,
 			}
 
 			RenderTemplate(rsp, notfound_t, vars)
@@ -76,8 +78,8 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 		if err != nil {
 
 			vars := ErrorVars{
-				Error:     err,
-				Endpoints: opts.Endpoints,
+				Error: err,
+				Paths: opts.Paths,
 				// status...
 			}
 
@@ -86,6 +88,7 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 
 		str_id := strconv.FormatInt(id, 10)
 		url := filepath.Join(endpoint, str_id)
+
 		http.Redirect(rsp, req, url, http.StatusMovedPermanently)
 		return
 	}
@@ -99,8 +102,8 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 			opts.Logger.Printf("Failed to parse URI from request %s, %v", req.URL, err)
 
 			vars := ErrorVars{
-				Error:     err,
-				Endpoints: opts.Endpoints,
+				Error: err,
+				Paths: opts.Paths,
 				// status...
 			}
 
@@ -115,16 +118,16 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 
 		switch ext {
 		case ".geojson":
-			handle_other(rsp, req, f, opts.Endpoints.Data)
+			handle_other(rsp, req, f, opts.Paths.GeoJSON)
 			return
 		case ".png":
-			handle_other(rsp, req, f, opts.Endpoints.Png)
+			handle_other(rsp, req, f, opts.Paths.PNG)
 			return
 		case ".spr":
-			handle_other(rsp, req, f, opts.Endpoints.Spr)
+			handle_other(rsp, req, f, opts.Paths.SPR)
 			return
 		case ".svg":
-			handle_other(rsp, req, f, opts.Endpoints.Svg)
+			handle_other(rsp, req, f, opts.Paths.SVG)
 			return
 		default:
 			// pass
@@ -135,8 +138,8 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 		if err != nil {
 
 			vars := ErrorVars{
-				Error:     err,
-				Endpoints: opts.Endpoints,
+				Error: err,
+				Paths: opts.Paths,
 			}
 
 			RenderTemplate(rsp, error_t, vars)
@@ -146,29 +149,14 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 		now := time.Now()
 		lastmod := now.Format(time.RFC3339)
 
-		/*
-			data_url := new(url.URL)
-			data_url.Scheme = req.URL.Scheme
-			data_url.Host = req.URL.Host
-			data_url.Path = opts.Endpoints.Data
-
-			data_endpoint := data_url.String()
-
-			png_url := new(url.URL)
-			png_url.Scheme = req.URL.Scheme
-			png_url.Host = req.URL.Host
-			png_url.Path = opts.Endpoints.Data
-
-			png_endpoint := png_url.String()
-		*/
-
 		vars := IDVars{
 			SPR:          s,
 			URI:          uri.URI,
 			URIArgs:      uri.URIArgs,
 			IsAlternate:  uri.IsAlternate,
 			LastModified: lastmod,
-			Endpoints:    opts.Endpoints,
+			Paths:        opts.Paths,
+			Capabilities: opts.Capabilities,
 			MapProvider:  opts.MapProvider,
 		}
 

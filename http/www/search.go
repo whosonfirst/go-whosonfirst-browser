@@ -21,16 +21,18 @@ type SearchAPIHandlerOptions struct {
 }
 
 type SearchHandlerOptions struct {
-	Templates   *template.Template
-	Endpoints   *Endpoints
-	Database    fulltext.FullTextDatabase
-	MapProvider string
+	Templates    *template.Template
+	Paths        *Paths
+	Capabilities *Capabilities
+	Database     fulltext.FullTextDatabase
+	MapProvider  string
 }
 
 type SearchVars struct {
-	Endpoints *Endpoints
-	Query     string
-	Results   []spr.StandardPlacesResult
+	Paths        *Paths
+	Capabilities *Capabilities
+	Query        string
+	Results      []spr.StandardPlacesResult
 }
 
 func SearchHandler(opts SearchHandlerOptions) (http.Handler, error) {
@@ -44,7 +46,8 @@ func SearchHandler(opts SearchHandlerOptions) (http.Handler, error) {
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		vars := SearchVars{
-			Endpoints: opts.Endpoints,
+			Paths:        opts.Paths,
+			Capabilities: opts.Capabilities,
 		}
 
 		term, err := sanitize.GetString(req, "term")

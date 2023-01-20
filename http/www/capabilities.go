@@ -1,12 +1,21 @@
 package www
 
 type Capabilities struct {
-	GeoJSON   bool
-	GeoJSONLD bool
-	PNG       bool
-	SVG       bool
-	NavPlace  bool
-	Select    bool
-	SPR       bool
-	HTML      bool
+	GeoJSON             bool
+	GeoJSONLD           bool
+	PNG                 bool
+	SVG                 bool
+	NavPlace            bool
+	Select              bool
+	SPR                 bool
+	HTML                bool // To do: Rename this; this is the /id/{ID} page
+	Search              bool
+	CreateFeature       bool
+	CreateFeatureAPI    bool
+	DeprecateFeature    bool
+	DeprecateFeatureAPI bool
+	CessateFeature      bool
+	CessateFeatureAPI   bool
+	EditGeometry        bool
+	EditGeometryAPI     bool
 }

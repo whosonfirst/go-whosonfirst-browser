@@ -120,8 +120,15 @@ const EnableEditUIDefault bool = false
 
 var enable_edit_ui bool
 
-var path_api_deprecate string
-var path_api_cessate string
+const PathAPIDeprecateFeatureFlag string = "path-api-deprecate-feature"
+const PathAPIDeprecateFeatureDefault string = "/api/deprecate/"
+
+var path_api_deprecate_feature string
+
+const PathAPICessateFeatureFlag string = "path-api-cessate-feature"
+const PathAPICessateFeatureDefault string = "/api/cessate/"
+
+var path_api_cessate_feature string
 
 const PathAPIEditGeometryFlag string = "path-api-edit-geometry"
 const PathAPIEditGeometryDefault string = "/api/geometry/"
@@ -150,6 +157,11 @@ const GitHubWriterAccessTokenURIFlag string = "github-writer-accesstoken-uri"
 const GitHubWriterAccessTokenURIDefault string = ""
 
 var github_writer_accesstoken_uri string
+
+const PathPingFlag string = "path-ping"
+const PathPingDefault string = "/ping"
+
+var path_ping string
 
 // The path that PNG requests should be served from.
 var path_png string
@@ -219,12 +231,18 @@ var path_id string
 var navplace_max_features int
 
 const EnableCORSFlag string = "enable-cors"
+const EnableCORSDefault bool = true
 
 var enable_cors bool
 
 const CORSOriginFlag string = "cors-origin"
 
 var cors_origins multi.MultiCSVString
+
+const CORSAllowCredentialsFlag string = "cors-allow-credentials"
+const CORSAllowCredentialsDefault bool = false
+
+var cors_allow_credentials bool
 
 const AuthenticatorURI string = "authenticator-uri"
 
@@ -282,6 +300,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.BoolVar(&enable_search, "enable-search", false, "Enable both the API and human-friendly search handlers.")
 	fs.StringVar(&search_database_uri, "search-database-uri", "", "A valid whosonfirst/go-whosonfist-search/fulltext URI.")
 
+	fs.StringVar(&path_ping, PathPingFlag, PathPingDefault, "...")
+
 	fs.StringVar(&path_png, "path-png", "/png/", "The path that PNG requests should be served from.")
 	fs.Var(&path_png_alt, "path-png-alt", "Zero or more alternate paths that PNG requests should be served from.")
 
@@ -318,8 +338,10 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.IntVar(&navplace_max_features, "navplace-max-features", 3, "The maximum number of features to allow in a /navplace/{ID} URI string.")
 
-	fs.BoolVar(&enable_cors, "enable-cors", true, "A boolean flag to enable CORS headers")
-	fs.Var(&cors_origins, "cors-origin", "One or more hosts to restrict CORS support to on the API endpoint. If no origins are defined (and -cors is enabled) then the server will default to all hosts.")
+	fs.BoolVar(&enable_cors, EnableCORSFlag, EnableCORSDefault, "A boolean flag to enable CORS headers")
+	fs.Var(&cors_origins, CORSOriginFlag, "One or more hosts to restrict CORS support to on the API endpoint. If no origins are defined (and -cors is enabled) then the server will default to all hosts.")
+
+	fs.BoolVar(&cors_allow_credentials, CORSAllowCredentialsFlag, CORSAllowCredentialsDefault, "...")
 
 	fs.StringVar(&authenticator_uri, "authenticator-uri", "none://", "A valid sfomuseum/go-http-auth URI.")
 
@@ -337,8 +359,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.BoolVar(&enable_edit_api, EnableEditAPIFlag, EnableEditAPIDefault, "...")
 	fs.BoolVar(&enable_edit_ui, EnableEditUIFlag, EnableEditUIDefault, "...")
 
-	fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
-	fs.StringVar(&path_api_cessate, "path-api-cessate", "/api/cessate/", "...")
+	fs.StringVar(&path_api_deprecate_feature, PathAPIDeprecateFeatureFlag, PathAPIDeprecateFeatureDefault, "...")
+	fs.StringVar(&path_api_cessate_feature, PathAPICessateFeatureFlag, PathAPICessateFeatureDefault, "...")
 	fs.StringVar(&path_api_edit_geometry, PathAPIEditGeometryFlag, "/api/geometry/", "...")
 	fs.StringVar(&path_api_create_feature, PathAPICreateFeatureFlag, PathAPICreateFeatureDefault, "...")
 
