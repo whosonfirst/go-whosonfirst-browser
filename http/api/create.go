@@ -90,6 +90,7 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			return
 		}
 
+		rsp.WriteHeader(http.StatusCreated)
 		rsp.Write(final)
 		return
 	}
