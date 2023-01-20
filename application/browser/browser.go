@@ -113,6 +113,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		enable_edit_ui = true
 	}
 
+	if enable_edit_ui {
+		enable_edit_api = true
+	}
+
 	var cors_wrapper *cors.Cors
 
 	if enable_cors {
