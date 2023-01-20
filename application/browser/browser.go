@@ -66,6 +66,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		return fmt.Errorf("Failed to set flags from environment variables, %w", err)
 	}
 
+	// To do: Convert flags in to a Config struct and then call
+	// RunWithConfig (below)
+
+	// To do: Convert Config struct in to a Settings struct and
+	// then call RunWithSettings (below)
+
 	if enable_all {
 		enable_graphics = true
 		enable_data = true
@@ -100,6 +106,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	if enable_html {
 		enable_geojson = true
 		enable_png = true
+	}
+
+	if enable_edit {
+		enable_edit_api = true
+		enable_edit_ui = true
 	}
 
 	var cors_wrapper *cors.Cors
@@ -230,6 +241,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		NavPlace:  path_navplace,
 		SPR:       path_spr,
 		HTML:      path_id,
+		// To do: API stuff
 	}
 
 	www_capabilities := &www.Capabilities{
@@ -241,6 +253,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		Select:    enable_select,
 		NavPlace:  enable_navplace,
 		SPR:       enable_spr,
+		// To do: API stuff
 	}
 
 	mux := http.NewServeMux()
@@ -463,6 +476,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 	}
 
+	// START OF probably due a rethink shortly
+
 	if enable_search_api {
 
 		if search_database_uri == "" {
@@ -480,22 +495,8 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		if enable_search_api_geojson {
-
 			search_opts.EnableGeoJSON = true
-
 			search_opts.GeoJSONReader = cr
-
-			/*
-				if resolver_uri != "" {
-
-				resolver_func, err := geojson.NewSPRPathResolverFunc(ctx, resolver_uri)
-
-				if err != nil {
-					return err
-				}
-
-				api_pip_opts.SPRPathResolver = resolver_func
-			*/
 		}
 
 		search_handler, err := www.SearchAPIHandler(search_opts)
@@ -511,22 +512,29 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		mux.Handle(path_search_api, search_handler)
 	}
 
-	if enable_html {
+	// END OF probably due a rethink shortly
 
-		endpoints := &www.Endpoints{
+	// Common code for HTML handler (public and/or edit handlers)
+
+	var bootstrap_opts *bootstrap.BootstrapOptions
+	var map_provider provider.Provider
+	var maps_opts *maps.MapsOptions
+	var endpoints *www.Endpoints
+
+	if enable_html || enable_edit_ui {
+
+		endpoints = &www.Endpoints{
 			Data:  path_geojson,
 			Png:   path_png,
 			Svg:   path_svg,
 			Spr:   path_spr,
 			Id:    path_id,
 			Index: "/",
+
+			// To do: Add API stuff?
 		}
 
-		if enable_search_html {
-			endpoints.Search = path_search_html
-		}
-
-		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
+		bootstrap_opts = bootstrap.DefaultBootstrapOptions()
 
 		err = bootstrap.AppendAssetHandlersWithPrefix(mux, static_prefix)
 
@@ -552,16 +560,51 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to derive provider URI from flagset, %v", err)
 		}
 
-		map_provider, err := provider.NewProvider(ctx, provider_uri)
+		pr, err := provider.NewProvider(ctx, provider_uri)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create new provider, %w", err)
 		}
 
+		map_provider = pr
 		err = map_provider.SetLogger(logger)
 
 		if err != nil {
 			return fmt.Errorf("Failed to set logger for provider, %w", err)
+		}
+
+		// Final map stuff
+
+		maps_opts = maps.DefaultMapsOptions()
+
+		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append static asset handlers, %v")
+		}
+
+		err = map_provider.AppendAssetHandlersWithPrefix(mux, static_prefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append provider asset handlers, %v", err)
+		}
+
+		// Null handler for annoying things like favicons
+
+		null_handler := www.NewNullHandler()
+
+		favicon_path := filepath.Join(path_id, "favicon.ico")
+		mux.Handle(favicon_path, null_handler)
+	}
+
+	// Public HTML handlers
+
+	// To do: Consider hooks to require auth?
+
+	if enable_html {
+
+		if enable_search_html {
+			endpoints.Search = path_search_html
 		}
 
 		// Note that we append all the handler to mux at the end of this block so that they
@@ -630,7 +673,25 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, static_prefix)
 		}
 
-		// START OF wrap me in a(nother) feature flag
+		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, static_prefix)
+		id_handler = custom.WrapHandler(id_handler)
+		id_handler = authenticator.WrapHandler(id_handler)
+
+		mux.Handle(path_id, id_handler)
+
+		if enable_search_html {
+			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, static_prefix)
+			search_handler = authenticator.WrapHandler(search_handler)
+			mux.Handle(path_search_html, search_handler)
+		}
+
+		index_handler = authenticator.WrapHandler(index_handler)
+		mux.Handle("/", index_handler)
+	}
+
+	// Edit/write HTML handlers
+
+	if enable_edit_ui {
 
 		// Edit geometry
 
@@ -655,7 +716,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create edit geometry handler, %w", err)
 		}
 
-		// Create geometry
+		// To do: Edit properties
+
+		// Create feature
 
 		create_t := t.Lookup("create")
 
@@ -678,38 +741,6 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create create feature handler, %w", err)
 		}
 
-		// END OF wrap me in a(nother) feature flag
-
-		// Final map stuff
-
-		maps_opts := maps.DefaultMapsOptions()
-
-		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
-
-		if err != nil {
-			return fmt.Errorf("Failed to append static asset handlers, %v")
-		}
-
-		err = map_provider.AppendAssetHandlersWithPrefix(mux, static_prefix)
-
-		if err != nil {
-			return fmt.Errorf("Failed to append provider asset handlers, %v", err)
-		}
-
-		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, static_prefix)
-		id_handler = custom.WrapHandler(id_handler)
-		id_handler = authenticator.WrapHandler(id_handler)
-
-		mux.Handle(path_id, id_handler)
-
-		if enable_search_html {
-			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, static_prefix)
-			search_handler = authenticator.WrapHandler(search_handler)
-			mux.Handle(path_search_html, search_handler)
-		}
-
-		// START OF wrap me in a(nother) feature flag
-
 		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, map_provider, maps_opts, static_prefix)
 		geom_handler = custom.WrapHandler(geom_handler)
 		geom_handler = authenticator.WrapHandler(geom_handler)
@@ -721,24 +752,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		create_handler = authenticator.WrapHandler(create_handler)
 
 		mux.Handle(path_create_feature, create_handler)
-
-		// END OF wrap me in a(nother) feature flag
-
-		// Basic landing page
-
-		index_handler = authenticator.WrapHandler(index_handler)
-		mux.Handle("/", index_handler)
-
-		// Null handler for annoying things like favicons
-
-		null_handler := www.NewNullHandler()
-
-		favicon_path := filepath.Join(path_id, "favicon.ico")
-		mux.Handle(favicon_path, null_handler)
-
 	}
 
-	if enable_api {
+	if enable_edit_api {
 
 		// Exporter
 
@@ -870,4 +886,12 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	}
 
 	return nil
+}
+
+func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
+	return fmt.Errorf("Not implemented")
+}
+
+func RunWithSettings(ctx context.Context, settings *Settings) error {
+	return fmt.Errorf("Not implemented")
 }

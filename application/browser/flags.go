@@ -105,9 +105,20 @@ const EnableSearchFlag string = "enable-search"
 
 var enable_search bool
 
-const EnableAPIFlag string = "enable-api"
+const EnableEditFlag string = "enable-edit"
+const EnableEditDefault bool = false
 
-var enable_api bool
+var enable_edit bool
+
+const EnableEditAPIFlag string = "enable-edit-api"
+const EnableEditAPIDefault bool = false
+
+var enable_edit_api bool
+
+const EnableEditUIFlag string = "enable-edit-ui"
+const EnableEditUIDefault bool = false
+
+var enable_edit_ui bool
 
 var path_api_deprecate string
 var path_api_cessate string
@@ -322,7 +333,10 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	// API edit/write stuff
 
-	fs.BoolVar(&enable_api, "enable-api", false, "Enable the API endpoints")
+	fs.BoolVar(&enable_edit, EnableEditFlag, EnableEditDefault, "Enable the API endpoints")
+	fs.BoolVar(&enable_edit_api, EnableEditAPIFlag, EnableEditAPIDefault, "...")
+	fs.BoolVar(&enable_edit_ui, EnableEditUIFlag, EnableEditUIDefault, "...")
+
 	fs.StringVar(&path_api_deprecate, "path-api-deprecate", "/api/deprecate/", "...")
 	fs.StringVar(&path_api_cessate, "path-api-cessate", "/api/cessate/", "...")
 	fs.StringVar(&path_api_edit_geometry, PathAPIEditGeometryFlag, "/api/geometry/", "...")
@@ -330,7 +344,11 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
 
+	// Point in polygon stuff (required for edit/write stuff)
+
 	fs.StringVar(&spatial_database_uri, SpatialDatabaseURIFlag, "", "...")
+
+	// Custom chrome stuff
 
 	fs.StringVar(&custom_chrome_uri, CustomChromeURIFlag, "none://", "...")
 
