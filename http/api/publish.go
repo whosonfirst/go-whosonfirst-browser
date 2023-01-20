@@ -8,8 +8,8 @@ import (
 
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
-	"github.com/whosonfirst/go-whosonfirst-browser/v6/http"
-	"github.com/whosonfirst/go-whosonfirst-browser/v6/writer"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/http"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/writer"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	"github.com/whosonfirst/go-whosonfirst-uri"

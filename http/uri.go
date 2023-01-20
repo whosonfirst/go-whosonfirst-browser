@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/aaronland/go-http-sanitize"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/v6/webfinger"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/webfinger"
 	wof_uri "github.com/whosonfirst/go-whosonfirst-uri"
 	"io"
 	_ "log"

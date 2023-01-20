@@ -3,7 +3,7 @@ package www
 import (
 	"errors"
 	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"

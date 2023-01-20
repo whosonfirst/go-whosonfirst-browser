@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
 	"github.com/whosonfirst/go-whosonfirst-image"
 	"log"
 	"net/http"

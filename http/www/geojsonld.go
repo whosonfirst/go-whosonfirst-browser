@@ -3,7 +3,7 @@ package www
 import (
 	"github.com/sfomuseum/go-geojsonld"
 	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v6/http"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
 	"log"
 	"net/http"
 )

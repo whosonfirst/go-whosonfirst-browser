@@ -2,7 +2,7 @@ package www
 
 import (
 	aa_static "github.com/aaronland/go-http-static"
-	"github.com/whosonfirst/go-whosonfirst-browser/v6/static"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/static"
 	"net/http"
 )
 
