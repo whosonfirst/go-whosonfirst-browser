@@ -27,6 +27,8 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
+		ctx := req.Context()
+
 		switch req.Method {
 		case "PUT":
 			// pass
@@ -35,13 +37,19 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			return
 		}
 
-		ctx := req.Context()
-
-		_, err := opts.Authenticator.GetAccountForRequest(req)
+		acct, err := opts.Authenticator.GetAccountForRequest(req)
 
 		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusUnauthorized)
-			return
+			switch err.(type) {
+			case auth.NotLoggedIn:
+				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				http.Error(rsp, "Not authorized", http.StatusUnauthorized)
+				return
+			default:
+				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				http.Error(rsp, "Internal server error", http.StatusInternalServerError)
+				return
+			}
 		}
 
 		body, err := io.ReadAll(req.Body)
@@ -72,6 +80,7 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			WriterURIs: opts.WriterURIs,
 			Exporter:   opts.Exporter,
 			Cache:      opts.Cache,
+			Account:    acct,
 		}
 
 		final, err := publishFeature(ctx, publish_opts, new_body)

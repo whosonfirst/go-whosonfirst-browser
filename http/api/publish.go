@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/v6/writer"
@@ -20,6 +21,7 @@ type publishFeatureOptions struct {
 	Exporter   export.Exporter
 	Cache      cache.Cache
 	URI        *http.URI
+	Account    *auth.Account
 }
 
 func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byte) ([]byte, error) {

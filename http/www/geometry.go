@@ -34,8 +34,18 @@ func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error)
 		_, err := opts.Authenticator.GetAccountForRequest(req)
 
 		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusUnauthorized)
-			return
+			switch err.(type) {
+			case auth.NotLoggedIn:
+
+				signin_handler := opts.Authenticator.SigninHandler()
+				signin_handler.ServeHTTP(rsp, req)
+				return
+
+			default:
+				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				http.Error(rsp, "Internal server error", http.StatusInternalServerError)
+				return
+			}
 		}
 
 		path, err, status := wof_http.DerivePathFromRequest(req)

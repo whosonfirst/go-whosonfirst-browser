@@ -23,6 +23,8 @@ func DeprecateFeatureHandler(opts *DeprecateFeatureHandlerOptions) (http.Handler
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
+		ctx := req.Context()
+
 		switch req.Method {
 		case "POST":
 			// pass
@@ -31,13 +33,19 @@ func DeprecateFeatureHandler(opts *DeprecateFeatureHandlerOptions) (http.Handler
 			return
 		}
 
-		ctx := req.Context()
-
-		_, err := opts.Authenticator.GetAccountForRequest(req)
+		acct, err := opts.Authenticator.GetAccountForRequest(req)
 
 		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusBadRequest)
-			return
+			switch err.(type) {
+			case auth.NotLoggedIn:
+				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				http.Error(rsp, "Not authorized", http.StatusUnauthorized)
+				return
+			default:
+				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				http.Error(rsp, "Internal server error", http.StatusInternalServerError)
+				return
+			}
 		}
 
 		uri, err, _ := wof_http.ParseURIFromRequest(req, opts.Reader)
@@ -61,6 +69,7 @@ func DeprecateFeatureHandler(opts *DeprecateFeatureHandlerOptions) (http.Handler
 			Exporter:   opts.Exporter,
 			URI:        uri,
 			Cache:      opts.Cache,
+			Account:    acct,
 		}
 
 		final, err := publishFeature(ctx, publish_opts, new_body)

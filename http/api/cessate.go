@@ -23,6 +23,8 @@ func CessateFeatureHandler(opts *CessateFeatureHandlerOptions) (http.Handler, er
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
+		ctx := req.Context()
+
 		switch req.Method {
 		case "POST":
 			// pass
@@ -31,13 +33,24 @@ func CessateFeatureHandler(opts *CessateFeatureHandlerOptions) (http.Handler, er
 			return
 		}
 
-		ctx := req.Context()
-
-		_, err := opts.Authenticator.GetAccountForRequest(req)
+		acct, err := opts.Authenticator.GetAccountForRequest(req)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusBadRequest)
 			return
+		}
+
+		if err != nil {
+			switch err.(type) {
+			case auth.NotLoggedIn:
+				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				http.Error(rsp, "Not authorized", http.StatusUnauthorized)
+				return
+			default:
+				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				http.Error(rsp, "Internal server error", http.StatusInternalServerError)
+				return
+			}
 		}
 
 		uri, err, _ := wof_http.ParseURIFromRequest(req, opts.Reader)
@@ -62,6 +75,7 @@ func CessateFeatureHandler(opts *CessateFeatureHandlerOptions) (http.Handler, er
 			Exporter:   opts.Exporter,
 			Cache:      opts.Cache,
 			URI:        uri,
+			Account:    acct,
 		}
 
 		final, err := publishFeature(ctx, publish_opts, new_body)
