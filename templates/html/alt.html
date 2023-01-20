@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
       <title>{{ .SPR.Name }} | {{ .SPR.Id }} | Who's On First</title>
-      {{ template "inc_common_meta" }}
+      {{ template "inc_common_meta" . }}
       <meta property="html:lastmodified" content="{{ .LastModified }}" />
 	  
       <meta property="og:type" content="article" />
@@ -20,37 +20,37 @@
       <meta property="twitter:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
       <meta property="twitter:image" content="{{ .Paths.PNG }}{{ .SPR.Id }}?size=xsm" />
       
-      <script src="/javascript/localforage.min.js"></script>	  
-      <script src="/javascript/slippymap.crosshairs.js"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/localforage.min.js" }}"></script>	  
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/slippymap.crosshairs.js" }}"></script>
       
-      <script src="/javascript/whosonfirst.www.js"></script>	 
-      <script src="/javascript/whosonfirst.render.js"></script>
-      <script src="/javascript/whosonfirst.properties.js"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.www.js" }}"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.render.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.properties.js" }}"></script>
       
-      <script src="/javascript/whosonfirst.cache.js"></script>	 
-      <script src="/javascript/whosonfirst.uri.js"></script>
-      <script src="/javascript/whosonfirst.net.js"></script>
-      <script src="/javascript/whosonfirst.namify.js"></script> 	 	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.cache.js" }}"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.uri.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.net.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.namify.js" }}"></script> 	 	 
       
-      <script src="/javascript/whosonfirst.geojson.js"></script>	 
-      <script src="/javascript/whosonfirst.leaflet.utils.js"></script>
-      <script src="/javascript/whosonfirst.leaflet.styles.js"></script>
-      <script src="/javascript/whosonfirst.leaflet.handlers.js"></script> 	 	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.geojson.js" }}"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.utils.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.styles.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.handlers.js" }}"></script> 	 	 
 
-      <script src="/javascript/whosonfirst.browser.maps.js"></script>
-      <script src="/javascript/whosonfirst.browser.common.js"></script>	       
-      <script src="/javascript/whosonfirst.browser.alt.js"></script>
-      <script src="/javascript/whosonfirst.browser.alt.init.js"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.maps.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.common.js" }}"></script>	       
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.alt.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.alt.init.js" }}"></script>	 
       
-      {{ template "inc_common_css" }}
+      {{ template "inc_common_css" . }}
 
-      <link rel="stylesheet" href="/css/whosonfirst.browser.id.css">
+      <link rel="stylesheet" href={{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.id.css" }}" />
       
   </head>
   <body data-whosonfirst-uri-endpoint="{{ .Paths.GeoJSON }}">
 
       <div class="container">
-      {{ template "inc_common_header" .}}
+      {{ template "inc_common_header" . }}
 
       <main class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .SPR.Id }}" data-whosonfirst-uri="{{ .URI }}" data-whosonfirst-is-alternate="1" data-whosonfirst-alt-source="{{ .URIArgs.AltGeom.Source }}" data-whosonfirst-alt-function="{{ .URIArgs.AltGeom.Function }}" data-whosonfirst-alt-extra="" data-whosonfirst-path="{{ .SPR.Path }}" data-whosonfirst-parent-id="{{ .SPR.ParentId }}" data-latitude="{{ .SPR.Latitude }}" data-longitude="{{ .SPR.Longitude }}" data-min-latitude="{{ .SPR.MinLatitude}}" data-min-longitude="{{ .SPR.MinLongitude }}" data-max-latitude="{{ .SPR.MaxLatitude}}" data-max-longitude="{{ .SPR.MaxLongitude }}">
 

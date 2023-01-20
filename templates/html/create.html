@@ -3,42 +3,42 @@
 <html lang="en">
   <head>
       <title>Who's On First</title>
-      {{ template "inc_common_meta" }}
+      {{ template "inc_common_meta" . }}
       <!-- <meta property="html:lastmodified" content="" /> -->
 	        
-      <script src="/javascript/localforage.min.js"></script>	  
-      <script src="/javascript/slippymap.crosshairs.js"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/localforage.min.js" }}"></script>	  
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/slippymap.crosshairs.js" }}"></script>
       
-      <script src="/javascript/whosonfirst.www.js"></script>	 
-      <script src="/javascript/whosonfirst.render.js"></script>
-      <script src="/javascript/whosonfirst.properties.js"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.www.js" }}"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.render.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.properties.js" }}"></script>
       
-      <script src="/javascript/whosonfirst.cache.js"></script>	 
-      <script src="/javascript/whosonfirst.uri.js"></script>
-      <script src="/javascript/whosonfirst.net.js"></script>
-      <script src="/javascript/whosonfirst.namify.js"></script> 	 	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.cache.js" }}"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.uri.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.net.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.namify.js" }}"></script> 	 	 
       
-      <script src="/javascript/whosonfirst.geojson.js"></script>	 
-      <script src="/javascript/whosonfirst.leaflet.utils.js"></script>
-      <script src="/javascript/whosonfirst.leaflet.styles.js"></script>
-      <script src="/javascript/whosonfirst.leaflet.handlers.js"></script> 	 	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.geojson.js" }}"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.utils.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.styles.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.handlers.js" }}"></script> 	 	 
 
-      <script src="/javascript/whosonfirst.browser.maps.js"></script>
-      <script src="/javascript/whosonfirst.browser.common.js"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.maps.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.common.js" }}"></script>
 
-      <script src="/javascript/whosonfirst.browser.api.js"></script>      
-      <script src="/javascript/whosonfirst.browser.create.js"></script>
-      <script src="/javascript/whosonfirst.browser.create.init.js"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.api.js" }}"></script>      
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.create.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.create.init.js" }}"></script>	 
       
-      {{ template "inc_common_css" }}
+      {{ template "inc_common_css" . }}
 
-      <link rel="stylesheet" href="/css/whosonfirst.browser.create.css">
+      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.create.css" }}" />
       
   </head>
   <body data-whosonfirst-uri-endpoint="{{ .Paths.GeoJSON }}">
 
       <div class="container">
-      {{ template "inc_common_header" .}}
+      {{ template "inc_common_header" . }}
 
       <main class="whosonfirst">
 
