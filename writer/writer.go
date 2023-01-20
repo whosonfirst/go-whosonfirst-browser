@@ -9,6 +9,7 @@ import (
 	"fmt"
 	wof_writer "github.com/whosonfirst/go-writer/v3"
 	"log"
+	"net/url"
 	"strings"
 )
 
@@ -24,8 +25,20 @@ func NewWriter(ctx context.Context, opts *WriterOptions) (wof_writer.Writer, err
 
 	for idx, wr_uri := range opts.WriterURIs {
 
+		// because github_writer.EnsureGitHubAccessToken (in application/browser/browser.go)
+		// will URL-encode '{repo}'
+
+		wr_uri, err := url.QueryUnescape(wr_uri)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to unescape '%s', %w", wr_uri, err)
+		}
+
 		if opts.Repo != "" && strings.Contains(wr_uri, "{repo}") {
+
 			wr_uri = strings.Replace(wr_uri, "{repo}", opts.Repo, -1)
+
+			log.Println("WR 2", wr_uri)
 		}
 
 		wr, err := wof_writer.NewWriter(ctx, wr_uri)

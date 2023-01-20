@@ -80,7 +80,13 @@ func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byt
 	_, err = wr.Write(ctx, rel_path, br)
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to write body, %w", err)
+		return nil, fmt.Errorf("Failed to write body for %s, %w", rel_path, err)
+	}
+
+	err = wr.Close(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to close writer for %s, %w", rel_path, err)
 	}
 
 	err = opts.Cache.Unset(ctx, rel_path)
