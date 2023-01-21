@@ -480,6 +480,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if enable_png {
 
+		if verbose {
+			logger.Println("png support enabled")
+		}
+
 		sizes := www.DefaultRasterSizes()
 
 		png_opts := &www.RasterHandlerOptions{
@@ -497,12 +501,20 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_png, png_handler)
 
+		if verbose {
+			logger.Printf("Handle png endpoint at %s\n", path_png)
+		}
+
 		for _, alt_path := range path_png_alt {
 			mux.Handle(alt_path, png_handler)
 		}
 	}
 
 	if enable_svg {
+
+		if verbose {
+			logger.Println("svg support enabled")
+		}
 
 		sizes := www.DefaultSVGSizes()
 
@@ -524,12 +536,20 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_svg, svg_handler)
 
+		if verbose {
+			log.Printf("handle svg endpoint at %s\n", path_svg)
+		}
+
 		for _, alt_path := range path_svg_alt {
 			mux.Handle(alt_path, svg_handler)
 		}
 	}
 
 	if enable_spr {
+
+		if verbose {
+			log.Println("spr support enabled")
+		}
 
 		spr_opts := &www.SPRHandlerOptions{
 			Reader: cr,
@@ -548,12 +568,20 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_spr, spr_handler)
 
+		if verbose {
+			log.Printf("handle spr endpoint at %s\n", path_spr)
+		}
+
 		for _, alt_path := range path_spr_alt {
 			mux.Handle(alt_path, spr_handler)
 		}
 	}
 
 	if enable_geojson {
+
+		if verbose {
+			log.Println("geojson support enabled")
+		}
 
 		geojson_opts := &www.GeoJSONHandlerOptions{
 			Reader: cr,
@@ -572,12 +600,20 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_geojson, geojson_handler)
 
+		if verbose {
+			logger.Printf("Handle geojson endpoint at %s\n", path_geojson)
+		}
+
 		for _, alt_path := range path_geojson_alt {
 			mux.Handle(alt_path, geojson_handler)
 		}
 	}
 
 	if enable_geojsonld {
+
+		if verbose {
+			log.Println("geojsonld support enabled")
+		}
 
 		geojsonld_opts := &www.GeoJSONLDHandlerOptions{
 			Reader: cr,
@@ -596,12 +632,20 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_geojsonld, geojsonld_handler)
 
+		if verbose {
+			logger.Printf("Handle geojsonld endpoint at %s\n", path_geojsonld)
+		}
+
 		for _, alt_path := range path_geojsonld_alt {
 			mux.Handle(alt_path, geojsonld_handler)
 		}
 	}
 
 	if enable_navplace {
+
+		if verbose {
+			log.Println("navplace support enabled")
+		}
 
 		navplace_opts := &www.NavPlaceHandlerOptions{
 			Reader:      cr,
@@ -621,12 +665,20 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_navplace, navplace_handler)
 
+		if verbose {
+			logger.Printf("Handle navplace endpoint at %s\n", path_navplace)
+		}
+
 		for _, alt_path := range path_navplace_alt {
 			mux.Handle(alt_path, navplace_handler)
 		}
 	}
 
 	if enable_select {
+
+		if verbose {
+			log.Println("select support enabled")
+		}
 
 		if select_pattern == "" {
 			return fmt.Errorf("Missing -select-pattern parameter.")
@@ -656,12 +708,20 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_select, select_handler)
 
+		if verbose {
+			log.Printf("handle select endpoint at %s\n", path_select)
+		}
+
 		for _, alt_path := range path_select_alt {
 			mux.Handle(alt_path, select_handler)
 		}
 	}
 
 	if enable_webfinger {
+
+		if verbose {
+			log.Println("webfinger support enabled")
+		}
 
 		webfinger_opts := &www.WebfingerHandlerOptions{
 			Reader:       cr,
@@ -682,6 +742,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		mux.Handle(path_webfinger, webfinger_handler)
+
+		if verbose {
+			log.Printf("handle webfinger endpoint at %s\n", path_webfinger)
+		}
 
 		for _, alt_path := range path_webfinger_alt {
 			mux.Handle(alt_path, webfinger_handler)
@@ -878,6 +942,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_id, id_handler)
 
+		if verbose {
+			log.Printf("handle ID endpoint at %s\n", path_id)
+		}
+
 		if enable_search_html {
 			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, static_prefix)
 			search_handler = authenticator.WrapHandler(search_handler)
@@ -891,6 +959,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	// Edit/write HTML handlers
 
 	if enable_edit_ui {
+
+		if verbose {
+			log.Println("edit user interface support enabled")
+		}
 
 		// Edit geometry
 
@@ -948,14 +1020,26 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_edit_geometry, geom_handler)
 
+		if verbose {
+			log.Printf("handle edit geometry endpoint at %s\n", path_edit_geometry)
+		}
+
 		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, map_provider, maps_opts, static_prefix)
 		create_handler = custom.WrapHandler(create_handler)
 		create_handler = authenticator.WrapHandler(create_handler)
 
 		mux.Handle(path_create_feature, create_handler)
+
+		if verbose {
+			log.Printf("handle create feature endpoint at %s\n", path_create_feature)
+		}
 	}
 
 	if enable_edit_api {
+
+		if verbose {
+			log.Println("edit api support enabled")
+		}
 
 		// Exporter
 
@@ -1007,6 +1091,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		deprecate_handler = authenticator.WrapHandler(deprecate_handler)
 		mux.Handle(path_api_deprecate_feature, deprecate_handler)
 
+		if verbose {
+			log.Printf("handle deprecate feature endpoint at %s\n", path_api_deprecate_feature)
+		}
+
 		// Mark a record as ceased
 
 		cessate_opts := &api.CessateFeatureHandlerOptions{
@@ -1026,6 +1114,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		cessate_handler = authenticator.WrapHandler(cessate_handler)
 		mux.Handle(path_api_cessate_feature, cessate_handler)
+
+		if verbose {
+			log.Printf("handle cessate feature endpoint at %s\n", path_api_cessate_feature)
+		}
 
 		// Edit geometry
 
@@ -1048,6 +1140,10 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		geom_handler = authenticator.WrapHandler(geom_handler)
 		mux.Handle(path_api_edit_geometry, geom_handler)
 
+		if verbose {
+			log.Printf("handle edit geometry endpoint at %s\n", path_api_edit_geometry)
+		}
+
 		// Create a new feature
 
 		create_opts := &api.CreateFeatureHandlerOptions{
@@ -1068,6 +1164,11 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		create_handler = authenticator.WrapHandler(create_handler)
 		mux.Handle(path_api_create_feature, create_handler)
+
+		if verbose {
+			log.Printf("handle create geometry endpoint at %s\n", path_api_edit_geometry)
+		}
+
 	}
 
 	// Finally, start the server

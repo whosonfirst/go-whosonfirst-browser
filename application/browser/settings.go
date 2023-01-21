@@ -3,6 +3,9 @@ package browser
 import (
 	"context"
 	"fmt"
+	"io/fs"
+
+	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
@@ -19,6 +22,12 @@ type Settings struct {
 
 	WriterURIs []string
 	Exporter   export.Exporter
+
+	Authenticator auth.Authenticator
+
+	Templates []fs.FS
+
+	Verbose bool
 }
 
 func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {

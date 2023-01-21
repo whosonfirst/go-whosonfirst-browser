@@ -1,5 +1,5 @@
 cli:
-	go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
+	go build -mod vendor -ldflags="-s -w" -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 
 debug:
 	# @make cli
@@ -17,7 +17,7 @@ lambda:
 lambda-browser:
 	if test -f main; then rm -f main; fi
 	if test -f browser.zip; then rm -f browser.zip; fi
-	GOOS=linux go build -mod vendor -o main cmd/whosonfirst-browser/main.go
+	GOOS=linux go build -mod vendor -ldflags="-s -w" -o main cmd/whosonfirst-browser/main.go
 	zip browser.zip main
 	rm -f main
 

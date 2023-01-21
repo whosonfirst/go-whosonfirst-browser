@@ -261,6 +261,11 @@ const CustomChromeURIFlag string = "custom-chrome-uri"
 
 var custom_chrome_uri string
 
+const VerboseFlag string = "verbose"
+const VerboseDefault bool = false
+
+var verbose bool
+
 // DefaultFlagSet returns a `flag.FlagSet` instance with flags and defaults values assigned for use with `app`.
 func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
@@ -373,6 +378,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	// Custom chrome stuff
 
 	fs.StringVar(&custom_chrome_uri, CustomChromeURIFlag, "none://", "...")
+
+	fs.BoolVar(&verbose, VerboseFlag, VerboseDefault, "...")
 
 	err := provider.AppendProviderFlags(fs)
 

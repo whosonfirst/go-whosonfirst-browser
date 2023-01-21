@@ -71,4 +71,6 @@ type Config struct {
 	SpatialDatabaseURI string `json:"spatial_database_uri"`
 
 	CustomChromeURI string `json:"custom_chrome_uri"`
+
+	Verbose bool `json:"verbose"`
 }
