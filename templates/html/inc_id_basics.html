@@ -11,7 +11,7 @@
     This record has been superseded by the following records:
     <ul class="whosonfirst-pointers">
 	{{ range $i, $s := .SPR.SupersededBy }}
-	<li><a href="{{ .Paths.Id }}{{ $s }}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ $s }}">{{ $s }}</a></li>
+	<li><a href="{{ $.Paths.Id }}{{ $s }}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ $s }}">{{ $s }}</a></li>
 	{{ end }}
     </ul>
     .
