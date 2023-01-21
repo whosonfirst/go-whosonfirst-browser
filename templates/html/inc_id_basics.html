@@ -11,7 +11,7 @@
     This record has been superseded by the following records:
     <ul class="whosonfirst-pointers">
 	{{ range $i, $s := .SPR.SupersededBy }}
-	<li><a href="/id/{{ $s }}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ $s }}">{{ $s }}</a></li>
+	<li><a href="{{ .Paths.Id }}{{ $s }}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ $s }}">{{ $s }}</a></li>
 	{{ end }}
     </ul>
     .
@@ -23,7 +23,7 @@
     This record supersedes the following records:
     <ul class="whosonfirst-pointers">
 	{{ range $i, $s := .SPR.Supersedes }}
-	<li><a href="/id/{{ $s }}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ $s }}">{{ $s }}</a></li>
+	<li><a href="{{ $.Paths.Id }}{{ $s }}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ $s }}">{{ $s }}</a></li>
 	{{ end }}
     </ul>
     .
@@ -46,7 +46,7 @@
     {{ else if eq .SPR.ParentId "-1" }}
 	This record's parent ID Is <code>-1</code> meaning we are <a href="https://github.com/whosonfirst/whosonfirst-properties/tree/master/properties/wof#parent_id">uncertain</a> which record parents this one.
     {{ else }}
-	It is parented by <a href="/id/{{ .SPR.ParentId}}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ .SPR.ParentId}}">Who's On First ID {{ .SPR.ParentId}}</a>.
+	It is parented by <a href="{{ .Paths.Id }}{{ .SPR.ParentId}}" class="whosonfirst-id whosonfirst-namify" data-whosonfirst-id="{{ .SPR.ParentId}}">Who's On First ID {{ .SPR.ParentId}}</a>.
     {{ end }}
 
     </p>

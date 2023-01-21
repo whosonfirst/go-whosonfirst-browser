@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
       <title>{{ .SPR.Name }} | {{ .SPR.Id }} | Who's On First</title>
-      {{ template "inc_common_meta" }}
+      {{ template "inc_common_meta" . }}
       <meta property="html:lastmodified" content="{{ .LastModified }}" />
 	  
       <meta property="og:type" content="article" />
@@ -11,15 +11,7 @@
       <meta property="og:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
       <meta property="og:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
       <meta property="og:image" content="{{ .Paths.PNG }}{{ .SPR.Id }}?size=xsm" />
-      
-      <meta property="twitter:card" value="summary" />
-      <meta property="twitter:site" content="@alloftheplaces" />
-      <meta property="twitter:creator" content="@alloftheplaces" />
-      <meta property="twitter:url" content="/id/{{ .SPR.Id }}" />
-      <meta property="twitter:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
-      <meta property="twitter:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
-      <meta property="twitter:image" content="{{ .Paths.PNG }}{{ .SPR.Id }}?size=xsm" />
-      
+            
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/localforage.min.js" }}"></script>	  
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/slippymap.crosshairs.js" }}"></script>
       

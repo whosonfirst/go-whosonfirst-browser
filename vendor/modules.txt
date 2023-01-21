@@ -538,7 +538,7 @@ github.com/sfomuseum/go-sfomuseum-mapshaper
 # github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3
 ## explicit; go 1.19
 github.com/sfomuseum/go-sfomuseum-pmtiles/http
-# github.com/sfomuseum/go-template v1.5.0
+# github.com/sfomuseum/go-template v1.5.1
 ## explicit; go 1.18
 github.com/sfomuseum/go-template/funcs
 github.com/sfomuseum/go-template/html

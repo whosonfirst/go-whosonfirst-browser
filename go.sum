@@ -1818,8 +1818,8 @@ github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1 h1:ecjCnrzs1QhSi2R2jQem0y8/6o
 github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1/go.mod h1:+JVebjhj6f3H3ESBlO1b5pkzS2ZxaqnpUyCHxA8/too=
 github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3 h1:vdENCMTE1mlNGF70g3GXLW0uj7e3cYitvInwP26j1AE=
 github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3/go.mod h1:ihAhHNZKhUhbBF/OsGYurzqfelcCMwM516T0SBr2HnE=
-github.com/sfomuseum/go-template v1.5.0 h1:FnMDOsgZ5aeuZdk2blgv+CkM432KZP++HF7qzHcZUD8=
-github.com/sfomuseum/go-template v1.5.0/go.mod h1:JRpTSqjgYv6+PdkoVbX5GmuyCQqnRLd0Yk8LFvLb6/k=
+github.com/sfomuseum/go-template v1.5.1 h1:al8tyls02fgDChAIJnGEBonaw8vMykjUuQn7Gi0Rx0M=
+github.com/sfomuseum/go-template v1.5.1/go.mod h1:JRpTSqjgYv6+PdkoVbX5GmuyCQqnRLd0Yk8LFvLb6/k=
 github.com/sfomuseum/runtimevar v1.0.4 h1:HANzvYssy8csmsAqRSfVDKBV5C8fkkM1IIxIQK7y0mo=
 github.com/sfomuseum/runtimevar v1.0.4/go.mod h1:+lU/Syl8syxrhf+dd/PlYEybg2qerqWwCHDuq25D/do=
 github.com/sfomuseum/tailscale v0.0.0-20230120014847-9303af0a66ac h1:Rah7F+01zzQcjhUUSmWryqB9bLagsZleN/+9pMcMTHo=

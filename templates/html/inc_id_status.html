@@ -62,9 +62,9 @@
 	<details-menu>
     
 	    <ul>
-		<li><a href="{{ .Paths.PNG }}{{ .SPR.Id }}">png</a></li>
-		<li><a href="{{ .Paths.SVG }}{{ .SPR.Id }}">svg</a></li>
-		<li><a href="{{ .Paths.GeoJSON }}{{ .SPR.Id }}">geojson</a></li>
+		<li><a href="{{ JoinPath .Paths.PNG .SPR.Id }}">png</a></li>
+		<li><a href="{{ JoinPath .Paths.SVG  .SPR.Id }}">svg</a></li>
+		<li><a href="{{ JoinPath .Paths.GeoJSON .SPR.Id }}">geojson</a></li>
 	    </ul>
 	</details-menu>
     </details>
