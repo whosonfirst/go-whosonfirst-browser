@@ -1,17 +1,6 @@
 cli:
 	go build -mod vendor -ldflags="-s -w" -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 
-debug:
-	go run cmd/whosonfirst-browser/main.go -enable-all -enable-edit \
-	-reader-uri 'findingaid://https/static.sfomuseum.org/findingaid?template=https://raw.githubusercontent.com/sfomuseum-data/{repo}/main/data/' \
-	-cache-uri null:// \
-	-map-provider leaflet \
-	-leaflet-tile-url 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' \
-	-leaflet-enable-draw \
-	-authenticator-uri null:// \
-	-writer-uri stdout:// \
-	-spatial-database-uri 'pmtiles://?tiles=s3blob%3A%2F%2Fsfomuseum-tiles%3Fregion%3Dus-west-2%26prefix%3Dpoint-in-polygon%2F%26credentials%3Dsession&database=whosonfirst_sfom_13&enable-cache=true&zoom=13&layer=whosonfirst_sfom_13'
-
 x-debug:
 	# @make cli
 	./bin/whosonfirst-browser -enable-all -map-provider tangram -nextzen-apikey $(APIKEY) -reader-uri $(READER)

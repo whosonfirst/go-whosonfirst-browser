@@ -82,8 +82,7 @@ whosonfirst.browser.geometry = (function(){
 		}
 
 		if (! map.pm){
-
-		    console.log("FOOOP", feature);
+		    
 		    var layer = L.geoJSON(feature);
 		    layer.addTo(map);
 
