@@ -64,7 +64,7 @@ whosonfirst.browser.geometry = (function(){
 	    var data_url = whosonfirst.uri.id2abspath(wof_id)
 	    
 	    var on_success = function(feature){
-
+		
 		var bbox = whosonfirst.geojson.derive_bbox(feature);
 		
 		var bounds = [
@@ -82,8 +82,9 @@ whosonfirst.browser.geometry = (function(){
 		}
 
 		if (! map.pm){
-		    
-		    var layer = L.geoJson(feature);
+
+		    console.log("FOOOP", feature);
+		    var layer = L.geoJSON(feature);
 		    layer.addTo(map);
 
 		    console.log("Missing map.pm");
