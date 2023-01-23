@@ -78,7 +78,7 @@ go run -mod vendor cmd/example/main.go -enable-hash -enable-fullscreen -enable-d
 
 The when you open the URL `http://localhost:8080` in a web browser you should see the following:
 
-![](docs/images/go-http-leaflet-example.png)
+![](docs/images/go-http-leaflet-geoman.png)
 
 ## See also
 
