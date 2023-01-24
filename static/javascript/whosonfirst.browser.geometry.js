@@ -4,6 +4,7 @@ whosonfirst.browser = whosonfirst.browser || {};
 whosonfirst.browser.geometry = (function(){
     
     var map;
+    var events = {};
     
     var self = {
 	
@@ -200,6 +201,15 @@ whosonfirst.browser.geometry = (function(){
 		});
 
 		geojson_layer.addTo(map);
+
+		if (events["load"]){
+
+		    var count = events["load"].length;
+		    
+		    for (var i=0; i < count; i++){
+			events["load"][i](feature);
+		    }
+		}
 	    };
 
 	    var on_error = function(err){
@@ -293,6 +303,31 @@ whosonfirst.browser.geometry = (function(){
 		return false;
 	    };
 	},
+
+	on: function(target, func){
+
+	    var addEvent = function(target, func){
+
+		funcs = events[target];
+
+		if (! funcs){
+		    funcs = [];
+		}
+
+		funcs.push(func)
+		events[target] = funcs;
+	    };
+	    
+	    switch (target){
+		case 'load':
+		    addEvent(target, func);
+		    break;
+		default:
+		    console.log("Unsupported target", target);
+		    break;
+	    }
+	},
+
     }
     
     return self;
