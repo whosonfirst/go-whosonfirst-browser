@@ -266,10 +266,17 @@ const VerboseDefault bool = false
 
 var verbose bool
 
+const ConfigURIFlag string = "config-uri"
+const ConfigURIDefault string = ""
+
+var config_uri string
+
 // DefaultFlagSet returns a `flag.FlagSet` instance with flags and defaults values assigned for use with `app`.
 func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
 	fs := flagset.NewFlagSet("browser")
+
+	fs.StringVar(&config_uri, ConfigURIFlag, ConfigURIDefault, "...")
 
 	fs.StringVar(&server_uri, ServerURIFlag, "http://localhost:8080", "A valid aaronland/go-http-server URI.")
 
@@ -388,8 +395,4 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	}
 
 	return fs, nil
-}
-
-func ConfigFromFlagSet(fs *flag.FlagSet) (*Config, error) {
-	return nil, fmt.Errorf("Not implemented")
 }
