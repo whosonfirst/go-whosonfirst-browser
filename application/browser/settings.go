@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
-
+	"net/http"
+	
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
@@ -27,6 +28,8 @@ type Settings struct {
 
 	Templates []fs.FS
 
+	CustomHandlers map[string]http.HandlerFunc
+	
 	Verbose bool
 }
 
