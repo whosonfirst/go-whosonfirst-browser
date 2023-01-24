@@ -64,6 +64,21 @@ whosonfirst.browser.geometry = (function(){
 	    var data_url = whosonfirst.uri.id2abspath(wof_id)
 	    
 	    var on_success = function(feature){
+
+		var props = feature.properties;
+		var name = props["wof:name"];
+		var id = props["wof:id"];
+
+		var name_el = document.getElementById("wof:name");
+		var id_el = document.getElementById("wof:id");		
+
+		if (name_el){
+		    name_el.innerText = name;
+		}
+
+		if (id_el){
+		    id_el.innerText = id;
+		}
 		
 		var bbox = whosonfirst.geojson.derive_bbox(feature);
 		
@@ -94,6 +109,15 @@ whosonfirst.browser.geometry = (function(){
 		    var feature_group = map.pm.getGeomanLayers(true);
 		    var feature_collection = feature_group.toGeoJSON();
 		    console.log("UPDATE", feature_collection);
+
+		    var geojson_el = document.getElementById("geojson");
+
+		    if (! geojson_el){
+			return;
+		    }
+		    
+		    var enc_featurecollection = JSON.stringify(feature_collection, " ", 2);
+		    geojson_el.innerText = enc_feature_collection;
 		};
 
 		map.pm.setGlobalOptions({

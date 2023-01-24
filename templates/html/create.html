@@ -32,7 +32,7 @@
       
       {{ template "inc_common_css" . }}
 
-      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.create.css" }}" />
+      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.css" }}" />
       
   </head>
   <body data-whosonfirst-uri-endpoint="{{ .Paths.GeoJSON }}">
@@ -46,7 +46,7 @@
 
 	      <div class="grid-view">
 		  
-		  <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true" style="height:80vh !important;">
+		  <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true">
 		  </div>
 
 		  <div id="properties">

@@ -32,7 +32,8 @@
       
       {{ template "inc_common_css" . }}
 
-      <link rel="stylesheet" href="/css/whosonfirst.browser.id.css">
+      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.css" }}" />
+      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.geometry.css" }}" />            
       
   </head>
   <body data-whosonfirst-uri-endpoint="{{ .Paths.GeoJSON }}">
@@ -44,14 +45,36 @@
 
 	  <div class="container">
 
-	      <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true" style="height:80vh !important;">
-	      </div>
+	      <div class="grid-view">	      
+		  <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true"></div>
 
-	      <div id="controls" class="row">
-		  <button class="btn" id="save">Save</button>
+		  <div id="edit">
+		      <h4>
+			  <span id="wof:name"></span>
+		      </h4>
+
+		      <a href="#" id="wof:id"></a>
+		      
+		      <div id="feedback"></div>
+
+		      <dialog id="feedback-dialog">
+			  <p id="feedback-body"></p>
+			  <form method="dialog">
+			      <button>OK</button>
+			  </form>
+		      </dialog>
+
+		      <!-- <pre id="geojson"></pre> -->
+		      
+		      <div id="controls" class="row">
+			  <button class="btn" id="save">Save</button>
+		      </div>
+
+		  </div>
+		  
 	      </div>
 	  </div>
-      
+	  
       </main>
 
       {{ template "inc_common_footer" .}}

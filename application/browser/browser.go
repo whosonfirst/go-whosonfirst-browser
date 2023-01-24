@@ -1015,6 +1015,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, map_provider, maps_opts, static_prefix)
+		geom_handler = bootstrap.AppendResourcesHandlerWithPrefix(geom_handler, bootstrap_opts, static_prefix)
 		geom_handler = custom.WrapHandler(geom_handler)
 		geom_handler = authenticator.WrapHandler(geom_handler)
 
@@ -1025,6 +1026,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, map_provider, maps_opts, static_prefix)
+		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, static_prefix)
 		create_handler = custom.WrapHandler(create_handler)
 		create_handler = authenticator.WrapHandler(create_handler)
 

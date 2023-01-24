@@ -1,0 +1,51 @@
+/* Tags */
+
+/* Identifiers */
+
+#controls {
+	position:absolute;
+	bottom:10px;
+	right: 15px;
+}
+
+#edit {
+	max-height:80vh !important;
+	overflow: scroll;
+	position:relative;	
+}
+
+#feedback {
+	font-style:italic;
+	margin-bottom:1rem;
+}
+
+#geojson {
+	border:solid thin;
+}
+
+#map {
+	height:80vh !important;
+}
+
+#save {
+	border: solid;
+}
+
+/* Classes */
+
+.grid-view {
+	display: grid;
+	grid-template-columns:1fr 1fr;
+	justify-items: initial !important;
+	gap: 50px 50px;
+}
+
+/* Media queries */
+
+@media (max-width: 1000px) {
+
+	.grid-view {
+		grid-template-columns:1fr !important;
+	}
+}
+
