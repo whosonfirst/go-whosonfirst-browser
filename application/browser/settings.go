@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -21,6 +22,7 @@ import (
 	github_reader "github.com/whosonfirst/go-reader-github"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/chrome"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"	
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-spatial/database"
@@ -48,13 +50,19 @@ type Settings struct {
 
 	CORSWrapper *cors.Cors
 
+	NavPlaceMaxFeatures int
+
+	SelectPattern *regexp.Regexp
+
+	WebFingerHostname string
+	
 	Verbose bool
 }
 
 func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*Settings, error) {
 
 	settings := &Settings{
-		// Templates...
+		Templates: []fs.FS{ html.FS },
 		Verbose: cfg.Verbose,
 	}
 
@@ -260,6 +268,18 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	if cfg.EnableSelect {
 
+		if cfg.SelectPattern == "" {
+			return nil, fmt.Errorf("Missing -select-pattern parameter.")
+		}
+
+		pat, err := regexp.Compile(select_pattern)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to compile select pattern (%s), %w", cfg.SelectPattern, err)
+		}
+
+		settings.SelectPattern = pat
+		
 		www_capabilities.Select = true
 		www_paths.Select = cfg.PathSelect
 
@@ -277,6 +297,8 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	if cfg.EnableNavPlace {
 
+		settings.NavPlaceMaxFeatures = cfg.NavPlaceMaxFeatures
+		
 		www_capabilities.NavPlace = true
 		www_paths.NavPlace = cfg.PathNavPlace
 
@@ -329,6 +351,25 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	}
 
+	if cfg.EnableWebFinger {
+
+		settings.WebFingerHostname = cfg.WebFingerHostname
+		
+		www_capabilities.WebFinger = true
+		www_paths.WebFinger = cfg.PathWebFinger
+
+		if cfg.URIPrefix != "" {
+
+			path_webfinger, err := url.JoinPath(cfg.URIPrefix, cfg.PathWebFinger)
+
+			if err != nil {
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathWebFinger)
+			}
+
+			www_paths.WebFinger = path_webfinger
+		}
+	}
+	
 	if cfg.EnableEditUI {
 
 		www_capabilities.CreateFeature = true

@@ -8,6 +8,7 @@ type Paths struct {
 	NavPlace            string `json:"navplace,omitempty"`
 	SPR                 string `json:"spr,omitempty"`
 	Select              string `json:"select,omitempty"`
+	WebFinger string `json:"webfinger,omitempty"`
 	URIPrefix           string `json:"uriprefix,omitempty"`
 	Id                  string `json:"id,omitempty"`
 	Index               string `json:"index,omitempty"`

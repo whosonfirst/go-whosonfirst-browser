@@ -48,8 +48,8 @@ type Config struct {
 	PathPNG        string   `json:"path_png,omitempty"`
 	PathPNGAlt     []string `json:"path_png_alt,omitempty"`
 	PathSVG        string   `json:"path_svg,omitempty"`
-	PathSPR        string   `json:"path_spr,omitempty"`
-	PathSPRAlt     []string `json:"path_spr,omitempty"`
+	PathSPR string `json:"path_spr,omitempty"`
+	PathSPRAlt []string `json:"path_spr,omitempty"`	
 	PathSVGAlt     []string `json:"path_svg_alt,omitempty"`
 	PathGeoJSON    string   `json:"path_geojson,omitempty"`
 	PathGeoJSONAlt []string `json:"path_geojson_alt,omitempty"`
@@ -136,12 +136,12 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 	}
 
 	if enable_cors {
-
+		
 		if len(cors_origins) == 0 {
 			cors_origins.Set("*")
 		}
 	}
-
+	
 	cfg := &Config{
 		CacheURI:         cache_uri,
 		ReaderURIs:       reader_uris,
@@ -173,7 +173,7 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		PathSVG:                 path_svg,
 		PathSVGAlt:              path_svg_alt,
 		PathSPR:                 path_spr,
-		PathSPRAlt:              path_spr_alt,
+		PathSPRAlt:              path_spr_alt,		
 		PathGeoJSON:             path_geojson,
 		PathGeoJSONAlt:          path_geojson_alt,
 		PathGeoJSONLD:           path_geojsonld,

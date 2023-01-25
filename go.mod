@@ -17,6 +17,7 @@ require (
 	github.com/sfomuseum/go-geojsonld v1.0.0
 	github.com/sfomuseum/go-http-auth v0.0.6
 	github.com/sfomuseum/go-template v1.5.1
+	github.com/sfomuseum/runtimevar v1.0.4
 	github.com/tidwall/gjson v1.14.4
 	github.com/whosonfirst/go-cache v0.5.2
 	github.com/whosonfirst/go-reader v1.0.2
@@ -125,7 +126,6 @@ require (
 	github.com/sfomuseum/go-http-protomaps v0.0.16 // indirect
 	github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1 // indirect
 	github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3 // indirect
-	github.com/sfomuseum/runtimevar v1.0.4 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/tidwall/match v1.1.1 // indirect

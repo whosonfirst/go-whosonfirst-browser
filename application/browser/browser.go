@@ -15,7 +15,6 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"regexp"
 
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
@@ -24,8 +23,8 @@ import (
 	"github.com/aaronland/go-http-server"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
-	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
+	"github.com/sfomuseum/go-template/html"
+	_ "github.com/whosonfirst/go-whosonfirst-search/fulltext"
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -116,7 +115,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	// To do: Once we have config/settings stuff working this needs to be able to
 	// specify a custom fs.FS for reading templates from
 
-	t, err := html.LoadTemplates(ctx)
+	t, err := html.LoadTemplates(ctx, settings.Templates...)
 
 	if err != nil {
 		return fmt.Errorf("Failed to load templates, %w", err)
@@ -132,8 +131,12 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		return fmt.Errorf("Failed to create ping handler, %w", err)
 	}
 
-	mux.Handle(path_ping, ping_handler)
+	mux.Handle(settings.Paths.Ping, ping_handler)
 
+	if settings.Verbose {
+		logger.Printf("Handle ping endpoint at %s\n", settings.Paths.Ping)
+	}
+	
 	if settings.Capabilities.PNG {
 
 		if settings.Verbose {
@@ -155,12 +158,13 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			return fmt.Errorf("Failed to create raster/png handler, %w", err)
 		}
 
-		mux.Handle(path_png, png_handler)
+		mux.Handle(settings.Paths.PNG, png_handler)
 
 		if settings.Verbose {
-			logger.Printf("Handle png endpoint at %s\n", path_png)
+			logger.Printf("Handle png endpoint at %s\n", settings.Paths.PNG)
 		}
 
+		// UPDATE ME
 		for _, alt_path := range path_png_alt {
 			mux.Handle(alt_path, png_handler)
 		}
@@ -190,10 +194,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			svg_handler = settings.CORSWrapper.Handler(svg_handler)
 		}
 
-		mux.Handle(path_svg, svg_handler)
+		mux.Handle(settings.Paths.SVG, svg_handler)
 
 		if settings.Verbose {
-			log.Printf("handle svg endpoint at %s\n", path_svg)
+			log.Printf("handle svg endpoint at %s\n", settings.Paths.SVG)
 		}
 
 		for _, alt_path := range path_svg_alt {
@@ -222,12 +226,14 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			spr_handler = settings.CORSWrapper.Handler(spr_handler)
 		}
 
-		mux.Handle(path_spr, spr_handler)
+		mux.Handle(settings.Paths.SPR, spr_handler)
 
 		if settings.Verbose {
-			log.Printf("handle spr endpoint at %s\n", path_spr)
+			log.Printf("handle spr endpoint at %s\n", settings.Paths.SPR)
 		}
 
+		// TO UPDATE
+	
 		for _, alt_path := range path_spr_alt {
 			mux.Handle(alt_path, spr_handler)
 		}
@@ -254,12 +260,14 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			geojson_handler = settings.CORSWrapper.Handler(geojson_handler)
 		}
 
-		mux.Handle(path_geojson, geojson_handler)
+		mux.Handle(settings.Paths.GeoJSON, geojson_handler)
 
 		if settings.Verbose {
-			logger.Printf("Handle geojson endpoint at %s\n", path_geojson)
+			logger.Printf("Handle geojson endpoint at %s\n", settings.Paths.GeoJSON)
 		}
 
+		// TO UPDATE
+		
 		for _, alt_path := range path_geojson_alt {
 			mux.Handle(alt_path, geojson_handler)
 		}
@@ -286,12 +294,14 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			geojsonld_handler = settings.CORSWrapper.Handler(geojsonld_handler)
 		}
 
-		mux.Handle(path_geojsonld, geojsonld_handler)
+		mux.Handle(settings.Paths.GeoJSONLD, geojsonld_handler)
 
 		if settings.Verbose {
-			logger.Printf("Handle geojsonld endpoint at %s\n", path_geojsonld)
+			logger.Printf("Handle geojsonld endpoint at %s\n", settings.Paths.GeoJSONLD)
 		}
 
+		// TO UPDATE
+		
 		for _, alt_path := range path_geojsonld_alt {
 			mux.Handle(alt_path, geojsonld_handler)
 		}
@@ -305,7 +315,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		navplace_opts := &www.NavPlaceHandlerOptions{
 			Reader:      settings.Reader,
-			MaxFeatures: navplace_max_features, // UPDATE ME
+			MaxFeatures: settings.NavPlaceMaxFeatures,
 			Logger:      logger,
 		}
 
@@ -319,12 +329,14 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			navplace_handler = settings.CORSWrapper.Handler(navplace_handler)
 		}
 
-		mux.Handle(path_navplace, navplace_handler)
+		mux.Handle(settings.Paths.NavPlace, navplace_handler)
 
 		if settings.Verbose {
-			logger.Printf("Handle navplace endpoint at %s\n", path_navplace)
+			logger.Printf("Handle navplace endpoint at %s\n", settings.Paths.NavPlace)
 		}
 
+		// TO UPDATE
+		
 		for _, alt_path := range path_navplace_alt {
 			mux.Handle(alt_path, navplace_handler)
 		}
@@ -336,20 +348,8 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			log.Println("select support enabled")
 		}
 
-		// UPDATE ME
-
-		if select_pattern == "" {
-			return fmt.Errorf("Missing -select-pattern parameter.")
-		}
-
-		pat, err := regexp.Compile(select_pattern)
-
-		if err != nil {
-			return fmt.Errorf("Failed to compile select pattern (%s), %w", select_pattern, err)
-		}
-
 		select_opts := &www.SelectHandlerOptions{
-			Pattern: pat,
+			Pattern: settings.SelectPattern,
 			Reader:  settings.Reader,
 			Logger:  logger,
 		}
@@ -364,12 +364,14 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			select_handler = settings.CORSWrapper.Handler(select_handler)
 		}
 
-		mux.Handle(path_select, select_handler)
+		mux.Handle(settings.Paths.Select, select_handler)
 
 		if settings.Verbose {
-			log.Printf("handle select endpoint at %s\n", path_select)
+			log.Printf("handle select endpoint at %s\n", settings.Paths.Select)
 		}
 
+		// TO UPDATE
+		
 		for _, alt_path := range path_select_alt {
 			mux.Handle(alt_path, select_handler)
 		}
@@ -399,17 +401,20 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			webfinger_handler = settings.CORSWrapper.Handler(webfinger_handler)
 		}
 
-		mux.Handle(path_webfinger, webfinger_handler)
+		mux.Handle(settings.Paths.WebFinger, webfinger_handler)
 
 		if settings.Verbose {
-			log.Printf("handle webfinger endpoint at %s\n", path_webfinger)
+			log.Printf("handle webfinger endpoint at %s\n", settings.Paths.WebFinger)
 		}
 
+		// TO UPDATE
+		
 		for _, alt_path := range path_webfinger_alt {
 			mux.Handle(alt_path, webfinger_handler)
 		}
 	}
 
+	/*
 	// START OF probably due a rethink shortly
 
 	if enable_search_api {
@@ -447,7 +452,8 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	}
 
 	// END OF probably due a rethink shortly
-
+	*/
+	
 	// Common code for HTML handler (public and/or edit handlers)
 
 	var bootstrap_opts *bootstrap.BootstrapOptions
@@ -495,7 +501,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		null_handler := www.NewNullHandler()
 
-		favicon_path := filepath.Join(path_id, "favicon.ico")
+		favicon_path := filepath.Join(settings.Paths.Id, "favicon.ico")
 		mux.Handle(favicon_path, null_handler)
 	}
 
@@ -510,7 +516,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		var index_handler http.Handler
 		var id_handler http.Handler
-		var search_handler http.Handler
+		// var search_handler http.Handler
 
 		if enable_index {
 
@@ -548,6 +554,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		id_handler = id_h
 		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, settings.Paths.URIPrefix)
 
+		/*
 		if enable_search_html {
 
 			search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
@@ -573,7 +580,8 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			search_handler = search_h
 			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.Paths.URIPrefix)
 		}
-
+		*/
+		
 		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
 		id_handler = settings.CustomChrome.WrapHandler(id_handler)
 		id_handler = settings.Authenticator.WrapHandler(id_handler)
@@ -584,14 +592,16 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			log.Printf("handle ID endpoint at %s\n", path_id)
 		}
 
+		/*
 		if enable_search_html {
 			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
 			search_handler = settings.Authenticator.WrapHandler(search_handler)
 			mux.Handle(path_search_html, search_handler)
 		}
-
+		*/
+		
 		index_handler = settings.Authenticator.WrapHandler(index_handler)
-		mux.Handle("/", index_handler)
+		mux.Handle(settings.Paths.Index, index_handler)
 	}
 
 	// Edit/write HTML handlers
@@ -657,7 +667,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		geom_handler = settings.CustomChrome.WrapHandler(geom_handler)
 		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
 
-		mux.Handle(path_edit_geometry, geom_handler)
+		mux.Handle(settings.Paths.EditGeometry, geom_handler)
 
 		if settings.Verbose {
 			log.Printf("handle edit geometry endpoint at %s\n", path_edit_geometry)
@@ -668,7 +678,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		create_handler = settings.CustomChrome.WrapHandler(create_handler)
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
 
-		mux.Handle(path_create_feature, create_handler)
+		mux.Handle(settings.Paths.CreateFeature, create_handler)
 
 		if settings.Verbose {
 			log.Printf("handle create feature endpoint at %s\n", path_create_feature)
@@ -702,10 +712,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		deprecate_handler = settings.Authenticator.WrapHandler(deprecate_handler)
-		mux.Handle(path_api_deprecate_feature, deprecate_handler)
+		mux.Handle(settings.Paths.DeprecateFeatureAPI, deprecate_handler)
 
 		if settings.Verbose {
-			log.Printf("handle deprecate feature endpoint at %s\n", path_api_deprecate_feature)
+			log.Printf("handle deprecate feature endpoint at %s\n", settings.Paths.DeprecateFeatureAPI)
 		}
 
 		// Mark a record as ceased
@@ -726,10 +736,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		cessate_handler = settings.Authenticator.WrapHandler(cessate_handler)
-		mux.Handle(path_api_cessate_feature, cessate_handler)
+		mux.Handle(settings.Paths.CessateFeatureAPI, cessate_handler)
 
 		if settings.Verbose {
-			log.Printf("handle cessate feature endpoint at %s\n", path_api_cessate_feature)
+			log.Printf("handle cessate feature endpoint at %s\n", settings.Paths.CessateFeatureAPI)
 		}
 
 		// Edit geometry
@@ -751,10 +761,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
-		mux.Handle(path_api_edit_geometry, geom_handler)
+		mux.Handle(settings.Paths.EditGeometryAPI, geom_handler)
 
 		if settings.Verbose {
-			log.Printf("handle edit geometry endpoint at %s\n", path_api_edit_geometry)
+			log.Printf("handle edit geometry endpoint at %s\n", settings.Paths.EditGeometryAPI)
 		}
 
 		// Create a new feature
@@ -776,10 +786,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
-		mux.Handle(path_api_create_feature, create_handler)
+		mux.Handle(settings.Paths.CreateFeatureAPI, create_handler)
 
 		if settings.Verbose {
-			log.Printf("handle create geometry endpoint at %s\n", path_api_edit_geometry)
+			log.Printf("handle create feature endpoint at %s\n", settings.Paths.CreateFeatureAPI)
 		}
 
 	}
