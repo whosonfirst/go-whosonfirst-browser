@@ -49,8 +49,17 @@
 		  <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true">
 		  </div>
 
-		  <div id="properties">
+		  <div id="edit">
 
+		      <div id="feedback"></div>
+
+		      <dialog id="feedback-dialog">
+			  <p id="feedback-body"></p>
+			  <form method="dialog">
+			      <button>OK</button>
+			  </form>
+		      </dialog>
+		      
 		      <form class="form" class="row g-3">
 
 			    <div class="col-auto">
