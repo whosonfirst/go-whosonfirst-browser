@@ -11,6 +11,8 @@ type Capabilities struct {
 	SPR                 bool
 	HTML                bool // To do: Rename this; this is the /id/{ID} page
 	Search              bool
+	EditUI              bool
+	EditAPI             bool
 	CreateFeature       bool
 	CreateFeatureAPI    bool
 	DeprecateFeature    bool

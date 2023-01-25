@@ -4,18 +4,26 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
+	"os"
+	"strings"
+	"time"
 
 	"github.com/aaronland/go-http-maps/provider"
 	"github.com/rs/cors"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-reader-cachereader"
+	github_reader "github.com/whosonfirst/go-reader-github"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/chrome"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
+	github_writer "github.com/whosonfirst/go-writer-github/v3"
 )
 
 type Settings struct {
@@ -55,22 +63,22 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	// Fetch and assign GitHub access tokens to reader/writer URIs
 
-	if cfg.GithubAccessTokenURI != "" {
+	if cfg.GitHubAccessTokenURI != "" {
 
-		if cfg.GithubReaderAccessTokenURI == "" {
-			cfg.GithubReaderAccessTokenURI = cfg.GithubAccessTokenURI
+		if cfg.GitHubReaderAccessTokenURI == "" {
+			cfg.GitHubReaderAccessTokenURI = cfg.GitHubAccessTokenURI
 		}
 
-		if cfg.GithubWriterAccessTokenURI == "" {
-			cfg.GithubWriterAccessTokenURI = cfg.GithubAccessTokenURI
+		if cfg.GitHubWriterAccessTokenURI == "" {
+			cfg.GitHubWriterAccessTokenURI = cfg.GitHubAccessTokenURI
 		}
 	}
 
-	if cfg.GithubReaderAccessTokenURI != "" {
+	if cfg.GitHubReaderAccessTokenURI != "" {
 
 		for idx, r_uri := range reader_uris {
 
-			r_uri, err := github_reader.EnsureGitHubAccessToken(ctx, r_uri, cfg.GithubReaderAccessTokenURI)
+			r_uri, err := github_reader.EnsureGitHubAccessToken(ctx, r_uri, cfg.GitHubReaderAccessTokenURI)
 
 			if err != nil {
 				return nil, fmt.Errorf("Failed to ensure GitHub access token for '%s', %w", r_uri, err)
@@ -80,14 +88,14 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		}
 	}
 
-	if cfg.GithubReaderAccessTokenURI != "" {
+	if cfg.GitHubReaderAccessTokenURI != "" {
 
 		for idx, wr_uri := range writer_uris {
 
-			wr_uri, err := github_writer.EnsureGitHubAccessToken(ctx, wr_uri, cfg.GithubReaderAccessTokenURI)
+			wr_uri, err := github_writer.EnsureGitHubAccessToken(ctx, wr_uri, cfg.GitHubReaderAccessTokenURI)
 
 			if err != nil {
-				return fmt.Errorf("Failed to ensure GitHub access token for '%s', %w", wr_uri, err)
+				return nil, fmt.Errorf("Failed to ensure GitHub access token for '%s', %w", wr_uri, err)
 			}
 
 			writer_uris[idx] = wr_uri
@@ -109,7 +117,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		tempdir, err := ioutil.TempDir("", prefix)
 
 		if err != nil {
-			return fmt.Errorf("Failed to derive tmp dir, %w", err)
+			return nil, fmt.Errorf("Failed to derive tmp dir, %w", err)
 		}
 
 		defer os.RemoveAll(tempdir)
@@ -120,13 +128,13 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 	browser_reader, err := reader.NewMultiReaderFromURIs(ctx, reader_uris...)
 
 	if err != nil {
-		return fmt.Errorf("Failed to create reader, %w", err)
+		return nil, fmt.Errorf("Failed to create reader, %w", err)
 	}
 
 	browser_cache, err := cache.NewCache(ctx, cache_uri)
 
 	if err != nil {
-		return fmt.Errorf("Failed to create new cache, %w", err)
+		return nil, fmt.Errorf("Failed to create new cache, %w", err)
 	}
 
 	cr_opts := &cachereader.CacheReaderOptions{
@@ -137,7 +145,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 	cr, err := cachereader.NewCacheReaderWithOptions(ctx, cr_opts)
 
 	if err != nil {
-		return fmt.Errorf("Failed to create cache reader, %w", err)
+		return nil, fmt.Errorf("Failed to create cache reader, %w", err)
 	}
 
 	settings.Reader = cr
@@ -160,19 +168,19 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		cfg.URIPrefix = strings.TrimRight(cfg.URIPrefix, "/")
 
 		if !strings.HasPrefix(cfg.URIPrefix, "/") {
-			return fmt.Errorf("Invalid -static-prefix value")
+			return nil, fmt.Errorf("Invalid -static-prefix value")
 		}
 
 		path_index, err := url.JoinPath(cfg.URIPrefix, cfg.PathIndex)
 
 		if err != nil {
-			return fmt.Errorf("Failed to assign prefix to %s, %w", path_index)
+			return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path_index)
 		}
 
 		path_ping, err = url.JoinPath(cfg.URIPrefix, cfg.PathPing)
 
 		if err != nil {
-			return fmt.Errorf("Failed to assign prefix to %s, %w", path_ping)
+			return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path_ping)
 		}
 
 		www_paths.Index = path_index
@@ -189,7 +197,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			path_geojson, err := url.JoinPath(cfg.URIPrefix, cfg.PathGeoJSON)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathGeoJSON)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathGeoJSON)
 			}
 
 			www_paths.GeoJSON = path_geojson
@@ -207,7 +215,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			path_geojsonld, err := url.JoinPath(cfg.URIPrefix, cfg.PathGeoJSONLD)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathGeoJSONLD)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathGeoJSONLD)
 			}
 
 			www_paths.GeoJSONLD = path_geojsonld
@@ -224,7 +232,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			path_svg, err := url.JoinPath(cfg.URIPrefix, cfg.PathSVG)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSVG)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSVG)
 			}
 
 			www_paths.SVG = path_svg
@@ -242,10 +250,10 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			path_png, err := url.JoinPath(cfg.URIPrefix, cfg.PathPNG)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathPNG)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathPNG)
 			}
 
-			www_paths.PNG = cfg.path_png
+			www_paths.PNG = path_png
 		}
 	}
 
@@ -259,10 +267,10 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			path_select, err := url.JoinPath(cfg.URIPrefix, cfg.PathSelect)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSelect)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSelect)
 			}
 
-			www_paths.Select = cfg.path_select
+			www_paths.Select = path_select
 		}
 	}
 
@@ -276,7 +284,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			path_navplace, err := url.JoinPath(cfg.URIPrefix, cfg.PathNavPlace)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathNavPlace)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathNavPlace)
 			}
 
 			www_paths.NavPlace = path_navplace
@@ -294,7 +302,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			path_spr, err := url.JoinPath(cfg.URIPrefix, cfg.PathSPR)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSPR)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSPR)
 			}
 
 			www_paths.SPR = path_spr
@@ -312,7 +320,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			path_id, err := url.JoinPath(cfg.URIPrefix, cfg.PathId)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathId)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathId)
 			}
 
 			www_paths.Id = path_id
@@ -335,13 +343,13 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			path_create_feature, err := url.JoinPath(cfg.URIPrefix, cfg.PathCreateFeature)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathCreateFeature)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathCreateFeature)
 			}
 
 			path_edit_geometry, err := url.JoinPath(cfg.URIPrefix, cfg.PathEditGeometry)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathEditGeometry)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathEditGeometry)
 			}
 
 			www_paths.CreateFeature = path_create_feature
@@ -366,25 +374,25 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			path_api_create_feature, err := url.JoinPath(cfg.URIPrefix, cfg.PathCreateFeatureAPI)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathCreateFeatureAPI)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathCreateFeatureAPI)
 			}
 
 			path_api_cessate_feature, err := url.JoinPath(cfg.URIPrefix, cfg.PathCessateFeatureAPI)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathCessateFeatureAPI)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathCessateFeatureAPI)
 			}
 
 			path_api_deprecate_feature, err := url.JoinPath(cfg.URIPrefix, cfg.PathDeprecateFeatureAPI)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathDeprecateFeatureAPI)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathDeprecateFeatureAPI)
 			}
 
 			path_api_edit_geometry, err := url.JoinPath(cfg.URIPrefix, cfg.PathEditGeometryAPI)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathEditGeometryAPI)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathEditGeometryAPI)
 			}
 
 			www_paths.CreateFeatureAPI = path_api_create_feature
@@ -403,7 +411,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 	authenticator, err := auth.NewAuthenticator(ctx, cfg.AuthenticatorURI)
 
 	if err != nil {
-		return fmt.Errorf("Failed to create authenticator, %w", err)
+		return nil, fmt.Errorf("Failed to create authenticator, %w", err)
 	}
 
 	settings.Authenticator = authenticator
@@ -429,7 +437,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 	custom, err := chrome.NewChrome(ctx, cfg.CustomChromeURI)
 
 	if err != nil {
-		return fmt.Errorf("Failed to create custom chrome, %w", err)
+		return nil, fmt.Errorf("Failed to create custom chrome, %w", err)
 	}
 
 	settings.CustomChrome = custom
@@ -457,7 +465,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		ex, err := export.NewExporter(ctx, cfg.ExporterURI)
 
 		if err != nil {
-			return fmt.Errorf("Failed to create new exporter, %w", err)
+			return nil, fmt.Errorf("Failed to create new exporter, %w", err)
 		}
 
 		// START OF Point in polygon service setup

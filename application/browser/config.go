@@ -43,6 +43,7 @@ type Config struct {
 	EnableEditAPI   bool   `json:"enable_edit_api,omitempty"`
 	EnableEditUI    bool   `json:"enable_edit_ui,omitempty"`
 
+	PathIndex      string   `json:"path_index,omitempty"`
 	PathPing       string   `json:"path_ping,omitempty"`
 	PathPNG        string   `json:"path_png,omitempty"`
 	PathPNGAlt     []string `json:"path_png_alt,omitempty"`

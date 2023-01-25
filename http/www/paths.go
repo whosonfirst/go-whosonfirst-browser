@@ -12,6 +12,7 @@ type Paths struct {
 	Id                  string `json:"id,omitempty"`
 	Index               string `json:"index,omitempty"`
 	Search              string `json:"search,omitempty"`
+	Ping                string `json:"ping,omitempty"`
 	CreateFeature       string `json:"create_feature,omitempty"`
 	CreateFeatureAPI    string `json:"create_feature_api,omitempty"`
 	DeprecateFeatureAPI string `json:"deprecate_feature_api,omitempty"`
