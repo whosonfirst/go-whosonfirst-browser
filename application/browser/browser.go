@@ -59,164 +59,68 @@ func Run(ctx context.Context, logger *log.Logger) error {
 
 func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) error {
 
-	flagset.Parse(fs)
-
-	err := flagset.SetFlagsFromEnvVars(fs, "BROWSER")
+	cfg, err := ConfigFromFlagSet(ctx, fs)
 
 	if err != nil {
-		return fmt.Errorf("Failed to set flags from environment variables, %w", err)
+		return fmt.Errorf("Failed to derive config from flagset, %w", err)
 	}
 
-	// To do: Convert flags in to a Config struct and then call
-	// RunWithConfig (below)
+	return RunWithConfig(ctx, cfg, logger)
+}
+
+func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
 	// To do: Convert Config struct in to a Settings struct and
 	// then call RunWithSettings (below)
 
-	if enable_all {
-		enable_graphics = true
-		enable_data = true
-		enable_html = true
-		// enable_search = true
+	if cfg.EnableAll {
+		cfg.EnableGrapics = true
+		cfg.EnableData = true
+		cfg.EnableHTML = true
 	}
 
-	if enable_search {
+	if cfg.EnableSearch {
 		enable_search_api = true
 		enable_search_api_geojson = true
 		enable_search_html = true
 	}
 
-	if enable_graphics {
-		enable_png = true
-		enable_svg = true
+	if cfg.EnableGrapics {
+		cfg.EnablePNG = true
+		cfg.EnableSVG = true
 	}
 
-	if enable_data {
-		enable_geojson = true
-		enable_geojsonld = true
-		enable_navplace = true
-		enable_spr = true
-		enable_select = true
-		enable_webfinger = true
+	if cfg.EnableData {
+		cfg.EnableGeoJSON = true
+		cfg.EnableGeoJSONLD = true
+		cfg.EnableNavPlace = true
+		cfg.EnableSPR = true
+		cfg.EnableSelect = true
+		cfg.EnableWebFinger = true
 	}
 
 	if enable_search_html {
-		enable_html = true
+		cfg.EnableHTML = true
 	}
 
-	if enable_html {
-		enable_geojson = true
-		enable_png = true
+	if cfg.EnableHTML {
+		cfg.EnableGeoJSON = true
+		cfg.EnablePNG = true
 	}
 
-	if enable_edit {
-		enable_edit_api = true
-		enable_edit_ui = true
+	if cfg.EnableEdit {
+		cfg.EnableEditAPI = true
+		cfg.EnableEditUI = true
 	}
 
-	if enable_edit_ui {
-		enable_edit_api = true
+	if cfg.EnableEditUI {
+		cfg.EnableEditAPI = true
 	}
 
-	// CORS... for a "good time"...
-
-	var cors_wrapper *cors.Cors
-
-	if enable_cors {
-
-		if len(cors_origins) == 0 {
-			cors_origins.Set("*")
-		}
-
-		cors_wrapper = cors.New(cors.Options{
-			AllowedOrigins:   cors_origins,
-			AllowCredentials: cors_allow_credentials,
-		})
-	}
-
-	// Fetch and assign GitHub access tokens to reader/writer URIs
-
-	if github_accesstoken_uri != "" {
-
-		if github_reader_accesstoken_uri == "" {
-			github_reader_accesstoken_uri = github_accesstoken_uri
-		}
-
-		if github_writer_accesstoken_uri == "" {
-			github_writer_accesstoken_uri = github_accesstoken_uri
-		}
-	}
-
-	if github_reader_accesstoken_uri != "" {
-
-		for idx, r_uri := range reader_uris {
-
-			r_uri, err := github_reader.EnsureGitHubAccessToken(ctx, r_uri, github_reader_accesstoken_uri)
-
-			if err != nil {
-				return fmt.Errorf("Failed to ensure GitHub access token for '%s', %w", r_uri, err)
-			}
-
-			reader_uris[idx] = r_uri
-		}
-	}
-
-	if github_writer_accesstoken_uri != "" {
-
-		for idx, wr_uri := range writer_uris {
-
-			wr_uri, err := github_writer.EnsureGitHubAccessToken(ctx, wr_uri, github_writer_accesstoken_uri)
-
-			if err != nil {
-				return fmt.Errorf("Failed to ensure GitHub access token for '%s', %w", wr_uri, err)
-			}
-
-			writer_uris[idx] = wr_uri
-		}
-
-	}
-
-	// Set up reader and reader cache. Note that we create a "cachereader"
-	// manually since we want to be able to purge records from the cache (assuming
-	// the edit hooks are enabled)
-
-	if cache_uri == "tmp://" {
-
-		now := time.Now()
-		prefix := fmt.Sprintf("go-whosonfirst-browser-%d", now.Unix())
-
-		tempdir, err := ioutil.TempDir("", prefix)
-
-		if err != nil {
-			return fmt.Errorf("Failed to derive tmp dir, %w", err)
-		}
-
-		defer os.RemoveAll(tempdir)
-
-		cache_uri = fmt.Sprintf("fs://%s", tempdir)
-	}
-
-	browser_reader, err := reader.NewMultiReaderFromURIs(ctx, reader_uris...)
+	settings, err := SettingsFromConfig(ctx, cfg, logger)
 
 	if err != nil {
-		return fmt.Errorf("Failed to create reader, %w", err)
-	}
-
-	browser_cache, err := cache.NewCache(ctx, cache_uri)
-
-	if err != nil {
-		return fmt.Errorf("Failed to create new cache, %w", err)
-	}
-
-	cr_opts := &cachereader.CacheReaderOptions{
-		Reader: browser_reader,
-		Cache:  browser_cache,
-	}
-
-	cr, err := cachereader.NewCacheReaderWithOptions(ctx, cr_opts)
-
-	if err != nil {
-		return fmt.Errorf("Failed to create cache reader, %w", err)
+		return fmt.Errorf("Failed to create settings from config, %w", err)
 	}
 
 	// Set up templates
@@ -227,243 +131,6 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	if err != nil {
 		return fmt.Errorf("Failed to load templates, %w", err)
-	}
-
-	// URI prefix stuff
-
-	path_index := "/"
-
-	if static_prefix != "" {
-
-		static_prefix = strings.TrimRight(static_prefix, "/")
-
-		if !strings.HasPrefix(static_prefix, "/") {
-			return fmt.Errorf("Invalid -static-prefix value")
-		}
-
-		path_index, err = url.JoinPath(static_prefix, path_index)
-
-		if err != nil {
-			return fmt.Errorf("Failed to assign prefix to %s, %w", path_index)
-		}
-
-		path_ping, err = url.JoinPath(static_prefix, path_ping)
-
-		if err != nil {
-			return fmt.Errorf("Failed to assign prefix to %s, %w", path_ping)
-		}
-	}
-
-	// Set up www.Paths and www.Capabilities structs for passing between handlers
-
-	www_paths := &www.Paths{
-		URIPrefix: static_prefix,
-		Index:     path_index,
-	}
-
-	www_capabilities := &www.Capabilities{}
-
-	if enable_geojson {
-
-		if static_prefix != "" {
-
-			path_geojson, err = url.JoinPath(static_prefix, path_geojson)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_geojson)
-			}
-		}
-
-		www_capabilities.GeoJSON = true
-		www_paths.GeoJSON = path_geojson
-	}
-
-	if enable_geojsonld {
-
-		if static_prefix != "" {
-
-			path_geojsonld, err = url.JoinPath(static_prefix, path_geojsonld)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_geojsonld)
-			}
-		}
-
-		www_capabilities.GeoJSONLD = true
-		www_paths.GeoJSONLD = path_geojsonld
-	}
-
-	if enable_svg {
-
-		if static_prefix != "" {
-
-			path_svg, err = url.JoinPath(static_prefix, path_svg)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_svg)
-			}
-		}
-
-		www_capabilities.SVG = true
-		www_paths.SVG = path_svg
-	}
-
-	if enable_png {
-
-		if static_prefix != "" {
-
-			path_png, err = url.JoinPath(static_prefix, path_png)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_png)
-			}
-		}
-
-		www_capabilities.PNG = true
-		www_paths.PNG = path_png
-	}
-
-	if enable_select {
-
-		if static_prefix != "" {
-
-			path_select, err = url.JoinPath(static_prefix, path_select)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_select)
-			}
-		}
-
-		www_capabilities.Select = true
-		www_paths.Select = path_select
-	}
-
-	if enable_navplace {
-
-		if static_prefix != "" {
-
-			path_navplace, err = url.JoinPath(static_prefix, path_navplace)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_navplace)
-			}
-		}
-
-		www_capabilities.NavPlace = true
-		www_paths.NavPlace = path_navplace
-	}
-
-	if enable_spr {
-
-		if static_prefix != "" {
-
-			path_spr, err = url.JoinPath(static_prefix, path_spr)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_spr)
-			}
-		}
-
-		www_capabilities.SPR = true
-		www_paths.SPR = path_spr
-	}
-
-	if enable_html {
-
-		if static_prefix != "" {
-
-			path_id, err = url.JoinPath(static_prefix, path_id)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_id)
-			}
-		}
-
-		www_capabilities.HTML = true
-		www_paths.Id = path_id
-	}
-
-	if enable_edit_ui {
-
-		if static_prefix != "" {
-
-			path_create_feature, err = url.JoinPath(static_prefix, path_create_feature)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_create_feature)
-			}
-
-			path_edit_geometry, err = url.JoinPath(static_prefix, path_edit_geometry)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_edit_geometry)
-			}
-		}
-
-		www_paths.CreateFeature = path_create_feature
-		www_paths.EditGeometry = path_edit_geometry
-
-		www_capabilities.CreateFeature = true
-		www_capabilities.DeprecateFeature = true
-		www_capabilities.CessateFeature = true
-		www_capabilities.EditGeometry = true
-	}
-
-	if enable_edit_api {
-
-		if static_prefix != "" {
-
-			path_api_create_feature, err = url.JoinPath(static_prefix, path_api_create_feature)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_api_create_feature)
-			}
-
-			path_api_cessate_feature, err = url.JoinPath(static_prefix, path_api_cessate_feature)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_api_cessate_feature)
-			}
-
-			path_api_deprecate_feature, err = url.JoinPath(static_prefix, path_api_deprecate_feature)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_api_deprecate_feature)
-			}
-
-			path_api_edit_geometry, err = url.JoinPath(static_prefix, path_api_edit_geometry)
-
-			if err != nil {
-				return fmt.Errorf("Failed to assign prefix to %s, %w", path_api_edit_geometry)
-			}
-
-		}
-
-		www_paths.CreateFeatureAPI = path_api_create_feature
-		www_paths.DeprecateFeatureAPI = path_api_deprecate_feature
-		www_paths.CessateFeatureAPI = path_api_cessate_feature
-		www_paths.EditGeometryAPI = path_api_edit_geometry
-
-		www_capabilities.CreateFeatureAPI = true
-		www_capabilities.DeprecateFeatureAPI = true
-		www_capabilities.CessateFeatureAPI = true
-		www_capabilities.EditGeometryAPI = true
-	}
-
-	// Auth hooks
-
-	authenticator, err := auth.NewAuthenticator(ctx, authenticator_uri)
-
-	if err != nil {
-		return fmt.Errorf("Failed to create authenticator, %w", err)
-	}
-
-	// Custom chrome (this is still in flux)
-
-	custom, err := chrome.NewChrome(ctx, custom_chrome_uri)
-
-	if err != nil {
-		return fmt.Errorf("Failed to create custom chrome, %w", err)
 	}
 
 	// Start setting up handlers
@@ -478,9 +145,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	mux.Handle(path_ping, ping_handler)
 
-	if enable_png {
+	if cfg.EnablePNG {
 
-		if verbose {
+		if cfg.Verbose {
 			logger.Println("png support enabled")
 		}
 
@@ -501,7 +168,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		mux.Handle(path_png, png_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			logger.Printf("Handle png endpoint at %s\n", path_png)
 		}
 
@@ -510,9 +177,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 	}
 
-	if enable_svg {
+	if cfg.EnableSVG {
 
-		if verbose {
+		if cfg.Verbose {
 			logger.Println("svg support enabled")
 		}
 
@@ -530,13 +197,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create SVG handler, %w", err)
 		}
 
-		if enable_cors {
+		if cfg.EnableCORS {
 			svg_handler = cors_wrapper.Handler(svg_handler)
 		}
 
 		mux.Handle(path_svg, svg_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle svg endpoint at %s\n", path_svg)
 		}
 
@@ -545,9 +212,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 	}
 
-	if enable_spr {
+	if cfg.EnableSPR {
 
-		if verbose {
+		if cfg.Verbose {
 			log.Println("spr support enabled")
 		}
 
@@ -562,13 +229,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create SPR handler, %w", err)
 		}
 
-		if enable_cors {
+		if cfg.EnableCORS {
 			spr_handler = cors_wrapper.Handler(spr_handler)
 		}
 
 		mux.Handle(path_spr, spr_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle spr endpoint at %s\n", path_spr)
 		}
 
@@ -577,9 +244,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 	}
 
-	if enable_geojson {
+	if cfg.EnableGeoJSON {
 
-		if verbose {
+		if cfg.Verbose {
 			log.Println("geojson support enabled")
 		}
 
@@ -594,13 +261,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create GeoJSON handler, %w", err)
 		}
 
-		if enable_cors {
+		if cfg.EnableCORS {
 			geojson_handler = cors_wrapper.Handler(geojson_handler)
 		}
 
 		mux.Handle(path_geojson, geojson_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			logger.Printf("Handle geojson endpoint at %s\n", path_geojson)
 		}
 
@@ -609,9 +276,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 	}
 
-	if enable_geojsonld {
+	if cfg.EnableGeoJSONLD {
 
-		if verbose {
+		if cfg.Verbose {
 			log.Println("geojsonld support enabled")
 		}
 
@@ -626,13 +293,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create GeoJSON LD handler, %w", err)
 		}
 
-		if enable_cors {
+		if cfg.EnableCORS {
 			geojsonld_handler = cors_wrapper.Handler(geojsonld_handler)
 		}
 
 		mux.Handle(path_geojsonld, geojsonld_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			logger.Printf("Handle geojsonld endpoint at %s\n", path_geojsonld)
 		}
 
@@ -641,9 +308,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 	}
 
-	if enable_navplace {
+	if cfg.EnableNavPlace {
 
-		if verbose {
+		if cfg.Verbose {
 			log.Println("navplace support enabled")
 		}
 
@@ -659,13 +326,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create IIIF navPlace handler, %w", err)
 		}
 
-		if enable_cors {
+		if cfg.EnableCORS {
 			navplace_handler = cors_wrapper.Handler(navplace_handler)
 		}
 
 		mux.Handle(path_navplace, navplace_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			logger.Printf("Handle navplace endpoint at %s\n", path_navplace)
 		}
 
@@ -674,9 +341,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 	}
 
-	if enable_select {
+	if cfg.EnableSelect {
 
-		if verbose {
+		if cfg.Verbose {
 			log.Println("select support enabled")
 		}
 
@@ -702,13 +369,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create select handler, %w", err)
 		}
 
-		if enable_cors {
+		if cfg.EnableCORS {
 			select_handler = cors_wrapper.Handler(select_handler)
 		}
 
 		mux.Handle(path_select, select_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle select endpoint at %s\n", path_select)
 		}
 
@@ -717,9 +384,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 	}
 
-	if enable_webfinger {
+	if cfg.EnableWebFinger {
 
-		if verbose {
+		if cfg.Verbose {
 			log.Println("webfinger support enabled")
 		}
 
@@ -737,13 +404,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create webfinger handler, %w", err)
 		}
 
-		if enable_cors {
+		if cfg.EnableCORS {
 			webfinger_handler = cors_wrapper.Handler(webfinger_handler)
 		}
 
 		mux.Handle(path_webfinger, webfinger_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle webfinger endpoint at %s\n", path_webfinger)
 		}
 
@@ -781,7 +448,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create search handler, %w", err)
 		}
 
-		if enable_cors {
+		if cfg.EnableCORS {
 			search_handler = cors_wrapper.Handler(search_handler)
 		}
 
@@ -796,23 +463,23 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	var map_provider provider.Provider
 	var maps_opts *maps.MapsOptions
 
-	if enable_html || enable_edit_ui {
+	if cfg.EnableHTML || cfg.EnableEditUI {
 
 		bootstrap_opts = bootstrap.DefaultBootstrapOptions()
 
-		err = bootstrap.AppendAssetHandlersWithPrefix(mux, static_prefix)
+		err = bootstrap.AppendAssetHandlersWithPrefix(mux, cfg.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append Bootstrap asset handlers, %w", err)
 		}
 
-		err = www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
+		err = www.AppendStaticAssetHandlersWithPrefix(mux, cfg.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append static asset handlers, %w", err)
 		}
 
-		err = custom.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
+		err = custom.AppendStaticAssetHandlersWithPrefix(mux, cfg.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append custom asset handlers, %w", err)
@@ -841,13 +508,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 		maps_opts = maps.DefaultMapsOptions()
 
-		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
+		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, cfg.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append static asset handlers, %v")
 		}
 
-		err = map_provider.AppendAssetHandlersWithPrefix(mux, static_prefix)
+		err = map_provider.AppendAssetHandlersWithPrefix(mux, cfg.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append provider asset handlers, %v", err)
@@ -865,7 +532,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	// To do: Consider hooks to require auth?
 
-	if enable_html {
+	if cfg.EnableHTML {
 
 		// Note that we append all the handler to mux at the end of this block so that they
 		// can be updated with map-related middleware where necessary
@@ -889,7 +556,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			}
 
 			index_handler = index_h
-			index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, static_prefix)
+			index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, cfg.URIPrefix)
 		}
 
 		id_opts := www.IDHandlerOptions{
@@ -908,7 +575,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		id_handler = id_h
-		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, static_prefix)
+		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, cfg.URIPrefix)
 
 		if enable_search_html {
 
@@ -933,21 +600,21 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			}
 
 			search_handler = search_h
-			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, static_prefix)
+			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, cfg.URIPrefix)
 		}
 
-		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, static_prefix)
+		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, cfg.URIPrefix)
 		id_handler = custom.WrapHandler(id_handler)
 		id_handler = authenticator.WrapHandler(id_handler)
 
 		mux.Handle(path_id, id_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle ID endpoint at %s\n", path_id)
 		}
 
 		if enable_search_html {
-			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, static_prefix)
+			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, cfg.URIPrefix)
 			search_handler = authenticator.WrapHandler(search_handler)
 			mux.Handle(path_search_html, search_handler)
 		}
@@ -958,9 +625,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	// Edit/write HTML handlers
 
-	if enable_edit_ui {
+	if cfg.EnableEditUI {
 
-		if verbose {
+		if cfg.Verbose {
 			log.Println("edit user interface support enabled")
 		}
 
@@ -1014,32 +681,32 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to create create feature handler, %w", err)
 		}
 
-		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, map_provider, maps_opts, static_prefix)
-		geom_handler = bootstrap.AppendResourcesHandlerWithPrefix(geom_handler, bootstrap_opts, static_prefix)
+		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, map_provider, maps_opts, cfg.URIPrefix)
+		geom_handler = bootstrap.AppendResourcesHandlerWithPrefix(geom_handler, bootstrap_opts, cfg.URIPrefix)
 		geom_handler = custom.WrapHandler(geom_handler)
 		geom_handler = authenticator.WrapHandler(geom_handler)
 
 		mux.Handle(path_edit_geometry, geom_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle edit geometry endpoint at %s\n", path_edit_geometry)
 		}
 
-		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, map_provider, maps_opts, static_prefix)
-		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, static_prefix)
+		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, map_provider, maps_opts, cfg.URIPrefix)
+		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, cfg.URIPrefix)
 		create_handler = custom.WrapHandler(create_handler)
 		create_handler = authenticator.WrapHandler(create_handler)
 
 		mux.Handle(path_create_feature, create_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle create feature endpoint at %s\n", path_create_feature)
 		}
 	}
 
-	if enable_edit_api {
+	if cfg.EnableEditAPI {
 
-		if verbose {
+		if cfg.Verbose {
 			log.Println("edit api support enabled")
 		}
 
@@ -1093,7 +760,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		deprecate_handler = authenticator.WrapHandler(deprecate_handler)
 		mux.Handle(path_api_deprecate_feature, deprecate_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle deprecate feature endpoint at %s\n", path_api_deprecate_feature)
 		}
 
@@ -1117,7 +784,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		cessate_handler = authenticator.WrapHandler(cessate_handler)
 		mux.Handle(path_api_cessate_feature, cessate_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle cessate feature endpoint at %s\n", path_api_cessate_feature)
 		}
 
@@ -1142,7 +809,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		geom_handler = authenticator.WrapHandler(geom_handler)
 		mux.Handle(path_api_edit_geometry, geom_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle edit geometry endpoint at %s\n", path_api_edit_geometry)
 		}
 
@@ -1167,7 +834,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		create_handler = authenticator.WrapHandler(create_handler)
 		mux.Handle(path_api_create_feature, create_handler)
 
-		if verbose {
+		if cfg.Verbose {
 			log.Printf("handle create geometry endpoint at %s\n", path_api_edit_geometry)
 		}
 
