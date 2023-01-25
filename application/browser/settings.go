@@ -4,32 +4,40 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"log"
 	"net/http"
 
+	"github.com/aaronland/go-http-maps/provider"
+	"github.com/rs/cors"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/chrome"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 )
 
 type Settings struct {
-	// Placeholder for application settings derived from a *Config instance
-
 	Paths        *www.Paths
 	Capabilities *www.Capabilities
 
 	Reader reader.Reader
 	Cache  cache.Cache
 
-	WriterURIs []string
-	Exporter   export.Exporter
+	WriterURIs            []string
+	Exporter              export.Exporter
+	PointInPolygonService *pointinpolygon.PointInPolygonService
+	Authenticator         auth.Authenticator
 
-	Authenticator auth.Authenticator
+	MapProvider provider.Provider
 
 	Templates []fs.FS
 
+	CustomChrome   chrome.Chrome
 	CustomHandlers map[string]http.HandlerFunc
+
+	CORSWrapper *cors.Cors
 
 	Verbose bool
 }
@@ -400,6 +408,22 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	settings.Authenticator = authenticator
 
+	// Map provider
+
+	map_provider, err := provider.NewProvider(ctx, cfg.MapProviderURI)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create new map provider, %w", err)
+	}
+
+	err = map_provider.SetLogger(logger)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to set logger for provider, %w", err)
+	}
+
+	settings.MapProvider = map_provider
+
 	// Custom chrome (this is still in flux)
 
 	custom, err := chrome.NewChrome(ctx, cfg.CustomChromeURI)
@@ -424,6 +448,39 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		})
 
 		settings.CORSWrapper = cors_wrapper
+	}
+
+	if cfg.EnableEditAPI {
+
+		// Exporter
+
+		ex, err := export.NewExporter(ctx, cfg.ExporterURI)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create new exporter, %w", err)
+		}
+
+		// START OF Point in polygon service setup
+
+		// We're doing this the long way because we need/want to pass in 'cr' and I am
+		// not sure what the interface/signature changes to do that should be...
+
+		spatial_db, err := database.NewSpatialDatabase(ctx, cfg.SpatialDatabaseURI)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to create spatial database, %w", err)
+		}
+
+		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithDatabaseAndReader(ctx, spatial_db, cr)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to create point in polygon service, %w", err)
+		}
+
+		// END OF Point in polygon service setup
+
+		settings.Exporter = ex
+		settings.PointInPolygonService = pip_service
 	}
 
 	return settings, nil

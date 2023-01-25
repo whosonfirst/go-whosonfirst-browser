@@ -6,6 +6,7 @@ type Capabilities struct {
 	PNG                 bool
 	SVG                 bool
 	NavPlace            bool
+	WebFinger           bool
 	Select              bool
 	SPR                 bool
 	HTML                bool // To do: Rename this; this is the /id/{ID} page

@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"strings"
+
+	"github.com/aaronland/go-http-maps/provider"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/runtimevar"
-	"strings"
 )
 
 type Config struct {
@@ -18,21 +20,28 @@ type Config struct {
 	WriterURIs       []string `json:"writer_uris,omitempty"`
 	AuthenticatorURI string   `json:"authenticator_uri"`
 	ServerURI        string   `json:"server_uri"`
-	URIPrefix        string   `json:"uri_prefix,omitempty"`
-	ExporterURI      string   `json:"exporter_uri,omitempty"`
-	EnableAll        bool     `json:"enable_all,omitempty"`
-	EnableGraphics   bool     `json:"enable_graphics"`
-	EnableData       bool     `json:"enable_data,omitempty"`
-	EnablePNG        bool     `json:"enable_png,omitempty"`
-	EnableSVG        bool     `json:"enable_svg,omitempty"`
-	EnableSelect     bool     `json:"enable_select,omitempty"`
-	EnableSPR        bool     `json:"enable_spr,omitempty"`
-	EnableHTML       bool     `json:"enable_html,omitempty"`
-	EnableIndex      bool     `json:"enable_index,omitempty"`
-	EnableCORS       bool     `json:"enable_cors,omitempty"`
-	EnableEdit       bool     `json:"enable_edit,omitempty"`
-	EnableEditAPI    bool     `json:"enable_edit_api,omitempty"`
-	EnableEditUI     bool     `json:"enable_edit_ui,omitempty"`
+	MapProviderURI   string   `json:"map_provider_uri"`
+
+	URIPrefix       string `json:"uri_prefix,omitempty"`
+	ExporterURI     string `json:"exporter_uri,omitempty"`
+	EnableAll       bool   `json:"enable_all,omitempty"`
+	EnableGraphics  bool   `json:"enable_graphics"`
+	EnableData      bool   `json:"enable_data,omitempty"`
+	EnableGeoJSON   bool   `json:"enable_geojson,omitempty"`
+	EnableGeoJSONLD bool   `json:"enable_geojsonld,omitempty"`
+	EnablePNG       bool   `json:"enable_png,omitempty"`
+	EnableSVG       bool   `json:"enable_svg,omitempty"`
+	EnableSelect    bool   `json:"enable_select,omitempty"`
+	EnableSPR       bool   `json:"enable_spr,omitempty"`
+	EnableHTML      bool   `json:"enable_html,omitempty"`
+	EnableNavPlace  bool   `json:"enable_navplace,omitempty"`
+	EnableWebFinger bool   `json:"enable_webfinger,omitempty"`
+	EnableSearch    bool   `json:"enable_search,omitempty"`
+	EnableIndex     bool   `json:"enable_index,omitempty"`
+	EnableCORS      bool   `json:"enable_cors,omitempty"`
+	EnableEdit      bool   `json:"enable_edit,omitempty"`
+	EnableEditAPI   bool   `json:"enable_edit_api,omitempty"`
+	EnableEditUI    bool   `json:"enable_edit_ui,omitempty"`
 
 	PathPing       string   `json:"path_ping,omitempty"`
 	PathPNG        string   `json:"path_png,omitempty"`
@@ -117,6 +126,12 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		return cfg, nil
 	}
 
+	map_provider_uri, err := provider.ProviderURIFromFlagSet(fs)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive provider URI from flagset, %v", err)
+	}
+
 	cfg := &Config{
 		CacheURI:         cache_uri,
 		ReaderURIs:       reader_uris,
@@ -124,7 +139,9 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		AuthenticatorURI: authenticator_uri,
 		ServerURI:        server_uri,
 		ExporterURI:      exporter_uri,
-		URIPrefix:        static_prefix,
+		MapProviderURI:   map_provider_uri,
+
+		URIPrefix: static_prefix,
 
 		EnableAll:      enable_all,
 		EnableGraphics: enable_graphics,

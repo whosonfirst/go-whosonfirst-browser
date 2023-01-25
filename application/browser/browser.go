@@ -28,7 +28,6 @@ import (
 	"github.com/aaronland/go-http-maps/provider"
 	"github.com/aaronland/go-http-ping/v2"
 	"github.com/aaronland/go-http-server"
-	"github.com/rs/cors"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
@@ -74,7 +73,7 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 	// then call RunWithSettings (below)
 
 	if cfg.EnableAll {
-		cfg.EnableGrapics = true
+		cfg.EnableGraphics = true
 		cfg.EnableData = true
 		cfg.EnableHTML = true
 	}
@@ -85,7 +84,7 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		enable_search_html = true
 	}
 
-	if cfg.EnableGrapics {
+	if cfg.EnableGraphics {
 		cfg.EnablePNG = true
 		cfg.EnableSVG = true
 	}
@@ -117,11 +116,18 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		cfg.EnableEditAPI = true
 	}
 
+	// To do: pre-fill defaults
+
 	settings, err := SettingsFromConfig(ctx, cfg, logger)
 
 	if err != nil {
 		return fmt.Errorf("Failed to create settings from config, %w", err)
 	}
+
+	return RunWithSettings(ctx, settings, logger)
+}
+
+func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger) error {
 
 	// Set up templates
 	// To do: Once we have config/settings stuff working this needs to be able to
@@ -145,9 +151,9 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
 	mux.Handle(path_ping, ping_handler)
 
-	if cfg.EnablePNG {
+	if settings.Capabilities.PNG {
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			logger.Println("png support enabled")
 		}
 
@@ -156,7 +162,7 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		png_opts := &www.RasterHandlerOptions{
 			Sizes:  sizes,
 			Format: "png",
-			Reader: cr,
+			Reader: settings.Reader,
 			Logger: logger,
 		}
 
@@ -168,7 +174,7 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
 		mux.Handle(path_png, png_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			logger.Printf("Handle png endpoint at %s\n", path_png)
 		}
 
@@ -177,9 +183,9 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		}
 	}
 
-	if cfg.EnableSVG {
+	if settings.Capabilities.SVG {
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			logger.Println("svg support enabled")
 		}
 
@@ -187,7 +193,7 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
 		svg_opts := &www.SVGHandlerOptions{
 			Sizes:  sizes,
-			Reader: cr,
+			Reader: settings.Reader,
 			Logger: logger,
 		}
 
@@ -197,13 +203,13 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create SVG handler, %w", err)
 		}
 
-		if cfg.EnableCORS {
-			svg_handler = cors_wrapper.Handler(svg_handler)
+		if settings.CORSWrapper != nil {
+			svg_handler = settings.CORSWrapper.Handler(svg_handler)
 		}
 
 		mux.Handle(path_svg, svg_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle svg endpoint at %s\n", path_svg)
 		}
 
@@ -212,14 +218,14 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		}
 	}
 
-	if cfg.EnableSPR {
+	if settings.Capabilities.SPR {
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Println("spr support enabled")
 		}
 
 		spr_opts := &www.SPRHandlerOptions{
-			Reader: cr,
+			Reader: settings.Reader,
 			Logger: logger,
 		}
 
@@ -229,13 +235,13 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create SPR handler, %w", err)
 		}
 
-		if cfg.EnableCORS {
-			spr_handler = cors_wrapper.Handler(spr_handler)
+		if settings.CORSWrapper != nil {
+			spr_handler = settings.CORSWrapper.Handler(spr_handler)
 		}
 
 		mux.Handle(path_spr, spr_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle spr endpoint at %s\n", path_spr)
 		}
 
@@ -244,14 +250,14 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		}
 	}
 
-	if cfg.EnableGeoJSON {
+	if settings.Capabilities.GeoJSON {
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Println("geojson support enabled")
 		}
 
 		geojson_opts := &www.GeoJSONHandlerOptions{
-			Reader: cr,
+			Reader: settings.Reader,
 			Logger: logger,
 		}
 
@@ -261,13 +267,13 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create GeoJSON handler, %w", err)
 		}
 
-		if cfg.EnableCORS {
-			geojson_handler = cors_wrapper.Handler(geojson_handler)
+		if settings.CORSWrapper != nil {
+			geojson_handler = settings.CORSWrapper.Handler(geojson_handler)
 		}
 
 		mux.Handle(path_geojson, geojson_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			logger.Printf("Handle geojson endpoint at %s\n", path_geojson)
 		}
 
@@ -276,14 +282,14 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		}
 	}
 
-	if cfg.EnableGeoJSONLD {
+	if settings.Capabilities.GeoJSONLD {
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Println("geojsonld support enabled")
 		}
 
 		geojsonld_opts := &www.GeoJSONLDHandlerOptions{
-			Reader: cr,
+			Reader: settings.Reader,
 			Logger: logger,
 		}
 
@@ -293,13 +299,13 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create GeoJSON LD handler, %w", err)
 		}
 
-		if cfg.EnableCORS {
-			geojsonld_handler = cors_wrapper.Handler(geojsonld_handler)
+		if settings.CORSWrapper != nil {
+			geojsonld_handler = settings.CORSWrapper.Handler(geojsonld_handler)
 		}
 
 		mux.Handle(path_geojsonld, geojsonld_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			logger.Printf("Handle geojsonld endpoint at %s\n", path_geojsonld)
 		}
 
@@ -308,15 +314,15 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		}
 	}
 
-	if cfg.EnableNavPlace {
+	if settings.Capabilities.NavPlace {
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Println("navplace support enabled")
 		}
 
 		navplace_opts := &www.NavPlaceHandlerOptions{
-			Reader:      cr,
-			MaxFeatures: navplace_max_features,
+			Reader:      settings.Reader,
+			MaxFeatures: navplace_max_features, // UPDATE ME
 			Logger:      logger,
 		}
 
@@ -326,13 +332,13 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create IIIF navPlace handler, %w", err)
 		}
 
-		if cfg.EnableCORS {
-			navplace_handler = cors_wrapper.Handler(navplace_handler)
+		if settings.CORSWrapper != nil {
+			navplace_handler = settings.CORSWrapper.Handler(navplace_handler)
 		}
 
 		mux.Handle(path_navplace, navplace_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			logger.Printf("Handle navplace endpoint at %s\n", path_navplace)
 		}
 
@@ -341,11 +347,13 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		}
 	}
 
-	if cfg.EnableSelect {
+	if settings.Capabilities.Select {
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Println("select support enabled")
 		}
+
+		// UPDATE ME
 
 		if select_pattern == "" {
 			return fmt.Errorf("Missing -select-pattern parameter.")
@@ -359,7 +367,7 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
 		select_opts := &www.SelectHandlerOptions{
 			Pattern: pat,
-			Reader:  cr,
+			Reader:  settings.Reader,
 			Logger:  logger,
 		}
 
@@ -369,13 +377,13 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create select handler, %w", err)
 		}
 
-		if cfg.EnableCORS {
-			select_handler = cors_wrapper.Handler(select_handler)
+		if settings.CORSWrapper != nil {
+			select_handler = settings.CORSWrapper.Handler(select_handler)
 		}
 
 		mux.Handle(path_select, select_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle select endpoint at %s\n", path_select)
 		}
 
@@ -384,18 +392,18 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		}
 	}
 
-	if cfg.EnableWebFinger {
+	if settings.Capabilities.WebFinger {
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Println("webfinger support enabled")
 		}
 
 		webfinger_opts := &www.WebfingerHandlerOptions{
-			Reader:       cr,
+			Reader:       settings.Reader,
 			Logger:       logger,
-			Paths:        www_paths,
-			Capabilities: www_capabilities,
-			Hostname:     webfinger_hostname,
+			Paths:        settings.Paths,
+			Capabilities: settings.Capabilities,
+			Hostname:     webfinger_hostname, // UPDATE M
 		}
 
 		webfinger_handler, err := www.WebfingerHandler(webfinger_opts)
@@ -404,13 +412,13 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create webfinger handler, %w", err)
 		}
 
-		if cfg.EnableCORS {
-			webfinger_handler = cors_wrapper.Handler(webfinger_handler)
+		if settings.CORSWrapper != nil {
+			webfinger_handler = settings.CORSWrapper.Handler(webfinger_handler)
 		}
 
 		mux.Handle(path_webfinger, webfinger_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle webfinger endpoint at %s\n", path_webfinger)
 		}
 
@@ -439,7 +447,7 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
 		if enable_search_api_geojson {
 			search_opts.EnableGeoJSON = true
-			search_opts.GeoJSONReader = cr
+			search_opts.GeoJSONReader = settings.Reader
 		}
 
 		search_handler, err := www.SearchAPIHandler(search_opts)
@@ -448,8 +456,8 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create search handler, %w", err)
 		}
 
-		if cfg.EnableCORS {
-			search_handler = cors_wrapper.Handler(search_handler)
+		if settings.CORSWrapper != nil {
+			search_handler = settings.CORSWrapper.Handler(search_handler)
 		}
 
 		mux.Handle(path_search_api, search_handler)
@@ -460,61 +468,41 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 	// Common code for HTML handler (public and/or edit handlers)
 
 	var bootstrap_opts *bootstrap.BootstrapOptions
-	var map_provider provider.Provider
 	var maps_opts *maps.MapsOptions
 
-	if cfg.EnableHTML || cfg.EnableEditUI {
+	if settings.Capabilities.HTML || settings.Capabilities.EditUI {
 
 		bootstrap_opts = bootstrap.DefaultBootstrapOptions()
 
-		err = bootstrap.AppendAssetHandlersWithPrefix(mux, cfg.URIPrefix)
+		err = bootstrap.AppendAssetHandlersWithPrefix(mux, settings.Paths.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append Bootstrap asset handlers, %w", err)
 		}
 
-		err = www.AppendStaticAssetHandlersWithPrefix(mux, cfg.URIPrefix)
+		err = www.AppendStaticAssetHandlersWithPrefix(mux, settings.Paths.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append static asset handlers, %w", err)
 		}
 
-		err = custom.AppendStaticAssetHandlersWithPrefix(mux, cfg.URIPrefix)
+		err = settings.CustomChrome.AppendStaticAssetHandlersWithPrefix(mux, settings.Paths.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append custom asset handlers, %w", err)
-		}
-
-		provider_uri, err := provider.ProviderURIFromFlagSet(fs)
-
-		if err != nil {
-			return fmt.Errorf("Failed to derive provider URI from flagset, %v", err)
-		}
-
-		pr, err := provider.NewProvider(ctx, provider_uri)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create new provider, %w", err)
-		}
-
-		map_provider = pr
-		err = map_provider.SetLogger(logger)
-
-		if err != nil {
-			return fmt.Errorf("Failed to set logger for provider, %w", err)
 		}
 
 		// Final map stuff
 
 		maps_opts = maps.DefaultMapsOptions()
 
-		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, cfg.URIPrefix)
+		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, settings.Paths.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append static asset handlers, %v")
 		}
 
-		err = map_provider.AppendAssetHandlersWithPrefix(mux, cfg.URIPrefix)
+		err = settings.MapProvider.AppendAssetHandlersWithPrefix(mux, settings.Paths.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append provider asset handlers, %v", err)
@@ -532,7 +520,7 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
 	// To do: Consider hooks to require auth?
 
-	if cfg.EnableHTML {
+	if settings.Capabilities.HTML {
 
 		// Note that we append all the handler to mux at the end of this block so that they
 		// can be updated with map-related middleware where necessary
@@ -545,8 +533,8 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
 			index_opts := www.IndexHandlerOptions{
 				Templates:    t,
-				Paths:        www_paths,
-				Capabilities: www_capabilities,
+				Paths:        settings.Paths,
+				Capabilities: settings.Capabilities,
 			}
 
 			index_h, err := www.IndexHandler(index_opts)
@@ -556,16 +544,16 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			}
 
 			index_handler = index_h
-			index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, cfg.URIPrefix)
+			index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, settings.Paths.URIPrefix)
 		}
 
 		id_opts := www.IDHandlerOptions{
 			Templates:    t,
-			Paths:        www_paths,
-			Capabilities: www_capabilities,
-			Reader:       cr,
+			Paths:        settings.Paths,
+			Capabilities: settings.Capabilities,
+			Reader:       settings.Reader,
 			Logger:       logger,
-			MapProvider:  map_provider.Scheme(),
+			MapProvider:  settings.MapProvider.Scheme(),
 		}
 
 		id_h, err := www.IDHandler(id_opts)
@@ -575,7 +563,7 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		}
 
 		id_handler = id_h
-		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, cfg.URIPrefix)
+		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, settings.Paths.URIPrefix)
 
 		if enable_search_html {
 
@@ -587,10 +575,10 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
 			search_opts := www.SearchHandlerOptions{
 				Templates:    t,
-				Paths:        www_paths,
-				Capabilities: www_capabilities,
+				Paths:        settings.Paths,
+				Capabilities: settings.Capabilities,
 				Database:     search_db,
-				MapProvider:  map_provider.Scheme(),
+				MapProvider:  settings.MapProvider.Scheme(),
 			}
 
 			search_h, err := www.SearchHandler(search_opts)
@@ -600,34 +588,34 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			}
 
 			search_handler = search_h
-			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, cfg.URIPrefix)
+			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.Paths.URIPrefix)
 		}
 
-		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, cfg.URIPrefix)
-		id_handler = custom.WrapHandler(id_handler)
-		id_handler = authenticator.WrapHandler(id_handler)
+		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
+		id_handler = settings.CustomChrome.WrapHandler(id_handler)
+		id_handler = settings.Authenticator.WrapHandler(id_handler)
 
 		mux.Handle(path_id, id_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle ID endpoint at %s\n", path_id)
 		}
 
 		if enable_search_html {
-			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, cfg.URIPrefix)
-			search_handler = authenticator.WrapHandler(search_handler)
+			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
+			search_handler = settings.Authenticator.WrapHandler(search_handler)
 			mux.Handle(path_search_html, search_handler)
 		}
 
-		index_handler = authenticator.WrapHandler(index_handler)
+		index_handler = settings.Authenticator.WrapHandler(index_handler)
 		mux.Handle("/", index_handler)
 	}
 
 	// Edit/write HTML handlers
 
-	if cfg.EnableEditUI {
+	if settings.Capabilities.EditUI {
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Println("edit user interface support enabled")
 		}
 
@@ -640,13 +628,13 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		}
 
 		geom_opts := &www.EditGeometryHandlerOptions{
-			Authenticator: authenticator,
-			MapProvider:   map_provider.Scheme(),
-			Paths:         www_paths,
-			Capabilities:  www_capabilities,
+			Authenticator: settings.Authenticator,
+			MapProvider:   settings.MapProvider.Scheme(),
+			Paths:         settings.Paths,
+			Capabilities:  settings.Capabilities,
 			Template:      geom_t,
 			Logger:        logger,
-			Reader:        cr,
+			Reader:        settings.Reader,
 		}
 
 		geom_handler, err := www.EditGeometryHandler(geom_opts)
@@ -666,13 +654,13 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		}
 
 		create_opts := &www.CreateFeatureHandlerOptions{
-			Authenticator: authenticator,
-			MapProvider:   map_provider.Scheme(),
-			Paths:         www_paths,
-			Capabilities:  www_capabilities,
+			Authenticator: settings.Authenticator,
+			MapProvider:   settings.MapProvider.Scheme(),
+			Paths:         settings.Paths,
+			Capabilities:  settings.Capabilities,
 			Template:      create_t,
 			Logger:        logger,
-			Reader:        cr,
+			Reader:        settings.Reader,
 		}
 
 		create_handler, err := www.CreateFeatureHandler(create_opts)
@@ -681,74 +669,47 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create create feature handler, %w", err)
 		}
 
-		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, map_provider, maps_opts, cfg.URIPrefix)
-		geom_handler = bootstrap.AppendResourcesHandlerWithPrefix(geom_handler, bootstrap_opts, cfg.URIPrefix)
-		geom_handler = custom.WrapHandler(geom_handler)
-		geom_handler = authenticator.WrapHandler(geom_handler)
+		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
+		geom_handler = bootstrap.AppendResourcesHandlerWithPrefix(geom_handler, bootstrap_opts, settings.Paths.URIPrefix)
+		geom_handler = settings.CustomChrome.WrapHandler(geom_handler)
+		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
 
 		mux.Handle(path_edit_geometry, geom_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle edit geometry endpoint at %s\n", path_edit_geometry)
 		}
 
-		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, map_provider, maps_opts, cfg.URIPrefix)
-		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, cfg.URIPrefix)
-		create_handler = custom.WrapHandler(create_handler)
-		create_handler = authenticator.WrapHandler(create_handler)
+		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
+		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, settings.Paths.URIPrefix)
+		create_handler = settings.CustomChrome.WrapHandler(create_handler)
+		create_handler = settings.Authenticator.WrapHandler(create_handler)
 
 		mux.Handle(path_create_feature, create_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle create feature endpoint at %s\n", path_create_feature)
 		}
 	}
 
-	if cfg.EnableEditAPI {
+	if settings.Capabilities.EditAPI {
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Println("edit api support enabled")
-		}
-
-		// Exporter
-
-		ex, err := export.NewExporter(ctx, exporter_uri)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create new exporter, %w", err)
 		}
 
 		// Writers are created at runtime using the http/api/publish.go#publishFeature
 		// method which in turn calls writer/writer.go#NewWriter
 
-		// START OF Point in polygon service setup
-
-		// We're doing this the long way because we need/want to pass in 'cr' and I am
-		// not sure what the interface/signature changes to do that should be...
-
-		spatial_db, err := database.NewSpatialDatabase(ctx, spatial_database_uri)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create spatial database, %w", err)
-		}
-
-		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithDatabaseAndReader(ctx, spatial_db, cr)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create point in polygon service, %w", err)
-		}
-
-		// END OF Point in polygon service setup
-
 		// Deprecate a record
 
 		deprecate_opts := &api.DeprecateFeatureHandlerOptions{
-			Reader:        cr,
-			Cache:         browser_cache,
+			Reader:        settings.Reader,
+			Cache:         settings.Cache,
 			Logger:        logger,
-			Authenticator: authenticator,
-			Exporter:      ex,
-			WriterURIs:    writer_uris,
+			Authenticator: settings.Authenticator,
+			Exporter:      settings.Exporter,
+			WriterURIs:    settings.WriterURIs,
 		}
 
 		deprecate_handler, err := api.DeprecateFeatureHandler(deprecate_opts)
@@ -757,22 +718,22 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create deprecate feature handler, %w", err)
 		}
 
-		deprecate_handler = authenticator.WrapHandler(deprecate_handler)
+		deprecate_handler = settings.Authenticator.WrapHandler(deprecate_handler)
 		mux.Handle(path_api_deprecate_feature, deprecate_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle deprecate feature endpoint at %s\n", path_api_deprecate_feature)
 		}
 
 		// Mark a record as ceased
 
 		cessate_opts := &api.CessateFeatureHandlerOptions{
-			Reader:        cr,
-			Cache:         browser_cache,
+			Reader:        settings.Reader,
+			Cache:         settings.Cache,
 			Logger:        logger,
-			Authenticator: authenticator,
-			Exporter:      ex,
-			WriterURIs:    writer_uris,
+			Authenticator: settings.Authenticator,
+			Exporter:      settings.Exporter,
+			WriterURIs:    settings.WriterURIs,
 		}
 
 		cessate_handler, err := api.CessateFeatureHandler(cessate_opts)
@@ -781,23 +742,23 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create cessate feature handler, %w", err)
 		}
 
-		cessate_handler = authenticator.WrapHandler(cessate_handler)
+		cessate_handler = settings.Authenticator.WrapHandler(cessate_handler)
 		mux.Handle(path_api_cessate_feature, cessate_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle cessate feature endpoint at %s\n", path_api_cessate_feature)
 		}
 
 		// Edit geometry
 
 		geom_opts := &api.UpdateGeometryHandlerOptions{
-			Reader:                cr,
-			Cache:                 browser_cache,
+			Reader:                settings.Reader,
+			Cache:                 settings.Cache,
 			Logger:                logger,
-			Authenticator:         authenticator,
-			Exporter:              ex,
-			WriterURIs:            writer_uris,
-			PointInPolygonService: pip_service,
+			Authenticator:         settings.Authenticator,
+			Exporter:              settings.Exporter,
+			WriterURIs:            settings.WriterURIs,
+			PointInPolygonService: settings.PointInPolygonService,
 		}
 
 		geom_handler, err := api.UpdateGeometryHandler(geom_opts)
@@ -806,23 +767,23 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create uupdate geometry handler, %w", err)
 		}
 
-		geom_handler = authenticator.WrapHandler(geom_handler)
+		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
 		mux.Handle(path_api_edit_geometry, geom_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle edit geometry endpoint at %s\n", path_api_edit_geometry)
 		}
 
 		// Create a new feature
 
 		create_opts := &api.CreateFeatureHandlerOptions{
-			Reader:                cr,
-			Cache:                 browser_cache,
+			Reader:                settings.Reader,
+			Cache:                 settings.Cache,
 			Logger:                logger,
-			Authenticator:         authenticator,
-			Exporter:              ex,
-			WriterURIs:            writer_uris,
-			PointInPolygonService: pip_service,
+			Authenticator:         settings.Authenticator,
+			Exporter:              settings.Exporter,
+			WriterURIs:            settings.WriterURIs,
+			PointInPolygonService: settings.PointInPolygonService,
 		}
 
 		create_handler, err := api.CreateFeatureHandler(create_opts)
@@ -831,10 +792,10 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 			return fmt.Errorf("Failed to create create feature handler, %w", err)
 		}
 
-		create_handler = authenticator.WrapHandler(create_handler)
+		create_handler = settings.Authenticator.WrapHandler(create_handler)
 		mux.Handle(path_api_create_feature, create_handler)
 
-		if cfg.Verbose {
+		if settings.Verbose {
 			log.Printf("handle create geometry endpoint at %s\n", path_api_edit_geometry)
 		}
 
@@ -857,12 +818,4 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 	}
 
 	return nil
-}
-
-func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
-	return fmt.Errorf("Not implemented")
-}
-
-func RunWithSettings(ctx context.Context, settings *Settings) error {
-	return fmt.Errorf("Not implemented")
 }
