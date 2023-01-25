@@ -30,7 +30,7 @@ whosonfirst.browser.create = (function(){
 	    var map_el = document.getElementById("map");
 
 	    if (! map_el){
-		console.log("Missing 'map' element");
+		whosonfirst.browser.feedback.emit("Missing 'map' element");
 		return false
 	    }
 
@@ -106,7 +106,7 @@ whosonfirst.browser.create = (function(){
 
 		var props = {};
 		
-		var inputs = document.getElementsByClassName("wof:property");
+		var inputs = document.getElementsByClassName("wof-property");
 		var count = inputs.length;
 
 		for (var i=0; i < count; i++){
@@ -115,8 +115,26 @@ whosonfirst.browser.create = (function(){
 		    var k = el.getAttribute("id");
 		    var v = el.value;
 
+		    if (v == ""){
+			continue;
+		    }
+
+		    // Account for arbitrary JSON in textarea elements
+		    
+		    if ((v.startsWith("[")) || (v.startsWith("{"))){
+			
+			try {
+			    v = JSON.parse(v);
+			} catch (err) {
+			    whosonfirst.browser.feedback.emit("Failed to parse '" + k + "=" + v + "' property, " + err);
+			    return false;
+			}
+		    }
+		    
 		    props[k] = v;
 		}
+
+		console.log("props", props);
 
 		try {
 		    
@@ -130,7 +148,7 @@ whosonfirst.browser.create = (function(){
 
 		    switch (count){
 			case 0:
-			    console.log("Missing geometry");
+			    whosonfirst.browser.feedback.emit("Missing geometry");
 			    return false;
 			    break;
 			case 1:
@@ -163,13 +181,13 @@ whosonfirst.browser.create = (function(){
 		    var uri = "/api/create/";
 
 		    whosonfirst.browser.api.do("PUT", uri, feature).then((data) => {
-			console.log("OKAY", data);
+			whosonfirst.browser.feedback.emit("OKAY", data);
 		    }).catch((err) => {
-			console.log("NOT OKAY", err);
+			whosonfirst.browser.feedback.emit("NOT OKAY", err);
 		    });			
 		    
 		} catch (err) {
-		    console.log("SAD", err);
+		    whosonfirst.browser.feedback.emit("SAD", err);
 		}
 		
 		return false;

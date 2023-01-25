@@ -31,6 +31,13 @@
 	border: solid;
 }
 
+#wof-properties-form {
+	border: solid thin;
+	max-height: 67vh;
+	overflow: scroll;
+	padding: 1rem;
+}
+
 /* Classes */
 
 .grid-view {
@@ -38,6 +45,15 @@
 	grid-template-columns:1fr 1fr;
 	justify-items: initial !important;
 	gap: 50px 50px;
+}
+
+.wof-property-block {
+	margin-bottom:1rem;
+}
+
+.wof-property-block textarea {
+	border: solid thin;
+	height: 2rem;
 }
 
 /* Media queries */
