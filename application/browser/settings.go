@@ -23,6 +23,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
+	"github.com/whosonfirst/go-whosonfirst-spatial/database"
 	github_writer "github.com/whosonfirst/go-writer-github/v3"
 )
 
@@ -445,10 +446,6 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 	// CORS
 
 	if cfg.EnableCORS {
-
-		if len(cfg.CORSOrigins) == 0 {
-			cfg.CORSOrigins.Set("*")
-		}
 
 		cors_wrapper := cors.New(cors.Options{
 			AllowedOrigins:   cfg.CORSOrigins,
