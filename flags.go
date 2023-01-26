@@ -106,60 +106,47 @@ const EnableSearchFlag string = "enable-search"
 var enable_search bool
 
 const EnableEditFlag string = "enable-edit"
-const EnableEditDefault bool = false
 
 var enable_edit bool
 
 const EnableEditAPIFlag string = "enable-edit-api"
-const EnableEditAPIDefault bool = false
 
 var enable_edit_api bool
 
 const EnableEditUIFlag string = "enable-edit-ui"
-const EnableEditUIDefault bool = false
 
 var enable_edit_ui bool
 
 const PathAPIDeprecateFeatureFlag string = "path-api-deprecate-feature"
-const PathAPIDeprecateFeatureDefault string = "/api/deprecate/"
 
 var path_api_deprecate_feature string
 
 const PathAPICessateFeatureFlag string = "path-api-cessate-feature"
-const PathAPICessateFeatureDefault string = "/api/cessate/"
 
 var path_api_cessate_feature string
 
 const PathAPIEditGeometryFlag string = "path-api-edit-geometry"
-const PathAPIEditGeometryDefault string = "/api/geometry/"
 
 var path_api_edit_geometry string
 
 const PathAPICreateFeatureFlag string = "path-api-create-feature"
-const PathAPICreateFeatureDefault string = "/api/create/"
 
 var path_api_create_feature string
 
-var search_database_uri string
-
 const GitHubAccessTokenURIFlag string = "github-accesstoken-uri"
-const GitHubAccessTokenURIDefault string = ""
 
 // A valid gocloud.dev/runtimevar URI that resolves to a GitHub API access token, required if you are using a githubapi:// reader URI.
 var github_accesstoken_uri string
 
 const GitHubReaderAccessTokenURIFlag string = "github-reader-accesstoken-uri"
-const GitHubReaderAccessTokenURIDefault string = ""
 
 var github_reader_accesstoken_uri string
 
 const GitHubWriterAccessTokenURIFlag string = "github-writer-accesstoken-uri"
-const GitHubWriterAccessTokenURIDefault string = ""
 
 var github_writer_accesstoken_uri string
 
 const PathPingFlag string = "path-ping"
-const PathPingDefault string = "/ping"
 
 var path_ping string
 
@@ -217,12 +204,10 @@ var path_search_api string
 var path_search_html string
 
 const PathEditGeometryFlag string = "path-edit-geometry"
-const PathEditGeometryDefault string = "/geometry/"
 
 var path_edit_geometry string
 
 const PathCreateFeatureFlag string = "path-create-feature"
-const PathCreateFeatureDefault string = "/create/"
 
 var path_create_feature string
 
@@ -231,7 +216,6 @@ var path_id string
 var navplace_max_features int
 
 const EnableCORSFlag string = "enable-cors"
-const EnableCORSDefault bool = true
 
 var enable_cors bool
 
@@ -240,7 +224,6 @@ const CORSOriginFlag string = "cors-origin"
 var cors_origins multi.MultiCSVString
 
 const CORSAllowCredentialsFlag string = "cors-allow-credentials"
-const CORSAllowCredentialsDefault bool = false
 
 var cors_allow_credentials bool
 
@@ -261,13 +244,15 @@ const CustomChromeURIFlag string = "custom-chrome-uri"
 
 var custom_chrome_uri string
 
+const SearchDatabaseURIFlag string = "search-database-uri"
+
+var search_database_uri string
+
 const VerboseFlag string = "verbose"
-const VerboseDefault bool = false
 
 var verbose bool
 
 const ConfigURIFlag string = "config-uri"
-const ConfigURIDefault string = ""
 
 var config_uri string
 
@@ -307,10 +292,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.BoolVar(&enable_index, "enable-index", true, "Enable the 'index' (or human-friendly) index handler.")
 
 	fs.BoolVar(&enable_search_api, "enable-search-api", false, "Enable the (API) search handlers.")
-	fs.BoolVar(&enable_search_api_geojson, "enable-search-api-geojson", false, "Enable the (API) search handlers to return results as GeoJSON.")
-	fs.BoolVar(&enable_search_html, "enable-search-html", false, "Enable the (human-friendly) search handlers.")
 	fs.BoolVar(&enable_search, "enable-search", false, "Enable both the API and human-friendly search handlers.")
-	fs.StringVar(&search_database_uri, "search-database-uri", "", "A valid whosonfirst/go-whosonfist-search/fulltext URI.")
+	fs.StringVar(&search_database_uri, SearchDatabaseURIFlag, SearchDatabaseURIDefault, "A valid whosonfirst/go-whosonfist-search/fulltext URI.")
 
 	fs.StringVar(&path_ping, PathPingFlag, PathPingDefault, "...")
 

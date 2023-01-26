@@ -18,9 +18,10 @@ type URIs struct {
 	PNG                 string   `json:"png,omitempty"`
 	PNGAlt              []string `json:"png_alt,omitempty"`
 	Ping                string   `json:"ping,omitempty"`
+	Search              string   `json:"search,omitempty"`
+	SearchAPI           string   `json:"search_api,omitempty"`
 	Select              string   `json:"select,omitempty"`
 	SelectAlt           []string `json:"select_alt,omitempty"`
-	Search              string   `json:"search,omitempty"`
 	SVG                 string   `json:"svg,omitempty"`
 	SVGAlt              []string `json:"svg_alt,omitempty"`
 	SPR                 string   `json:"spr,omitempty"`

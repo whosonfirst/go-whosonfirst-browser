@@ -57,12 +57,6 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		cfg.EnableHTML = true
 	}
 
-	if cfg.EnableSearch {
-		enable_search_api = true
-		enable_search_api_geojson = true
-		enable_search_html = true
-	}
-
 	if cfg.EnableGraphics {
 		cfg.EnablePNG = true
 		cfg.EnableSVG = true
@@ -77,7 +71,8 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 		cfg.EnableWebFinger = true
 	}
 
-	if enable_search_html {
+	if cfg.EnableSearch {
+		cfg.EnableSearchAPI = true
 		cfg.EnableHTML = true
 	}
 
@@ -107,10 +102,6 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 }
 
 func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger) error {
-
-	// Set up templates
-	// To do: Once we have config/settings stuff working this needs to be able to
-	// specify a custom fs.FS for reading templates from
 
 	t, err := html.LoadTemplates(ctx, settings.Templates...)
 
@@ -436,45 +427,26 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 	}
 
-	/*
-		// START OF probably due a rethink shortly
+	if settings.Capabilities.SearchAPI {
 
-		if enable_search_api {
-
-			if search_database_uri == "" {
-				return fmt.Errorf("-enable-search-api flag is true but -search-database-uri flag is empty.")
-			}
-
-			search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create fulltext database for '%s', %w", search_database_uri, err)
-			}
-
-			search_opts := www.SearchAPIHandlerOptions{
-				Database: search_db,
-			}
-
-			if enable_search_api_geojson {
-				search_opts.EnableGeoJSON = true
-				search_opts.GeoJSONReader = settings.Reader
-			}
-
-			search_handler, err := www.SearchAPIHandler(search_opts)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create search handler, %w", err)
-			}
-
-			if settings.CORSWrapper != nil {
-				search_handler = settings.CORSWrapper.Handler(search_handler)
-			}
-
-			mux.Handle(path_search_api, search_handler)
+		search_opts := api.SearchAPIHandlerOptions{
+			Database:      settings.SearchDatabase,
+			EnableGeoJSON: true,
+			GeoJSONReader: settings.Reader,
 		}
 
-		// END OF probably due a rethink shortly
-	*/
+		search_api_handler, err := api.SearchAPIHandler(search_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create search handler, %w", err)
+		}
+
+		if settings.CORSWrapper != nil {
+			search_api_handler = settings.CORSWrapper.Handler(search_api_handler)
+		}
+
+		mux.Handle(settings.URIs.SearchAPI, search_api_handler)
+	}
 
 	// Common code for HTML handler (public and/or edit handlers)
 

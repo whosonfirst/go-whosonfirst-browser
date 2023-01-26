@@ -26,6 +26,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
 	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
+	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"github.com/whosonfirst/go-whosonfirst-spatial/database"
 	github_writer "github.com/whosonfirst/go-writer-github/v3"
 )
@@ -43,6 +44,7 @@ type Settings struct {
 	URIs                  *browser_uris.URIs
 	PointInPolygonService *pointinpolygon.PointInPolygonService
 	Reader                reader.Reader
+	SearchDatabase        fulltext.FullTextDatabase
 	SelectPattern         *regexp.Regexp
 	Templates             []fs.FS
 	Verbose               bool
@@ -609,6 +611,17 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		})
 
 		settings.CORSWrapper = cors_wrapper
+	}
+
+	if cfg.EnableSearchAPI {
+
+		search_db, err := fulltext.NewFullTextDatabase(ctx, cfg.SearchDatabaseURI)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to create fulltext database for '%s', %w", cfg.SearchDatabaseURI, err)
+		}
+
+		settings.SearchDatabase = search_db
 	}
 
 	if cfg.EnableEditAPI {

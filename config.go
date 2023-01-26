@@ -32,6 +32,7 @@ type Config struct {
 	EnableNavPlace             bool     `json:"enable_navplace,omitempty"`
 	EnablePNG                  bool     `json:"enable_png,omitempty"`
 	EnableSearch               bool     `json:"enable_search,omitempty"`
+	EnableSearchAPI            bool     `json:"enable_search_api,omitempty"`
 	EnableSelect               bool     `json:"enable_select,omitempty"`
 	EnableSPR                  bool     `json:"enable_spr,omitempty"`
 	EnableSVG                  bool     `json:"enable_svg,omitempty"`
@@ -68,6 +69,7 @@ type Config struct {
 	PathWebFinger              string   `json:"path_webfinger,omitempty"`
 	PathWebFingerAlt           []string `json:"path_webfinger_alt,omitempty"`
 	ReaderURIs                 []string `json:"reader_uris"`
+	SearchDatabaseURI          string   `json:"search_database_uri,omitempty"`
 	SelectPattern              string   `json:"select_pattern,omitempty"`
 	ServerURI                  string   `json:"server_uri"`
 	SpatialDatabaseURI         string   `json:"spatial_database_uri,omitempty"`
@@ -132,6 +134,8 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		EnableIndex:                enable_index,
 		EnablePNG:                  enable_png,
 		EnableSelect:               enable_select,
+		EnableSearch:               enable_search,
+		EnableSearchAPI:            enable_search_api,
 		EnableSPR:                  enable_spr,
 		EnableSVG:                  enable_svg,
 		ExporterURI:                exporter_uri,
@@ -166,6 +170,7 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		PathWebFinger:              path_webfinger,
 		PathWebFingerAlt:           path_webfinger_alt,
 		ReaderURIs:                 reader_uris,
+		SearchDatabaseURI:          search_database_uri,
 		SelectPattern:              select_pattern,
 		ServerURI:                  server_uri,
 		SpatialDatabaseURI:         spatial_database_uri,
