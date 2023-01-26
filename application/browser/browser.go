@@ -131,10 +131,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		return fmt.Errorf("Failed to create ping handler, %w", err)
 	}
 
-	mux.Handle(settings.Paths.Ping, ping_handler)
+	mux.Handle(settings.URIs.Ping, ping_handler)
 
 	if settings.Verbose {
-		logger.Printf("Handle ping endpoint at %s\n", settings.Paths.Ping)
+		logger.Printf("Handle ping endpoint at %s\n", settings.URIs.Ping)
 	}
 
 	if settings.Capabilities.PNG {
@@ -158,15 +158,19 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			return fmt.Errorf("Failed to create raster/png handler, %w", err)
 		}
 
-		mux.Handle(settings.Paths.PNG, png_handler)
+		mux.Handle(settings.URIs.PNG, png_handler)
 
 		if settings.Verbose {
-			logger.Printf("Handle png endpoint at %s\n", settings.Paths.PNG)
+			logger.Printf("Handle png endpoint at %s\n", settings.URIs.PNG)
 		}
 
-		// UPDATE ME
-		for _, alt_path := range path_png_alt {
+		for _, alt_path := range settings.URIs.PNGAlt {
+
 			mux.Handle(alt_path, png_handler)
+
+			if settings.Verbose {
+				logger.Printf("Handle png endpoint at %s\n", alt_path)
+			}
 		}
 	}
 
@@ -194,14 +198,19 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			svg_handler = settings.CORSWrapper.Handler(svg_handler)
 		}
 
-		mux.Handle(settings.Paths.SVG, svg_handler)
+		mux.Handle(settings.URIs.SVG, svg_handler)
 
 		if settings.Verbose {
-			log.Printf("handle svg endpoint at %s\n", settings.Paths.SVG)
+			log.Printf("handle svg endpoint at %s\n", settings.URIs.SVG)
 		}
 
-		for _, alt_path := range path_svg_alt {
+		for _, alt_path := range settings.URIs.SVGAlt {
+
 			mux.Handle(alt_path, svg_handler)
+
+			if settings.Verbose {
+				log.Printf("handle svg endpoint at %s\n", alt_path)
+			}
 		}
 	}
 
@@ -226,16 +235,19 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			spr_handler = settings.CORSWrapper.Handler(spr_handler)
 		}
 
-		mux.Handle(settings.Paths.SPR, spr_handler)
+		mux.Handle(settings.URIs.SPR, spr_handler)
 
 		if settings.Verbose {
-			log.Printf("handle spr endpoint at %s\n", settings.Paths.SPR)
+			log.Printf("handle spr endpoint at %s\n", settings.URIs.SPR)
 		}
 
-		// TO UPDATE
+		for _, alt_path := range settings.URIs.SPRAlt {
 
-		for _, alt_path := range path_spr_alt {
 			mux.Handle(alt_path, spr_handler)
+
+			if settings.Verbose {
+				log.Printf("handle spr endpoint at %s\n", alt_path)
+			}
 		}
 	}
 
@@ -260,16 +272,19 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			geojson_handler = settings.CORSWrapper.Handler(geojson_handler)
 		}
 
-		mux.Handle(settings.Paths.GeoJSON, geojson_handler)
+		mux.Handle(settings.URIs.GeoJSON, geojson_handler)
 
 		if settings.Verbose {
-			logger.Printf("Handle geojson endpoint at %s\n", settings.Paths.GeoJSON)
+			logger.Printf("Handle geojson endpoint at %s\n", settings.URIs.GeoJSON)
 		}
 
-		// TO UPDATE
+		for _, alt_path := range settings.URIs.GeoJSONAlt {
 
-		for _, alt_path := range path_geojson_alt {
 			mux.Handle(alt_path, geojson_handler)
+
+			if settings.Verbose {
+				logger.Printf("Handle geojson endpoint at %s\n", alt_path)
+			}
 		}
 	}
 
@@ -294,16 +309,19 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			geojsonld_handler = settings.CORSWrapper.Handler(geojsonld_handler)
 		}
 
-		mux.Handle(settings.Paths.GeoJSONLD, geojsonld_handler)
+		mux.Handle(settings.URIs.GeoJSONLD, geojsonld_handler)
 
 		if settings.Verbose {
-			logger.Printf("Handle geojsonld endpoint at %s\n", settings.Paths.GeoJSONLD)
+			logger.Printf("Handle geojsonld endpoint at %s\n", settings.URIs.GeoJSONLD)
 		}
 
-		// TO UPDATE
+		for _, alt_path := range settings.URIs.GeoJSONLDAlt {
 
-		for _, alt_path := range path_geojsonld_alt {
 			mux.Handle(alt_path, geojsonld_handler)
+
+			if settings.Verbose {
+				logger.Printf("Handle geojsonld endpoint at %s\n", alt_path)
+			}
 		}
 	}
 
@@ -329,16 +347,18 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			navplace_handler = settings.CORSWrapper.Handler(navplace_handler)
 		}
 
-		mux.Handle(settings.Paths.NavPlace, navplace_handler)
+		mux.Handle(settings.URIs.NavPlace, navplace_handler)
 
 		if settings.Verbose {
-			logger.Printf("Handle navplace endpoint at %s\n", settings.Paths.NavPlace)
+			logger.Printf("Handle navplace endpoint at %s\n", settings.URIs.NavPlace)
 		}
 
-		// TO UPDATE
-
-		for _, alt_path := range path_navplace_alt {
+		for _, alt_path := range settings.URIs.NavPlaceAlt {
 			mux.Handle(alt_path, navplace_handler)
+
+			if settings.Verbose {
+				logger.Printf("Handle navplace endpoint at %s\n", alt_path)
+			}
 		}
 	}
 
@@ -364,16 +384,19 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			select_handler = settings.CORSWrapper.Handler(select_handler)
 		}
 
-		mux.Handle(settings.Paths.Select, select_handler)
+		mux.Handle(settings.URIs.Select, select_handler)
 
 		if settings.Verbose {
-			log.Printf("handle select endpoint at %s\n", settings.Paths.Select)
+			log.Printf("handle select endpoint at %s\n", settings.URIs.Select)
 		}
 
-		// TO UPDATE
+		for _, alt_path := range settings.URIs.SelectAlt {
 
-		for _, alt_path := range path_select_alt {
 			mux.Handle(alt_path, select_handler)
+
+			if settings.Verbose {
+				log.Printf("handle select endpoint at %s\n", alt_path)
+			}
 		}
 	}
 
@@ -386,7 +409,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		webfinger_opts := &www.WebfingerHandlerOptions{
 			Reader:       settings.Reader,
 			Logger:       logger,
-			Paths:        settings.Paths,
+			URIs:         settings.URIs,
 			Capabilities: settings.Capabilities,
 			Hostname:     webfinger_hostname, // UPDATE M
 		}
@@ -401,16 +424,18 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			webfinger_handler = settings.CORSWrapper.Handler(webfinger_handler)
 		}
 
-		mux.Handle(settings.Paths.WebFinger, webfinger_handler)
+		mux.Handle(settings.URIs.WebFinger, webfinger_handler)
 
 		if settings.Verbose {
-			log.Printf("handle webfinger endpoint at %s\n", settings.Paths.WebFinger)
+			log.Printf("handle webfinger endpoint at %s\n", settings.URIs.WebFinger)
 		}
 
-		// TO UPDATE
-
-		for _, alt_path := range path_webfinger_alt {
+		for _, alt_path := range settings.URIs.WebFingerAlt {
 			mux.Handle(alt_path, webfinger_handler)
+
+			if settings.Verbose {
+				log.Printf("handle webfinger endpoint at %s\n", alt_path)
+			}
 		}
 	}
 
@@ -463,19 +488,19 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		bootstrap_opts = bootstrap.DefaultBootstrapOptions()
 
-		err = bootstrap.AppendAssetHandlersWithPrefix(mux, settings.Paths.URIPrefix)
+		err = bootstrap.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append Bootstrap asset handlers, %w", err)
 		}
 
-		err = www.AppendStaticAssetHandlersWithPrefix(mux, settings.Paths.URIPrefix)
+		err = www.AppendStaticAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append static asset handlers, %w", err)
 		}
 
-		err = settings.CustomChrome.AppendStaticAssetHandlersWithPrefix(mux, settings.Paths.URIPrefix)
+		err = settings.CustomChrome.AppendStaticAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append custom asset handlers, %w", err)
@@ -485,13 +510,13 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		maps_opts = maps.DefaultMapsOptions()
 
-		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, settings.Paths.URIPrefix)
+		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append static asset handlers, %v")
 		}
 
-		err = settings.MapProvider.AppendAssetHandlersWithPrefix(mux, settings.Paths.URIPrefix)
+		err = settings.MapProvider.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append provider asset handlers, %v", err)
@@ -501,7 +526,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		null_handler := www.NewNullHandler()
 
-		favicon_path := filepath.Join(settings.Paths.Id, "favicon.ico")
+		favicon_path := filepath.Join(settings.URIs.Id, "favicon.ico")
 		mux.Handle(favicon_path, null_handler)
 	}
 
@@ -522,7 +547,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 			index_opts := www.IndexHandlerOptions{
 				Templates:    t,
-				Paths:        settings.Paths,
+				URIs:         settings.URIs,
 				Capabilities: settings.Capabilities,
 			}
 
@@ -533,12 +558,12 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			}
 
 			index_handler = index_h
-			index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, settings.Paths.URIPrefix)
+			index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, settings.URIs.URIPrefix)
 		}
 
 		id_opts := www.IDHandlerOptions{
 			Templates:    t,
-			Paths:        settings.Paths,
+			URIs:         settings.URIs,
 			Capabilities: settings.Capabilities,
 			Reader:       settings.Reader,
 			Logger:       logger,
@@ -552,7 +577,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		id_handler = id_h
-		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, settings.Paths.URIPrefix)
+		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, settings.URIs.URIPrefix)
 
 		/*
 			if enable_search_html {
@@ -565,7 +590,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 				search_opts := www.SearchHandlerOptions{
 					Templates:    t,
-					Paths:        settings.Paths,
+					URIs:        settings.URIs,
 					Capabilities: settings.Capabilities,
 					Database:     search_db,
 					MapProvider:  settings.MapProvider.Scheme(),
@@ -578,11 +603,11 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 				}
 
 				search_handler = search_h
-				search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.Paths.URIPrefix)
+				search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.URIs.URIPrefix)
 			}
 		*/
 
-		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
+		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
 		id_handler = settings.CustomChrome.WrapHandler(id_handler)
 		id_handler = settings.Authenticator.WrapHandler(id_handler)
 
@@ -594,14 +619,14 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		/*
 			if enable_search_html {
-				search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
+				search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
 				search_handler = settings.Authenticator.WrapHandler(search_handler)
 				mux.Handle(path_search_html, search_handler)
 			}
 		*/
 
 		index_handler = settings.Authenticator.WrapHandler(index_handler)
-		mux.Handle(settings.Paths.Index, index_handler)
+		mux.Handle(settings.URIs.Index, index_handler)
 	}
 
 	// Edit/write HTML handlers
@@ -623,7 +648,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		geom_opts := &www.EditGeometryHandlerOptions{
 			Authenticator: settings.Authenticator,
 			MapProvider:   settings.MapProvider.Scheme(),
-			Paths:         settings.Paths,
+			URIs:          settings.URIs,
 			Capabilities:  settings.Capabilities,
 			Template:      geom_t,
 			Logger:        logger,
@@ -649,7 +674,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		create_opts := &www.CreateFeatureHandlerOptions{
 			Authenticator: settings.Authenticator,
 			MapProvider:   settings.MapProvider.Scheme(),
-			Paths:         settings.Paths,
+			URIs:          settings.URIs,
 			Capabilities:  settings.Capabilities,
 			Template:      create_t,
 			Logger:        logger,
@@ -662,23 +687,23 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			return fmt.Errorf("Failed to create create feature handler, %w", err)
 		}
 
-		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
-		geom_handler = bootstrap.AppendResourcesHandlerWithPrefix(geom_handler, bootstrap_opts, settings.Paths.URIPrefix)
+		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		geom_handler = bootstrap.AppendResourcesHandlerWithPrefix(geom_handler, bootstrap_opts, settings.URIs.URIPrefix)
 		geom_handler = settings.CustomChrome.WrapHandler(geom_handler)
 		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
 
-		mux.Handle(settings.Paths.EditGeometry, geom_handler)
+		mux.Handle(settings.URIs.EditGeometry, geom_handler)
 
 		if settings.Verbose {
 			log.Printf("handle edit geometry endpoint at %s\n", path_edit_geometry)
 		}
 
-		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
-		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, settings.Paths.URIPrefix)
+		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, settings.URIs.URIPrefix)
 		create_handler = settings.CustomChrome.WrapHandler(create_handler)
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
 
-		mux.Handle(settings.Paths.CreateFeature, create_handler)
+		mux.Handle(settings.URIs.CreateFeature, create_handler)
 
 		if settings.Verbose {
 			log.Printf("handle create feature endpoint at %s\n", path_create_feature)
@@ -712,10 +737,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		deprecate_handler = settings.Authenticator.WrapHandler(deprecate_handler)
-		mux.Handle(settings.Paths.DeprecateFeatureAPI, deprecate_handler)
+		mux.Handle(settings.URIs.DeprecateFeatureAPI, deprecate_handler)
 
 		if settings.Verbose {
-			log.Printf("handle deprecate feature endpoint at %s\n", settings.Paths.DeprecateFeatureAPI)
+			log.Printf("handle deprecate feature endpoint at %s\n", settings.URIs.DeprecateFeatureAPI)
 		}
 
 		// Mark a record as ceased
@@ -736,10 +761,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		cessate_handler = settings.Authenticator.WrapHandler(cessate_handler)
-		mux.Handle(settings.Paths.CessateFeatureAPI, cessate_handler)
+		mux.Handle(settings.URIs.CessateFeatureAPI, cessate_handler)
 
 		if settings.Verbose {
-			log.Printf("handle cessate feature endpoint at %s\n", settings.Paths.CessateFeatureAPI)
+			log.Printf("handle cessate feature endpoint at %s\n", settings.URIs.CessateFeatureAPI)
 		}
 
 		// Edit geometry
@@ -761,10 +786,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
-		mux.Handle(settings.Paths.EditGeometryAPI, geom_handler)
+		mux.Handle(settings.URIs.EditGeometryAPI, geom_handler)
 
 		if settings.Verbose {
-			log.Printf("handle edit geometry endpoint at %s\n", settings.Paths.EditGeometryAPI)
+			log.Printf("handle edit geometry endpoint at %s\n", settings.URIs.EditGeometryAPI)
 		}
 
 		// Create a new feature
@@ -786,10 +811,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
-		mux.Handle(settings.Paths.CreateFeatureAPI, create_handler)
+		mux.Handle(settings.URIs.CreateFeatureAPI, create_handler)
 
 		if settings.Verbose {
-			log.Printf("handle create feature endpoint at %s\n", settings.Paths.CreateFeatureAPI)
+			log.Printf("handle create feature endpoint at %s\n", settings.URIs.CreateFeatureAPI)
 		}
 
 	}

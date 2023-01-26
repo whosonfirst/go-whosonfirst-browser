@@ -1,5 +1,7 @@
 package www
 
+/*
+
 import (
 	"encoding/json"
 	"errors"
@@ -161,3 +163,5 @@ func SearchAPIHandler(opts SearchAPIHandlerOptions) (http.Handler, error) {
 	h := http.HandlerFunc(fn)
 	return h, nil
 }
+
+*/

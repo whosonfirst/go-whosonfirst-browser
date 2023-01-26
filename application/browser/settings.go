@@ -20,10 +20,11 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-reader-cachereader"
 	github_reader "github.com/whosonfirst/go-reader-github"
+	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/chrome"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
+	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-spatial/database"
 	github_writer "github.com/whosonfirst/go-writer-github/v3"
@@ -32,14 +33,14 @@ import (
 type Settings struct {
 	Authenticator         auth.Authenticator
 	Cache                 cache.Cache
-	Capabilities          *www.Capabilities
+	Capabilities          *browser_capabilities.Capabilities
 	CORSWrapper           *cors.Cors
 	CustomChrome          chrome.Chrome
 	CustomHandlers        map[string]http.HandlerFunc
 	Exporter              export.Exporter
 	MapProvider           provider.Provider
 	NavPlaceMaxFeatures   int
-	Paths                 *www.Paths
+	URIs                  *browser_uris.URIs
 	PointInPolygonService *pointinpolygon.PointInPolygonService
 	Reader                reader.Reader
 	SelectPattern         *regexp.Regexp
@@ -152,9 +153,9 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	// Set up www.Paths and www.Capabilities structs for passing between handlers
 
-	www_capabilities := &www.Capabilities{}
+	capabilities := &browser_capabilities.Capabilities{}
 
-	www_paths := &www.Paths{
+	uris := &browser_uris.URIs{
 		URIPrefix: cfg.URIPrefix,
 		Index:     cfg.PathIndex,
 		Ping:      cfg.PathPing,
@@ -182,49 +183,82 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path_ping)
 		}
 
-		www_paths.Index = path_index
-		www_paths.Ping = path_ping
+		uris.Index = path_index
+		uris.Ping = path_ping
 	}
 
 	if cfg.EnableGeoJSON {
 
-		www_capabilities.GeoJSON = true
-		www_paths.GeoJSON = cfg.PathGeoJSON
+		capabilities.GeoJSON = true
+		uris.GeoJSON = cfg.PathGeoJSON
+		uris.GeoJSONAlt = cfg.PathGeoJSONAlt
 
 		if cfg.URIPrefix != "" {
 
 			path_geojson, err := url.JoinPath(cfg.URIPrefix, cfg.PathGeoJSON)
 
 			if err != nil {
-				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathGeoJSON)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathGeoJSON, err)
 			}
 
-			www_paths.GeoJSON = path_geojson
+			uris.GeoJSON = path_geojson
+
+			alt_paths := make([]string, len(cfg.PathGeoJSONAlt))
+
+			for idx, path := range cfg.PathGeoJSONAlt {
+
+				path, err := url.JoinPath(cfg.URIPrefix, path)
+
+				if err != nil {
+					return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path, err)
+				}
+
+				alt_paths[idx] = path
+			}
+
+			uris.GeoJSONAlt = alt_paths
 		}
 
 	}
 
 	if cfg.EnableGeoJSONLD {
 
-		www_capabilities.GeoJSONLD = true
-		www_paths.GeoJSONLD = cfg.PathGeoJSONLD
+		capabilities.GeoJSONLD = true
+		uris.GeoJSONLD = cfg.PathGeoJSONLD
+		uris.GeoJSONLDAlt = cfg.PathGeoJSONLDAlt
 
 		if cfg.URIPrefix != "" {
 
 			path_geojsonld, err := url.JoinPath(cfg.URIPrefix, cfg.PathGeoJSONLD)
 
 			if err != nil {
-				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathGeoJSONLD)
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathGeoJSONLD, err)
 			}
 
-			www_paths.GeoJSONLD = path_geojsonld
+			uris.GeoJSONLD = path_geojsonld
+
+			alt_paths := make([]string, len(cfg.PathGeoJSONLDAlt))
+
+			for idx, path := range cfg.PathGeoJSONLDAlt {
+
+				path, err := url.JoinPath(cfg.URIPrefix, path)
+
+				if err != nil {
+					return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path, err)
+				}
+
+				alt_paths[idx] = path
+			}
+
+			uris.GeoJSONLDAlt = alt_paths
 		}
 	}
 
 	if cfg.EnableSVG {
 
-		www_capabilities.SVG = true
-		www_paths.SVG = cfg.PathSVG
+		capabilities.SVG = true
+		uris.SVG = cfg.PathSVG
+		uris.SVGAlt = cfg.PathSVGAlt
 
 		if cfg.URIPrefix != "" {
 
@@ -234,15 +268,32 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSVG)
 			}
 
-			www_paths.SVG = path_svg
+			uris.SVG = path_svg
+
+			alt_paths := make([]string, len(cfg.PathSVGAlt))
+
+			for idx, path := range cfg.PathSVGAlt {
+
+				path, err := url.JoinPath(cfg.URIPrefix, path)
+
+				if err != nil {
+					return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path, err)
+				}
+
+				alt_paths[idx] = path
+			}
+
+			uris.SVGAlt = alt_paths
+
 		}
 
 	}
 
 	if cfg.EnablePNG {
 
-		www_capabilities.PNG = true
-		www_paths.PNG = cfg.PathPNG
+		capabilities.PNG = true
+		uris.PNG = cfg.PathPNG
+		uris.PNGAlt = cfg.PathPNGAlt
 
 		if cfg.URIPrefix != "" {
 
@@ -252,7 +303,23 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathPNG)
 			}
 
-			www_paths.PNG = path_png
+			uris.PNG = path_png
+
+			alt_paths := make([]string, len(cfg.PathPNGAlt))
+
+			for idx, path := range cfg.PathPNGAlt {
+
+				path, err := url.JoinPath(cfg.URIPrefix, path)
+
+				if err != nil {
+					return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path, err)
+				}
+
+				alt_paths[idx] = path
+			}
+
+			uris.PNGAlt = alt_paths
+
 		}
 	}
 
@@ -270,8 +337,8 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 		settings.SelectPattern = pat
 
-		www_capabilities.Select = true
-		www_paths.Select = cfg.PathSelect
+		capabilities.Select = true
+		uris.Select = cfg.PathSelect
 
 		if cfg.URIPrefix != "" {
 
@@ -281,7 +348,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSelect)
 			}
 
-			www_paths.Select = path_select
+			uris.Select = path_select
 		}
 	}
 
@@ -289,8 +356,9 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 		settings.NavPlaceMaxFeatures = cfg.NavPlaceMaxFeatures
 
-		www_capabilities.NavPlace = true
-		www_paths.NavPlace = cfg.PathNavPlace
+		capabilities.NavPlace = true
+		uris.NavPlace = cfg.PathNavPlace
+		uris.NavPlaceAlt = cfg.PathNavPlaceAlt
 
 		if cfg.URIPrefix != "" {
 
@@ -300,15 +368,32 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathNavPlace)
 			}
 
-			www_paths.NavPlace = path_navplace
+			uris.NavPlace = path_navplace
+
+			alt_paths := make([]string, len(cfg.PathNavPlaceAlt))
+
+			for idx, path := range cfg.PathNavPlaceAlt {
+
+				path, err := url.JoinPath(cfg.URIPrefix, path)
+
+				if err != nil {
+					return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path, err)
+				}
+
+				alt_paths[idx] = path
+			}
+
+			uris.NavPlaceAlt = alt_paths
+
 		}
 
 	}
 
 	if cfg.EnableSPR {
 
-		www_capabilities.SPR = true
-		www_paths.SPR = cfg.PathSPR
+		capabilities.SPR = true
+		uris.SPR = cfg.PathSPR
+		uris.SPRAlt = cfg.PathSPRAlt
 
 		if cfg.URIPrefix != "" {
 
@@ -318,15 +403,31 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSPR)
 			}
 
-			www_paths.SPR = path_spr
+			uris.SPR = path_spr
+
+			alt_paths := make([]string, len(cfg.PathSPRAlt))
+
+			for idx, path := range cfg.PathSPRAlt {
+
+				path, err := url.JoinPath(cfg.URIPrefix, path)
+
+				if err != nil {
+					return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path, err)
+				}
+
+				alt_paths[idx] = path
+			}
+
+			uris.SPRAlt = alt_paths
+
 		}
 
 	}
 
 	if cfg.EnableHTML {
 
-		www_capabilities.HTML = true
-		www_paths.Id = cfg.PathId
+		capabilities.HTML = true
+		uris.Id = cfg.PathId
 
 		if cfg.URIPrefix != "" {
 
@@ -336,7 +437,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathId)
 			}
 
-			www_paths.Id = path_id
+			uris.Id = path_id
 		}
 
 	}
@@ -345,8 +446,9 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 		settings.WebFingerHostname = cfg.WebFingerHostname
 
-		www_capabilities.WebFinger = true
-		www_paths.WebFinger = cfg.PathWebFinger
+		capabilities.WebFinger = true
+		uris.WebFinger = cfg.PathWebFinger
+		uris.WebFingerAlt = cfg.PathWebFingerAlt
 
 		if cfg.URIPrefix != "" {
 
@@ -356,19 +458,35 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathWebFinger)
 			}
 
-			www_paths.WebFinger = path_webfinger
+			uris.WebFinger = path_webfinger
+
+			alt_paths := make([]string, len(cfg.PathWebFingerAlt))
+
+			for idx, path := range cfg.PathWebFingerAlt {
+
+				path, err := url.JoinPath(cfg.URIPrefix, path)
+
+				if err != nil {
+					return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path, err)
+				}
+
+				alt_paths[idx] = path
+			}
+
+			uris.WebFingerAlt = alt_paths
 		}
 	}
 
 	if cfg.EnableEditUI {
 
-		www_capabilities.CreateFeature = true
-		www_capabilities.DeprecateFeature = true
-		www_capabilities.CessateFeature = true
-		www_capabilities.EditGeometry = true
+		capabilities.EditUI = true
+		capabilities.CreateFeature = true
+		capabilities.DeprecateFeature = true
+		capabilities.CessateFeature = true
+		capabilities.EditGeometry = true
 
-		www_paths.CreateFeature = cfg.PathCreateFeature
-		www_paths.EditGeometry = cfg.PathEditGeometry
+		uris.CreateFeature = cfg.PathCreateFeature
+		uris.EditGeometry = cfg.PathEditGeometry
 
 		if cfg.URIPrefix != "" {
 
@@ -384,22 +502,23 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathEditGeometry)
 			}
 
-			www_paths.CreateFeature = path_create_feature
-			www_paths.EditGeometry = path_edit_geometry
+			uris.CreateFeature = path_create_feature
+			uris.EditGeometry = path_edit_geometry
 		}
 	}
 
 	if cfg.EnableEditAPI {
 
-		www_capabilities.CreateFeatureAPI = true
-		www_capabilities.DeprecateFeatureAPI = true
-		www_capabilities.CessateFeatureAPI = true
-		www_capabilities.EditGeometryAPI = true
+		capabilities.EditAPI = true
+		capabilities.CreateFeatureAPI = true
+		capabilities.DeprecateFeatureAPI = true
+		capabilities.CessateFeatureAPI = true
+		capabilities.EditGeometryAPI = true
 
-		www_paths.CreateFeatureAPI = cfg.PathCreateFeatureAPI
-		www_paths.DeprecateFeatureAPI = cfg.PathDeprecateFeatureAPI
-		www_paths.CessateFeatureAPI = cfg.PathCessateFeatureAPI
-		www_paths.EditGeometryAPI = cfg.PathEditGeometryAPI
+		uris.CreateFeatureAPI = cfg.PathCreateFeatureAPI
+		uris.DeprecateFeatureAPI = cfg.PathDeprecateFeatureAPI
+		uris.CessateFeatureAPI = cfg.PathCessateFeatureAPI
+		uris.EditGeometryAPI = cfg.PathEditGeometryAPI
 
 		if cfg.URIPrefix != "" {
 
@@ -427,16 +546,16 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathEditGeometryAPI)
 			}
 
-			www_paths.CreateFeatureAPI = path_api_create_feature
-			www_paths.DeprecateFeatureAPI = path_api_deprecate_feature
-			www_paths.CessateFeatureAPI = path_api_cessate_feature
-			www_paths.EditGeometryAPI = path_api_edit_geometry
+			uris.CreateFeatureAPI = path_api_create_feature
+			uris.DeprecateFeatureAPI = path_api_deprecate_feature
+			uris.CessateFeatureAPI = path_api_cessate_feature
+			uris.EditGeometryAPI = path_api_edit_geometry
 		}
 
 	}
 
-	settings.Paths = www_paths
-	settings.Capabilities = www_capabilities
+	settings.URIs = uris
+	settings.Capabilities = capabilities
 
 	// Auth hooks
 

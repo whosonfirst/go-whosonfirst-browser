@@ -3,25 +3,28 @@ package www
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/webfinger"
-	"github.com/whosonfirst/go-whosonfirst-feature/properties"
-	"github.com/whosonfirst/go-whosonfirst-uri"
 	"log"
 	"net/http"
 	"net/url"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/whosonfirst/go-reader"
+	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
+	browser_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
+	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/webfinger"
+	"github.com/whosonfirst/go-whosonfirst-feature/properties"
+	"github.com/whosonfirst/go-whosonfirst-uri"
 )
 
 type WebfingerHandlerOptions struct {
 	Reader       reader.Reader
 	Logger       *log.Logger
 	Hostname     string
-	Paths        *Paths
-	Capabilities *Capabilities
+	URIs         *browser_uris.URIs
+	Capabilities *browser_capabilities.Capabilities
 }
 
 func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
@@ -42,7 +45,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 			wf_host = opts.Hostname
 		}
 
-		wof_uri, err, status := wof_http.ParseURIFromRequest(req, opts.Reader)
+		wof_uri, err, status := browser_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {
 
@@ -90,7 +93,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 		if opts.Capabilities.GeoJSON {
 
-			path_geojson, err := url.JoinPath(opts.Paths.GeoJSON, rel_path)
+			path_geojson, err := url.JoinPath(opts.URIs.GeoJSON, rel_path)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)
@@ -115,7 +118,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 		if opts.Capabilities.GeoJSONLD {
 
-			path_geojsonld, err := url.JoinPath(opts.Paths.GeoJSONLD, rel_path)
+			path_geojsonld, err := url.JoinPath(opts.URIs.GeoJSONLD, rel_path)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)
@@ -139,7 +142,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 		if opts.Capabilities.HTML {
 
-			path_html, err := url.JoinPath(opts.Paths.Id, rel_path)
+			path_html, err := url.JoinPath(opts.URIs.Id, rel_path)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)
@@ -167,7 +170,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 		if opts.Capabilities.SVG {
 
-			path_svg, err := url.JoinPath(opts.Paths.SVG, rel_path)
+			path_svg, err := url.JoinPath(opts.URIs.SVG, rel_path)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)
@@ -190,7 +193,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 		if opts.Capabilities.PNG {
 
-			path_png, err := url.JoinPath(opts.Paths.PNG, rel_path)
+			path_png, err := url.JoinPath(opts.URIs.PNG, rel_path)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)
@@ -213,7 +216,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 		if opts.Capabilities.Select {
 
-			path_select, err := url.JoinPath(opts.Paths.Select, rel_path)
+			path_select, err := url.JoinPath(opts.URIs.Select, rel_path)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)
@@ -236,7 +239,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 		if opts.Capabilities.NavPlace {
 
-			path_navplace, err := url.JoinPath(opts.Paths.NavPlace, rel_path)
+			path_navplace, err := url.JoinPath(opts.URIs.NavPlace, rel_path)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)
@@ -259,7 +262,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 		if opts.Capabilities.SPR {
 
-			path_spr, err := url.JoinPath(opts.Paths.SPR, rel_path)
+			path_spr, err := url.JoinPath(opts.URIs.SPR, rel_path)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)

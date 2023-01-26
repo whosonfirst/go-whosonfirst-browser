@@ -7,7 +7,9 @@ import (
 
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
+	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
+	browser_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
+	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 )
 
@@ -17,15 +19,15 @@ type EditGeometryHandlerOptions struct {
 	Logger        *log.Logger
 	Template      *template.Template
 	MapProvider   string
-	Paths         *Paths
-	Capabilities  *Capabilities
+	URIs          *browser_uris.URIs
+	Capabilities  *browser_capabilities.Capabilities
 }
 
 type EditGeometryVars struct {
 	MapProvider  string
 	Id           int64
-	Paths        *Paths
-	Capabilities *Capabilities
+	Paths        *browser_uris.URIs
+	Capabilities *browser_capabilities.Capabilities
 	// To do: Support alternate geometries
 }
 
@@ -50,7 +52,7 @@ func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error)
 			}
 		}
 
-		path, err, status := wof_http.DerivePathFromRequest(req)
+		path, err, status := browser_http.DerivePathFromRequest(req)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), status)
@@ -65,7 +67,7 @@ func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error)
 		}
 
 		vars := EditGeometryVars{
-			Paths:        opts.Paths,
+			Paths:        opts.URIs,
 			Capabilities: opts.Capabilities,
 			MapProvider:  opts.MapProvider,
 			Id:           id,

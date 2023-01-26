@@ -8,6 +8,8 @@ import (
 
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
+	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
+	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-placetypes"
 )
 
@@ -17,15 +19,15 @@ type CreateFeatureHandlerOptions struct {
 	Logger        *log.Logger
 	Template      *template.Template
 	MapProvider   string
-	Paths         *Paths
-	Capabilities  *Capabilities
+	URIs          *browser_uris.URIs
+	Capabilities  *browser_capabilities.Capabilities
 }
 
 type CreateFeatureVars struct {
 	MapProvider  string
 	Placetypes   []*placetypes.WOFPlacetype
-	Paths        *Paths
-	Capabilities *Capabilities
+	Paths        *browser_uris.URIs
+	Capabilities *browser_capabilities.Capabilities
 	// To do: Support alternate geometries
 }
 
@@ -65,7 +67,7 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		}
 
 		vars := CreateFeatureVars{
-			Paths:        opts.Paths,
+			Paths:        opts.URIs,
 			Capabilities: opts.Capabilities,
 			MapProvider:  opts.MapProvider,
 			Placetypes:   all_placetypes,

@@ -2,26 +2,29 @@ package www
 
 import (
 	"errors"
-	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
-	"github.com/whosonfirst/go-whosonfirst-feature/properties"
-	"github.com/whosonfirst/go-whosonfirst-spr/v2"
-	"github.com/whosonfirst/go-whosonfirst-uri"
 	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/whosonfirst/go-reader"
+	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
+	browser_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
+	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
+	"github.com/whosonfirst/go-whosonfirst-feature/properties"
+	"github.com/whosonfirst/go-whosonfirst-spr/v2"
+	"github.com/whosonfirst/go-whosonfirst-uri"
 )
 
 type IDHandlerOptions struct {
 	Templates    *template.Template
-	Paths        *Paths
-	Capabilities *Capabilities
 	Reader       reader.Reader
 	Logger       *log.Logger
 	MapProvider  string
+	URIs         *browser_uris.URIs
+	Capabilities *browser_capabilities.Capabilities
 }
 
 type IDVars struct {
@@ -30,8 +33,8 @@ type IDVars struct {
 	URIArgs      *uri.URIArgs
 	IsAlternate  bool
 	LastModified string
-	Paths        *Paths
-	Capabilities *Capabilities
+	Paths        *browser_uris.URIs
+	Capabilities *browser_capabilities.Capabilities
 	MapProvider  string
 }
 
@@ -66,7 +69,7 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 		if endpoint == "" {
 
 			vars := NotFoundVars{
-				Paths: opts.Paths,
+				URIs: opts.URIs,
 			}
 
 			RenderTemplate(rsp, notfound_t, vars)
@@ -79,7 +82,7 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 
 			vars := ErrorVars{
 				Error: err,
-				Paths: opts.Paths,
+				URIs:  opts.URIs,
 				// status...
 			}
 
@@ -95,7 +98,7 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		uri, err, _ := wof_http.ParseURIFromRequest(req, opts.Reader)
+		uri, err, _ := browser_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {
 
@@ -103,7 +106,7 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 
 			vars := ErrorVars{
 				Error: err,
-				Paths: opts.Paths,
+				URIs:  opts.URIs,
 				// status...
 			}
 
@@ -118,16 +121,16 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 
 		switch ext {
 		case ".geojson":
-			handle_other(rsp, req, f, opts.Paths.GeoJSON)
+			handle_other(rsp, req, f, opts.URIs.GeoJSON)
 			return
 		case ".png":
-			handle_other(rsp, req, f, opts.Paths.PNG)
+			handle_other(rsp, req, f, opts.URIs.PNG)
 			return
 		case ".spr":
-			handle_other(rsp, req, f, opts.Paths.SPR)
+			handle_other(rsp, req, f, opts.URIs.SPR)
 			return
 		case ".svg":
-			handle_other(rsp, req, f, opts.Paths.SVG)
+			handle_other(rsp, req, f, opts.URIs.SVG)
 			return
 		default:
 			// pass
@@ -139,7 +142,7 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 
 			vars := ErrorVars{
 				Error: err,
-				Paths: opts.Paths,
+				URIs:  opts.URIs,
 			}
 
 			RenderTemplate(rsp, error_t, vars)
@@ -155,7 +158,7 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 			URIArgs:      uri.URIArgs,
 			IsAlternate:  uri.IsAlternate,
 			LastModified: lastmod,
-			Paths:        opts.Paths,
+			Paths:        opts.URIs,
 			Capabilities: opts.Capabilities,
 			MapProvider:  opts.MapProvider,
 		}

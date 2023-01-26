@@ -1,4 +1,4 @@
-package www
+package browser
 
 type Capabilities struct {
 	GeoJSON             bool
