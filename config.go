@@ -60,6 +60,8 @@ type Config struct {
 	PathPing                   string   `json:"path_ping,omitempty"`
 	PathPNG                    string   `json:"path_png,omitempty"`
 	PathPNGAlt                 []string `json:"path_png_alt,omitempty"`
+	PathSearch                 string   `json:"path_search,omitempty"`
+	PathSearchAPI              string   `json:"path_search_api,omitempty"`
 	PathSelect                 string   `json:"path_select,omitempty"`
 	PathSelectAlt              []string `json:"path_select_alt,omitempty"`
 	PathSPR                    string   `json:"path_spr,omitempty"`

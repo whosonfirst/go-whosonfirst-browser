@@ -2,10 +2,10 @@ package browser
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"io/fs"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -52,7 +52,18 @@ type Settings struct {
 	WriterURIs            []string
 }
 
-func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*Settings, error) {
+func SettingsFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Settings, error) {
+
+	cfg, err := ConfigFromFlagSet(ctx, fs)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive config from flagset, %w", err)
+	}
+
+	return SettingsFromConfig(ctx, cfg)
+}
+
+func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 
 	settings := &Settings{
 		Templates: []fs.FS{html.FS},
@@ -556,6 +567,48 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	}
 
+	if cfg.EnableSearchAPI {
+
+		search_db, err := fulltext.NewFullTextDatabase(ctx, cfg.SearchDatabaseURI)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to create fulltext database for '%s', %w", cfg.SearchDatabaseURI, err)
+		}
+
+		settings.SearchDatabase = search_db
+
+		capabilities.SearchAPI = true
+		uris.Search = cfg.PathSearchAPI
+
+		if cfg.URIPrefix != "" {
+
+			path_search_api, err := url.JoinPath(cfg.URIPrefix, cfg.PathSearchAPI)
+
+			if err != nil {
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSearchAPI, err)
+			}
+
+			uris.SearchAPI = path_search_api
+		}
+	}
+
+	if cfg.EnableSearch {
+
+		capabilities.Search = true
+		uris.Search = cfg.PathSearch
+
+		if cfg.URIPrefix != "" {
+
+			path_search, err := url.JoinPath(cfg.URIPrefix, cfg.PathSearch)
+
+			if err != nil {
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathSearch, err)
+			}
+
+			uris.Search = path_search
+		}
+	}
+
 	settings.URIs = uris
 	settings.Capabilities = capabilities
 
@@ -571,19 +624,16 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	// Map provider
 
-	map_provider, err := provider.NewProvider(ctx, cfg.MapProviderURI)
+	if cfg.EnableHTML {
 
-	if err != nil {
-		return nil, fmt.Errorf("Failed to create new map provider, %w", err)
+		map_provider, err := provider.NewProvider(ctx, cfg.MapProviderURI)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to create new map provider, %w", err)
+		}
+
+		settings.MapProvider = map_provider
 	}
-
-	err = map_provider.SetLogger(logger)
-
-	if err != nil {
-		return nil, fmt.Errorf("Failed to set logger for provider, %w", err)
-	}
-
-	settings.MapProvider = map_provider
 
 	// Custom chrome (this is still in flux)
 
@@ -611,17 +661,6 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		})
 
 		settings.CORSWrapper = cors_wrapper
-	}
-
-	if cfg.EnableSearchAPI {
-
-		search_db, err := fulltext.NewFullTextDatabase(ctx, cfg.SearchDatabaseURI)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to create fulltext database for '%s', %w", cfg.SearchDatabaseURI, err)
-		}
-
-		settings.SearchDatabase = search_db
 	}
 
 	if cfg.EnableEditAPI {

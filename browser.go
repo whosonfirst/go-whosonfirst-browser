@@ -92,7 +92,7 @@ func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
 	// To do: pre-fill defaults
 
-	settings, err := SettingsFromConfig(ctx, cfg, logger)
+	settings, err := SettingsFromConfig(ctx, cfg)
 
 	if err != nil {
 		return fmt.Errorf("Failed to create settings from config, %w", err)
@@ -510,7 +510,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		var index_handler http.Handler
 		var id_handler http.Handler
-		// var search_handler http.Handler
+		var search_handler http.Handler
 
 		if enable_index {
 
@@ -548,33 +548,24 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		id_handler = id_h
 		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, settings.URIs.URIPrefix)
 
-		/*
-			if enable_search_html {
+		if settings.Capabilities.Search {
 
-				search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
-
-				if err != nil {
-					return fmt.Errorf("Failed to create fulltext database for '%s', %w", search_database_uri, err)
-				}
-
-				search_opts := www.SearchHandlerOptions{
-					Templates:    t,
-					URIs:        settings.URIs,
-					Capabilities: settings.Capabilities,
-					Database:     search_db,
-					MapProvider:  settings.MapProvider.Scheme(),
-				}
-
-				search_h, err := www.SearchHandler(search_opts)
-
-				if err != nil {
-					return fmt.Errorf("Failed to create search handler, %w", err)
-				}
-
-				search_handler = search_h
-				search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.URIs.URIPrefix)
+			search_opts := www.SearchHandlerOptions{
+				Templates:    t,
+				URIs:         settings.URIs,
+				Capabilities: settings.Capabilities,
+				Database:     settings.SearchDatabase,
+				MapProvider:  settings.MapProvider.Scheme(),
 			}
-		*/
+
+			search_handler, err = www.SearchHandler(search_opts)
+
+			if err != nil {
+				return fmt.Errorf("Failed to create search handler, %w", err)
+			}
+
+			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.URIs.URIPrefix)
+		}
 
 		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
 		id_handler = settings.CustomChrome.WrapHandler(id_handler)
@@ -586,13 +577,11 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			log.Printf("handle ID endpoint at %s\n", path_id)
 		}
 
-		/*
-			if enable_search_html {
-				search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
-				search_handler = settings.Authenticator.WrapHandler(search_handler)
-				mux.Handle(path_search_html, search_handler)
-			}
-		*/
+		if settings.Capabilities.Search {
+			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+			search_handler = settings.Authenticator.WrapHandler(search_handler)
+			mux.Handle(settings.URIs.Search, search_handler)
+		}
 
 		index_handler = settings.Authenticator.WrapHandler(index_handler)
 		mux.Handle(settings.URIs.Index, index_handler)
