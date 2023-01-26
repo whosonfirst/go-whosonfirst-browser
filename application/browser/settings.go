@@ -30,33 +30,23 @@ import (
 )
 
 type Settings struct {
-	Paths        *www.Paths
-	Capabilities *www.Capabilities
-
-	Reader reader.Reader
-	Cache  cache.Cache
-
-	WriterURIs            []string
-	Exporter              export.Exporter
-	PointInPolygonService *pointinpolygon.PointInPolygonService
 	Authenticator         auth.Authenticator
-
-	MapProvider provider.Provider
-
-	Templates []fs.FS
-
-	CustomChrome   chrome.Chrome
-	CustomHandlers map[string]http.HandlerFunc
-
-	CORSWrapper *cors.Cors
-
-	NavPlaceMaxFeatures int
-
-	SelectPattern *regexp.Regexp
-
-	WebFingerHostname string
-
-	Verbose bool
+	Cache                 cache.Cache
+	Capabilities          *www.Capabilities
+	CORSWrapper           *cors.Cors
+	CustomChrome          chrome.Chrome
+	CustomHandlers        map[string]http.HandlerFunc
+	Exporter              export.Exporter
+	MapProvider           provider.Provider
+	NavPlaceMaxFeatures   int
+	Paths                 *www.Paths
+	PointInPolygonService *pointinpolygon.PointInPolygonService
+	Reader                reader.Reader
+	SelectPattern         *regexp.Regexp
+	Templates             []fs.FS
+	Verbose               bool
+	WebFingerHostname     string
+	WriterURIs            []string
 }
 
 func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*Settings, error) {
@@ -488,8 +478,14 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	if cfg.EnableCORS {
 
+		cors_origins := cfg.CORSOrigins
+
+		if len(cors_origins) == 0 {
+			cors_origins = []string{"*"}
+		}
+
 		cors_wrapper := cors.New(cors.Options{
-			AllowedOrigins:   cfg.CORSOrigins,
+			AllowedOrigins:   cors_origins,
 			AllowCredentials: cfg.CORSAllowCredentials,
 		})
 
