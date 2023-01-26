@@ -22,8 +22,8 @@ import (
 	github_reader "github.com/whosonfirst/go-reader-github"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/chrome"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"	
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-spatial/database"
 	github_writer "github.com/whosonfirst/go-writer-github/v3"
@@ -55,15 +55,15 @@ type Settings struct {
 	SelectPattern *regexp.Regexp
 
 	WebFingerHostname string
-	
+
 	Verbose bool
 }
 
 func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*Settings, error) {
 
 	settings := &Settings{
-		Templates: []fs.FS{ html.FS },
-		Verbose: cfg.Verbose,
+		Templates: []fs.FS{html.FS},
+		Verbose:   cfg.Verbose,
 	}
 
 	reader_uris := cfg.ReaderURIs
@@ -279,7 +279,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		}
 
 		settings.SelectPattern = pat
-		
+
 		www_capabilities.Select = true
 		www_paths.Select = cfg.PathSelect
 
@@ -298,7 +298,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 	if cfg.EnableNavPlace {
 
 		settings.NavPlaceMaxFeatures = cfg.NavPlaceMaxFeatures
-		
+
 		www_capabilities.NavPlace = true
 		www_paths.NavPlace = cfg.PathNavPlace
 
@@ -354,7 +354,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 	if cfg.EnableWebFinger {
 
 		settings.WebFingerHostname = cfg.WebFingerHostname
-		
+
 		www_capabilities.WebFinger = true
 		www_paths.WebFinger = cfg.PathWebFinger
 
@@ -369,7 +369,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			www_paths.WebFinger = path_webfinger
 		}
 	}
-	
+
 	if cfg.EnableEditUI {
 
 		www_capabilities.CreateFeature = true

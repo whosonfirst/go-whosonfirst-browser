@@ -21,9 +21,9 @@ import (
 	map_www "github.com/aaronland/go-http-maps/http/www"
 	"github.com/aaronland/go-http-ping/v2"
 	"github.com/aaronland/go-http-server"
+	"github.com/sfomuseum/go-template/html"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
-	"github.com/sfomuseum/go-template/html"
 	_ "github.com/whosonfirst/go-whosonfirst-search/fulltext"
 )
 
@@ -136,7 +136,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	if settings.Verbose {
 		logger.Printf("Handle ping endpoint at %s\n", settings.Paths.Ping)
 	}
-	
+
 	if settings.Capabilities.PNG {
 
 		if settings.Verbose {
@@ -233,7 +233,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		// TO UPDATE
-	
+
 		for _, alt_path := range path_spr_alt {
 			mux.Handle(alt_path, spr_handler)
 		}
@@ -267,7 +267,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		// TO UPDATE
-		
+
 		for _, alt_path := range path_geojson_alt {
 			mux.Handle(alt_path, geojson_handler)
 		}
@@ -301,7 +301,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		// TO UPDATE
-		
+
 		for _, alt_path := range path_geojsonld_alt {
 			mux.Handle(alt_path, geojsonld_handler)
 		}
@@ -336,7 +336,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		// TO UPDATE
-		
+
 		for _, alt_path := range path_navplace_alt {
 			mux.Handle(alt_path, navplace_handler)
 		}
@@ -371,7 +371,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		// TO UPDATE
-		
+
 		for _, alt_path := range path_select_alt {
 			mux.Handle(alt_path, select_handler)
 		}
@@ -408,52 +408,52 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		// TO UPDATE
-		
+
 		for _, alt_path := range path_webfinger_alt {
 			mux.Handle(alt_path, webfinger_handler)
 		}
 	}
 
 	/*
-	// START OF probably due a rethink shortly
+		// START OF probably due a rethink shortly
 
-	if enable_search_api {
+		if enable_search_api {
 
-		if search_database_uri == "" {
-			return fmt.Errorf("-enable-search-api flag is true but -search-database-uri flag is empty.")
+			if search_database_uri == "" {
+				return fmt.Errorf("-enable-search-api flag is true but -search-database-uri flag is empty.")
+			}
+
+			search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
+
+			if err != nil {
+				return fmt.Errorf("Failed to create fulltext database for '%s', %w", search_database_uri, err)
+			}
+
+			search_opts := www.SearchAPIHandlerOptions{
+				Database: search_db,
+			}
+
+			if enable_search_api_geojson {
+				search_opts.EnableGeoJSON = true
+				search_opts.GeoJSONReader = settings.Reader
+			}
+
+			search_handler, err := www.SearchAPIHandler(search_opts)
+
+			if err != nil {
+				return fmt.Errorf("Failed to create search handler, %w", err)
+			}
+
+			if settings.CORSWrapper != nil {
+				search_handler = settings.CORSWrapper.Handler(search_handler)
+			}
+
+			mux.Handle(path_search_api, search_handler)
 		}
 
-		search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create fulltext database for '%s', %w", search_database_uri, err)
-		}
-
-		search_opts := www.SearchAPIHandlerOptions{
-			Database: search_db,
-		}
-
-		if enable_search_api_geojson {
-			search_opts.EnableGeoJSON = true
-			search_opts.GeoJSONReader = settings.Reader
-		}
-
-		search_handler, err := www.SearchAPIHandler(search_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create search handler, %w", err)
-		}
-
-		if settings.CORSWrapper != nil {
-			search_handler = settings.CORSWrapper.Handler(search_handler)
-		}
-
-		mux.Handle(path_search_api, search_handler)
-	}
-
-	// END OF probably due a rethink shortly
+		// END OF probably due a rethink shortly
 	*/
-	
+
 	// Common code for HTML handler (public and/or edit handlers)
 
 	var bootstrap_opts *bootstrap.BootstrapOptions
@@ -555,33 +555,33 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, settings.Paths.URIPrefix)
 
 		/*
-		if enable_search_html {
+			if enable_search_html {
 
-			search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
+				search_db, err := fulltext.NewFullTextDatabase(ctx, search_database_uri)
 
-			if err != nil {
-				return fmt.Errorf("Failed to create fulltext database for '%s', %w", search_database_uri, err)
+				if err != nil {
+					return fmt.Errorf("Failed to create fulltext database for '%s', %w", search_database_uri, err)
+				}
+
+				search_opts := www.SearchHandlerOptions{
+					Templates:    t,
+					Paths:        settings.Paths,
+					Capabilities: settings.Capabilities,
+					Database:     search_db,
+					MapProvider:  settings.MapProvider.Scheme(),
+				}
+
+				search_h, err := www.SearchHandler(search_opts)
+
+				if err != nil {
+					return fmt.Errorf("Failed to create search handler, %w", err)
+				}
+
+				search_handler = search_h
+				search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.Paths.URIPrefix)
 			}
-
-			search_opts := www.SearchHandlerOptions{
-				Templates:    t,
-				Paths:        settings.Paths,
-				Capabilities: settings.Capabilities,
-				Database:     search_db,
-				MapProvider:  settings.MapProvider.Scheme(),
-			}
-
-			search_h, err := www.SearchHandler(search_opts)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create search handler, %w", err)
-			}
-
-			search_handler = search_h
-			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.Paths.URIPrefix)
-		}
 		*/
-		
+
 		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
 		id_handler = settings.CustomChrome.WrapHandler(id_handler)
 		id_handler = settings.Authenticator.WrapHandler(id_handler)
@@ -593,13 +593,13 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		/*
-		if enable_search_html {
-			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
-			search_handler = settings.Authenticator.WrapHandler(search_handler)
-			mux.Handle(path_search_html, search_handler)
-		}
+			if enable_search_html {
+				search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.Paths.URIPrefix)
+				search_handler = settings.Authenticator.WrapHandler(search_handler)
+				mux.Handle(path_search_html, search_handler)
+			}
 		*/
-		
+
 		index_handler = settings.Authenticator.WrapHandler(index_handler)
 		mux.Handle(settings.Paths.Index, index_handler)
 	}
