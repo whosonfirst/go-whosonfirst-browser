@@ -4,6 +4,28 @@ const ConfigURIDefault string = ""
 
 const CORSAllowCredentialsDefault bool = false
 
+const DisableGeoJSONDefault bool = false
+
+const DisableGeoJSONLDDefault bool = false
+
+const DisableIdDefault bool = false
+
+const DisableIndexDefault bool = false
+
+const DisableNavPlaceDefault bool = false
+
+const DisablePNGDefault bool = false
+
+const DisableSearchDefault bool = false
+
+const DisableSelectDefault bool = false
+
+const DisableSPRDefault bool = false
+
+const DisableSVGDefault bool = false
+
+const DisableWebFingerDefault bool = false
+
 const EnableCORSDefault bool = true
 
 const EnableEditDefault bool = false
@@ -11,6 +33,12 @@ const EnableEditDefault bool = false
 const EnableEditAPIDefault bool = false
 
 const EnableEditUIDefault bool = false
+
+const EnableHTMLDefault bool = false
+
+const EnableIdDefault bool = true
+
+const EnableIndexDefault bool = true
 
 const GitHubAccessTokenURIDefault string = ""
 

@@ -140,7 +140,7 @@ func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {
 
 		}
 
-		if opts.Capabilities.HTML {
+		if opts.Capabilities.Id {
 
 			path_html, err := url.JoinPath(opts.URIs.Id, rel_path)
 

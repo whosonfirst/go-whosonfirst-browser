@@ -51,47 +51,6 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
-	if cfg.EnableAll {
-		cfg.EnableGraphics = true
-		cfg.EnableData = true
-		cfg.EnableHTML = true
-	}
-
-	if cfg.EnableGraphics {
-		cfg.EnablePNG = true
-		cfg.EnableSVG = true
-	}
-
-	if cfg.EnableData {
-		cfg.EnableGeoJSON = true
-		cfg.EnableGeoJSONLD = true
-		cfg.EnableNavPlace = true
-		cfg.EnableSPR = true
-		cfg.EnableSelect = true
-		cfg.EnableWebFinger = true
-	}
-
-	if cfg.EnableSearch {
-		cfg.EnableSearchAPI = true
-		cfg.EnableHTML = true
-	}
-
-	if cfg.EnableHTML {
-		cfg.EnableGeoJSON = true
-		cfg.EnablePNG = true
-	}
-
-	if cfg.EnableEdit {
-		cfg.EnableEditAPI = true
-		cfg.EnableEditUI = true
-	}
-
-	if cfg.EnableEditUI {
-		cfg.EnableEditAPI = true
-	}
-
-	// To do: pre-fill defaults
-
 	settings, err := SettingsFromConfig(ctx, cfg)
 
 	if err != nil {
@@ -453,7 +412,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	var bootstrap_opts *bootstrap.BootstrapOptions
 	var maps_opts *maps.MapsOptions
 
-	if settings.Capabilities.HTML || settings.Capabilities.EditUI {
+	if settings.HasHTMLCapabilities() {
 
 		bootstrap_opts = bootstrap.DefaultBootstrapOptions()
 
@@ -503,32 +462,33 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	// To do: Consider hooks to require auth?
 
-	if settings.Capabilities.HTML {
+	if settings.Capabilities.Index {
 
-		// Note that we append all the handler to mux at the end of this block so that they
-		// can be updated with map-related middleware where necessary
-
-		var index_handler http.Handler
-		var id_handler http.Handler
-		var search_handler http.Handler
-
-		if enable_index {
-
-			index_opts := www.IndexHandlerOptions{
-				Templates:    t,
-				URIs:         settings.URIs,
-				Capabilities: settings.Capabilities,
-			}
-
-			index_h, err := www.IndexHandler(index_opts)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create index handler, %w", err)
-			}
-
-			index_handler = index_h
-			index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, settings.URIs.URIPrefix)
+		index_opts := www.IndexHandlerOptions{
+			Templates:    t,
+			URIs:         settings.URIs,
+			Capabilities: settings.Capabilities,
 		}
+
+		index_handler, err := www.IndexHandler(index_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create index handler, %w", err)
+		}
+
+		index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, settings.URIs.URIPrefix)
+		index_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(index_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		index_handler = settings.CustomChrome.WrapHandler(index_handler)
+		index_handler = settings.Authenticator.WrapHandler(index_handler)
+
+		mux.Handle(settings.URIs.Index, index_handler)
+
+		if settings.Verbose {
+			log.Printf("handle index endpoint at %s\n", settings.URIs.Index)
+		}
+	}
+
+	if settings.Capabilities.Id {
 
 		id_opts := www.IDHandlerOptions{
 			Templates:    t,
@@ -539,52 +499,51 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			MapProvider:  settings.MapProvider.Scheme(),
 		}
 
-		id_h, err := www.IDHandler(id_opts)
+		id_handler, err := www.IDHandler(id_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to create ID handler, %w", err)
 		}
 
-		id_handler = id_h
 		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, settings.URIs.URIPrefix)
-
-		if settings.Capabilities.Search {
-
-			search_opts := www.SearchHandlerOptions{
-				Templates:    t,
-				URIs:         settings.URIs,
-				Capabilities: settings.Capabilities,
-				Database:     settings.SearchDatabase,
-				MapProvider:  settings.MapProvider.Scheme(),
-			}
-
-			search_handler, err = www.SearchHandler(search_opts)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create search handler, %w", err)
-			}
-
-			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.URIs.URIPrefix)
-		}
-
 		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
 		id_handler = settings.CustomChrome.WrapHandler(id_handler)
 		id_handler = settings.Authenticator.WrapHandler(id_handler)
 
-		mux.Handle(path_id, id_handler)
+		mux.Handle(settings.URIs.Id, id_handler)
 
 		if settings.Verbose {
-			log.Printf("handle ID endpoint at %s\n", path_id)
+			log.Printf("handle ID endpoint at %s\n", settings.URIs.Id)
 		}
 
-		if settings.Capabilities.Search {
-			search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
-			search_handler = settings.Authenticator.WrapHandler(search_handler)
-			mux.Handle(settings.URIs.Search, search_handler)
+	}
+
+	if settings.Capabilities.Search {
+
+		search_opts := www.SearchHandlerOptions{
+			Templates:    t,
+			URIs:         settings.URIs,
+			Capabilities: settings.Capabilities,
+			Database:     settings.SearchDatabase,
+			MapProvider:  settings.MapProvider.Scheme(),
 		}
 
-		index_handler = settings.Authenticator.WrapHandler(index_handler)
-		mux.Handle(settings.URIs.Index, index_handler)
+		search_handler, err := www.SearchHandler(search_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create search handler, %w", err)
+		}
+
+		search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.URIs.URIPrefix)
+		search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		search_handler = settings.CustomChrome.WrapHandler(search_handler)
+		search_handler = settings.Authenticator.WrapHandler(search_handler)
+
+		mux.Handle(settings.URIs.Search, search_handler)
+
+		if settings.Verbose {
+			log.Printf("handle search endpoint at %s\n", settings.URIs.Search)
+		}
 	}
 
 	// Edit/write HTML handlers
@@ -775,6 +734,34 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			log.Printf("handle create feature endpoint at %s\n", settings.URIs.CreateFeatureAPI)
 		}
 
+	}
+
+	// Custom handlers
+
+	for path, h := range settings.CustomWWWHandlers {
+
+		h = maps.AppendResourcesHandlerWithPrefixAndProvider(h, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		h = bootstrap.AppendResourcesHandlerWithPrefix(h, bootstrap_opts, settings.URIs.URIPrefix)
+		h = settings.CustomChrome.WrapHandler(h)
+
+		h = settings.Authenticator.WrapHandler(h)
+
+		mux.Handle(path, h)
+
+		if settings.Verbose {
+			log.Printf("handle custom www endpoint at %s\n", path)
+		}
+	}
+
+	for path, h := range settings.CustomAPIHandlers {
+
+		h = settings.Authenticator.WrapHandler(h)
+
+		mux.Handle(path, h)
+
+		if settings.Verbose {
+			log.Printf("handle custom api endpoint at %s\n", path)
+		}
 	}
 
 	// Finally, start the server

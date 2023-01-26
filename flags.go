@@ -9,6 +9,90 @@ import (
 	"github.com/sfomuseum/go-flags/multi"
 )
 
+const CacheURIFlag string = "cache-uri"
+
+var cache_uri string
+
+const ConfigURIFlag string = "config-uri"
+
+var config_uri string
+
+const EnableAllFlag string = "enable-all"
+
+var enable_all bool
+
+const EnableDataFlag string = "enable-data"
+
+var enable_data bool
+
+const EnableGraphicsFlag string = "enable-graphics"
+
+var enable_graphics bool
+
+const EnableHTMLFlag string = "enable-html"
+
+var enable_html bool
+
+const EnableIdFlag string = "enable-id"
+
+var enable_id bool
+
+const EnableIndexFlag string = "enable-index"
+
+var enable_index bool
+
+const DisableGeoJSONFlag string = "disable-geojson"
+
+var disable_geojson bool
+
+const DisableGeoJSONLDFlag string = "disable-geojsonld"
+
+var disable_geojsonld bool
+
+const DisableIdFlag string = "disable-id"
+
+var disable_id bool
+
+const DisableIndexFlag string = "disable-index"
+
+var disable_index bool
+
+const DisableNavPlaceFlag string = "disable-navplace"
+
+var disable_navplace bool
+
+const DisablePNGFlag string = "disable-png"
+
+var disable_png bool
+
+const DisableSearchFlag string = "disable-search"
+
+var disable_search bool
+
+const DisableSelectFlag string = "disable-select"
+
+var disable_select bool
+
+const DisableSPRFlag string = "disable-spr"
+
+var disable_spr bool
+
+const DisableSVGFlag string = "disable-svg"
+
+var disable_svg bool
+
+const DisableWebFingerFlag string = "disable-webfinger"
+
+var disable_webfinger bool
+
+const ExporterURIFlag string = "exporter-uri"
+
+var exporter_uri string
+
+const ReaderURIFlag string = "reader-uri"
+
+var reader_uris multi.MultiCSVString
+
 const ServerURIFlag string = "server-uri"
 
 var server_uri string
@@ -17,33 +101,15 @@ const StaticPrefixFlag string = "static-prefix"
 
 var static_prefix string
 
-const ReaderURIFlag string = "reader-uri"
+const VerboseFlag string = "verbose"
 
-var reader_uris multi.MultiCSVString
-
-const CacheURIFlag string = "cache-uri"
-
-var cache_uri string
-
-const ExporterURIFlag string = "exporter-uri"
-
-var exporter_uri string
+var verbose bool
 
 const WriterURIFlag string = "writer-uri"
 
 var writer_uris multi.MultiCSVString
 
-const EnableAllFlag string = "enable-all"
-
-var enable_all bool
-
-const EnableGraphicsFlag string = "enable-graphics"
-
-var enable_graphics bool
-
-const EnableDataFlag string = "enable-data"
-
-var enable_data bool
+/* unsorted */
 
 const EnablePNGFlag string = "enable-png"
 
@@ -80,14 +146,6 @@ var enable_webfinger bool
 const SelectPatternFlag string = "select-pattern"
 
 var select_pattern string
-
-const EnableHTMLFlag string = "enable-html"
-
-var enable_html bool
-
-const EnableIndexFlag string = "enable-index"
-
-var enable_index bool
 
 const EnableSearchAPIFlag string = "enable-search-api"
 
@@ -248,14 +306,6 @@ const SearchDatabaseURIFlag string = "search-database-uri"
 
 var search_database_uri string
 
-const VerboseFlag string = "verbose"
-
-var verbose bool
-
-const ConfigURIFlag string = "config-uri"
-
-var config_uri string
-
 // DefaultFlagSet returns a `flag.FlagSet` instance with flags and defaults values assigned for use with `app`.
 func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 
@@ -275,6 +325,7 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.BoolVar(&enable_all, EnableAllFlag, false, "Enable all the available output handlers EXCEPT the search handlers which need to be explicitly enable using the -enable-search* flags.")
 	fs.BoolVar(&enable_graphics, EnableGraphicsFlag, false, "Enable the 'png' and 'svg' output handlers.")
 	fs.BoolVar(&enable_data, EnableDataFlag, false, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
+	fs.BoolVar(&enable_html, EnableHTMLFlag, EnableHTMLDefault, "Enable the 'geojson' and 'spr' and 'select' output handlers.")
 
 	fs.BoolVar(&enable_png, EnablePNGFlag, false, "Enable the 'png' output handler.")
 	fs.BoolVar(&enable_svg, EnableSVGFlag, false, "Enable the 'svg' output handler.")
@@ -288,8 +339,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.BoolVar(&enable_select, "enable-select", false, "Enable the 'select' output handler.")
 	fs.StringVar(&select_pattern, "select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")
 
-	fs.BoolVar(&enable_html, "enable-html", true, "Enable the 'html' (or human-friendly) output handlers.")
-	fs.BoolVar(&enable_index, "enable-index", true, "Enable the 'index' (or human-friendly) index handler.")
+	fs.BoolVar(&enable_id, EnableIdFlag, EnableIdDefault, "Enable the 'html' (or human-friendly) output handlers.")
+	fs.BoolVar(&enable_index, EnableIndexFlag, EnableIndexDefault, "Enable the 'index' (or human-friendly) index handler.")
 
 	fs.BoolVar(&enable_search_api, "enable-search-api", false, "Enable the (API) search handlers.")
 	fs.BoolVar(&enable_search, "enable-search", false, "Enable both the API and human-friendly search handlers.")
@@ -364,6 +415,17 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	// Point in polygon stuff (required for edit/write stuff)
 
 	fs.StringVar(&spatial_database_uri, SpatialDatabaseURIFlag, "", "...")
+
+	fs.BoolVar(&disable_geojson, DisableGeoJSONFlag, DisableGeoJSONDefault, "...")
+	fs.BoolVar(&disable_geojsonld, DisableGeoJSONLDFlag, DisableGeoJSONLDDefault, "...")
+	fs.BoolVar(&disable_id, DisableIdFlag, DisableIdDefault, "...")
+	fs.BoolVar(&disable_index, DisableIndexFlag, DisableIndexDefault, "...")
+	fs.BoolVar(&disable_navplace, DisableNavPlaceFlag, DisableNavPlaceDefault, "...")
+	fs.BoolVar(&disable_png, DisablePNGFlag, DisablePNGDefault, "...")
+	fs.BoolVar(&disable_search, DisableSearchFlag, DisableSearchDefault, "...")
+	fs.BoolVar(&disable_spr, DisableSPRFlag, DisableSPRDefault, "...")
+	fs.BoolVar(&disable_svg, DisableSVGFlag, DisableSVGDefault, "...")
+	fs.BoolVar(&disable_webfinger, DisableWebFingerFlag, DisableWebFingerDefault, "...")
 
 	// Custom chrome stuff
 

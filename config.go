@@ -18,6 +18,17 @@ type Config struct {
 	CORSOrigins                []string `json:"cors_origins,omitempty"`
 	CORSAllowCredentials       bool     `json:"cors_allow_credentials,omitempty"`
 	CustomChromeURI            string   `json:"custom_chrome_uri,omitempty"`
+	DisableGeoJSON             bool     `json:"disable_geojson,omitempty"`
+	DisableGeoJSONLD           bool     `json:"disable_geojsonld,omitempty"`
+	DisableId                  bool     `json:"disable_id,omitempty"`
+	DisableIndex               bool     `json:"disable_index,omitempty"`
+	DisableNavPlace            bool     `json:"disable_navplace,omitempty"`
+	DisablePNG                 bool     `json:"disable_png,omitempty"`
+	DisableSearch              bool     `json:"disable_search,omitempty"`
+	DisableSelect              bool     `json:"disable_select"`
+	DisableSPR                 bool     `json:"disable_spr"`
+	DisableSVG                 bool     `json:"disable_svg,omitempty"`
+	DisableWebFinger           bool     `json:"disable_webfinger"`
 	EnableAll                  bool     `json:"enable_all,omitempty"`
 	EnableCORS                 bool     `json:"enable_cors,omitempty"`
 	EnableData                 bool     `json:"enable_data,omitempty"`
@@ -28,6 +39,7 @@ type Config struct {
 	EnableGeoJSONLD            bool     `json:"enable_geojsonld,omitempty"`
 	EnableGraphics             bool     `json:"enable_graphics"`
 	EnableHTML                 bool     `json:"enable_html,omitempty"`
+	EnableId                   bool     `json:"enable_id,omitempty"`
 	EnableIndex                bool     `json:"enable_index,omitempty"`
 	EnableNavPlace             bool     `json:"enable_navplace,omitempty"`
 	EnablePNG                  bool     `json:"enable_png,omitempty"`
@@ -125,6 +137,7 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		CORSAllowCredentials:       cors_allow_credentials,
 		CORSOrigins:                cors_origins,
 		CustomChromeURI:            custom_chrome_uri,
+		DisableIndex:               disable_index,
 		EnableAll:                  enable_all,
 		EnableCORS:                 enable_cors,
 		EnableData:                 enable_data,
@@ -133,6 +146,7 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		EnableEditUI:               enable_edit_ui,
 		EnableGraphics:             enable_graphics,
 		EnableHTML:                 enable_html,
+		EnableId:                   enable_id,
 		EnableIndex:                enable_index,
 		EnablePNG:                  enable_png,
 		EnableSelect:               enable_select,

@@ -37,7 +37,8 @@ type Settings struct {
 	Capabilities          *browser_capabilities.Capabilities
 	CORSWrapper           *cors.Cors
 	CustomChrome          chrome.Chrome
-	CustomHandlers        map[string]http.HandlerFunc
+	CustomWWWHandlers     map[string]http.Handler
+	CustomAPIHandlers     map[string]http.Handler
 	Exporter              export.Exporter
 	MapProvider           provider.Provider
 	NavPlaceMaxFeatures   int
@@ -52,6 +53,16 @@ type Settings struct {
 	WriterURIs            []string
 }
 
+func (s *Settings) HasHTMLCapabilities() bool {
+
+	if s.Capabilities.Index || s.Capabilities.Id || s.Capabilities.Search || s.Capabilities.EditUI {
+		return true
+	}
+
+	return false
+}
+
+// SettingsFromFlagSet will create a new `Settings` instance derived from 'fs'.
 func SettingsFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Settings, error) {
 
 	cfg, err := ConfigFromFlagSet(ctx, fs)
@@ -63,7 +74,95 @@ func SettingsFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Settings, erro
 	return SettingsFromConfig(ctx, cfg)
 }
 
+// SettingsFromFlagSet will create a new `Settings` instance derived from 'cfg'.
 func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
+
+	// To do: pre-fill defaults in cfg
+
+	if cfg.EnableAll {
+		cfg.EnableGraphics = true
+		cfg.EnableData = true
+		cfg.EnableHTML = true
+	}
+
+	if cfg.EnableGraphics {
+		cfg.EnablePNG = true
+		cfg.EnableSVG = true
+	}
+
+	if cfg.EnableData {
+		cfg.EnableGeoJSON = true
+		cfg.EnableGeoJSONLD = true
+		cfg.EnableNavPlace = true
+		cfg.EnableSPR = true
+		cfg.EnableSelect = true
+		cfg.EnableWebFinger = true
+	}
+
+	if cfg.EnableSearch {
+		cfg.EnableSearchAPI = true
+		cfg.EnableHTML = true
+	}
+
+	if cfg.EnableHTML {
+		cfg.EnableGeoJSON = true
+		cfg.EnablePNG = true
+		cfg.EnableIndex = true
+		cfg.EnableId = true
+	}
+
+	if cfg.EnableEdit {
+		cfg.EnableEditAPI = true
+		cfg.EnableEditUI = true
+	}
+
+	if cfg.EnableEditUI {
+		cfg.EnableEditAPI = true
+	}
+
+	if cfg.DisableGeoJSON {
+		cfg.EnableGeoJSON = false
+	}
+
+	if cfg.DisableGeoJSONLD {
+		cfg.EnableGeoJSONLD = false
+	}
+
+	if cfg.DisableId {
+		cfg.EnableId = false
+	}
+
+	if cfg.DisableIndex {
+		cfg.EnableIndex = false
+	}
+
+	if cfg.DisableNavPlace {
+		cfg.EnableNavPlace = false
+	}
+
+	if cfg.DisablePNG {
+		cfg.EnablePNG = false
+	}
+
+	if cfg.DisableSearch {
+		cfg.EnableSearch = false
+	}
+
+	if cfg.DisableSelect {
+		cfg.EnableSelect = false
+	}
+
+	if cfg.DisableSPR {
+		cfg.EnableSPR = false
+	}
+
+	if cfg.DisableSVG {
+		cfg.EnableSVG = false
+	}
+
+	if cfg.DisableWebFinger {
+		cfg.EnableWebFinger = false
+	}
 
 	settings := &Settings{
 		Templates: []fs.FS{html.FS},
@@ -170,7 +269,6 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 
 	uris := &browser_uris.URIs{
 		URIPrefix: cfg.URIPrefix,
-		Index:     cfg.PathIndex,
 		Ping:      cfg.PathPing,
 	}
 
@@ -184,20 +282,47 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 			return nil, fmt.Errorf("Invalid -static-prefix value")
 		}
 
-		path_index, err := url.JoinPath(cfg.URIPrefix, cfg.PathIndex)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path_index)
-		}
-
 		path_ping, err = url.JoinPath(cfg.URIPrefix, cfg.PathPing)
 
 		if err != nil {
 			return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path_ping)
 		}
 
-		uris.Index = path_index
 		uris.Ping = path_ping
+	}
+
+	if cfg.EnableIndex {
+
+		capabilities.Index = true
+		uris.Index = cfg.PathIndex
+
+		if cfg.URIPrefix != "" {
+
+			path_index, err := url.JoinPath(cfg.URIPrefix, cfg.PathIndex)
+
+			if err != nil {
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path_index)
+			}
+
+			uris.Index = path_index
+		}
+	}
+
+	if cfg.EnableId {
+
+		capabilities.Id = true
+		uris.Id = cfg.PathId
+
+		if cfg.URIPrefix != "" {
+
+			path_id, err := url.JoinPath(cfg.URIPrefix, cfg.PathId)
+
+			if err != nil {
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", path_id)
+			}
+
+			uris.Id = path_id
+		}
 	}
 
 	if cfg.EnableGeoJSON {
@@ -433,24 +558,6 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 
 			uris.SPRAlt = alt_paths
 
-		}
-
-	}
-
-	if cfg.EnableHTML {
-
-		capabilities.HTML = true
-		uris.Id = cfg.PathId
-
-		if cfg.URIPrefix != "" {
-
-			path_id, err := url.JoinPath(cfg.URIPrefix, cfg.PathId)
-
-			if err != nil {
-				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathId)
-			}
-
-			uris.Id = path_id
 		}
 
 	}

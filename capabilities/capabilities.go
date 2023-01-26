@@ -9,7 +9,8 @@ type Capabilities struct {
 	WebFinger           bool
 	Select              bool
 	SPR                 bool
-	HTML                bool // To do: Rename this; this is the /id/{ID} page
+	Index               bool
+	Id                  bool
 	Search              bool
 	SearchAPI           bool
 	EditUI              bool
