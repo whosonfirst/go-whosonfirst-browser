@@ -1,23 +1,13 @@
 {{ define "error" }}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-      <title>Who's On First</title>
-      {{template "inc_common_meta" .}}
-      {{template "inc_common_css" .}}
-  </head>
-  <body>
+{{ template "inc_header" }}
 
-      <div class="container">
-      {{template "inc_common_header" .}}
+<div class="container">
 
       <main>
 	  <p>Hrm... there was a problem trying to do that.</p>
       </main>
-      
-      {{template "inc_common_footer" .}}
+
+
       </div>
-      
-  </body>
-</html>
+{{ template "inc_footer" }}            
 {{ end }}
