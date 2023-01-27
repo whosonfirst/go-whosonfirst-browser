@@ -1,5 +1,5 @@
 {{ define "create" }}
-{{ template "inc_header" . }}
+{{ template "browser_header" . }}
 
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.api.js" }}"></script>      
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.create.js" }}"></script>
@@ -87,4 +87,5 @@
 	      
 	  </div>
 
-	  {{ template "inc_footer.html" }}
+{{ template "browser_footer" }}
+{{ end }} 

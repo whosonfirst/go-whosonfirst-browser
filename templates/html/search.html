@@ -1,16 +1,7 @@
 {{ define "search" }}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-      <title>Who's On First Search</title>
-      {{template "inc_common_meta" . }}
-      {{template "inc_common_css" . }}
-
-  </head>
-  <body>
+{{ template "browser_header" . }}
 
       <div class="container">            
-      {{template "inc_common_header" .}}
 
 	  <main>
 	      
@@ -64,9 +55,7 @@
 	      {{ end }} 
 	  </main>
       
-      {{template "inc_common_footer" . }}
       </div>
       
-  </body>
-</html>
+{{ template "browser_footer" . }}
 {{ end }}

@@ -1,5 +1,5 @@
 {{ define "alt" }}
-{{ template "inc_header" . }}
+{{ template "browser_header" . }}
 
       <link rel="stylesheet" href={{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.id.css" }}" />
 
@@ -40,5 +40,5 @@
       </main>
 
     </div>      
-{{ template "inc_footer.html" }}
+{{ template "browser_footer" . }}
 {{ end }}

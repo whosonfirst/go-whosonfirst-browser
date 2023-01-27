@@ -1,46 +1,14 @@
 {{ define "geometry" }}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-      <title>{{ .Id }} | Who's On First</title>
-      {{ template "inc_common_meta" . }}
-      <!-- <meta property="html:lastmodified" content="" /> -->
-	        
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/localforage.min.js" }}"></script>	  
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/slippymap.crosshairs.js" }}"></script>
-      
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.www.js" }}"></script>	 
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.render.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.properties.js" }}"></script>
-      
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.cache.js" }}"></script>	 
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.uri.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.net.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.namify.js" }}"></script> 	 	 
-      
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.geojson.js" }}"></script>	 
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.utils.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.styles.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.handlers.js" }}"></script> 	 	 
+{{ template "browser_header" . }}
 
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.maps.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.common.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.feedback.js" }}"></script>
-      
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.api.js" }}"></script>      
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.geometry.js" }}"></script>
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.geometry.init.js" }}"></script>	 
-      
-      {{ template "inc_common_css" . }}
 
       <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.css" }}" />
       <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.geometry.css" }}" />            
-      
-  </head>
-  <body data-whosonfirst-uri-endpoint="{{ .Paths.GeoJSON }}">
 
       <div class="container">
-      {{ template "inc_common_header" . }}
 
       <main class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .Id }}">
 
@@ -75,12 +43,6 @@
 		  
 	      </div>
 	  </div>
-	  
-      </main>
 
-      {{ template "inc_common_footer" .}}
-
-    </div>      
-  </body>
-</html>
+{{ template "browser_footer" . }}
 {{ end }}

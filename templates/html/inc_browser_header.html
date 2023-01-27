@@ -1,0 +1,44 @@
+{{ define "browser_header" }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <title>Who's On First</title>
+
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <meta name="referrer" content="origin">
+      <meta http-equiv="X-UA-Compatible" content="IE=9" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+      <meta name="HandheldFriendly" content="true" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+
+      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.www.css" }}" />
+      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.common.css"  }}" />
+      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.css" }}" />
+
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/localforage.min.js" }}"></script>	  
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/slippymap.crosshairs.js" }}"></script>
+      
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.www.js" }}"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.render.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.properties.js" }}"></script>
+      
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.cache.js" }}"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.uri.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.net.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.namify.js" }}"></script> 	 	 
+      
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.geojson.js" }}"></script>	 
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.utils.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.styles.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.leaflet.handlers.js" }}"></script> 	 	 
+      
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.maps.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.common.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.feedback.js" }}"></script>      
+      
+  </head>
+  <body data-whosonfirst-uri-endpoint="{{ .Paths.GeoJSON }}">
+      {{ template "browser_navi" . }}
+      
+{{ end }}
