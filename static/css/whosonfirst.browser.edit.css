@@ -40,13 +40,6 @@
 
 /* Classes */
 
-.grid-view {
-	display: grid;
-	grid-template-columns:1fr 1fr;
-	justify-items: initial !important;
-	gap: 50px 50px;
-}
-
 .wof-property-block {
 	margin-bottom:1rem;
 }
@@ -57,11 +50,4 @@
 }
 
 /* Media queries */
-
-@media (max-width: 1000px) {
-
-	.grid-view {
-		grid-template-columns:1fr !important;
-	}
-}
 

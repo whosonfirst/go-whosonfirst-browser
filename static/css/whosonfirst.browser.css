@@ -23,6 +23,13 @@ body {
 
 /* Classes */
 
+.grid-view {
+	display: grid;
+	grid-template-columns:1fr 1fr;
+	justify-items: initial !important;
+	gap: 50px 50px;
+}
+
 /* START OF hopefully this will be unnecessary once there are SVG icons in Leaflet 2.x
    For nor now we need to do because image-based markers aren't served correctly if this is
    run in a Lamba + API Gateway context. Computers, amirite... */
@@ -38,6 +45,13 @@ body {
 /* END OF hopefully this will be unnecessary once there are SVG icons in Leaflet 2.x */
 
 /* Media queries */
+
+@media (max-width: 1000px) {
+
+	.grid-view {
+		grid-template-columns:1fr !important;
+	}
+}
 
 @media (max-width: 600px) {
 	#header h4 {
