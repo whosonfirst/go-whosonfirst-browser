@@ -10,10 +10,8 @@ whosonfirst.browser.api = (function(){
 	    return new Promise((resolve, reject) => {
 		
 		var abs_url = self.abs_url(rel_url);
-	    
-		var req = new XMLHttpRequest();
-		
-		req.onload = function(){
+
+		var onload = function(){
 		    
 		    var rsp;
 		    
@@ -30,10 +28,39 @@ whosonfirst.browser.api = (function(){
 		    resolve(rsp);
        		};
 		
-		req.open(http_method, abs_url, true);
-				
-		var enc_body = JSON.stringify(body);
-		req.send(enc_body);	    
+		var onprogress = function(rsp){
+		    // console.log("progress");
+		};
+		
+		var onfailed = function(rsp){
+		    reject("Connection failed " + rsp);
+		};
+		
+		var onabort = function(rsp){
+		    reject("Connection aborted " + rsp);
+		};
+		
+		try {
+		    
+		    var req = new XMLHttpRequest();
+
+		    // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials		    
+		    req.withCredentials = true;
+		    
+		    req.addEventListener("load", onload);
+		    req.addEventListener("progress", onprogress);
+		    req.addEventListener("error", onfailed);
+		    req.addEventListener("abort", onabort);
+		    
+		    req.open(http_method, abs_url, true);
+		    
+		    var enc_body = JSON.stringify(body);
+		    req.send(enc_body);	    
+		    
+		} catch (err){
+		    reject(err);
+		}
+
 	    });
 	},
 
