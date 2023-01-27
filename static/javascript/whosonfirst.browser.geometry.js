@@ -30,21 +30,21 @@ whosonfirst.browser.geometry = (function(){
 	    var pl = document.getElementById("whosonfirst-place");
 
 	    if (! pl){
-		console.log("Missing 'whosonfirst-place' element");
+		whosonfirst.browser.feedback.emit("Missing 'whosonfirst-place' element");
 		return false;
 	    }
 
 	    var wof_id = pl.getAttribute("data-whosonfirst-id");
 
 	    if (! wof_id){
-		console.log("Missing 'data-whosonfirst-id' attribute");
+		whosonfirst.browser.feedback.emit("Missing 'data-whosonfirst-id' attribute");
 		return;
 	    }
 
 	    var map_el = document.getElementById("map");
 
 	    if (! map_el){
-		console.log("Missing 'map' element");
+		whosonfirst.browser.feedback.emit("Missing 'map' element");
 		return false
 	    }
 
@@ -66,6 +66,8 @@ whosonfirst.browser.geometry = (function(){
 	    
 	    var on_success = function(feature){
 
+		whosonfirst.browser.feedback.clear();
+		
 		var props = feature.properties;
 		var name = props["wof:name"];
 		var id = props["wof:id"];
@@ -102,14 +104,14 @@ whosonfirst.browser.geometry = (function(){
 		    var layer = L.geoJSON(feature);
 		    layer.addTo(map);
 
-		    console.log("Missing map.pm");
+		    whosonfirst.browser.feedback.emit("Missing map.pm");
 		    return;
 		}
 		
 		var on_update = function(){
+		    
 		    var feature_group = map.pm.getGeomanLayers(true);
 		    var feature_collection = feature_group.toGeoJSON();
-		    console.log("UPDATE", feature_collection);
 
 		    var geojson_el = document.getElementById("geojson");
 
@@ -213,9 +215,10 @@ whosonfirst.browser.geometry = (function(){
 	    };
 
 	    var on_error = function(err){
-		console.log("SAD", err);
+		whosonfirst.browser.feedback.emit("Failed to load record", err);		
 	    };
-	    
+
+	    whosonfirst.browser.feedback.emit("Loading record");
 	    whosonfirst.net.fetch(data_url, on_success, on_error);	    
 	},
 
@@ -235,14 +238,14 @@ whosonfirst.browser.geometry = (function(){
 		var pl = document.getElementById("whosonfirst-place");
 		
 		if (! pl){
-		    console.log("Missing 'whosonfirst-place' element");
+		    whosonfirst.browser.feedback.emit("Missing 'whosonfirst-place' element");
 		    return false;
 		}
 		
 		var wof_id = pl.getAttribute("data-whosonfirst-id");
 		
 		if (! wof_id){
-		    console.log("Missing 'data-whosonfirst-id' attribute");
+		    whosonfirst.browser.feedback.emit("Missing 'data-whosonfirst-id' attribute");
 		    return;
 		}
 
@@ -258,7 +261,7 @@ whosonfirst.browser.geometry = (function(){
 
 		    switch (count){
 			case 0:
-			    console.log("Missing geometry");
+			    whosonfirst.browser.feedback.emit("Missing geometry");
 			    return false;
 			    break;
 			case 1:
@@ -287,17 +290,19 @@ whosonfirst.browser.geometry = (function(){
 			'properties': {},
 			'geometry': geom,
 		    };
-		    
+
+		    // UPDATE ME: paths...
+			
 		    var uri = "/api/geometry/" + wof_id;
 
 		    whosonfirst.browser.api.do("POST", uri, feature).then((data) => {
-			console.log("OKAY", data);
+			whosonfirst.browser.feedback.emit("Geometry has been successfully updated", err);
 		    }).catch((err) => {
-			console.log("NOT OKAY", err);
+			whosonfirst.browser.feedback.emit("Failed to update geometry", err);
 		    });			
 		    
 		} catch (err) {
-		    console.log("SAD", err);
+		    whosonfirst.browser.feedback.emit("Failed to parse record before submitting update", err);
 		}
 		
 		return false;
