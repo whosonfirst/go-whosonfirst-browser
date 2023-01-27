@@ -7,85 +7,64 @@
       
       <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.css" }}" />
 
-      <div class="container">
+      <div class="container" id="create-feature">
 
-      <main class="whosonfirst">
-
-	  <div class="container">
-
-	      <div class="grid-view">
+	  <div class="grid-view">
+	      
+	      <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true"></div>
+	      
+	      <div id="edit">
 		  
-		  <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true">
-		  </div>
-
-		  <div id="edit">
-
-		      <div id="feedback"></div>
-
-		      <dialog id="feedback-dialog">
-			  <p id="feedback-body"></p>
-			  <form method="dialog">
-			      <button>OK</button>
-			  </form>
-		      </dialog>
+		  <div id="feedback"></div>
+		  		  
+		  <form class="form" class="row g-3" id="wof-properties-form">
 		      
-		      <form class="form" class="row g-3" id="wof-properties-form">
-
-			  <!--
+		      <!--
 			  See the way everything is a textarea? That's the default and allows arbitrary
-			  JSON to be written if necessary. Eventually the idea is to write and use web
-			  components to transform these textareas in to custom elements.
-			  -->
-			  
-			  <div class="col-auto wof-property-block">
-			      <label for="wof:name" >wof:name</label>
-			      <textarea class="form-control-plaintext wof-property wof-property-string" id="wof:name"></textarea>
-			  </div>
-			  
-			  <div class="col-auto wof-property-block">
-			      <label for="wof:placetype" class="form-label">wof:placetype</label>
-			      <textarea class="form-control-plaintext wof-property wof-property-placetype" id="wof:placetype"></textarea>
-			      
-			      <!--
-				   <input class="form-control wof-property" list="wof:placetype_options" id="wof:placetype" placeholder="Type to search...">
-				   <datalist id="wof:placetype_options">
-				   {{ range $i, $pt := .Placetypes }}
-				   <option value="{{ $pt.Name }}" />
-				   {{ end }}
-				   </datalist>
-			      -->
-			  </div>
-			  
-			  <div class="col-auto wof-property-block">
-			      <label for="edtf:inception" >edtf:inception</label>
-			      <textarea class="form-control-plaintext wof-property wof-property-edtf" id="edtf:inception"></textarea>
-			  </div>
-			  
-			  <div class="col-auto wof-property-block">
-			      <label for="edtf:cessation" >edtf:cessation</label>
-			      <textarea class="form-control-plaintext wof-property wof-property-edtf" id="edtf:cessation"></textarea>
-			  </div>
-			  
-			  <div class="col-auto wof-property-block">
-			      <label for="wof:repo" >wof:repo</label>
-			      <textarea class="form-control-plaintext wof-property wof-property-repo" id="wof:repo"></textarea>
-			  </div>
-			  
-			  <div class="col-auto wof-property-block">
-			      <label for="mz:is_current" >mz:is_current</label>
-			      <textarea class="form-control-plaintext wof-property wof-property-existential" id="mz:is_current"></textarea>
-			  </div>
-			  
-		      </form>
+			   JSON to be written if necessary. Eventually the idea is to write and use web
+			   components to transform these textareas in to custom elements.
+		      -->
 		      
-		      <div id="controls" class="row">
-			  <button class="btn" id="save">Save</button>
+		      <div class="col-auto wof-property-block">
+			  <label for="wof:name" >wof:name</label>
+			  <textarea class="form-control-plaintext wof-property wof-property-string" id="wof:name"></textarea>
 		      </div>
 		      
+		      <div class="col-auto wof-property-block">
+			  <label for="wof:placetype" class="form-label">wof:placetype</label>
+			  <textarea class="form-control-plaintext wof-property wof-property-placetype" id="wof:placetype"></textarea>
+		      </div>
+			  
+		      <div class="col-auto wof-property-block">
+			  <label for="edtf:inception" >edtf:inception</label>
+			  <textarea class="form-control-plaintext wof-property wof-property-edtf" id="edtf:inception"></textarea>
+		      </div>
+		      
+		      <div class="col-auto wof-property-block">
+			  <label for="edtf:cessation" >edtf:cessation</label>
+			  <textarea class="form-control-plaintext wof-property wof-property-edtf" id="edtf:cessation"></textarea>
+		      </div>
+		      
+		      <div class="col-auto wof-property-block">
+			  <label for="wof:repo" >wof:repo</label>
+			  <textarea class="form-control-plaintext wof-property wof-property-repo" id="wof:repo"></textarea>
+		      </div>
+		      
+		      <div class="col-auto wof-property-block">
+			  <label for="mz:is_current" >mz:is_current</label>
+			  <textarea class="form-control-plaintext wof-property wof-property-existential" id="mz:is_current"></textarea>
+		      </div>
+		      
+		  </form>
+		  
+		  <div id="controls" class="row">
+		      <button class="btn" id="save">Save</button>
 		  </div>
+		  
 	      </div>
-	      
 	  </div>
-
+	  
+      </div>
+      
 {{ template "browser_footer" }}
 {{ end }} 

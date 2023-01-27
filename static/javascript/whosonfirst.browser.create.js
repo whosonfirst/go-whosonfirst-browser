@@ -51,7 +51,7 @@ whosonfirst.browser.create = (function(){
 	    var on_update = function(){
 		var feature_group = map.pm.getGeomanLayers(true);
 		var feature_collection = feature_group.toGeoJSON();
-		console.log("UPDATE", feature_collection);
+		// console.log("UPDATE", feature_collection);
 	    };
 	    
 	    map.pm.setGlobalOptions({
@@ -104,6 +104,20 @@ whosonfirst.browser.create = (function(){
 
 	    save_button.onclick = function(){
 
+		var create_el = document.getElementById("create-feature");
+
+		if (! create_el){
+		    whosonfirst.browser.feedback.emit("Missing 'create-feature' element");
+		    return false;
+		}
+		
+		var create_uri = create_el.getAttribute("data-uri-create-geometry");		
+
+		if (! create_uri){
+		    whosonfirst.browser.feedback.emit("Missing 'data-uri-create-geometry' attribute");
+		    return;
+		}
+		
 		var props = {};
 		
 		var inputs = document.getElementsByClassName("wof-property");
@@ -133,8 +147,6 @@ whosonfirst.browser.create = (function(){
 		    
 		    props[k] = v;
 		}
-
-		console.log("props", props);
 
 		try {
 		    
@@ -178,16 +190,20 @@ whosonfirst.browser.create = (function(){
 			'geometry': geom,
 		    };
 		    
-		    var uri = "/api/create/";
+		    var create_uri = whosonfirst.browser.uris.forLabel("create_feature_api");
 
-		    whosonfirst.browser.api.do("PUT", uri, feature).then((data) => {
-			whosonfirst.browser.feedback.emit("OKAY", data);
+		    whosonfirst.browser.api.do("PUT", create_uri, feature).then((data) => {
+			var props = data["properties"];
+			var id = props["wof:id"];
+			whosonfirst.browser.feedback.emit("New feature created with ID " + id);
 		    }).catch((err) => {
-			whosonfirst.browser.feedback.emit("NOT OKAY", err);
+			whosonfirst.browser.feedback.emit("Failed to create new feature", err);
 		    });			
+
+		    whosonfirst.browser.feedback.emit("Creating new feature...");
 		    
 		} catch (err) {
-		    whosonfirst.browser.feedback.emit("SAD", err);
+		    whosonfirst.browser.feedback.emit("Unable to prepare data to create new feature", err);
 		}
 		
 		return false;

@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"path/filepath"
 
 	"github.com/aaronland/go-http-bootstrap"
@@ -22,9 +23,10 @@ import (
 	"github.com/aaronland/go-http-ping/v2"
 	"github.com/aaronland/go-http-server"
 	"github.com/sfomuseum/go-template/html"
+	"github.com/sfomuseum/go-template/text"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
-	_ "github.com/whosonfirst/go-whosonfirst-search/fulltext"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/javascript"
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -68,6 +70,12 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		return fmt.Errorf("Failed to load templates, %w", err)
 	}
 
+	js_t, err := text.LoadTemplatesMatching(ctx, "*.js", javascript.FS)
+
+	if err != nil {
+		return fmt.Errorf("Failed to load JS templates, %w", err)
+	}
+
 	// Start setting up handlers
 
 	mux := http.NewServeMux()
@@ -83,6 +91,46 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	if settings.Verbose {
 		logger.Printf("Handle ping endpoint at %s\n", settings.URIs.Ping)
 	}
+
+	// START OF uris.js
+
+	uris_t := js_t.Lookup("uris")
+
+	if uris_t == nil {
+		return fmt.Errorf("Failed to load 'uris' javascript template")
+	}
+
+	uris_opts := &www.URIsHandlerOptions{
+		URIs:     settings.URIs,
+		Template: uris_t,
+	}
+
+	uris_handler, err := www.URIsHandler(uris_opts)
+
+	if err != nil {
+		return fmt.Errorf("Failed to create URIs handler, %w", err)
+	}
+
+	uris_path := "/javascript/whosonfirst.browser.uris.js"
+
+	if settings.URIs.URIPrefix != "" {
+
+		path, err := url.JoinPath(settings.URIs.URIPrefix, uris_path)
+
+		if err != nil {
+			return fmt.Errorf("Failed to assign URI prefix to %s, %w", uris_path, err)
+		}
+
+		uris_path = path
+	}
+
+	mux.Handle(uris_path, uris_handler)
+
+	if settings.Verbose {
+		logger.Printf("Handle whosonfirst.browser.uris.js endpoint at %s\n", uris_path)
+	}
+
+	// END OF uris.js
 
 	if settings.Capabilities.PNG {
 

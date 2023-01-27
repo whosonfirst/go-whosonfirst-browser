@@ -65,6 +65,9 @@ whosonfirst.browser.api = (function(){
 	},
 
 	'abs_url': function(rel_url){
+
+	    // To do: read root URL from ... ?
+	    
 	    return rel_url;
 	},
     };

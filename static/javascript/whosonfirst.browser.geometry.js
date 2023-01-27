@@ -27,20 +27,20 @@ whosonfirst.browser.geometry = (function(){
 		
 	'init_geometry': function(){
 
-	    var pl = document.getElementById("whosonfirst-place");
-
-	    if (! pl){
-		whosonfirst.browser.feedback.emit("Missing 'whosonfirst-place' element");
+	    var edit_el = document.getElementById("edit-geometry");
+	    
+	    if (! edit_el){
+		whosonfirst.browser.feedback.emit("Missing 'edit-geometry' element");
 		return false;
 	    }
-
-	    var wof_id = pl.getAttribute("data-whosonfirst-id");
-
+	    
+	    var wof_id = edit_el.getAttribute("data-whosonfirst-id");
+	    
 	    if (! wof_id){
 		whosonfirst.browser.feedback.emit("Missing 'data-whosonfirst-id' attribute");
 		return;
 	    }
-
+	    
 	    var map_el = document.getElementById("map");
 
 	    if (! map_el){
@@ -234,15 +234,15 @@ whosonfirst.browser.geometry = (function(){
 	    var save_button = document.getElementById("save");
 
 	    save_button.onclick = function(){
-
-		var pl = document.getElementById("whosonfirst-place");
 		
-		if (! pl){
-		    whosonfirst.browser.feedback.emit("Missing 'whosonfirst-place' element");
+		var edit_el = document.getElementById("edit-geometry");
+
+		if (! edit_el){
+		    whosonfirst.browser.feedback.emit("Missing 'edit-geometry' element");
 		    return false;
 		}
 		
-		var wof_id = pl.getAttribute("data-whosonfirst-id");
+		var wof_id = edit_el.getAttribute("data-whosonfirst-id");
 		
 		if (! wof_id){
 		    whosonfirst.browser.feedback.emit("Missing 'data-whosonfirst-id' attribute");
@@ -291,11 +291,9 @@ whosonfirst.browser.geometry = (function(){
 			'geometry': geom,
 		    };
 
-		    // UPDATE ME: paths...
-			
-		    var uri = "/api/geometry/" + wof_id;
+		    var edit_uri = whosonfirst.browser.uris.forLabel("edit_geometry_api") + wof_id;
 
-		    whosonfirst.browser.api.do("POST", uri, feature).then((data) => {
+		    whosonfirst.browser.api.do("POST", edit_uri, feature).then((data) => {
 			whosonfirst.browser.feedback.emit("Geometry has been successfully updated", err);
 		    }).catch((err) => {
 			whosonfirst.browser.feedback.emit("Failed to update geometry", err);

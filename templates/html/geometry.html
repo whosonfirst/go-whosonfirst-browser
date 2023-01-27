@@ -8,41 +8,38 @@
       <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.css" }}" />
       <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.geometry.css" }}" />            
 
-      <div class="container">
+      <div class="container" id="edit-geometry" data-whosonfirst-id="{{ .Id }}">
 
-      <main class="whosonfirst" id="whosonfirst-place" data-whosonfirst-id="{{ .Id }}">
-
-	  <div class="container">
-
-	      <div class="grid-view">	      
-		  <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true"></div>
-
-		  <div id="edit">
-		      <h4>
-			  <span id="wof:name"></span>
-		      </h4>
-
-		      <a href="#" id="wof:id"></a>
-		      
-		      <div id="feedback"></div>
-
-		      <dialog id="feedback-dialog">
-			  <p id="feedback-body"></p>
-			  <form method="dialog">
-			      <button>OK</button>
-			  </form>
-		      </dialog>
-
-		      <!-- <pre id="geojson"></pre> -->
-		      
-		      <div id="controls" class="row">
-			  <button class="btn" id="save">Save</button>
-		      </div>
-
+	  <div class="grid-view">	      
+	      <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true"></div>
+	      
+	      <div id="edit">
+		  <h4>
+		      <span id="wof:name"></span>
+		  </h4>
+		  
+		  <a href="#" id="wof:id"></a>
+		  
+		  <div id="feedback"></div>
+		  
+		  <dialog id="feedback-dialog">
+		      <p id="feedback-body"></p>
+		      <form method="dialog">
+			  <button>OK</button>
+		      </form>
+		  </dialog>
+		  
+		  <!-- <pre id="geojson"></pre> -->
+		  
+		  <div id="controls" class="row">
+		      <button class="btn" id="save">Save</button>
 		  </div>
 		  
 	      </div>
+	      
 	  </div>
+	  
+      </div>
 
 {{ template "browser_footer" . }}
 {{ end }}
