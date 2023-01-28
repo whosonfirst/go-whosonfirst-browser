@@ -12,6 +12,11 @@ whosonfirst.browser.api = (function(){
 		var abs_url = self.abs_url(rel_url);
 
 		var onload = function(){
+
+		    if (this.status >= 300){
+			reject(this.responseText);
+			return;
+		    }
 		    
 		    var rsp;
 		    

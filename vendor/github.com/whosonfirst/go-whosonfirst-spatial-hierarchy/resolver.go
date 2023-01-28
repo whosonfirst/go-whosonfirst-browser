@@ -27,6 +27,9 @@ type PointInPolygonHierarchyResolver struct {
 	Database database.SpatialDatabase
 	// Mapshaper is an optional `mapshaper.Client` instance used to derive centroids used in point-in-polygon requests.
 	Mapshaper *mapshaper.Client
+	// reader is the `reader.Reader` instance used to retrieve ancestor records. By default it is the same as `Database` but can be assigned
+	// explicitly using the `SetReader` method.
+	reader reader.Reader
 }
 
 // PointInPolygonHierarchyResolverUpdateCallback is a function definition for a custom callback to convert 'spr' in to a dictionary of properties
@@ -85,9 +88,15 @@ func NewPointInPolygonHierarchyResolver(ctx context.Context, spatial_db database
 	t := &PointInPolygonHierarchyResolver{
 		Database:  spatial_db,
 		Mapshaper: ms_client,
+		reader:    spatial_db,
 	}
 
 	return t, nil
+}
+
+// SetReader assigns 'r' as the internal `reader.Reader` instance used to retrieve ancestor records when resolving a hierarchy.
+func (t *PointInPolygonHierarchyResolver) SetReader(r reader.Reader) {
+	t.reader = r
 }
 
 // PointInPolygonAndUpdate will ...
@@ -99,13 +108,13 @@ func (t *PointInPolygonHierarchyResolver) PointInPolygonAndUpdate(ctx context.Co
 		return false, nil, fmt.Errorf("Failed to perform point in polygon operation, %w", err)
 	}
 
-	parent_spr, err := results_cb(ctx, t.Database, body, possible)
+	parent_spr, err := results_cb(ctx, t.reader, body, possible)
 
 	if err != nil {
 		return false, nil, fmt.Errorf("Results callback failed, %w", err)
 	}
 
-	to_assign, err := update_cb(ctx, t.Database, parent_spr)
+	to_assign, err := update_cb(ctx, t.reader, parent_spr)
 
 	if err != nil {
 		return false, nil, fmt.Errorf("Update callback failed, %w", err)
