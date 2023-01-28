@@ -293,16 +293,23 @@ whosonfirst.browser.geometry = (function(){
 
 		    var edit_uri = whosonfirst.browser.uris.forLabel("edit_geometry_api") + wof_id;
 
-		    whosonfirst.browser.api.do("POST", edit_uri, feature).then((data) => {
-			whosonfirst.browser.feedback.emit("Geometry has been successfully updated", err);
-		    }).catch((err) => {
-			whosonfirst.browser.feedback.emit("Failed to update geometry", err);
-		    });			
+		    whosonfirst.browser.api.do("POST", edit_uri, feature)
+			       .then((data) => {
+				   whosonfirst.browser.feedback.emit("Geometry has been successfully updated");
+				   save_button.removeAttribute("disabled");			
+			       })
+			       .catch((err) => {
+				   whosonfirst.browser.feedback.emit("Failed to update geometry", err);
+				   save_button.removeAttribute("disabled");			
+			       });			
+		    
+		    whosonfirst.browser.feedback.emit("Updating geometry...");				
+		    save_button.setAttribute("disabled", "disabled");
 		    
 		} catch (err) {
 		    whosonfirst.browser.feedback.emit("Failed to parse record before submitting update", err);
 		}
-		
+
 		return false;
 	    };
 	},

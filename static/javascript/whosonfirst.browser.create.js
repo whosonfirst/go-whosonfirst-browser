@@ -192,15 +192,20 @@ whosonfirst.browser.create = (function(){
 		    
 		    var create_uri = whosonfirst.browser.uris.forLabel("create_feature_api");
 
-		    whosonfirst.browser.api.do("PUT", create_uri, feature).then((data) => {
-			var props = data["properties"];
-			var id = props["wof:id"];
-			whosonfirst.browser.feedback.emit("New feature created with ID " + id);
-		    }).catch((err) => {
-			whosonfirst.browser.feedback.emit("Failed to create new feature", err);
-		    });			
+		    whosonfirst.browser.api.do("PUT", create_uri, feature)
+			       .then((data) => {
+				   var props = data["properties"];
+				   var id = props["wof:id"];
+				   whosonfirst.browser.feedback.emit("New feature created with ID " + id);
+				   save_button.removeAttribute("disabled");			
+			       })
+			       .catch((err) => {
+				   whosonfirst.browser.feedback.emit("Failed to create new feature", err);
+				   save_button.removeAttribute("disabled");						
+			       });			
 
 		    whosonfirst.browser.feedback.emit("Creating new feature...");
+		    save_button.setAttribute("disabled", "disabled");
 		    
 		} catch (err) {
 		    whosonfirst.browser.feedback.emit("Unable to prepare data to create new feature", err);

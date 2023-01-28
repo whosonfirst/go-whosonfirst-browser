@@ -17,11 +17,9 @@ whosonfirst.browser.api = (function(){
 		    
 		    try {
 			rsp = JSON.parse(this.responseText);
-            	    }
-		    
-		    catch (e){
-			console.log("ERR", abs_url, e);
-			reject(e);
+            	    } catch (err){
+			console.log("ERR", abs_url, err);
+			reject(err);
 			return false;
 		    }
 		    
@@ -40,27 +38,20 @@ whosonfirst.browser.api = (function(){
 		    reject("Connection aborted " + rsp);
 		};
 		
-		try {
-		    
-		    var req = new XMLHttpRequest();
-
-		    // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials		    
-		    req.withCredentials = true;
-		    
-		    req.addEventListener("load", onload);
-		    req.addEventListener("progress", onprogress);
-		    req.addEventListener("error", onfailed);
-		    req.addEventListener("abort", onabort);
-		    
-		    req.open(http_method, abs_url, true);
-		    
-		    var enc_body = JSON.stringify(body);
-		    req.send(enc_body);	    
-		    
-		} catch (err){
-		    reject(err);
-		}
-
+		var req = new XMLHttpRequest();
+		
+		// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials		    
+		req.withCredentials = true;
+		
+		req.addEventListener("load", onload);
+		req.addEventListener("progress", onprogress);
+		req.addEventListener("error", onfailed);
+		req.addEventListener("abort", onabort);
+		
+		req.open(http_method, abs_url, true);
+		
+		var enc_body = JSON.stringify(body);
+		req.send(enc_body);	    
 	    });
 	},
 
