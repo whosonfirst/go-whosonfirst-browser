@@ -455,6 +455,11 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		mux.Handle(settings.URIs.SearchAPI, search_api_handler)
 	}
 
+	if settings.Capabilities.PointInPolygonAPI {
+		// To do: Need to sort out what's necessary to create *spatial_app.SpatialApplication
+		// https://github.com/whosonfirst/go-whosonfirst-spatial/blob/main/app/app.go#L20
+	}
+
 	// Common code for HTML handler (public and/or edit handlers)
 
 	var bootstrap_opts *bootstrap.BootstrapOptions

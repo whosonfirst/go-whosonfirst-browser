@@ -41,6 +41,14 @@ const EnableIndexFlag string = "enable-index"
 
 var enable_index bool
 
+const EnablePointInPolygonFlag string = "enable-point-in-polygon"
+
+var enable_point_in_polygon bool
+
+const EnablePointInPolygonAPIFlag string = "enable-point-in-polygon-api"
+
+var enable_point_in_polygon_api bool
+
 const DisableGeoJSONFlag string = "disable-geojson"
 
 var disable_geojson bool
@@ -88,6 +96,14 @@ var disable_webfinger bool
 const ExporterURIFlag string = "exporter-uri"
 
 var exporter_uri string
+
+const PathPointInPolygonFlag string = "path-point-in-polygon"
+
+var path_point_in_polygon string
+
+const PathPointInPolygonAPIFlag string = "path-point-in-polygon-api"
+
+var path_point_in_polygon_api string
 
 const ReaderURIFlag string = "reader-uri"
 
@@ -410,6 +426,9 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&path_api_edit_geometry, PathAPIEditGeometryFlag, "/api/geometry/", "...")
 	fs.StringVar(&path_api_create_feature, PathAPICreateFeatureFlag, PathAPICreateFeatureDefault, "...")
 
+	fs.StringVar(&path_point_in_polygon, PathPointInPolygonFlag, PathPointInPolygonDefault, "...")
+	fs.StringVar(&path_point_in_polygon_api, PathPointInPolygonAPIFlag, PathPointInPolygonAPIDefault, "...")
+
 	fs.Var(&writer_uris, "writer-uri", "One or more valid go-writer Writer URI strings.")
 
 	// Point in polygon stuff (required for edit/write stuff)
@@ -426,6 +445,9 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.BoolVar(&disable_spr, DisableSPRFlag, DisableSPRDefault, "...")
 	fs.BoolVar(&disable_svg, DisableSVGFlag, DisableSVGDefault, "...")
 	fs.BoolVar(&disable_webfinger, DisableWebFingerFlag, DisableWebFingerDefault, "...")
+
+	fs.BoolVar(&enable_point_in_polygon, EnablePointInPolygonFlag, EnablePointInPolygonDefault, "...")
+	fs.BoolVar(&enable_point_in_polygon_api, EnablePointInPolygonAPIFlag, EnablePointInPolygonAPIDefault, "...")
 
 	// Custom chrome stuff
 

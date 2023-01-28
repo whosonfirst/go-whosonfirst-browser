@@ -23,4 +23,6 @@ type Capabilities struct {
 	CessateFeatureAPI   bool
 	EditGeometry        bool
 	EditGeometryAPI     bool
+	PointInPolygon      bool
+	PointInPolygonAPI   bool
 }

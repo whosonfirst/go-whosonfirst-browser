@@ -40,6 +40,10 @@ const EnableIdDefault bool = true
 
 const EnableIndexDefault bool = true
 
+const EnablePointInPolygonDefault bool = false
+
+const EnablePointInPolygonAPIDefault bool = false
+
 const GitHubAccessTokenURIDefault string = ""
 
 const GitHubReaderAccessTokenURIDefault string = ""
@@ -59,6 +63,10 @@ const PathAPIEditGeometryDefault string = "/api/geometry/"
 const PathCreateFeatureDefault string = "/create/"
 
 const PathPingDefault string = "/ping"
+
+const PathPointInPolygonDefault string = "/point-in-polygon"
+
+const PathPointInPolygonAPIDefault string = "/api/point-in-polygon"
 
 const PathSearchDefault string = "/search/"
 

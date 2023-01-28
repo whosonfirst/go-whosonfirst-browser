@@ -18,6 +18,8 @@ type URIs struct {
 	PNG                 string   `json:"png,omitempty"`
 	PNGAlt              []string `json:"png_alt,omitempty"`
 	Ping                string   `json:"ping,omitempty"`
+	PointInPolygon      string   `json:"point_in_polygon,omitempty"`
+	PointInPolygonAPI   string   `json:"point_in_polygon_api,omitempty"`
 	Search              string   `json:"search,omitempty"`
 	SearchAPI           string   `json:"search_api,omitempty"`
 	Select              string   `json:"select,omitempty"`

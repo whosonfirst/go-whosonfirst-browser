@@ -47,6 +47,7 @@ type Settings struct {
 	Reader                reader.Reader
 	SearchDatabase        fulltext.FullTextDatabase
 	SelectPattern         *regexp.Regexp
+	SpatialDatabase       database.SpatialDatabase
 	Templates             []fs.FS
 	Verbose               bool
 	WebFingerHostname     string
@@ -101,6 +102,11 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 
 	if cfg.EnableSearch {
 		cfg.EnableSearchAPI = true
+		cfg.EnableHTML = true
+	}
+
+	if cfg.EnablePointInPolygon {
+		cfg.EnablePointInPolygonAPI = true
 		cfg.EnableHTML = true
 	}
 
@@ -716,6 +722,40 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 		}
 	}
 
+	if cfg.EnablePointInPolygonAPI {
+
+		capabilities.PointInPolygonAPI = true
+		uris.Search = cfg.PathPointInPolygonAPI
+
+		if cfg.URIPrefix != "" {
+
+			path_pip_api, err := url.JoinPath(cfg.URIPrefix, cfg.PathPointInPolygonAPI)
+
+			if err != nil {
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathPointInPolygonAPI, err)
+			}
+
+			uris.PointInPolygonAPI = path_pip_api
+		}
+	}
+
+	if cfg.EnablePointInPolygon {
+
+		capabilities.PointInPolygon = true
+		uris.PointInPolygon = cfg.PathPointInPolygon
+
+		if cfg.URIPrefix != "" {
+
+			path_pip, err := url.JoinPath(cfg.URIPrefix, cfg.PathPointInPolygon)
+
+			if err != nil {
+				return nil, fmt.Errorf("Failed to assign prefix to %s, %w", cfg.PathPointInPolygon, err)
+			}
+
+			uris.PointInPolygon = path_pip
+		}
+	}
+
 	settings.URIs = uris
 	settings.Capabilities = capabilities
 
@@ -770,7 +810,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 		settings.CORSWrapper = cors_wrapper
 	}
 
-	if cfg.EnableEditAPI {
+	if cfg.EnableEditAPI || cfg.EnablePointInPolygonAPI {
 
 		// Exporter
 
@@ -800,6 +840,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 		// END OF Point in polygon service setup
 
 		settings.Exporter = ex
+		settings.SpatialDatabase = spatial_db
 		settings.PointInPolygonService = pip_service
 	}
 

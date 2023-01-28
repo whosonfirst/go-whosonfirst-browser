@@ -42,6 +42,8 @@ type Config struct {
 	EnableId                   bool     `json:"enable_id,omitempty"`
 	EnableIndex                bool     `json:"enable_index,omitempty"`
 	EnableNavPlace             bool     `json:"enable_navplace,omitempty"`
+	EnablePointInPolygon       bool     `json:"enable_point_in_polygon,omitempty"`
+	EnablePointInPolygonAPI    bool     `json:"enable_point_in_polygon_api,omitempty"`
 	EnablePNG                  bool     `json:"enable_png,omitempty"`
 	EnableSearch               bool     `json:"enable_search,omitempty"`
 	EnableSearchAPI            bool     `json:"enable_search_api,omitempty"`
@@ -72,6 +74,8 @@ type Config struct {
 	PathPing                   string   `json:"path_ping,omitempty"`
 	PathPNG                    string   `json:"path_png,omitempty"`
 	PathPNGAlt                 []string `json:"path_png_alt,omitempty"`
+	PathPointInPolygon         string   `json:"path_point_in_polygon,omitempty"`
+	PathPointInPolygonAPI      string   `json:"path_point_in_polygon_api,omitempty"`
 	PathSearch                 string   `json:"path_search,omitempty"`
 	PathSearchAPI              string   `json:"path_search_api,omitempty"`
 	PathSelect                 string   `json:"path_select,omitempty"`
@@ -149,6 +153,8 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		EnableId:                   enable_id,
 		EnableIndex:                enable_index,
 		EnablePNG:                  enable_png,
+		EnablePointInPolygon:       enable_point_in_polygon,
+		EnablePointInPolygonAPI:    enable_point_in_polygon_api,
 		EnableSelect:               enable_select,
 		EnableSearch:               enable_search,
 		EnableSearchAPI:            enable_search_api,
@@ -177,6 +183,8 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		PathPing:                   path_ping,
 		PathPNG:                    path_png,
 		PathPNGAlt:                 path_png_alt,
+		PathPointInPolygon:         path_point_in_polygon,
+		PathPointInPolygonAPI:      path_point_in_polygon_api,
 		PathSelect:                 path_select,
 		PathSelectAlt:              path_select_alt,
 		PathSPR:                    path_spr,

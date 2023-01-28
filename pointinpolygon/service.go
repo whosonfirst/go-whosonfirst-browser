@@ -1,6 +1,6 @@
 package pointinpolygon
 
-// Is this general enough to put in a common SFOM package? Not sure yet...
+// Is this general enough to put in a common WOF or other package? Not sure yet...
 
 import (
 	_ "github.com/whosonfirst/go-whosonfirst-spatial-pmtiles"
