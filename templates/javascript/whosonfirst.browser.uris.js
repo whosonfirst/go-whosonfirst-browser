@@ -11,7 +11,15 @@ whosonfirst.browser.uris = (function(){
 	forLabel: function(label){
 	    return uris[label];
 	},
-		   
+
+	forCustomLabel: function(label){
+
+	    if (!uris['custom']){
+		return null;
+	    }
+
+	    return uris['custom'][label];
+	},
     };
 
     return self;

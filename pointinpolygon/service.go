@@ -59,9 +59,9 @@ func NewPointInPolygonServiceWithDatabaseAndReader(ctx context.Context, spatial_
 	// This is particularly important if we are using a PMTiles/Protomaps spatial database
 	// because the spatial hierarchy resolver may need to retrieve properties that have not
 	// been encoded in the PMTiles database.
-	
+
 	resolver.SetReader(parent_reader)
-	
+
 	results_cb := hierarchy_filter.FirstButForgivingSPRResultsFunc
 	update_cb := hierarchy.DefaultPointInPolygonHierarchyResolverUpdateCallback()
 
