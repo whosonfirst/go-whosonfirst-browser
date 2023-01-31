@@ -1,16 +1,15 @@
 package api
 
 import (
-	"io"
 	"log"
 	"net/http"
 
-	"github.com/paulmach/orb/geojson"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
+	"github.com/whosonfirst/go-whosonfirst-validate"
 )
 
 type CreateFeatureHandlerOptions struct {
@@ -52,22 +51,24 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			}
 		}
 
-		body, err := io.ReadAll(req.Body)
+		body, err := validate.EnsureValidGeoJSON(req.Body)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		_, err = geojson.UnmarshalFeature(body)
+		validation_opts := validate.DefaultValidateOptions()
+		
+		err = validate.ValidateWithOptions(body, validation_opts)
 
 		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusBadRequest)
+			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		// Sanity check / validate feature here
-
+		
+		//
+		
 		_, new_body, err := opts.PointInPolygonService.Update(ctx, body)
 
 		if err != nil {
