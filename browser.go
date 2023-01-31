@@ -27,6 +27,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/javascript"
+	wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -668,7 +669,17 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			log.Printf("handle edit geometry endpoint at %s\n", path_edit_geometry)
 		}
 
+		err = wasm_validate.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append wasm validate asset handlers, %w", err)
+		}
+
+		wasm_validate_opts := wasm_validate.DefaultWASMOptions()
+		wasm_validate_opts.EnableWASMExec()
+		
 		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		create_handler = wasm_validate.AppendResourcesHandlerWithPrefix(create_handler, wasm_validate_opts, settings.URIs.URIPrefix)
 		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, settings.URIs.URIPrefix)
 		create_handler = settings.CustomChrome.WrapHandler(create_handler)
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
@@ -683,9 +694,9 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	if settings.Capabilities.EditAPI {
 
 		if settings.Verbose {
-			log.Println("edit api support enabled")
+			log.Println("Edit api support enabled")
 		}
-
+		
 		// Writers are created at runtime using the http/api/publish.go#publishFeature
 		// method which in turn calls writer/writer.go#NewWriter
 
