@@ -117,14 +117,14 @@ whosonfirst.browser.create = (function(){
 		
 		var id = prompt("Property name");
 
-		if (id == ""){
+		if (! id){
 		    return false;
 		}
 
 		var existing_el = document.getElementById(id);
 
 		if (existing_el){
-		    whosonfirst.browser.feedback.emit("Property with this name already exists:", id);
+		    alert("Property with this name already exists");
 		    return false;
 		}
 		
@@ -143,16 +143,41 @@ whosonfirst.browser.create = (function(){
 	    ta.setAttribute("class", "form-control-plaintext wof-property wof-property-" + property_type);
 	    ta.setAttribute("id", id);
 
+	    var remove = document.createElement("span");
+	    remove.setAttribute("class", "remove-property");
+	    remove.setAttribute("data-property", id);
+	    remove.appendChild(document.createTextNode("[x]"));
+
+	    remove.onclick = function(e){
+		
+		var this_el = e.target;
+		var prop = this_el.getAttribute("data-property");
+
+		var wrapper = document.getElementById(prop + "-wrapper");
+
+		if (! wrapper){
+		    return false;
+		}
+
+		if (confirm("Are you sure you want to remove this property?")){
+		    wrapper.remove();
+		}
+		
+		return false;
+	    };
+	    
 	    var l = document.createElement("label");
 	    l.setAttribute("for", id);
 	    l.appendChild(document.createTextNode(id));
-
+	    l.appendChild(remove);
+	    
 	    var el = document.createElement("div");
 	    el.setAttribute("class", "col-auto wof-property-block");
+	    el.setAttribute("id", id + "-wrapper");
 
 	    el.appendChild(l);
 	    el.appendChild(ta);
-
+	    
 	    return el;
 	},
 	
