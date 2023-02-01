@@ -17,6 +17,10 @@ const ConfigURIFlag string = "config-uri"
 
 var config_uri string
 
+const CustomEditPropertiesFlag string = "custom-property"
+
+var custom_edit_properties multi.MultiCSVString
+
 const EnableAllFlag string = "enable-all"
 
 var enable_all bool
@@ -328,6 +332,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs := flagset.NewFlagSet("browser")
 
 	fs.StringVar(&config_uri, ConfigURIFlag, ConfigURIDefault, "...")
+
+	fs.Var(&custom_edit_properties, CustomEditPropertiesFlag, "...")
 
 	fs.StringVar(&server_uri, ServerURIFlag, "http://localhost:8080", "A valid aaronland/go-http-server URI.")
 

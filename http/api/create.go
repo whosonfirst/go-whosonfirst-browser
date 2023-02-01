@@ -52,7 +52,7 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		}
 
 		// START OF validation code
-		
+
 		body, err := validate.EnsureValidGeoJSON(req.Body)
 
 		if err != nil {

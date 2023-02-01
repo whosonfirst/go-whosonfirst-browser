@@ -23,6 +23,7 @@ import (
 	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/chrome"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
+	browser_properties "github.com/whosonfirst/go-whosonfirst-browser/v7/properties"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
 	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
@@ -39,6 +40,7 @@ type Settings struct {
 	CustomChrome          chrome.Chrome
 	CustomWWWHandlers     map[string]http.Handler
 	CustomAPIHandlers     map[string]http.Handler
+	CustomEditProperties  []browser_properties.CustomProperty
 	Exporter              export.Exporter
 	MapProvider           provider.Provider
 	NavPlaceMaxFeatures   int
@@ -630,6 +632,24 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 
 			uris.CreateFeature = path_create_feature
 			uris.EditGeometry = path_edit_geometry
+		}
+
+		if len(custom_edit_properties) > 0 {
+
+			custom_props := make([]browser_properties.CustomProperty, len(custom_edit_properties))
+
+			for idx, pr_uri := range custom_edit_properties {
+
+				pr, err := browser_properties.NewCustomProperty(ctx, pr_uri)
+
+				if err != nil {
+					return nil, fmt.Errorf("Failed to create new custom property for %s, %w", pr_uri, err)
+				}
+
+				custom_props[idx] = pr
+			}
+
+			settings.CustomEditProperties = custom_props
 		}
 	}
 

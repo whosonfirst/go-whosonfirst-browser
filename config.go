@@ -18,6 +18,7 @@ type Config struct {
 	CORSOrigins                []string `json:"cors_origins,omitempty"`
 	CORSAllowCredentials       bool     `json:"cors_allow_credentials,omitempty"`
 	CustomChromeURI            string   `json:"custom_chrome_uri,omitempty"`
+	CustomEditProperties       []string `json:"custom_edit_properties,omitempty"`
 	DisableGeoJSON             bool     `json:"disable_geojson,omitempty"`
 	DisableGeoJSONLD           bool     `json:"disable_geojsonld,omitempty"`
 	DisableId                  bool     `json:"disable_id,omitempty"`
@@ -141,6 +142,7 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		CORSAllowCredentials:       cors_allow_credentials,
 		CORSOrigins:                cors_origins,
 		CustomChromeURI:            custom_chrome_uri,
+		CustomEditProperties:       custom_edit_properties,
 		DisableIndex:               disable_index,
 		EnableAll:                  enable_all,
 		EnableCORS:                 enable_cors,

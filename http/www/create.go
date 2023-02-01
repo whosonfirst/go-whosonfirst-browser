@@ -14,42 +14,42 @@ import (
 )
 
 type CreateFeatureHandlerOptions struct {
-	Reader        reader.Reader
-	Authenticator auth.Authenticator
-	Logger        *log.Logger
-	Template      *template.Template
-	MapProvider   string
-	URIs          *browser_uris.URIs
-	Capabilities  *browser_capabilities.Capabilities
-	CustomProperties map[string]string	
+	Reader           reader.Reader
+	Authenticator    auth.Authenticator
+	Logger           *log.Logger
+	Template         *template.Template
+	MapProvider      string
+	URIs             *browser_uris.URIs
+	Capabilities     *browser_capabilities.Capabilities
+	CustomProperties map[string]string
 }
 
 type CreateFeatureVars struct {
-	MapProvider  string
+	MapProvider string
 	// Placetypes   []*placetypes.WOFPlacetype
-	Paths        *browser_uris.URIs
-	Capabilities *browser_capabilities.Capabilities
+	Paths            *browser_uris.URIs
+	Capabilities     *browser_capabilities.Capabilities
 	CustomProperties map[string]string
 }
 
 func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, error) {
 
 	/*
-	pt, err := placetypes.GetPlacetypeByName("planet")
+		pt, err := placetypes.GetPlacetypeByName("planet")
 
-	if err != nil {
-		return nil, fmt.Errorf("Failed to load placetype for planet, %w", err)
-	}
+		if err != nil {
+			return nil, fmt.Errorf("Failed to load placetype for planet, %w", err)
+		}
 
-	roles := []string{
-		"common",
-		"common_optional",
-		"optional",
-	}
+		roles := []string{
+			"common",
+			"common_optional",
+			"optional",
+		}
 
-	all_placetypes := placetypes.DescendantsForRoles(pt, roles)
+		all_placetypes := placetypes.DescendantsForRoles(pt, roles)
 	*/
-	
+
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		_, err := opts.Authenticator.GetAccountForRequest(req)
@@ -70,9 +70,9 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		}
 
 		vars := CreateFeatureVars{
-			Paths:        opts.URIs,
-			Capabilities: opts.Capabilities,
-			MapProvider:  opts.MapProvider,
+			Paths:            opts.URIs,
+			Capabilities:     opts.Capabilities,
+			MapProvider:      opts.MapProvider,
 			CustomProperties: opts.CustomProperties,
 			// Placetypes:   all_placetypes,
 		}
