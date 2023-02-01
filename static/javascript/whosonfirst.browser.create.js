@@ -226,11 +226,20 @@ whosonfirst.browser.create = (function(){
 		for (var i=0; i < count; i++){
 
 		    var el = inputs[i];
+
+		    var el_class = el.getAttribute("class");
+
 		    var k = el.getAttribute("id");
 		    var v = el.value;
 
 		    if (v == ""){
-			continue;
+
+			if (el_class.includes("wof-property-optional")){
+			    continue;
+			}
+
+			whosonfirst.browser.feedback.emit("Required property is missing a value: ", k)
+			return false;
 		    }
 
 		    // Account for arbitrary JSON in textarea elements
