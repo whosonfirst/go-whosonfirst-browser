@@ -185,9 +185,6 @@ whosonfirst.browser.create = (function(){
 		    
 		    validate_feature(str_f).then(rsp => {
 
-			whosonfirst.browser.feedback.emit("Document validates");
-			return;
-			
 			whosonfirst.browser.api.do("PUT", create_uri, feature)
 				   .then((data) => {
 				       var props = data["properties"];

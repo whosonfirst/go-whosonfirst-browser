@@ -54,10 +54,18 @@
 			  <label for="mz:is_current" >mz:is_current</label>
 			  <textarea class="form-control-plaintext wof-property wof-property-existential" id="mz:is_current"></textarea>
 		      </div>
+
+		      {{ range $key, $type := .CustomProperties }}
+		      <div class="col-auto wof-property-block">
+			  <label for="mz:is_current" >{{ $key }}</label>
+			  <textarea class="form-control-plaintext wof-property wof-property-{{ $type }}" id="{{ $key }}"></textarea>
+		      </div>
+		      {{ end }}
 		      
 		  </form>
 		  
 		  <div id="controls" class="row">
+		      <button class="btn" id="add">Add property</button>		      
 		      <button class="btn" id="save">Save</button>
 		  </div>
 		  

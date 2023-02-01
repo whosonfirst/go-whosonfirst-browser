@@ -1,7 +1,7 @@
 package www
 
 import (
-	"fmt"
+	// "fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 	"github.com/whosonfirst/go-reader"
 	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
 	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
-	"github.com/whosonfirst/go-whosonfirst-placetypes"
+	// "github.com/whosonfirst/go-whosonfirst-placetypes"
 )
 
 type CreateFeatureHandlerOptions struct {
@@ -21,18 +21,20 @@ type CreateFeatureHandlerOptions struct {
 	MapProvider   string
 	URIs          *browser_uris.URIs
 	Capabilities  *browser_capabilities.Capabilities
+	CustomProperties map[string]string	
 }
 
 type CreateFeatureVars struct {
 	MapProvider  string
-	Placetypes   []*placetypes.WOFPlacetype
+	// Placetypes   []*placetypes.WOFPlacetype
 	Paths        *browser_uris.URIs
 	Capabilities *browser_capabilities.Capabilities
-	// To do: Support alternate geometries
+	CustomProperties map[string]string
 }
 
 func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, error) {
 
+	/*
 	pt, err := placetypes.GetPlacetypeByName("planet")
 
 	if err != nil {
@@ -46,7 +48,8 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 	}
 
 	all_placetypes := placetypes.DescendantsForRoles(pt, roles)
-
+	*/
+	
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		_, err := opts.Authenticator.GetAccountForRequest(req)
@@ -70,7 +73,8 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			Paths:        opts.URIs,
 			Capabilities: opts.Capabilities,
 			MapProvider:  opts.MapProvider,
-			Placetypes:   all_placetypes,
+			CustomProperties: opts.CustomProperties,
+			// Placetypes:   all_placetypes,
 		}
 
 		RenderTemplate(rsp, opts.Template, vars)

@@ -51,6 +51,8 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			}
 		}
 
+		// START OF validation code
+		
 		body, err := validate.EnsureValidGeoJSON(req.Body)
 
 		if err != nil {
@@ -67,7 +69,7 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			return
 		}
 
-		//
+		// END OF validation code
 
 		_, new_body, err := opts.PointInPolygonService.Update(ctx, body)
 
