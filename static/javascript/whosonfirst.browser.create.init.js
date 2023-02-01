@@ -2,7 +2,7 @@ window.addEventListener("load", function load(event){
 
     // whosonfirst.browser.create.init();
     
-    whosonfirst.validate.feature.init()
+    whosonfirst.browser.validate.init()
 	       .then(rsp => {
 		   whosonfirst.browser.create.init();
 	       })

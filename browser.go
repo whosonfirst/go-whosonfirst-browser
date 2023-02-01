@@ -93,46 +93,6 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		logger.Printf("Handle ping endpoint at %s\n", settings.URIs.Ping)
 	}
 
-	// START OF uris.js
-
-	uris_t := js_t.Lookup("uris")
-
-	if uris_t == nil {
-		return fmt.Errorf("Failed to load 'uris' javascript template")
-	}
-
-	uris_opts := &www.URIsHandlerOptions{
-		URIs:     settings.URIs,
-		Template: uris_t,
-	}
-
-	uris_handler, err := www.URIsHandler(uris_opts)
-
-	if err != nil {
-		return fmt.Errorf("Failed to create URIs handler, %w", err)
-	}
-
-	uris_path := "/javascript/whosonfirst.browser.uris.js"
-
-	if settings.URIs.URIPrefix != "" {
-
-		path, err := url.JoinPath(settings.URIs.URIPrefix, uris_path)
-
-		if err != nil {
-			return fmt.Errorf("Failed to assign URI prefix to %s, %w", uris_path, err)
-		}
-
-		uris_path = path
-	}
-
-	mux.Handle(uris_path, uris_handler)
-
-	if settings.Verbose {
-		logger.Printf("Handle whosonfirst.browser.uris.js endpoint at %s\n", uris_path)
-	}
-
-	// END OF uris.js
-
 	if settings.Capabilities.PNG {
 
 		if settings.Verbose {
@@ -677,6 +637,30 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		wasm_validate_opts := wasm_validate.DefaultWASMOptions()
 		wasm_validate_opts.EnableWASMExec()
+
+		// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
+		// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
+		// way to specify the wasm path (yet) this is what we're going to do in conjunction with writing
+		// our own 'whosonfirst.browser.validate' package that fetches the custom URI from 'whosonfirst.browser.uris'.
+		// I suppose it would be easy enough to add a 'setWasmURI' or a 'setWasmPrefix' method to 'whosonfirst.validate.feature.js'
+		// but today that hasn't happened.
+		
+		wasm_validate_uri := "/wasm/validate_feature.wasm"
+
+		if settings.URIs.URIPrefix!= "" {
+			
+			uri, err := url.JoinPath(settings.URIs.URIPrefix, wasm_validate_uri)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign URI prefix to validate wasm path, %w", err)
+			}
+
+			wasm_validate_uri = uri
+		}
+
+		settings.URIs.AddCustomURI("validate_wasm", wasm_validate_uri);
+
+		// END OF I don't like having	to do this
 		
 		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
 		create_handler = wasm_validate.AppendResourcesHandlerWithPrefix(create_handler, wasm_validate_opts, settings.URIs.URIPrefix)
@@ -828,6 +812,46 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 	}
 
+	// START OF uris.js
+
+	uris_t := js_t.Lookup("uris")
+
+	if uris_t == nil {
+		return fmt.Errorf("Failed to load 'uris' javascript template")
+	}
+
+	uris_opts := &www.URIsHandlerOptions{
+		URIs:     settings.URIs,
+		Template: uris_t,
+	}
+
+	uris_handler, err := www.URIsHandler(uris_opts)
+
+	if err != nil {
+		return fmt.Errorf("Failed to create URIs handler, %w", err)
+	}
+
+	uris_path := "/javascript/whosonfirst.browser.uris.js"
+
+	if settings.URIs.URIPrefix != "" {
+
+		path, err := url.JoinPath(settings.URIs.URIPrefix, uris_path)
+
+		if err != nil {
+			return fmt.Errorf("Failed to assign URI prefix to %s, %w", uris_path, err)
+		}
+
+		uris_path = path
+	}
+
+	mux.Handle(uris_path, uris_handler)
+
+	if settings.Verbose {
+		logger.Printf("Handle whosonfirst.browser.uris.js endpoint at %s\n", uris_path)
+	}
+
+	// END OF uris.js
+	
 	// Finally, start the server
 
 	s, err := server.NewServer(ctx, server_uri)
