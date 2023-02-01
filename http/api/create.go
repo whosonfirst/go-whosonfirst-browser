@@ -59,16 +59,16 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		}
 
 		validation_opts := validate.DefaultValidateOptions()
-		
+
 		err = validate.ValidateWithOptions(body, validation_opts)
 
 		if err != nil {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		
+
 		//
-		
+
 		_, new_body, err := opts.PointInPolygonService.Update(ctx, body)
 
 		if err != nil {

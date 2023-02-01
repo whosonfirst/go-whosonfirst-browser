@@ -14,8 +14,10 @@ package main
 
 import (
 	"context"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7"
 	"log"
+
+	aa_log "github.com/aaronland/go-log"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7"
 )
 
 func main() {
@@ -26,7 +28,7 @@ func main() {
 	err := browser.Run(ctx, logger)
 
 	if err != nil {
-		logger.Fatalf("Failed to run browser application, %v", err)
+		aa_log.Fatal(logger, "Failed to run browser application, %v", err)
 	}
 
 }

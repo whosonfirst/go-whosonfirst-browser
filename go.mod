@@ -9,6 +9,7 @@ require (
 	github.com/aaronland/go-http-sanitize v0.0.6
 	github.com/aaronland/go-http-server v1.0.0
 	github.com/aaronland/go-http-static v0.0.2
+	github.com/aaronland/go-log v1.0.0
 	github.com/aaronland/go-roster v1.0.0
 	github.com/aaronland/gocloud-blob-s3 v0.2.2
 	github.com/paulmach/orb v0.8.0

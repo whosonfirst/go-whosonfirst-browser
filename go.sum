@@ -517,6 +517,8 @@ github.com/aaronland/go-http-tangramjs v0.1.3/go.mod h1:sIqGKcQrVLmqoUIAGwLIFEkH
 github.com/aaronland/go-json-query v0.1.2/go.mod h1:kkCl5KrO+fVSL2M8b/i3qO5PsnCpmajGXkbJHpEQPY8=
 github.com/aaronland/go-json-query v0.1.3 h1:wBqGF4d+Qy1+/YFqiFEKL7ja4iaaZi9E/CWaO3s7G4U=
 github.com/aaronland/go-json-query v0.1.3/go.mod h1:+T7tN35K0RtLt92MlNM+N2sr6pxsQMJc6Fd4PsKaVtw=
+github.com/aaronland/go-log v1.0.0 h1:bbGjejv1qjpHWXibpQAep8dNbSRrmP8TMs2gzgF8Vls=
+github.com/aaronland/go-log v1.0.0/go.mod h1:jkvmABZWoTJn9mqR1E6h0hRcjSB9IbegezfmjQwiTYU=
 github.com/aaronland/go-pagination v0.2.0 h1:ZZ8mNu5oEK5wanAjbYAaE3w5eyQKzFOWu/gsloW1vdw=
 github.com/aaronland/go-pagination v0.2.0/go.mod h1:zrYVkUTBoe6yJ23l6OyTyfSpTyg6s/cNxZxNztXNQpQ=
 github.com/aaronland/go-pagination-sql v0.2.0 h1:WVesObJVvwawIgkl6Twot9DXia09qiZQJQ/7ik64kSU=
