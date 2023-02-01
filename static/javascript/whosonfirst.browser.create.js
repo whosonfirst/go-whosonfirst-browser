@@ -103,20 +103,6 @@ whosonfirst.browser.create = (function(){
 	    var save_button = document.getElementById("save");
 
 	    save_button.onclick = function(){
-
-		var create_el = document.getElementById("create-feature");
-
-		if (! create_el){
-		    whosonfirst.browser.feedback.emit("Missing 'create-feature' element");
-		    return false;
-		}
-		
-		var create_uri = create_el.getAttribute("data-uri-create-geometry");		
-
-		if (! create_uri){
-		    whosonfirst.browser.feedback.emit("Missing 'data-uri-create-geometry' attribute");
-		    return;
-		}
 		
 		var props = {};
 		
@@ -192,21 +178,36 @@ whosonfirst.browser.create = (function(){
 		    
 		    var create_uri = whosonfirst.browser.uris.forLabel("create_feature_api");
 
-		    whosonfirst.browser.api.do("PUT", create_uri, feature)
-			       .then((data) => {
-				   var props = data["properties"];
-				   var id = props["wof:id"];
-				   whosonfirst.browser.feedback.emit("New feature created with ID " + id);
-				   save_button.removeAttribute("disabled");			
-			       })
-			       .catch((err) => {
-				   whosonfirst.browser.feedback.emit("Failed to create new feature", err);
-				   save_button.removeAttribute("disabled");						
-			       });			
+		    var str_f = JSON.stringify(feature);
 
-		    whosonfirst.browser.feedback.emit("Creating new feature...");
-		    save_button.setAttribute("disabled", "disabled");
+		    // https://github.com/whosonfirst/go-whosonfirst-validate-wasm
+		    // https://github.com/whosonfirst/go-whosonfirst-validate
 		    
+		    validate_feature(str_f).then(rsp => {
+
+			whosonfirst.browser.feedback.emit("Document validates");
+			return;
+			
+			whosonfirst.browser.api.do("PUT", create_uri, feature)
+				   .then((data) => {
+				       var props = data["properties"];
+				       var id = props["wof:id"];
+				       whosonfirst.browser.feedback.emit("New feature created with ID " + id);
+				       save_button.removeAttribute("disabled");			
+				   })
+				   .catch((err) => {
+				       whosonfirst.browser.feedback.emit("Failed to create new feature", err);
+				       save_button.removeAttribute("disabled");						
+				   });			
+			
+			whosonfirst.browser.feedback.emit("Creating new feature...");
+			save_button.setAttribute("disabled", "disabled");
+			
+		    }).catch(err => {
+
+			whosonfirst.browser.feedback.emit("Document failed to validate:", err);			
+		    });
+		   		    
 		} catch (err) {
 		    whosonfirst.browser.feedback.emit("Unable to prepare data to create new feature", err);
 		}
