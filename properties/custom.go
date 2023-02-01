@@ -8,12 +8,34 @@ import (
 	"strings"
 
 	"github.com/aaronland/go-roster"
+	"github.com/tidwall/gjson"
 )
 
 type CustomProperty interface {
 	Name() string
 	Type() string
 	Required() bool
+}
+
+func EnsureCustomPropertyHasValue(ctx context.Context, pr CustomProperty, body []byte) (bool, error) {
+
+	if !pr.Required() {
+		return true, nil
+	}
+
+	path := fmt.Sprintf("properties.%s", pr.Name())
+
+	rsp := gjson.GetBytes(body, path)
+
+	if !rsp.Exists() {
+		return false, nil
+	}
+
+	if rsp.String() == "" {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 var custom_roster roster.Roster

@@ -634,11 +634,11 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 			uris.EditGeometry = path_edit_geometry
 		}
 
-		if len(custom_edit_properties) > 0 {
+		if len(cfg.CustomEditProperties) > 0 {
 
-			custom_props := make([]browser_properties.CustomProperty, len(custom_edit_properties))
+			custom_props := make([]browser_properties.CustomProperty, len(cfg.CustomEditProperties))
 
-			for idx, pr_uri := range custom_edit_properties {
+			for idx, pr_uri := range cfg.CustomEditProperties {
 
 				pr, err := browser_properties.NewCustomProperty(ctx, pr_uri)
 

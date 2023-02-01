@@ -55,10 +55,10 @@
 			  <textarea class="form-control-plaintext wof-property wof-property-existential" id="mz:is_current"></textarea>
 		      </div>
 
-		      {{ range $key, $type := .CustomProperties }}
-		      <div class="col-auto wof-property-block">
-			  <label for="mz:is_current" >{{ $key }}</label>
-			  <textarea class="form-control-plaintext wof-property wof-property-{{ $type }}" id="{{ $key }}"></textarea>
+		      {{ range $idx, $pr := .CustomProperties }}
+		      <div class="col-auto wof-property-block{{ if not $pr.Required }} wof-property-optional{{ end }}" id="{{ $pr.Name }}-wrapper">
+			  <label for="mz:is_current" >{{ $pr.Name }}</label>
+			  <textarea class="form-control-plaintext wof-property wof-property-{{ $pr.Type }}" id="{{ $pr.Name }}"></textarea>
 		      </div>
 		      {{ end }}
 		      

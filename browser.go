@@ -533,13 +533,14 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		create_opts := &www.CreateFeatureHandlerOptions{
-			Authenticator: settings.Authenticator,
-			MapProvider:   settings.MapProvider.Scheme(),
-			URIs:          settings.URIs,
-			Capabilities:  settings.Capabilities,
-			Template:      create_t,
-			Logger:        logger,
-			Reader:        settings.Reader,
+			Authenticator:    settings.Authenticator,
+			MapProvider:      settings.MapProvider.Scheme(),
+			URIs:             settings.URIs,
+			Capabilities:     settings.Capabilities,
+			Template:         create_t,
+			Logger:           logger,
+			Reader:           settings.Reader,
+			CustomProperties: settings.CustomEditProperties,
 		}
 
 		create_handler, err := www.CreateFeatureHandler(create_opts)
@@ -683,6 +684,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			Exporter:              settings.Exporter,
 			WriterURIs:            settings.WriterURIs,
 			PointInPolygonService: settings.PointInPolygonService,
+			CustomProperties:      settings.CustomEditProperties,
 		}
 
 		create_handler, err := api.CreateFeatureHandler(create_opts)

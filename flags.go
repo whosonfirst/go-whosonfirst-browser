@@ -17,7 +17,7 @@ const ConfigURIFlag string = "config-uri"
 
 var config_uri string
 
-const CustomEditPropertiesFlag string = "custom-property"
+const CustomEditPropertiesFlag string = "custom-edit-property"
 
 var custom_edit_properties multi.MultiCSVString
 

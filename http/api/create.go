@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
+	browser_properties "github.com/whosonfirst/go-whosonfirst-browser/v7/properties"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-validate"
 )
@@ -20,6 +22,7 @@ type CreateFeatureHandlerOptions struct {
 	Authenticator         auth.Authenticator
 	Logger                *log.Logger
 	PointInPolygonService *pointinpolygon.PointInPolygonService
+	CustomProperties      []browser_properties.CustomProperty
 }
 
 func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, error) {
@@ -56,7 +59,7 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		body, err := validate.EnsureValidGeoJSON(req.Body)
 
 		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusInternalServerError)
+			http.Error(rsp, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -65,8 +68,25 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		err = validate.ValidateWithOptions(body, validation_opts)
 
 		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusInternalServerError)
+			http.Error(rsp, err.Error(), http.StatusBadRequest)
 			return
+		}
+
+		for _, pr := range opts.CustomProperties {
+
+			ok, err := browser_properties.EnsureCustomPropertyHasValue(ctx, pr, body)
+
+			if err != nil {
+				http.Error(rsp, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if !ok {
+				msg := fmt.Sprintf("Required property '%s' has invalid or missing value", pr.Name())
+				http.Error(rsp, msg, http.StatusBadRequest)
+				return
+			}
+
 		}
 
 		// END OF validation code

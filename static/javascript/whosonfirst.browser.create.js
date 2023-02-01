@@ -99,6 +99,16 @@ whosonfirst.browser.create = (function(){
 
 	'init_property_controls': function(){
 
+	    var optional_els = document.getElementsByClassName("wof-property-optional");
+	    var count_optional = optional_els.length;
+
+	    for (var i=0; i < count_optional; i++){
+		self.add_remove_button(optional_els[i]);
+	    }
+
+	    //
+
+	    
 	    var add_button = document.getElementById("add-property");
 
 	    if (! add_button){
@@ -142,7 +152,38 @@ whosonfirst.browser.create = (function(){
 	    var ta = document.createElement("textarea");
 	    ta.setAttribute("class", "form-control-plaintext wof-property wof-property-" + property_type);
 	    ta.setAttribute("id", id);
+	    
+	    var l = document.createElement("label");
+	    l.setAttribute("for", id);
+	    l.appendChild(document.createTextNode(id));
+	    
+	    var el = document.createElement("div");
+	    el.setAttribute("class", "col-auto wof-property-block");
+	    el.setAttribute("id", id + "-wrapper");
 
+	    el.appendChild(l);
+	    el.appendChild(ta);
+
+	    self.add_remove_button(el);
+	    return el;
+	},
+
+	'add_remove_button': function(el){
+
+	    // This is all a bit brittle but will have to do for now...
+	    
+	    var labels = el.getElementsByTagName("label");
+	    var count = labels.length;
+
+	    if (count != 1){
+		console.log("Invalid count for labels", count);
+	    }
+
+	    var l = labels[0];
+
+	    var id = el.getAttribute("id");
+	    id = id.replace("-wrapper", "");
+	    
 	    var remove = document.createElement("span");
 	    remove.setAttribute("class", "remove-property");
 	    remove.setAttribute("data-property", id);
@@ -165,20 +206,8 @@ whosonfirst.browser.create = (function(){
 		
 		return false;
 	    };
-	    
-	    var l = document.createElement("label");
-	    l.setAttribute("for", id);
-	    l.appendChild(document.createTextNode(id));
-	    l.appendChild(remove);
-	    
-	    var el = document.createElement("div");
-	    el.setAttribute("class", "col-auto wof-property-block");
-	    el.setAttribute("id", id + "-wrapper");
 
-	    el.appendChild(l);
-	    el.appendChild(ta);
-	    
-	    return el;
+	    l.appendChild(remove);
 	},
 	
 	'init_save_controls': function(){
