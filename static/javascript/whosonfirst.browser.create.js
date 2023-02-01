@@ -93,10 +93,70 @@ whosonfirst.browser.create = (function(){
 	
 	'init_controls': function(){
 
-	    self.init_save_control();
+	    self.init_property_controls();	    	    
+	    self.init_save_controls();
+	},
+
+	'init_property_controls': function(){
+
+	    var add_button = document.getElementById("add-property");
+
+	    if (! add_button){
+		console.log("Missing 'add-property' element.");
+		return false;
+	    };
+	    
+	    add_button.onclick = function(){
+
+		var form = document.getElementById("wof-properties-form");
+
+		if (! form){
+		    whosonfirst.browser.feedback.emit("Failed to locate 'wof-properties-form' element.");
+		    return false;
+		}
+		
+		var id = prompt("Property name");
+
+		if (id == ""){
+		    return false;
+		}
+
+		var existing_el = document.getElementById(id);
+
+		if (existing_el){
+		    whosonfirst.browser.feedback.emit("Property with this name already exists:", id);
+		    return false;
+		}
+		
+		var property_type = "string";	// To do: Make this an option (once we've figured out what those options are/need to be)
+
+		var new_el = self.create_property_el(id, property_type);
+
+		form.appendChild(new_el);
+		return false;
+	    };
+	},
+
+	'create_property_el': function(id, property_type){
+
+	    var ta = document.createElement("textarea");
+	    ta.setAttribute("class", "form-control-plaintext wof-property wof-property-" + property_type);
+	    ta.setAttribute("id", id);
+
+	    var l = document.createElement("label");
+	    l.setAttribute("for", id);
+	    l.appendChild(document.createTextNode(id));
+
+	    var el = document.createElement("div");
+	    el.setAttribute("class", "col-auto wof-property-block");
+
+	    el.appendChild(l);
+	    el.appendChild(ta);
+
+	    return el;
 	},
 	
-	'init_save_control': function(){
+	'init_save_controls': function(){
 
 	    // Eventually this should become a Leaflet control... maybe?
 	    
