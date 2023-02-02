@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
 	"io/fs"
 	"io/ioutil"
 	"net/http"
@@ -44,7 +43,7 @@ type Settings struct {
 	CustomAPIHandlers        map[string]http.Handler
 	CustomEditProperties     []browser_properties.CustomProperty
 	CustomEditValidationFunc browser_custom.CustomValidationFunc
-	CustomEditValidationWasm io.Reader
+	CustomEditValidationWasm *browser_custom.CustomValidationWasm
 	Exporter                 export.Exporter
 	MapProvider              provider.Provider
 	NavPlaceMaxFeatures      int

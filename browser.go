@@ -573,6 +573,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		// I suppose it would be easy enough to add a 'setWasmURI' or a 'setWasmPrefix' method to 'whosonfirst.validate.feature.js'
 		// but today that hasn't happened.
 
+		// This file is served by the http/www/static.go handlers
 		wasm_validate_uri := "/wasm/validate_feature.wasm"
 
 		if settings.URIs.URIPrefix != "" {
@@ -598,6 +599,42 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		aa_log.Debug(logger, "Handle create feature endpoint at %s\n", path_create_feature)
 		mux.Handle(settings.URIs.CreateFeature, create_handler)
+
+		// Custom client-side WASM/JS validation (optional)
+
+		if settings.CustomEditValidationWasm != nil {
+
+			aa_log.Debug(logger, "Enable custom edit validation WASM")
+
+			validation_handler_opts := &www.CustomValidationWasmHandlerOptions{
+				CustomValidationWasm: settings.CustomEditValidationWasm,
+			}
+
+			validation_handler, err := www.CustomValidationWasmHandler(validation_handler_opts)
+
+			if err != nil {
+				return fmt.Errorf("Failed to create custom edit validation WASM handler, %w", err)
+			}
+
+			fname := filepath.Base(settings.CustomEditValidationWasm.Path)
+			custom_validate_uri := filepath.Join("/wasm", fname)
+
+			if settings.URIs.URIPrefix != "" {
+
+				uri, err := url.JoinPath(settings.URIs.URIPrefix, custom_validate_uri)
+
+				if err != nil {
+					return fmt.Errorf("Failed to assign URI prefix to custom validate wasm path, %w", err)
+				}
+
+				custom_validate_uri = uri
+			}
+
+			settings.URIs.AddCustomURI("custom_validate_wasm", custom_validate_uri)
+
+			aa_log.Debug(logger, "Handle custom validation WASM endpoint at %s\n", custom_validate_uri)
+			mux.Handle(custom_validate_uri, validation_handler)
+		}
 	}
 
 	if settings.Capabilities.EditAPI {
