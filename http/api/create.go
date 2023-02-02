@@ -73,9 +73,11 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			return
 		}
 
-		// Ideally we'd like to be able to do something like this:
-
 		/*
+
+			Ideally we'd like to be able to do something like this:
+
+			// github.com/aaronland/go-wasi
 
 			_, err = wasi.Run(ctx, opts.CustomValidationWASM, string(body))
 
@@ -83,6 +85,25 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 				http.Error(rsp, err.Error(), http.StatusBadRequest)
 				return
 			}
+
+			But practically it is... impractical. Specifically, there is not
+			broad support or parity between WASI and WASM stuff. Further in
+			order to compile Go code in to a WASI binary you need to use tinygo
+			which lacks support for much (most) of the standard Go library, for
+			example encoding/json. While it would be hypotherically possible to
+			run WASM produced with GOOS=JS here using the v8go package the problem
+			with that approach is a) it's a proposed extension to the v8go package
+			that requires monkey-patching a bunch of things (https://github.com/rogchap/v8go/issues/333)
+			and b) I haven't been able to make it work and c) we would then need
+			to check whether we're runing v8/GOOS=JS WASM or plain vanilla WASM.
+
+			So, in the end it's easier (emphasis on the "-ier") to expect that server-
+			side validation code be written in Go since that same code can be compiled
+			in to WASM that can be run client-side. It's a bit of a nuisance from a
+			configuration / scaffolding perspective but that's just where we're at
+			with WASM today...
+
+			(20230201/thisisaaronland)
 		*/
 
 		if opts.CustomValidationFunc != nil {
