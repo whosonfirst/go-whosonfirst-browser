@@ -309,8 +309,8 @@ whosonfirst.browser.create = (function(){
 
 		    // https://github.com/whosonfirst/go-whosonfirst-validate-wasm
 		    // https://github.com/whosonfirst/go-whosonfirst-validate
-		    
-		    validate_feature(str_f).then(rsp => {
+
+		    var do_create = function(){
 
 			whosonfirst.browser.api.do("PUT", create_uri, feature)
 				   .then((data) => {
@@ -326,6 +326,35 @@ whosonfirst.browser.create = (function(){
 			
 			whosonfirst.browser.feedback.emit("Creating new feature...");
 			save_button.setAttribute("disabled", "disabled");
+			
+		    };
+		    
+		    validate_feature(str_f).then(rsp => {
+
+			/*
+
+			   See this? As of this writing it is expected that:
+			   
+			   1) in whosonfirst.browser.validate.js
+			   2) if whosonfirst.browser.uris.forCustomLabel("custom_validate_wasm") is non-nil
+			   3) there is a wasm binary at the end of that URI
+			   4) that wasm binary exports a function named "whosonfirst_validate_feature_custom"
+
+			   Is this the best way to do this? It doesn't feel like. It doesn't feel elegant
+			   at least. But, for now, we'll live it...
+			   
+			 */
+			
+			if (typeof(whosonfirst_validate_feature_custom) != "function"){
+			    do_create();
+			    return;
+			}
+			
+			whosonfirst_validate_feature_custom(str_f).then(rsp => {
+			    do_create();
+			}).catch(err => {
+			    whosonfirst.browser.feedback.emit("Document failed custom validation:", err);
+			})
 			
 		    }).catch(err => {
 

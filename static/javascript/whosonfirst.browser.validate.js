@@ -63,7 +63,7 @@ whosonfirst.browser.validate = (function(){
 			if (pending == 0){
 			    resolve();
 			}
-			
+
 			export_mod = result.module;
 			export_inst = result.instance;
 			await export_go.run(export_inst);
