@@ -234,12 +234,16 @@ whosonfirst.browser.create = (function(){
 
 		    if (v == ""){
 
+			continue;
+
+			/*
 			if (el_class.includes("wof-property-optional")){
 			    continue;
 			}
 
 			whosonfirst.browser.feedback.emit("Required property is missing a value: ", k)
 			return false;
+			*/
 		    }
 
 		    // Account for arbitrary JSON in textarea elements

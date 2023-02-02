@@ -108,12 +108,16 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 
 		if opts.CustomValidationFunc != nil {
 
+			opts.Logger.Println("CUSTOM VALIDATION")
+
 			err = opts.CustomValidationFunc(body)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusBadRequest)
 				return
 			}
+
+			opts.Logger.Println("CUSTOM OKAY")
 		}
 
 		// END OF validation code

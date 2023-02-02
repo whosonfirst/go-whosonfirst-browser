@@ -685,6 +685,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			WriterURIs:            settings.WriterURIs,
 			PointInPolygonService: settings.PointInPolygonService,
 			CustomProperties:      settings.CustomEditProperties,
+			CustomValidationFunc:  settings.CustomEditValidationFunc,
 		}
 
 		create_handler, err := api.CreateFeatureHandler(create_opts)
