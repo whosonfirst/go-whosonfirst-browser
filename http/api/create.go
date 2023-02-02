@@ -7,7 +7,7 @@ import (
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
-	browser_custom "github.com/whosonfirst/go-whosonfirst-browser/v7/custom"	
+	browser_custom "github.com/whosonfirst/go-whosonfirst-browser/v7/custom"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	browser_properties "github.com/whosonfirst/go-whosonfirst-browser/v7/properties"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
@@ -74,27 +74,27 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		}
 
 		// Ideally we'd like to be able to do something like this:
-		
+
 		/*
 
-		_, err = wasi.Run(ctx, opts.CustomValidationWASM, string(body))
+			_, err = wasi.Run(ctx, opts.CustomValidationWASM, string(body))
 
-		if err != nil {
-			http.Error(rsp, err.Error(), http.StatusBadRequest)
-			return
-		}
+			if err != nil {
+				http.Error(rsp, err.Error(), http.StatusBadRequest)
+				return
+			}
 		*/
-		
+
 		if opts.CustomValidationFunc != nil {
 
-			err = opts.CustomValidationFunc(ctx, body)
+			err = opts.CustomValidationFunc(body)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusBadRequest)
 				return
 			}
 		}
-				
+
 		// END OF validation code
 
 		_, new_body, err := opts.PointInPolygonService.Update(ctx, body)

@@ -1,7 +1,3 @@
 package custom
 
-import (
-	"context"
-)
-
-type CustomValidationFunc func(context.Context, []byte) error
+type CustomValidationFunc func([]byte) error

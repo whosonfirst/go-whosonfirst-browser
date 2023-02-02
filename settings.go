@@ -22,8 +22,8 @@ import (
 	"github.com/whosonfirst/go-reader-cachereader"
 	github_reader "github.com/whosonfirst/go-reader-github"
 	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
-	browser_custom "github.com/whosonfirst/go-whosonfirst-browser/v7/custom"	
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/chrome"
+	browser_custom "github.com/whosonfirst/go-whosonfirst-browser/v7/custom"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	browser_properties "github.com/whosonfirst/go-whosonfirst-browser/v7/properties"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
@@ -35,29 +35,29 @@ import (
 )
 
 type Settings struct {
-	Authenticator         auth.Authenticator
-	Cache                 cache.Cache
-	Capabilities          *browser_capabilities.Capabilities
-	CORSWrapper           *cors.Cors
-	CustomChrome          chrome.Chrome
-	CustomWWWHandlers     map[string]http.Handler
-	CustomAPIHandlers     map[string]http.Handler
-	CustomEditProperties  []browser_properties.CustomProperty
+	Authenticator            auth.Authenticator
+	Cache                    cache.Cache
+	Capabilities             *browser_capabilities.Capabilities
+	CORSWrapper              *cors.Cors
+	CustomChrome             chrome.Chrome
+	CustomWWWHandlers        map[string]http.Handler
+	CustomAPIHandlers        map[string]http.Handler
+	CustomEditProperties     []browser_properties.CustomProperty
 	CustomEditValidationFunc browser_custom.CustomValidationFunc
 	CustomEditValidationWasm io.Reader
-	Exporter              export.Exporter
-	MapProvider           provider.Provider
-	NavPlaceMaxFeatures   int
-	URIs                  *browser_uris.URIs
-	PointInPolygonService *pointinpolygon.PointInPolygonService
-	Reader                reader.Reader
-	SearchDatabase        fulltext.FullTextDatabase
-	SelectPattern         *regexp.Regexp
-	SpatialDatabase       database.SpatialDatabase
-	Templates             []fs.FS
-	Verbose               bool
-	WebFingerHostname     string
-	WriterURIs            []string
+	Exporter                 export.Exporter
+	MapProvider              provider.Provider
+	NavPlaceMaxFeatures      int
+	URIs                     *browser_uris.URIs
+	PointInPolygonService    *pointinpolygon.PointInPolygonService
+	Reader                   reader.Reader
+	SearchDatabase           fulltext.FullTextDatabase
+	SelectPattern            *regexp.Regexp
+	SpatialDatabase          database.SpatialDatabase
+	Templates                []fs.FS
+	Verbose                  bool
+	WebFingerHostname        string
+	WriterURIs               []string
 }
 
 func (s *Settings) HasHTMLCapabilities() bool {
