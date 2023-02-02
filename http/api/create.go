@@ -1,13 +1,13 @@
 package api
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
+	browser_custom "github.com/whosonfirst/go-whosonfirst-browser/v7/custom"	
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	browser_properties "github.com/whosonfirst/go-whosonfirst-browser/v7/properties"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
@@ -23,6 +23,7 @@ type CreateFeatureHandlerOptions struct {
 	Logger                *log.Logger
 	PointInPolygonService *pointinpolygon.PointInPolygonService
 	CustomProperties      []browser_properties.CustomProperty
+	CustomValidationFunc  browser_custom.CustomValidationFunc
 }
 
 func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, error) {
@@ -72,23 +73,28 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			return
 		}
 
-		for _, pr := range opts.CustomProperties {
+		// Ideally we'd like to be able to do something like this:
+		
+		/*
 
-			ok, err := browser_properties.EnsureCustomPropertyHasValue(ctx, pr, body)
+		_, err = wasi.Run(ctx, opts.CustomValidationWASM, string(body))
+
+		if err != nil {
+			http.Error(rsp, err.Error(), http.StatusBadRequest)
+			return
+		}
+		*/
+		
+		if opts.CustomValidationFunc != nil {
+
+			err = opts.CustomValidationFunc(ctx, body)
 
 			if err != nil {
-				http.Error(rsp, err.Error(), http.StatusInternalServerError)
+				http.Error(rsp, err.Error(), http.StatusBadRequest)
 				return
 			}
-
-			if !ok {
-				msg := fmt.Sprintf("Required property '%s' has invalid or missing value", pr.Name())
-				http.Error(rsp, msg, http.StatusBadRequest)
-				return
-			}
-
 		}
-
+				
 		// END OF validation code
 
 		_, new_body, err := opts.PointInPolygonService.Update(ctx, body)

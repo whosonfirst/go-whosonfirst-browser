@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"io/fs"
 	"io/ioutil"
 	"net/http"
@@ -21,6 +22,7 @@ import (
 	"github.com/whosonfirst/go-reader-cachereader"
 	github_reader "github.com/whosonfirst/go-reader-github"
 	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
+	browser_custom "github.com/whosonfirst/go-whosonfirst-browser/v7/custom"	
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/chrome"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	browser_properties "github.com/whosonfirst/go-whosonfirst-browser/v7/properties"
@@ -41,6 +43,8 @@ type Settings struct {
 	CustomWWWHandlers     map[string]http.Handler
 	CustomAPIHandlers     map[string]http.Handler
 	CustomEditProperties  []browser_properties.CustomProperty
+	CustomEditValidationFunc browser_custom.CustomValidationFunc
+	CustomEditValidationWasm io.Reader
 	Exporter              export.Exporter
 	MapProvider           provider.Provider
 	NavPlaceMaxFeatures   int
