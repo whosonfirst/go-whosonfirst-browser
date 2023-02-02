@@ -4,6 +4,10 @@ const ConfigURIDefault string = ""
 
 const CORSAllowCredentialsDefault bool = false
 
+const CustomEditValidationWasmDirDefault string = ""
+
+const CustomEditValidationWasmPathDefault string = ""
+
 const DisableGeoJSONDefault bool = false
 
 const DisableGeoJSONLDDefault bool = false
@@ -27,6 +31,8 @@ const DisableSVGDefault bool = false
 const DisableWebFingerDefault bool = false
 
 const EnableCORSDefault bool = true
+
+const EnableCustomEditValidationWasmDefault bool = false
 
 const EnableEditDefault bool = false
 

@@ -654,6 +654,24 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 
 			settings.CustomEditProperties = custom_props
 		}
+
+		if cfg.EnableCustomEditValidationWasm {
+
+			wasm_dir := os.DirFS(cfg.CustomEditValidationWasmDir)
+
+			r, err := wasm_dir.Open(cfg.CustomEditValidationWasmPath)
+
+			if err != nil {
+				return nil, fmt.Errorf("Failed to open %s from %s, %w", cfg.CustomEditValidationWasmPath, cfg.CustomEditValidationWasmDir)
+			}
+
+			r.Close()
+
+			settings.CustomEditValidationWasm = &browser_custom.CustomValidationWasm{
+				FS:   wasm_dir,
+				Path: cfg.CustomEditValidationWasmPath,
+			}
+		}
 	}
 
 	if cfg.EnableEditAPI {
