@@ -9,7 +9,36 @@ whosonfirst.browser.validate = (function(){
 
 	init: function(cb){
 
+	    var wasm_uri = whosonfirst.browser.uris.forCustomLabel("validate_wasm");
+	    var custom_wasm_uri = whosonfirst.browser.uris.forCustomLabel("custom_validate_wasm");
+
+	    return new Promise((resolve, reject) => {
+
+		this.fetchWasm(wasm_uri).then(rsp => {
+		    
+		    if (! custom_wasm_uri){
+			resolve();
+			return;
+		    }
+
+		    this.fetchWasm(custom_wasm_uri).then(rsp => {
+			resolve();
+			return;
+		    }).catch(err => {
+			reject(err);
+		    });
+		    
+		}).catch(err => {
+		    reject(err);
+		})
+
+	    });
+	},
+
+	fetchWasm: function(wasm_uri){
+	    
 	    var pending = 1;
+	    console.log("Fetch WASM ", wasm_uri);
 	    
 	    return new Promise((resolve, reject) => {
 		
@@ -24,8 +53,6 @@ whosonfirst.browser.validate = (function(){
 		const export_go = new Go();
 		
 		let export_mod, export_inst;	
-
-		var wasm_uri = whosonfirst.browser.uris.forCustomLabel("validate_wasm");
 		
 		WebAssembly.instantiateStreaming(fetch(wasm_uri), export_go.importObject).then(
 		    
