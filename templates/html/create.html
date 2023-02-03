@@ -9,13 +9,12 @@
 
       <div class="container" id="create-feature">
 
+	  <div id="feedback"></div>	  
 	  <div class="grid-view">
 	      
 	      <div id="map" class="row" data-map-provider="{{ .MapProvider }}" data-enable-draw="true"></div>
 	      
-	      <div id="edit">
-		  
-		  <div id="feedback"></div>
+	      <div id="edit">		 
 		  		  
 		  <form class="form" class="row g-3" id="wof-properties-form">
 		      
@@ -64,7 +63,7 @@
 		      
 		  </form>
 		  
-		  <div id="controls" class="row">
+		  <div id="controls" class="grid-view">
 		      <button class="btn" id="add-property">Add property</button>		      
 		      <button class="btn" id="save">Save</button>
 		  </div>
