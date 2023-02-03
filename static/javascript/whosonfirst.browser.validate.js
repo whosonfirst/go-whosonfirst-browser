@@ -53,8 +53,22 @@ whosonfirst.browser.validate = (function(){
 		const export_go = new Go();
 		
 		let export_mod, export_inst;	
+
+		// See this, with the headers? This is important if we're running in
+		// a AWS Lambda + API Gateway context. Without this API Gateway will
+		// return the WASM binary as a base64-encoded blob. Note that this
+		// also depends on configuring both the API Gateway and the 'lambda://'
+		// server URI to specify that 'application/wasm' is treated as binary
+		// data. Computers, amirite...
+		    
+		var fetch_headers = new Headers();
+		fetch_headers.set("Accept", "application/wasm");
 		
-		WebAssembly.instantiateStreaming(fetch(wasm_uri), export_go.importObject).then(
+		const fetch_opts = {
+		    headers: fetch_headers,
+		};
+
+		WebAssembly.instantiateStreaming(fetch(wasm_uri, fetch_opts), export_go.importObject).then(
 		    
 		    async result => {
 			
