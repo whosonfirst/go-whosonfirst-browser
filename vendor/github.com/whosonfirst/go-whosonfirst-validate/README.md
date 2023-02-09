@@ -12,7 +12,24 @@ Documentation is incomplete.
 
 So far this is a tool built and developed out of expediency (translation: why is `x` broken?). So far it validates the things that have needed to be validated.
 
-Going forward it would be nice to imagine this as both a general-purpose validation tool and a core piece of a Go "export" package for Who's On First documents. At present exporting WOF documents is handled exclusively by the `py-mapzen-whosonfirst-export` and `py-mapzen-whosonfirst-geojson` libraries and it would be nice to have something in another language (and one that can generate pre-compiled binaries).
+## Example
+
+```
+import (
+       "github.com/whosonfirst/go-whosonfirst-validate"
+)
+
+func main() {
+
+     r, _ := os.Open("/path/to/feature.geojson")
+
+     body, _ := validate.EnsureValidGeoJSON(r)
+     
+     validate_opts := default.ValidateOptions()
+     validate.ValidateWithOptions(body, opts)
+```
+
+_Error handling omitted for the sake of brevity._
 
 ## Tools
 
@@ -28,10 +45,20 @@ Usage:
 Valid arguments are:
   -all
     	Enable all validation checks.
+  -edtf
+    	Validate edtf: properties. (default true)
+  -is-current
+    	Validate mz:is_current property.
   -iterator-uri string
     	A valid whosonfirst/go-whosonfirst-iterate/v2 URI (default "repo://")
+  -name
+    	Validate wof:name property. (default true)
   -names
     	Validate WOF/RFC 5646 names.
+  -placetype
+    	Validate wof:placetype property. (default true)
+  -repo
+    	Validate wof:repo property. (default true)
   -verbose
     	Be chatty about what's happening.
 ```
@@ -48,12 +75,17 @@ Assuming everything loads successfully you won't see any output (unless you've p
 Or this:
 
 ```
-> ./bin/wof-validate -names /usr/local/data/whosonfirst-data
+$> ./bin/wof-validate -names /usr/local/data/whosonfirst-data
 error: Failed to parse name tag for /usr/local/data/whosonfirst-data/data/112/585/728/5/1125857285.geojson, because Failed to parse language tag 'eng_v_variant'
 ```
+
+## WASM
+
+Consult https://github.com/whosonfirst/go-whosonfirst-validate-wasm
 
 ## See also
 
 * https://github.com/whosonfirst/go-whosonfirst-iterate/v2
 * https://github.com/whosonfirst/go-whosonfirst-feature
 * https://github.com/whosonfirst/go-whosonfirst-names
+* https://github.com/whosonfirst/go-whosonfirst-validate-wasm

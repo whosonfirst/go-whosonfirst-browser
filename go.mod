@@ -26,10 +26,9 @@ require (
 	github.com/whosonfirst/go-reader-findingaid v0.14.2
 	github.com/whosonfirst/go-reader-github v0.6.3
 	github.com/whosonfirst/go-sanitize v0.1.0
-	github.com/whosonfirst/go-whosonfirst-export/v2 v2.6.2
+	github.com/whosonfirst/go-whosonfirst-export/v2 v2.7.0
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.26
 	github.com/whosonfirst/go-whosonfirst-image v0.1.0
-	github.com/whosonfirst/go-whosonfirst-placetypes v0.4.2
 	github.com/whosonfirst/go-whosonfirst-reader v1.0.1
 	github.com/whosonfirst/go-whosonfirst-search v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spatial v0.5.4
@@ -38,8 +37,8 @@ require (
 	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.8
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.3
 	github.com/whosonfirst/go-whosonfirst-svg v0.1.0
-	github.com/whosonfirst/go-whosonfirst-uri v1.2.0
-	github.com/whosonfirst/go-whosonfirst-validate v0.3.2
+	github.com/whosonfirst/go-whosonfirst-uri v1.3.0
+	github.com/whosonfirst/go-whosonfirst-validate v0.3.3
 	github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.1
 	github.com/whosonfirst/go-writer-github/v3 v3.0.2
 	github.com/whosonfirst/go-writer/v3 v3.1.0
@@ -146,6 +145,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-id v1.2.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.1 // indirect
 	github.com/whosonfirst/go-whosonfirst-names v0.1.0 // indirect
+	github.com/whosonfirst/go-whosonfirst-placetypes v0.4.2 // indirect
 	github.com/whosonfirst/go-whosonfirst-sources v0.1.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-spatial-sqlite v0.6.4 // indirect
 	github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.0 // indirect
@@ -157,11 +157,11 @@ require (
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 	golang.org/x/mod v0.6.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/net v0.4.0 // indirect
 	golang.org/x/oauth2 v0.2.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/term v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/term v0.3.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
 	golang.org/x/tools v0.2.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.103.0 // indirect
