@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	aa_log "github.com/aaronland/go-log"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
@@ -140,6 +142,11 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		title := fmt.Sprintf("Create new record for '%s'", name)
 		description := title
 
+		now := time.Now()
+		ts := now.Unix()
+
+		branch := fmt.Sprintf("create-feature-%d", ts)
+
 		publish_opts := &publishFeatureOptions{
 			Logger:      opts.Logger,
 			WriterURIs:  opts.WriterURIs,
@@ -148,6 +155,7 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			Account:     acct,
 			Title:       title,
 			Description: description,
+			Branch:      branch,
 		}
 
 		final, err := publishFeature(ctx, publish_opts, new_body)
@@ -159,6 +167,8 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 
 		rsp.WriteHeader(http.StatusCreated)
 		rsp.Write(final)
+
+		aa_log.Debug(opts.Logger, "Wrote new feature to %s branch", branch)
 		return
 	}
 

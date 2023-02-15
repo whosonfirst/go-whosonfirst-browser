@@ -7,6 +7,7 @@ import (
 	"log"
 	"strings"
 
+	aa_log "github.com/aaronland/go-log"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http"
@@ -25,6 +26,7 @@ type publishFeatureOptions struct {
 	Account     *auth.Account
 	Title       string
 	Description string
+	Branch      string
 }
 
 func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byte) ([]byte, error) {
@@ -42,6 +44,7 @@ func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byt
 	email := "editor@localhost"
 	title := opts.Title
 	description := opts.Description
+	branch := opts.Branch
 
 	to_replace := map[string]string{
 		"{author}":      author,
@@ -49,6 +52,7 @@ func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byt
 		"{email}":       email,
 		"{title}":       title,
 		"{description}": description,
+		"{branch}":      branch,
 	}
 
 	// Note how we are creating a fresh (local) set of writer URIs so we don't need to worry
@@ -63,6 +67,8 @@ func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byt
 		}
 
 		writer_uris[idx] = wr_uri
+
+		aa_log.Debug(opts.Logger, "Writer URI %d %s", idx, wr_uri)
 	}
 
 	// END OF on-the-fly values for https://github.com/whosonfirst/go-writer-github based writers
