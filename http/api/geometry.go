@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
+	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 )
 
 type UpdateGeometryHandlerOptions struct {
@@ -104,13 +106,28 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 			return
 		}
 
+		name, err := properties.Name(new_body)
+
+		if err != nil {
+			http.Error(rsp, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// To do (maybe): Make these customizable with URI templates in opts
+		// https://pkg.go.dev/github.com/jtacoma/uritemplates
+
+		title := fmt.Sprintf("Update geometry for '%s' (%d)", name, uri.Id)
+		description := title
+
 		publish_opts := &publishFeatureOptions{
-			Logger:     opts.Logger,
-			WriterURIs: opts.WriterURIs,
-			Exporter:   opts.Exporter,
-			Cache:      opts.Cache,
-			URI:        uri,
-			Account:    acct,
+			Logger:      opts.Logger,
+			WriterURIs:  opts.WriterURIs,
+			Exporter:    opts.Exporter,
+			Cache:       opts.Cache,
+			URI:         uri,
+			Account:     acct,
+			Title:       title,
+			Description: description,
 		}
 
 		final, err := publishFeature(ctx, publish_opts, new_body)

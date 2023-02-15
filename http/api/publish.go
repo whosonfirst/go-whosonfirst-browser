@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
@@ -16,12 +17,14 @@ import (
 )
 
 type publishFeatureOptions struct {
-	Logger     *log.Logger
-	WriterURIs []string
-	Exporter   export.Exporter
-	Cache      cache.Cache
-	URI        *http.URI
-	Account    *auth.Account
+	Logger      *log.Logger
+	WriterURIs  []string
+	Exporter    export.Exporter
+	Cache       cache.Cache
+	URI         *http.URI
+	Account     *auth.Account
+	Title       string
+	Description string
 }
 
 func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byte) ([]byte, error) {
@@ -32,8 +35,40 @@ func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byt
 		return nil, fmt.Errorf("Failed to derive repo from body, %w", err)
 	}
 
+	// START OF on-the-fly values for https://github.com/whosonfirst/go-writer-github based writers
+
+	author := opts.Account.Name
+	owner := opts.Account.Name
+	email := "editor@localhost"
+	title := opts.Title
+	description := opts.Description
+
+	to_replace := map[string]string{
+		"{author}":      author,
+		"{owner}":       owner,
+		"{email}":       email,
+		"{title}":       title,
+		"{description}": description,
+	}
+
+	// Note how we are creating a fresh (local) set of writer URIs so we don't need to worry
+	// about two different instances of a handler changing each other's opts.WriterURIs list
+
+	writer_uris := make([]string, len(opts.WriterURIs))
+
+	for idx, wr_uri := range opts.WriterURIs {
+
+		for match_str, replace_str := range to_replace {
+			wr_uri = strings.Replace(wr_uri, match_str, replace_str, -1)
+		}
+
+		writer_uris[idx] = wr_uri
+	}
+
+	// END OF on-the-fly values for https://github.com/whosonfirst/go-writer-github based writers
+
 	wr_opts := &writer.WriterOptions{
-		WriterURIs: opts.WriterURIs,
+		WriterURIs: writer_uris,
 		Logger:     opts.Logger,
 		Repo:       repo,
 	}

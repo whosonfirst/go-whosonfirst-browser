@@ -7,10 +7,11 @@ import (
 import (
 	"context"
 	"fmt"
-	wof_writer "github.com/whosonfirst/go-writer/v3"
 	"log"
 	"net/url"
 	"strings"
+
+	wof_writer "github.com/whosonfirst/go-writer/v3"
 )
 
 type WriterOptions struct {
@@ -37,8 +38,6 @@ func NewWriter(ctx context.Context, opts *WriterOptions) (wof_writer.Writer, err
 		if opts.Repo != "" && strings.Contains(wr_uri, "{repo}") {
 
 			wr_uri = strings.Replace(wr_uri, "{repo}", opts.Repo, -1)
-
-			log.Println("WR 2", wr_uri)
 		}
 
 		wr, err := wof_writer.NewWriter(ctx, wr_uri)

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	browser_properties "github.com/whosonfirst/go-whosonfirst-browser/v7/properties"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
+	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	"github.com/whosonfirst/go-whosonfirst-validate"
 )
 
@@ -108,16 +110,12 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 
 		if opts.CustomValidationFunc != nil {
 
-			opts.Logger.Println("CUSTOM VALIDATION")
-
 			err = opts.CustomValidationFunc(body)
 
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusBadRequest)
 				return
 			}
-
-			opts.Logger.Println("CUSTOM OKAY")
 		}
 
 		// END OF validation code
@@ -129,12 +127,27 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			return
 		}
 
+		name, err := properties.Name(new_body)
+
+		if err != nil {
+			http.Error(rsp, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// To do (maybe): Make these customizable with URI templates in opts
+		// https://pkg.go.dev/github.com/jtacoma/uritemplates
+
+		title := fmt.Sprintf("Create new record for '%s'", name)
+		description := title
+
 		publish_opts := &publishFeatureOptions{
-			Logger:     opts.Logger,
-			WriterURIs: opts.WriterURIs,
-			Exporter:   opts.Exporter,
-			Cache:      opts.Cache,
-			Account:    acct,
+			Logger:      opts.Logger,
+			WriterURIs:  opts.WriterURIs,
+			Exporter:    opts.Exporter,
+			Cache:       opts.Cache,
+			Account:     acct,
+			Title:       title,
+			Description: description,
 		}
 
 		final, err := publishFeature(ctx, publish_opts, new_body)
