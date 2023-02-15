@@ -1,11 +1,12 @@
 package api
 
 import (
-	"fmt"
 	"io"
+	"fmt"
 	"log"
 	"net/http"
 
+	aa_log "github.com/aaronland/go-log"
 	"github.com/paulmach/orb/geojson"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
@@ -13,7 +14,7 @@ import (
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
-	"github.com/whosonfirst/go-whosonfirst-feature/properties"
+	"github.com/whosonfirst/go-whosonfirst-feature/properties"	
 )
 
 type UpdateGeometryHandlerOptions struct {
@@ -45,11 +46,11 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 		if err != nil {
 			switch err.(type) {
 			case auth.NotLoggedIn:
-				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				aa_log.Error(opts.Logger, "Failed to determine account for request, %v", err)
 				http.Error(rsp, "Not authorized", http.StatusUnauthorized)
 				return
 			default:
-				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				aa_log.Error(opts.Logger, "Failed to determine account for request, %v", err)
 				http.Error(rsp, "Internal server error", http.StatusInternalServerError)
 				return
 			}
@@ -58,6 +59,7 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 		uri, err, _ := wof_http.ParseURIFromRequest(req, opts.Reader)
 
 		if err != nil {
+			aa_log.Error(opts.Logger, "Failed to parse URI from request %s, %v", req.URL.Path, err)			
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -65,6 +67,7 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 		update, err := io.ReadAll(req.Body)
 
 		if err != nil {
+			aa_log.Error(opts.Logger, "Failed to read body from %s, %v", req.URL.Path, err)			
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -72,6 +75,7 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 		f, err := geojson.UnmarshalFeature(update)
 
 		if err != nil {
+			aa_log.Error(opts.Logger, "Failed to unmarshal GeoJSON from %s, %v", req.URL.Path, err)			
 			http.Error(rsp, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -87,6 +91,7 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 		has_changes, new_body, err := export.AssignPropertiesIfChanged(ctx, body, updates)
 
 		if err != nil {
+			aa_log.Error(opts.Logger, "Failed to assign properties to %s, %v", req.URL.Path, err)						
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -98,6 +103,7 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 		has_changes, new_body, err = opts.PointInPolygonService.Update(ctx, new_body)
 
 		if err != nil {
+			aa_log.Error(opts.Logger, "Failed to assign point-in-polygon data to %s, %v", req.URL.Path, err)			
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -109,30 +115,32 @@ func UpdateGeometryHandler(opts *UpdateGeometryHandlerOptions) (http.Handler, er
 		name, err := properties.Name(new_body)
 
 		if err != nil {
+			aa_log.Error(opts.Logger, "Failed to derive name %s, %v", req.URL.Path, err)			
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		// To do (maybe): Make these customizable with URI templates in opts
 		// https://pkg.go.dev/github.com/jtacoma/uritemplates
-
+		
 		title := fmt.Sprintf("Update geometry for '%s' (%d)", name, uri.Id)
 		description := title
 
 		publish_opts := &publishFeatureOptions{
-			Logger:      opts.Logger,
-			WriterURIs:  opts.WriterURIs,
-			Exporter:    opts.Exporter,
-			Cache:       opts.Cache,
-			URI:         uri,
-			Account:     acct,
-			Title:       title,
+			Logger:              opts.Logger,
+			WriterURIs:          opts.WriterURIs,
+			Exporter:            opts.Exporter,
+			Cache:               opts.Cache,
+			URI:                 uri,
+			Account:             acct,
+			Title: title,
 			Description: description,
 		}
 
 		final, err := publishFeature(ctx, publish_opts, new_body)
 
 		if err != nil {
+			aa_log.Error(opts.Logger, "Failed to publish feature for %s, %v", req.URL.Path, err)						
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
