@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/url"
 	"strings"
 
 	aa_log "github.com/aaronland/go-log"
@@ -61,6 +62,12 @@ func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byt
 	writer_uris := make([]string, len(opts.WriterURIs))
 
 	for idx, wr_uri := range opts.WriterURIs {
+
+		wr_uri, err = url.QueryUnescape(wr_uri)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to unescape writer URI at index %d, %w", idx, err)
+		}
 
 		for match_str, replace_str := range to_replace {
 			wr_uri = strings.Replace(wr_uri, match_str, replace_str, -1)

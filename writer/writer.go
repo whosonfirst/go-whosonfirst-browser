@@ -43,7 +43,8 @@ func NewWriter(ctx context.Context, opts *WriterOptions) (wof_writer.Writer, err
 		wr, err := wof_writer.NewWriter(ctx, wr_uri)
 
 		if err != nil {
-			return nil, fmt.Errorf("Failed to create writer for '%s', %w", wr_uri, err)
+			// Note: Don't leak writer URI which may have a GH token in it
+			return nil, fmt.Errorf("Failed to create writer at offset %d, %w", idx, err)
 		}
 
 		writers[idx] = wr
