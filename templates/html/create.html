@@ -2,7 +2,8 @@
 {{ template "browser_header" . }}
 
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.api.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.leaflet.js" }}"></script>      
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.leaflet.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.webcomponent.existentialflag.js" }}"></script>            
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.create.js" }}"></script>
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.create.init.js" }}"></script>	 
       
@@ -52,7 +53,9 @@
 		      
 		      <div class="col-auto wof-property-block wof-property-optional-x">
 			  <label for="mz:is_current" >mz:is_current</label>
-			  <textarea class="form-control-plaintext wof-property wof-property-existential" id="mz:is_current"></textarea>
+			  <existential-flag id="mz:is_current">
+			      <textarea class="form-control-plaintext wof-property wof-property-existential" id="mz:is_current"></textarea>
+			  </existential-flag>
 		      </div>
 
 		      {{ range $idx, $pr := .CustomProperties }}
