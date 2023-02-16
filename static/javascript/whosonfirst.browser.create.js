@@ -59,6 +59,11 @@ whosonfirst.browser.create = (function(){
 		    vertexPane: geojson_pane_name,
 		    layerPane: geojson_pane_name,
 		    markerPane: geojson_pane_name,
+		},
+		markerStyle: {
+		    draggle: true,
+		    icon: whosonfirst.browser.leaflet.markerIcon(),
+		    pane: geojson_pane_name,
 		}
 	    });
 

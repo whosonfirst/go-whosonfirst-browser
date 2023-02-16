@@ -1,3 +1,7 @@
 .grid-view {
 	grid-template-columns:1.5fr .5fr;
 }
+
+#save {
+	width: 90%;
+}
