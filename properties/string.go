@@ -13,6 +13,7 @@ type CustomStringProperty struct {
 	CustomProperty
 	name     string
 	required bool
+	custom_element string
 }
 
 func init() {
@@ -53,6 +54,14 @@ func NewCustomStringProperty(ctx context.Context, uri string) (CustomProperty, e
 		pr.required = r
 	}
 
+	custom_el := q.Get("custom-element")
+
+	if custom_el != "" {
+
+		// Validate custom_el here...
+		pr.custom_element = custom_el
+	}
+	
 	return pr, nil
 }
 
@@ -66,4 +75,8 @@ func (pr *CustomStringProperty) Required() bool {
 
 func (pr *CustomStringProperty) Type() string {
 	return CUSTOM_STRING_PROPERTY
+}
+
+func (pr *CustomStringProperty) CustomElement() string {
+	return pr.custom_element
 }

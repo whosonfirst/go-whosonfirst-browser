@@ -15,6 +15,7 @@ type CustomProperty interface {
 	Name() string
 	Type() string
 	Required() bool
+	CustomElement() string
 }
 
 func EnsureCustomPropertyHasValue(ctx context.Context, pr CustomProperty, body []byte) (bool, error) {
