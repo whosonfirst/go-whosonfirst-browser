@@ -1,4 +1,4 @@
-class ExistentialFlag extends HTMLElement {
+class WhosOnFirstPlacetype extends HTMLElement {
     
     constructor() {
 	super();
@@ -13,21 +13,8 @@ class ExistentialFlag extends HTMLElement {
 	var select = document.createElement('select');
 	select.setAttribute("class", "form-select wof-property");
 
-	const flags = [ "-1", "0" , "1" ];
+	// Get placetypes here...
 	
-	const labels = {
-	    "-1": "unknown",
-	    "0": "false",
-	    "1": "true"
-	};
-
-	for (var i in flags){
-	    var option = document.createElement("option");
-	    option.setAttribute("value", flags[i]);
-	    option.appendChild(document.createTextNode(labels[flags[i]]));
-	    select.appendChild(option);
-	}
-
 	select.onchange = function(){
 	    var textarea = document.getElementById(id);
 	    textarea.value = parseInt(select.value);
@@ -38,4 +25,4 @@ class ExistentialFlag extends HTMLElement {
 }
 
 // Define the new element
-customElements.define('existential-flag', ExistentialFlag);
+customElements.define('whosonfirst-placetype', WhosOnFirstPlacetype);

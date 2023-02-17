@@ -3,7 +3,7 @@
 
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.api.js" }}"></script>
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.leaflet.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.webcomponent.existentialflag.js" }}"></script>            
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.webcomponent.existentialflag.js" }}"></script>            
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.create.js" }}"></script>
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.create.init.js" }}"></script>	 
       
@@ -33,17 +33,23 @@
 		      
 		      <div class="col-auto wof-property-block">
 			  <label for="wof:placetype" class="form-label">wof:placetype</label>
-			  <textarea class="form-control-plaintext wof-property wof-property-placetype" id="wof:placetype"></textarea>
+			  <whosonfirst-placetype data-id="wof:placetype">			  
+			      <textarea class="form-control-plaintext wof-property wof-property-placetype" id="wof:placetype"></textarea>
+			  </whosonfirst-placetype>
 		      </div>
 			  
 		      <div class="col-auto wof-property-block wof-property-optional-x">
 			  <label for="edtf:inception" >edtf:inception</label>
-			  <textarea class="form-control-plaintext wof-property wof-property-edtf" id="edtf:inception"></textarea>
+			  <whosonfirst-edtf data-id="edtf:inception">			  			  
+			      <textarea class="form-control-plaintext wof-property wof-property-edtf" id="edtf:inception"></textarea>
+			  </whosonfirst-edtf>
 		      </div>
 		      
 		      <div class="col-auto wof-property-block wof-property-optional-x">
 			  <label for="edtf:cessation" >edtf:cessation</label>
-			  <textarea class="form-control-plaintext wof-property wof-property-edtf" id="edtf:cessation"></textarea>
+			  <whosonfirst-edtf data-id="edtf:inception">			  			  			  
+			      <textarea class="form-control-plaintext wof-property wof-property-edtf" id="edtf:cessation"></textarea>
+			  </whosonfirst>
 		      </div>
 		      
 		      <div class="col-auto wof-property-block">
@@ -53,14 +59,14 @@
 		      
 		      <div class="col-auto wof-property-block wof-property-optional-x">
 			  <label for="mz:is_current" >mz:is_current</label>
-			  <existential-flag data-id="mz:is_current">
+			  <whosonfirst-existential-flag data-id="mz:is_current">
 			      <textarea class="form-control-plaintext wof-property wof-property-existential" id="mz:is_current"></textarea>
-			  </existential-flag>
+			  </whosonfirst-existential-flag>
 		      </div>
 
 		      {{ range $idx, $pr := .CustomProperties }}
 		      <div class="col-auto wof-property-block{{ if not $pr.Required }} wof-property-optional{{ end }}" id="{{ $pr.Name }}-wrapper">
-			  <label for="mz:is_current" >{{ $pr.Name }}</label>
+			  <label for="{{ $pr.Name }}" >{{ $pr.Name }}</label>
 			  <textarea class="form-control-plaintext wof-property wof-property-{{ $pr.Type }}" id="{{ $pr.Name }}"></textarea>
 		      </div>
 		      {{ end }}
