@@ -67,10 +67,13 @@
 		      {{ range $idx, $pr := .CustomProperties }}
 		      <div class="col-auto wof-property-block{{ if not $pr.Required }} wof-property-optional{{ end }}" id="{{ $pr.Name }}-wrapper">
 			  <label for="{{ $pr.Name }}" >{{ $pr.Name }}</label>
-			  <!-- this doesn't work because Go is hyper strict about HTML elements... -->
-			  <!-- {{ if ne $pr.CustomElement "" }}<{{ $pr.CustomElement }} data-id="{{ $pr.Name }}">{{ end }} -->
-			  <textarea class="form-control-plaintext wof-property wof-property-{{ $pr.Type }}" id="{{ $pr.Name }}"></textarea>
-			  <!-- {{ if ne $pr.CustomElement "" }}</{{ $pr.CustomElement }}>{{ end }} -->
+			  <!--
+			  See the way we're assiging a conditional wof-property-custom-element and data-custom-element
+			  class? That's to account for the fact that there is no way to make Go templates generate markup
+			  derived from template variables. When you try that markup gets escaped. Instead we're going to
+			  have to investigate using custom JS code to rewrite the DOM and invoke the custom web components...
+			  -->
+			  <textarea class="form-control-plaintext wof-property wof-property-{{ $pr.Type }}{{ if ne $pr.CustomElement "" }} wof-property-custom-element{{ end }}" id="{{ $pr.Name }}"{{ if ne $pr.CustomElement "" }} data-custom-element="{{ $pr.CustomElement }}"{{ end }}></textarea>
 		      </div>
 		      {{ end }}
 		      
