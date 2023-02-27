@@ -2007,8 +2007,8 @@ github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.1/go.mod h1:sAVuLSXDCyU1Yb
 github.com/whosonfirst/go-whosonfirst-names v0.1.0 h1:uXop/DwQqH60uDBZvHCPg1yRSQLScbm6VZyqcaED2KE=
 github.com/whosonfirst/go-whosonfirst-names v0.1.0/go.mod h1:0z86/nedM9T/5C8cAdbCMfRuBrkc33oEQ6vdJ6WybSg=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.3.0/go.mod h1:ez0VFkGFbgT2/z2oi3PIuW6FewsZ2+5glyfDD79XEHk=
-github.com/whosonfirst/go-whosonfirst-placetypes v0.4.2 h1:Sye3ySdkTy5+PPdSLCaZO6/Pcfqb0AnMDU40c/yYZpQ=
-github.com/whosonfirst/go-whosonfirst-placetypes v0.4.2/go.mod h1:HjxisIp+iZOXoThM9XyvC+GCmnupynE73GD3JxhH3fY=
+github.com/whosonfirst/go-whosonfirst-placetypes v0.5.0 h1:Ico/pTolO4CS4knJmWAnQwSPWUB/pE2tUVB8f5AJzug=
+github.com/whosonfirst/go-whosonfirst-placetypes v0.5.0/go.mod h1:HjxisIp+iZOXoThM9XyvC+GCmnupynE73GD3JxhH3fY=
 github.com/whosonfirst/go-whosonfirst-reader v1.0.1 h1:6edzwFwhm3Kb5wiMMzUhTRyMaHmkE7MQTK18ufs4qgM=
 github.com/whosonfirst/go-whosonfirst-reader v1.0.1/go.mod h1:IPl9yAPYBS0XULSpQprDMkI/Y3++khnL1k/MVHh06+Q=
 github.com/whosonfirst/go-whosonfirst-search v0.1.0 h1:BZctXvgB8HyuVlmtw49IIV2i30EGzR682ZUAbdSfB7w=

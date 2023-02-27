@@ -11,7 +11,7 @@ import (
 )
 
 //go:embed placetypes.json
-var fs embed.FS
+var FS embed.FS
 
 type WOFPlacetypeSpecification struct {
 	catalog map[string]WOFPlacetype
@@ -20,11 +20,13 @@ type WOFPlacetypeSpecification struct {
 
 func DefaultWOFPlacetypeSpecification() (*WOFPlacetypeSpecification, error) {
 
-	r, err := fs.Open("placetypes.json")
+	r, err := FS.Open("placetypes.json")
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to open placetypes, %w", err)
 	}
+
+	defer r.Close()
 
 	return NewWOFPlacetypeSpecificationWithReader(r)
 }

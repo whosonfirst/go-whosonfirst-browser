@@ -796,6 +796,32 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	// END OF uris.js
 
+	// START OF placetypes.js
+
+	placetypes_handler, err := www.PlacetypesHandler()
+
+	if err != nil {
+		return fmt.Errorf("Failed to create placetypes handler, %w", err)
+	}
+
+	placetypes_path := "/javascript/whosonfirst.browser.placetypes.js"
+
+	if settings.URIs.URIPrefix != "" {
+
+		path, err := url.JoinPath(settings.URIs.URIPrefix, placetypes_path)
+
+		if err != nil {
+			return fmt.Errorf("Failed to assign URI prefix to %s, %w", placetypes_path, err)
+		}
+
+		placetypes_path = path
+	}
+
+	aa_log.Debug(logger, "Handle whosonfirst.browser.placetypes.js endpoint at %s\n", placetypes_path)
+	mux.Handle(placetypes_path, placetypes_handler)
+
+	// END OF placetypes.js
+	
 	// Finally, start the server
 
 	s, err := server.NewServer(ctx, server_uri)

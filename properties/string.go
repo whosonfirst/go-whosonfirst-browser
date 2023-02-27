@@ -11,8 +11,8 @@ const CUSTOM_STRING_PROPERTY string = "string"
 
 type CustomStringProperty struct {
 	CustomProperty
-	name     string
-	required bool
+	name           string
+	required       bool
 	custom_element string
 }
 
@@ -61,7 +61,7 @@ func NewCustomStringProperty(ctx context.Context, uri string) (CustomProperty, e
 		// Validate custom_el here...
 		pr.custom_element = custom_el
 	}
-	
+
 	return pr, nil
 }
 
