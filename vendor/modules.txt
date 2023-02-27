@@ -475,7 +475,7 @@ github.com/patrickmn/go-cache
 # github.com/paulmach/go.geojson v1.4.0
 ## explicit
 github.com/paulmach/go.geojson
-# github.com/paulmach/orb v0.8.0
+# github.com/paulmach/orb v0.9.0
 ## explicit; go 1.15
 github.com/paulmach/orb
 github.com/paulmach/orb/clip
@@ -634,7 +634,7 @@ github.com/whosonfirst/go-reader-cachereader
 # github.com/whosonfirst/go-reader-findingaid v0.14.2
 ## explicit; go 1.18
 github.com/whosonfirst/go-reader-findingaid
-# github.com/whosonfirst/go-reader-github v0.6.3
+# github.com/whosonfirst/go-reader-github v0.6.5
 ## explicit; go 1.18
 github.com/whosonfirst/go-reader-github
 # github.com/whosonfirst/go-reader-http v0.3.1
@@ -759,6 +759,15 @@ github.com/whosonfirst/walk
 # github.com/x448/float16 v0.8.4
 ## explicit; go 1.11
 github.com/x448/float16
+# go.mongodb.org/mongo-driver v1.11.1
+## explicit; go 1.13
+go.mongodb.org/mongo-driver/bson
+go.mongodb.org/mongo-driver/bson/bsoncodec
+go.mongodb.org/mongo-driver/bson/bsonoptions
+go.mongodb.org/mongo-driver/bson/bsonrw
+go.mongodb.org/mongo-driver/bson/bsontype
+go.mongodb.org/mongo-driver/bson/primitive
+go.mongodb.org/mongo-driver/x/bsonx/bsoncore
 # go.opencensus.io v0.24.0
 ## explicit; go 1.13
 go.opencensus.io
@@ -849,7 +858,7 @@ golang.org/x/image/vector
 # golang.org/x/mod v0.6.0
 ## explicit; go 1.17
 golang.org/x/mod/semver
-# golang.org/x/net v0.5.0
+# golang.org/x/net v0.7.0
 ## explicit; go 1.17
 golang.org/x/net/bpf
 golang.org/x/net/context
@@ -880,7 +889,7 @@ golang.org/x/oauth2/internal
 # golang.org/x/sync v0.1.0
 ## explicit
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.4.0
+# golang.org/x/sys v0.5.0
 ## explicit; go 1.17
 golang.org/x/sys/cpu
 golang.org/x/sys/execabs
@@ -891,10 +900,10 @@ golang.org/x/sys/windows
 golang.org/x/sys/windows/registry
 golang.org/x/sys/windows/svc
 golang.org/x/sys/windows/svc/mgr
-# golang.org/x/term v0.4.0
+# golang.org/x/term v0.5.0
 ## explicit; go 1.17
 golang.org/x/term
-# golang.org/x/text v0.6.0
+# golang.org/x/text v0.7.0
 ## explicit; go 1.17
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap

@@ -13,7 +13,7 @@ require (
 	github.com/aaronland/go-log v1.0.0
 	github.com/aaronland/go-roster v1.0.0
 	github.com/aaronland/gocloud-blob-s3 v0.2.2
-	github.com/paulmach/orb v0.8.0
+	github.com/paulmach/orb v0.9.0
 	github.com/rs/cors v1.8.3
 	github.com/sfomuseum/go-flags v0.10.0
 	github.com/sfomuseum/go-geojsonld v1.0.0
@@ -25,7 +25,7 @@ require (
 	github.com/whosonfirst/go-reader v1.0.2
 	github.com/whosonfirst/go-reader-cachereader v1.1.0
 	github.com/whosonfirst/go-reader-findingaid v0.14.2
-	github.com/whosonfirst/go-reader-github v0.6.3
+	github.com/whosonfirst/go-reader-github v0.6.5
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-export/v2 v2.7.0
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.26
@@ -186,6 +186,7 @@ require (
 	github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0-20220916180959-42588e308a3e // indirect
 	github.com/whosonfirst/walk v0.0.1 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
+	go.mongodb.org/mongo-driver v1.11.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/ratelimit v0.2.0 // indirect
 	go4.org/mem v0.0.0-20210711025021-927187094b94 // indirect
@@ -194,12 +195,12 @@ require (
 	golang.org/x/exp v0.0.0-20221205204356-47842c84f3db // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 	golang.org/x/mod v0.6.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.2.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/term v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/term v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.2.0 // indirect
 	golang.org/x/tools v0.2.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
