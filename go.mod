@@ -18,6 +18,7 @@ require (
 	github.com/sfomuseum/go-flags v0.10.0
 	github.com/sfomuseum/go-geojsonld v1.0.0
 	github.com/sfomuseum/go-http-auth v0.0.6
+	github.com/sfomuseum/go-http-wasm v1.0.0
 	github.com/sfomuseum/go-template v1.5.1
 	github.com/sfomuseum/runtimevar v1.0.4
 	github.com/tidwall/gjson v1.14.4
@@ -31,7 +32,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.26
 	github.com/whosonfirst/go-whosonfirst-image v0.1.0
 	github.com/whosonfirst/go-whosonfirst-placetypes v0.5.0
-	github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.0.1
+	github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.0.2
 	github.com/whosonfirst/go-whosonfirst-reader v1.0.1
 	github.com/whosonfirst/go-whosonfirst-search v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spatial v0.5.4
@@ -42,7 +43,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-svg v0.1.0
 	github.com/whosonfirst/go-whosonfirst-uri v1.3.0
 	github.com/whosonfirst/go-whosonfirst-validate v0.3.3
-	github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.1
+	github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.2
 	github.com/whosonfirst/go-writer-github/v3 v3.0.2
 	github.com/whosonfirst/go-writer/v3 v3.1.0
 	gocloud.dev v0.28.0

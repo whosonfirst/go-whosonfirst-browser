@@ -28,6 +28,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/javascript"
+	wasm_exec "github.com/sfomuseum/go-http-wasm"
 	wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
 	wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"	
 )
@@ -558,6 +559,14 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		aa_log.Debug(logger, "Handle edit geometry endpoint at %s\n", path_edit_geometry)
 		mux.Handle(settings.URIs.EditGeometry, geom_handler)
 
+		// START OF wasm stuff
+		
+		err = wasm_exec.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append wasm asset handlers, %w", err)
+		}
+		
 		err = wasm_placetypes.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
@@ -570,11 +579,9 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			return fmt.Errorf("Failed to append wasm validate asset handlers, %w", err)
 		}
 
+		wasm_exec_opts := wasm_exec.DefaultWASMOptions()		
 		wasm_validate_opts := wasm_validate.DefaultWASMOptions()
-		wasm_validate_opts.EnableWASMExec()
-
 		wasm_placetypes_opts := wasm_placetypes.DefaultWASMOptions()
-		// Don't enable wasm exec since we've just done it above
 		
 		// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
 		// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
@@ -611,6 +618,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		// END OF I don't like having	to do this
 
 		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		create_handler = wasm_exec.AppendResourcesHandlerWithPrefix(create_handler, wasm_exec_opts, settings.URIs.URIPrefix)		
 		create_handler = wasm_validate.AppendResourcesHandlerWithPrefix(create_handler, wasm_validate_opts, settings.URIs.URIPrefix)
 		create_handler = wasm_placetypes.AppendResourcesHandlerWithPrefix(create_handler, wasm_placetypes_opts, settings.URIs.URIPrefix)		
 		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, settings.URIs.URIPrefix)
@@ -815,32 +823,6 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	mux.Handle(uris_path, uris_handler)
 
 	// END OF uris.js
-
-	// START OF placetypes.js
-
-	placetypes_handler, err := www.PlacetypesHandler()
-
-	if err != nil {
-		return fmt.Errorf("Failed to create placetypes handler, %w", err)
-	}
-
-	placetypes_path := "/javascript/whosonfirst.browser.placetypes.js"
-
-	if settings.URIs.URIPrefix != "" {
-
-		path, err := url.JoinPath(settings.URIs.URIPrefix, placetypes_path)
-
-		if err != nil {
-			return fmt.Errorf("Failed to assign URI prefix to %s, %w", placetypes_path, err)
-		}
-
-		placetypes_path = path
-	}
-
-	aa_log.Debug(logger, "Handle whosonfirst.browser.placetypes.js endpoint at %s\n", placetypes_path)
-	mux.Handle(placetypes_path, placetypes_handler)
-
-	// END OF placetypes.js
 	
 	// Finally, start the server
 

@@ -1,16 +1,15 @@
-package http
+package wasm
 
 import (
 	gohttp "net/http"
 
 	aa_static "github.com/aaronland/go-http-static"
-	"github.com/whosonfirst/go-whosonfirst-placetypes-wasm/static"
+	"github.com/sfomuseum/go-http-wasm/static"
 )
 
 // WASMOptions provides a list of JavaScript and CSS link to include with HTML output.
 type WASMOptions struct {
 	JS  []string
-	CSS []string
 }
 
 // Return a *WASMOptions struct with default paths and URIs.
@@ -18,14 +17,14 @@ func DefaultWASMOptions() *WASMOptions {
 
 	opts := &WASMOptions{
 		JS: []string{
-			"/javascript/whosonfirst.placetypes.wasm.js",
+			"/javascript/wasm_exec.js",
 		},
 	}
 
 	return opts
 }
 
-// AppendResourcesHandler will rewrite any HTML produced by previous handler to include the necessary markup to load WASM JavaScript and CSS files and related assets.
+// AppendResourcesHandler will rewrite any HTML produced by previous handler to include the necessary markup to load WASM JavaScript files and related assets.
 func AppendResourcesHandler(next gohttp.Handler, opts *WASMOptions) gohttp.Handler {
 	return AppendResourcesHandlerWithPrefix(next, opts, "")
 }
@@ -35,7 +34,6 @@ func AppendResourcesHandlerWithPrefix(next gohttp.Handler, opts *WASMOptions, pr
 
 	static_opts := aa_static.DefaultResourcesOptions()
 	static_opts.JS = opts.JS
-	static_opts.CSS = opts.CSS
 
 	return aa_static.AppendResourcesHandlerWithPrefix(next, static_opts, prefix)
 }
