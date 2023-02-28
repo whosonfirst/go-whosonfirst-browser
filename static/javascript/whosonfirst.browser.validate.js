@@ -14,14 +14,14 @@ whosonfirst.browser.validate = (function(){
 
 	    return new Promise((resolve, reject) => {
 
-		this.fetchWasm(wasm_uri).then(rsp => {
+		whosonfirst.browser.wasm.fetch(wasm_uri).then(rsp => {		
 		    
 		    if (! custom_wasm_uri){
 			resolve();
 			return;
 		    }
 
-		    this.fetchWasm(custom_wasm_uri).then(rsp => {
+		    whosonfirst.browser.wasm.fetch(custom_wasm_uri).then(rsp => {				    
 			resolve();
 			return;
 		    }).catch(err => {
@@ -34,58 +34,6 @@ whosonfirst.browser.validate = (function(){
 
 	    });
 	},
-
-	fetchWasm: function(wasm_uri){
-	    
-	    var pending = 1;
-	    console.log("Fetch WASM ", wasm_uri);
-	    
-	    return new Promise((resolve, reject) => {
-		
-		if (! WebAssembly.instantiateStreaming){
-		    
-		    WebAssembly.instantiateStreaming = async (resp, importObject) => {
-			const source = await (await resp).arrayBuffer();
-			return await WebAssembly.instantiate(source, importObject);
-		    };
-		}
-		
-		const export_go = new Go();
-		
-		let export_mod, export_inst;	
-
-		// See this, with the headers? This is important if we're running in
-		// a AWS Lambda + API Gateway context. Without this API Gateway will
-		// return the WASM binary as a base64-encoded blob. Note that this
-		// also depends on configuring both the API Gateway and the 'lambda://'
-		// server URI to specify that 'application/wasm' is treated as binary
-		// data. Computers, amirite...
-		    
-		var fetch_headers = new Headers();
-		fetch_headers.set("Accept", "application/wasm");
-		
-		const fetch_opts = {
-		    headers: fetch_headers,
-		};
-
-		WebAssembly.instantiateStreaming(fetch(wasm_uri, fetch_opts), export_go.importObject).then(
-		    
-		    async result => {
-			
-			pending -= 1;
-			
-			if (pending == 0){
-			    resolve();
-			}
-
-			export_mod = result.module;
-			export_inst = result.instance;
-			await export_go.run(export_inst);
-		    }
-		);
-		
-	    });
-	    
 	},	// init
 	
     };
