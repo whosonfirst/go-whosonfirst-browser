@@ -34,7 +34,6 @@ whosonfirst.browser.validate = (function(){
 
 	    });
 	},
-	},	// init
 	
     };
 

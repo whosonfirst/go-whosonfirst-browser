@@ -7,38 +7,61 @@ class WhosOnFirstPlacetype extends HTMLElement {
     connectedCallback() {
 
 	var wasm_uri = whosonfirst.browser.uris.forCustomLabel("placetypes_wasm");
+	var _self = this;
 
-	whosonfirst.browser.wasm.fetch(wasm_uri).
-		    then(() => {
-
-			console.log("WOO")
-			whosonfirst_placetype_descendants("continent","common,common_optional,optional").
-											  then((data) => {
-											      console.log(data);
-											  });
-			
-		    }).
-		    catch((err) => {
-			console.log("Failed to fetch ", wasm_uri, err);
-		    });
-
-	/*
-	var id = this.getAttribute("data-id");
+	// Once we have placetypes, replace textarea with select menu
 	
-	const shadow = this.attachShadow({mode: 'open'});
-	
-	var select = document.createElement('select');
-	select.setAttribute("class", "form-select wof-property");
+	var placetypes_cb = function(placetypes){
 
-	// Get placetypes here...
+	    var count = placetypes.length;
+	    
+	    var id = _self.getAttribute("data-id");
 	
-	select.onchange = function(){
-	    var textarea = document.getElementById(id);
-	    textarea.value = parseInt(select.value);
+	    const shadow = _self.attachShadow({mode: 'open'});
+	    
+	    var select = document.createElement('select');
+	    select.setAttribute("class", "form-select wof-property");
+
+	    for (var i=0; i < count; i++){
+		var pt = placetypes[i];
+		var name = pt["name"];
+
+		var opt = document.createElement("option");
+		opt.value = name;
+		opt.appendChild(document.createTextNode(name));
+		select.appendChild(opt);
+	    }
+	    
+	    select.onchange = function(){
+		var textarea = document.getElementById(id);
+		textarea.value = parseInt(select.value);
+	    };
+	    
+	    shadow.appendChild(select);
 	};
+
+	// Once we've loaded the whosonfirst/go-whosonfirst-placetypes-wasm WASM binary
+	// fetch all the descendants for the 'planet' placetype
 	
-	shadow.appendChild(select);
-	*/
+	var wasm_cb = function(){
+
+	    whosonfirst_placetypes_descendants("planet","common,common_optional,optional").then((data) => {
+		var placetypes = JSON.parse(data);
+		placetypes_cb(placetypes);
+	    }).catch((err)=> {
+		console.log(err);
+	    });
+			
+	};
+
+	// Fetch the whosonfirst/go-whosonfirst-placetypes-wasm WASM binary
+	
+	whosonfirst.browser.wasm.fetch(wasm_uri). then(() => {
+	    wasm_cb();
+	}).catch((err) => {
+	    console.log("Failed to fetch ", wasm_uri, err);
+	});
+
     }
 }
 
