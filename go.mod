@@ -31,6 +31,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.26
 	github.com/whosonfirst/go-whosonfirst-image v0.1.0
 	github.com/whosonfirst/go-whosonfirst-placetypes v0.5.0
+	github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.0.1
 	github.com/whosonfirst/go-whosonfirst-reader v1.0.1
 	github.com/whosonfirst/go-whosonfirst-search v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spatial v0.5.4

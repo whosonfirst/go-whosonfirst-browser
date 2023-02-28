@@ -29,6 +29,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/javascript"
 	wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
+	wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"	
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -557,6 +558,12 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		aa_log.Debug(logger, "Handle edit geometry endpoint at %s\n", path_edit_geometry)
 		mux.Handle(settings.URIs.EditGeometry, geom_handler)
 
+		err = wasm_placetypes.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append wasm placetypes asset handlers, %w", err)
+		}
+		
 		err = wasm_validate.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
@@ -566,6 +573,9 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		wasm_validate_opts := wasm_validate.DefaultWASMOptions()
 		wasm_validate_opts.EnableWASMExec()
 
+		wasm_placetypes_opts := wasm_placetypes.DefaultWASMOptions()
+		// Don't enable wasm exec since we've just done it above
+		
 		// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
 		// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
 		// way to specify the wasm path (yet) this is what we're going to do in conjunction with writing
@@ -575,24 +585,34 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		// This file is served by the http/www/static.go handlers
 		wasm_validate_uri := "/wasm/validate_feature.wasm"
+		wasm_placetypes_uri := "/wasm/whosonfirst_placetypes.wasm"		
 
 		if settings.URIs.URIPrefix != "" {
 
-			uri, err := url.JoinPath(settings.URIs.URIPrefix, wasm_validate_uri)
+			validate_uri, err := url.JoinPath(settings.URIs.URIPrefix, wasm_validate_uri)
 
 			if err != nil {
 				return fmt.Errorf("Failed to assign URI prefix to validate wasm path, %w", err)
 			}
 
-			wasm_validate_uri = uri
+			placetypes_uri, err := url.JoinPath(settings.URIs.URIPrefix, wasm_placetypes_uri)
+
+			if err != nil {
+				return fmt.Errorf("Failed to assign URI prefix to placetypes wasm path, %w", err)
+			}
+			
+			wasm_validate_uri = validate_uri
+			wasm_placetypes_uri = placetypes_uri			
 		}
 
 		settings.URIs.AddCustomURI("validate_wasm", wasm_validate_uri)
+		settings.URIs.AddCustomURI("placetypes_wasm", wasm_placetypes_uri)		
 
 		// END OF I don't like having	to do this
 
 		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
 		create_handler = wasm_validate.AppendResourcesHandlerWithPrefix(create_handler, wasm_validate_opts, settings.URIs.URIPrefix)
+		create_handler = wasm_placetypes.AppendResourcesHandlerWithPrefix(create_handler, wasm_placetypes_opts, settings.URIs.URIPrefix)		
 		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, settings.URIs.URIPrefix)
 		create_handler = settings.CustomChrome.WrapHandler(create_handler)
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
