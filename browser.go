@@ -100,6 +100,20 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	aa_log.Debug(logger, "Handle ping endpoint at %s\n", settings.URIs.Ping)
 
+	if len(settings.CustomAssetHandlerFunctions) > 0 {
+		
+		aa_log.Debug(logger, "Register custom asset handlers")
+
+		for idx, handler_func := range settings.CustomAssetHandlerFunctions {
+
+			err := handler_func(mux, settings.URIs.URIPrefix)
+
+			if err != nil {
+				return fmt.Errorf("Failed to register custom asset handler function at offset %d, %w", idx, err)
+			}
+		}
+	}
+	
 	if settings.Capabilities.PNG {
 
 		aa_log.Debug(logger, "PNG support enabled")
@@ -620,7 +634,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
 		create_handler = wasm_exec.AppendResourcesHandlerWithPrefix(create_handler, wasm_exec_opts, settings.URIs.URIPrefix)		
 		create_handler = wasm_validate.AppendResourcesHandlerWithPrefix(create_handler, wasm_validate_opts, settings.URIs.URIPrefix)
-		create_handler = wasm_placetypes.AppendResourcesHandlerWithPrefix(create_handler, wasm_placetypes_opts, settings.URIs.URIPrefix)		
+		create_handler = wasm_placetypes.AppendResourcesHandlerWithPrefix(create_handler, wasm_placetypes_opts, settings.URIs.URIPrefix)
+		
+		create_handler = appendCustomMiddlewareHandlers(settings, settings.URIs.CreateFeature, create_handler)
+		
 		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, settings.URIs.URIPrefix)
 		create_handler = settings.CustomChrome.WrapHandler(create_handler)
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
@@ -825,7 +842,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	// END OF uris.js
 	
 	// Finally, start the server
-
+	
 	s, err := server.NewServer(ctx, server_uri)
 
 	if err != nil {
@@ -841,4 +858,19 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	}
 
 	return nil
+}
+
+func appendCustomMiddlewareHandlers(settings *Settings, path string, handler http.Handler) http.Handler {
+
+	custom_handlers, exists := settings.CustomMiddlewareHandlers[path]
+
+	if !exists {
+		return handler
+	}
+
+	for _, middleware_func := range custom_handlers {
+		handler = middleware_func(handler)
+	}
+
+	return handler
 }

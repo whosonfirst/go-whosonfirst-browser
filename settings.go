@@ -33,6 +33,9 @@ import (
 	github_writer "github.com/whosonfirst/go-writer-github/v3"
 )
 
+type AssetHandlerFunc func(*http.ServeMux, string) error
+type MiddlewareHandlerFunc func(http.Handler) http.Handler
+
 type Settings struct {
 	Authenticator            auth.Authenticator
 	Cache                    cache.Cache
@@ -41,6 +44,8 @@ type Settings struct {
 	CustomChrome             chrome.Chrome
 	CustomWWWHandlers        map[string]http.Handler
 	CustomAPIHandlers        map[string]http.Handler
+	CustomMiddlewareHandlers map[string][]MiddlewareHandlerFunc
+	CustomAssetHandlerFunctions []AssetHandlerFunc
 	CustomEditProperties     []browser_properties.CustomProperty
 	CustomEditValidationFunc browser_custom.CustomValidationFunc
 	CustomEditValidationWasm *browser_custom.CustomValidationWasm
@@ -57,6 +62,26 @@ type Settings struct {
 	Verbose                  bool
 	WebFingerHostname        string
 	WriterURIs               []string
+}
+
+func (s *Settings) AddCustomAssetHandlerFunction(fn AssetHandlerFunc) {
+	s.CustomAssetHandlerFunctions = append(s.CustomAssetHandlerFunctions, fn)
+}
+
+func (s *Settings) AddCustomMiddlewareHandler(path string, fn MiddlewareHandlerFunc) {
+
+	if s.CustomMiddlewareHandlers == nil {
+		s.CustomMiddlewareHandlers = make(map[string][]MiddlewareHandlerFunc)
+	}
+	
+	handler_funcs, exists := s.CustomMiddlewareHandlers[path]
+
+	if !exists {
+		handler_funcs = make([]MiddlewareHandlerFunc, 0)
+	}
+
+	handler_funcs = append(handler_funcs, fn)
+	s.CustomMiddlewareHandlers[path] = handler_funcs
 }
 
 func (s *Settings) HasHTMLCapabilities() bool {
