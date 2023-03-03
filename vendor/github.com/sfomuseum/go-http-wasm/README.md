@@ -1,6 +1,6 @@
 # go-http-wasm
 
-Go HTTP middleware package for bundling, serving and appending pointers to `wasm_exec.js`.
+Go HTTP middleware package for bundling, serving and appending pointers to `wasm_exec.js` and related JavaScript assets.
 
 ## Documentation
 
@@ -10,7 +10,7 @@ Go HTTP middleware package for bundling, serving and appending pointers to `wasm
 
 This is a simple Go HTTP middleware package for bundling, serving and appending pointers to `wasm_exec.js` which is required by web applications using WASM binaries derived from Go applications.
 
-Given that all this package does is manage a single file (the `wasm_exec.js` file that is bundled with the Go programming language) it borders on the absurd. It would arguably be easier for those packages that consume this one to simple manage bundling and serving that same file themselves. That is a perfectly good way to do the same thing.
+Given that all this package does is manage two files (the `wasm_exec.js` file that is bundled with the Go programming language and the `sfomuseum.wasm.js` helper library) it borders on the absurd. It would arguably be easier for those packages that consume this one to simple manage bundling and serving that same file themselves. That is a perfectly good way to do the same thing.
 
 ## Example
 
@@ -47,6 +47,24 @@ example_handler = wasm.AppendResourcesHandler(example_handler, wasm_opts)
 	
 example_mux.Handle("/", example_handler)
 ```
+
+Notably this will rewrite HTML output to append the following JavaScript directives:
+
+```
+<script type="text/javascript" src="/javascript/wasm_exec.js"></script>
+<script type="text/javascript" src="/javascript/sfomuseum.wasm.js"></script></head>
+```
+
+* `wasm_exec.js` is the JavaScript library for interacting with WASM binaries bundled with the Go programming language.
+* `sfomuseum.wasm.js` is a convenience library for fetching and invoking WASM. It exposes a single `fetch` method that take the URL of a WASM binary and returns a JavaScript Promise. For example:
+
+```
+sfomuseum.wasm.fetch("wasm/whosonfirst_placetypes.wasm").then(rsp => {
+	...
+}).catch(err => {
+	...
+});
+``
 
 Here's a concrete example taken from the [go-whosonfirst-placetypes-wasm](https://github.com/whosonfirst/go-whosonfirst-placetypes-wasm/tree/main/cmd/example) package.
  

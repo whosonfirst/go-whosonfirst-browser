@@ -1821,8 +1821,8 @@ github.com/sfomuseum/go-http-auth v0.0.6 h1:f1QpdTcSXxQBX8NAHy7aQLWh9EQCb0vSX1K7
 github.com/sfomuseum/go-http-auth v0.0.6/go.mod h1:rAWkkf9KlG9HhyLLOToiu4MqluH8HVE5Si03z0e6kb0=
 github.com/sfomuseum/go-http-protomaps v0.0.16 h1:cEsJGuW1TFqydFdGZJQoDeEvyQZxFaSIlx9YcrapVxs=
 github.com/sfomuseum/go-http-protomaps v0.0.16/go.mod h1:VkfLbtYbOBc6/Xe0Sy8/Y/+okfz93Kz394UdJ48OQFs=
-github.com/sfomuseum/go-http-wasm v1.0.0 h1:UwY0iM+4BwnOoewlVvpeJCDk+PJC992Km/PSos0rmiY=
-github.com/sfomuseum/go-http-wasm v1.0.0/go.mod h1:njFA3D6WDdiawJKKvOtymMwkh4lYLsZ9X9SBuB7ldJg=
+github.com/sfomuseum/go-http-wasm v1.1.0 h1:J8mTCpZo8P6HUjyM5VqlL+8AYuohF/b6J+JNHi6Vho8=
+github.com/sfomuseum/go-http-wasm v1.1.0/go.mod h1:njFA3D6WDdiawJKKvOtymMwkh4lYLsZ9X9SBuB7ldJg=
 github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1 h1:ecjCnrzs1QhSi2R2jQem0y8/6oNrvmUgyM9kMKxZjtw=
 github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1/go.mod h1:+JVebjhj6f3H3ESBlO1b5pkzS2ZxaqnpUyCHxA8/too=
 github.com/sfomuseum/go-sfomuseum-pmtiles v1.0.3 h1:vdENCMTE1mlNGF70g3GXLW0uj7e3cYitvInwP26j1AE=
@@ -2011,8 +2011,8 @@ github.com/whosonfirst/go-whosonfirst-names v0.1.0/go.mod h1:0z86/nedM9T/5C8cAdb
 github.com/whosonfirst/go-whosonfirst-placetypes v0.3.0/go.mod h1:ez0VFkGFbgT2/z2oi3PIuW6FewsZ2+5glyfDD79XEHk=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.5.0 h1:Ico/pTolO4CS4knJmWAnQwSPWUB/pE2tUVB8f5AJzug=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.5.0/go.mod h1:HjxisIp+iZOXoThM9XyvC+GCmnupynE73GD3JxhH3fY=
-github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.0.2 h1:U4ipmJ23J6ImGbtaFlanNCtML8iUU6Wb1KCox26t+xU=
-github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.0.2/go.mod h1:Y4mE0fmkWJlWgcJFfCGB/WfHm3SEikBKaDmteQaSuWI=
+github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.0.3 h1:bPk0Ii9jz9m2CVfUqCbAy6wXVr9Afq1Yga+sySczqkY=
+github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.0.3/go.mod h1:MqTKuRyXyDyvRWdf5lfVYsbWnaPYTfU4oCQvBtEBM3M=
 github.com/whosonfirst/go-whosonfirst-reader v1.0.1 h1:6edzwFwhm3Kb5wiMMzUhTRyMaHmkE7MQTK18ufs4qgM=
 github.com/whosonfirst/go-whosonfirst-reader v1.0.1/go.mod h1:IPl9yAPYBS0XULSpQprDMkI/Y3++khnL1k/MVHh06+Q=
 github.com/whosonfirst/go-whosonfirst-search v0.1.0 h1:BZctXvgB8HyuVlmtw49IIV2i30EGzR682ZUAbdSfB7w=

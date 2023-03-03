@@ -595,7 +595,6 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		wasm_exec_opts := wasm_exec.DefaultWASMOptions()		
 		wasm_validate_opts := wasm_validate.DefaultWASMOptions()
-		wasm_placetypes_opts := wasm_placetypes.DefaultWASMOptions()
 		
 		// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
 		// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
@@ -634,7 +633,6 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
 		create_handler = wasm_exec.AppendResourcesHandlerWithPrefix(create_handler, wasm_exec_opts, settings.URIs.URIPrefix)		
 		create_handler = wasm_validate.AppendResourcesHandlerWithPrefix(create_handler, wasm_validate_opts, settings.URIs.URIPrefix)
-		create_handler = wasm_placetypes.AppendResourcesHandlerWithPrefix(create_handler, wasm_placetypes_opts, settings.URIs.URIPrefix)
 		
 		create_handler = appendCustomMiddlewareHandlers(settings, settings.URIs.CreateFeature, create_handler)
 		

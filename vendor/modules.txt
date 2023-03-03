@@ -535,7 +535,7 @@ github.com/sfomuseum/go-http-auth
 ## explicit; go 1.18
 github.com/sfomuseum/go-http-protomaps
 github.com/sfomuseum/go-http-protomaps/static
-# github.com/sfomuseum/go-http-wasm v1.0.0
+# github.com/sfomuseum/go-http-wasm v1.1.0
 ## explicit; go 1.18
 github.com/sfomuseum/go-http-wasm
 github.com/sfomuseum/go-http-wasm/static
@@ -693,7 +693,7 @@ github.com/whosonfirst/go-whosonfirst-names/tags
 # github.com/whosonfirst/go-whosonfirst-placetypes v0.5.0
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-placetypes
-# github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.0.2
+# github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.0.3
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http
 github.com/whosonfirst/go-whosonfirst-placetypes-wasm/static

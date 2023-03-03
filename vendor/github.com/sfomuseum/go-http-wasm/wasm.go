@@ -18,6 +18,7 @@ func DefaultWASMOptions() *WASMOptions {
 	opts := &WASMOptions{
 		JS: []string{
 			"/javascript/wasm_exec.js",
+			"/javascript/sfomuseum.wasm.js",			
 		},
 	}
 

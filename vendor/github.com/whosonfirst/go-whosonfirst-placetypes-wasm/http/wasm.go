@@ -7,6 +7,8 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-placetypes-wasm/static"
 )
 
+/*
+
 // WASMOptions provides a list of JavaScript and CSS link to include with HTML output.
 type WASMOptions struct {
 	JS  []string
@@ -15,18 +17,13 @@ type WASMOptions struct {
 
 // Return a *WASMOptions struct with default paths and URIs.
 func DefaultWASMOptions() *WASMOptions {
-
-	opts := &WASMOptions{
-		JS: []string{
-			"/javascript/whosonfirst.placetypes.wasm.js",
-		},
-	}
-
+	opts := &WASMOptions{}
 	return opts
 }
 
 // AppendResourcesHandler will rewrite any HTML produced by previous handler to include the necessary markup to load WASM JavaScript and CSS files and related assets.
 func AppendResourcesHandler(next gohttp.Handler, opts *WASMOptions) gohttp.Handler {
+
 	return AppendResourcesHandlerWithPrefix(next, opts, "")
 }
 
@@ -39,6 +36,8 @@ func AppendResourcesHandlerWithPrefix(next gohttp.Handler, opts *WASMOptions, pr
 
 	return aa_static.AppendResourcesHandlerWithPrefix(next, static_opts, prefix)
 }
+
+*/
 
 // Append all the files in the net/http FS instance containing the embedded WASM assets to an *http.ServeMux instance.
 func AppendAssetHandlers(mux *gohttp.ServeMux) error {
