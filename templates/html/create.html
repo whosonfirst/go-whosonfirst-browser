@@ -71,7 +71,8 @@
 		      </div>
 		      
 		      {{ range $idx, $pr := .CustomProperties }}
-		      <div class="col-auto wof-property-block{{ if not $pr.Required }} wof-property-optional{{ end }}" id="{{ $pr.Name }}-wrapper">
+		      <!-- Note the data-id attribute on the wrapper div; that's to account for the inability to generate template-based tags (below) -->
+		      <div class="col-auto wof-property-block{{ if not $pr.Required }} wof-property-optional{{ end }}" id="{{ $pr.Name }}-wrapper" data-id="{{ $pr.Name}}">
 			  <label for="{{ $pr.Name }}" >{{ $pr.Name }}</label>
 			  <!--
 			  See the way we're assiging a conditional wof-property-custom-element and data-custom-element
