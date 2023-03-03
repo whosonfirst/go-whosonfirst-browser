@@ -3,9 +3,11 @@ package http
 import (
 	gohttp "net/http"
 
-	aa_static "github.com/aaronland/go-http-static"	
-	"github.com/whosonfirst/go-whosonfirst-validate-wasm/static"	
+	aa_static "github.com/aaronland/go-http-static"
+	"github.com/whosonfirst/go-whosonfirst-validate-wasm/static"
 )
+
+/*
 
 // WASMOptions provides a list of JavaScript and CSS link to include with HTML output.
 type WASMOptions struct {
@@ -23,9 +25,7 @@ func DefaultWASMOptions() *WASMOptions {
 
 	opts := &WASMOptions{
 		CSS: []string{},
-		JS: []string{
-			"/javascript/whosonfirst.validate.feature.js",
-		},
+		JS: []string{},
 	}
 
 	return opts
@@ -42,9 +42,11 @@ func AppendResourcesHandlerWithPrefix(next gohttp.Handler, opts *WASMOptions, pr
 	static_opts := aa_static.DefaultResourcesOptions()
 	static_opts.JS = opts.JS
 	static_opts.CSS = opts.CSS
-	
+
 	return aa_static.AppendResourcesHandlerWithPrefix(next, static_opts, prefix)
 }
+
+*/
 
 // Append all the files in the net/http FS instance containing the embedded WASM assets to an *http.ServeMux instance.
 func AppendAssetHandlers(mux *gohttp.ServeMux) error {

@@ -748,7 +748,7 @@ github.com/whosonfirst/go-whosonfirst-uri
 # github.com/whosonfirst/go-whosonfirst-validate v0.3.3
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-validate
-# github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.2
+# github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.3
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-validate-wasm/http
 github.com/whosonfirst/go-whosonfirst-validate-wasm/static

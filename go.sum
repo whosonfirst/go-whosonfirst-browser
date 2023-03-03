@@ -2045,8 +2045,8 @@ github.com/whosonfirst/go-whosonfirst-uri v1.3.0 h1:LYOVLqP9rWQxauYVkdw65j5LZxEi
 github.com/whosonfirst/go-whosonfirst-uri v1.3.0/go.mod h1:CuVygTCUpMG945MMvqHyqxvc/L5YkDaMrrVpRFr7ZxY=
 github.com/whosonfirst/go-whosonfirst-validate v0.3.3 h1:AFzpupWOws9qpV6/wxfjFLNXCJhOjxRA0uqG6rOBavU=
 github.com/whosonfirst/go-whosonfirst-validate v0.3.3/go.mod h1:MNgmsVwei9kavTotIktq4fEGeD/T8gr/ty2TJ8YELCE=
-github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.2 h1:cpywXiy9XUxaK0kDPiudB9gLrx/m5z6YUXSa2ARNGPg=
-github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.2/go.mod h1:r0cKpY5NgvNVegyZh/Ty9vMtKz6E9tiBHaAvL+RQRsw=
+github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.3 h1:dqHOk3LQEa99tyqqMt2MvOYkURgmiZat2amMdQkaklY=
+github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.3/go.mod h1:jUsMjEyQGkziajcLCj7+iWMrP/qZB/EJ0erLiYt51Vk=
 github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0-20220916180959-42588e308a3e h1:FMjhKz9LHZDDZOCrNvof2o7CduM7mSQg3AKSXkJowmg=
 github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0-20220916180959-42588e308a3e/go.mod h1:Ee7DXBL23kO62yG/yzkLaO9OOqOGTcHLnxRIN2BB4Tg=
 github.com/whosonfirst/go-writer-github/v3 v3.0.2 h1:ArgugLUDy6yun8oMfcBHjZkHUTa30ZKnnMuYzCSkXBo=
