@@ -99,20 +99,6 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	mux.Handle(settings.URIs.Ping, ping_handler)
 
 	aa_log.Debug(logger, "Handle ping endpoint at %s\n", settings.URIs.Ping)
-
-	if len(settings.CustomAssetHandlerFunctions) > 0 {
-		
-		aa_log.Debug(logger, "Register custom asset handlers")
-
-		for idx, handler_func := range settings.CustomAssetHandlerFunctions {
-
-			err := handler_func(mux, settings.URIs.URIPrefix)
-
-			if err != nil {
-				return fmt.Errorf("Failed to register custom asset handler function at offset %d, %w", idx, err)
-			}
-		}
-	}
 	
 	if settings.Capabilities.PNG {
 
@@ -778,6 +764,9 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		mux.Handle(settings.URIs.CreateFeatureAPI, create_handler)
 	}
 
+	// START OF customizable handlers
+	// Note that middleware handlers are applied inline above
+	
 	// Custom handlers
 
 	for path, h := range settings.CustomWWWHandlers {
@@ -800,8 +789,27 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		mux.Handle(path, h)
 	}
 
-	// START OF uris.js
+	// Custom asset handlers
+	
+	if len(settings.CustomAssetHandlerFunctions) > 0 {
+		
+		aa_log.Debug(logger, "Register custom asset handlers")
 
+		for idx, handler_func := range settings.CustomAssetHandlerFunctions {
+
+			err := handler_func(mux, settings.URIs.URIPrefix)
+
+			if err != nil {
+				return fmt.Errorf("Failed to register custom asset handler function at offset %d, %w", idx, err)
+			}
+		}
+	}
+
+	// END OF customizable handlers
+	
+	// START OF uris.js
+	// Publish settings.URIs as a JS file so that other JS knows where to find things
+	
 	uris_t := js_t.Lookup("uris")
 
 	if uris_t == nil {

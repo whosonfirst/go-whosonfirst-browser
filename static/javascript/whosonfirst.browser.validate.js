@@ -14,14 +14,14 @@ whosonfirst.browser.validate = (function(){
 
 	    return new Promise((resolve, reject) => {
 
-		whosonfirst.browser.wasm.fetch(wasm_uri).then(rsp => {		
+		sfomuseum.wasm.fetch(wasm_uri).then(rsp => {				
 		    
 		    if (! custom_wasm_uri){
 			resolve();
 			return;
 		    }
 
-		    whosonfirst.browser.wasm.fetch(custom_wasm_uri).then(rsp => {				    
+		    sfomuseum.wasm.fetch(custom_wasm_uri).then(rsp => {				    
 			resolve();
 			return;
 		    }).catch(err => {

@@ -61,8 +61,8 @@ class WhosOnFirstPlacetype extends HTMLElement {
 	};
 
 	// Fetch the whosonfirst/go-whosonfirst-placetypes-wasm WASM binary
-	
-	whosonfirst.browser.wasm.fetch(wasm_uri). then(() => {
+
+	sfomuseum.wasm.fetch(wasm_uri). then(() => {	    
 	    wasm_cb();
 	}).catch((err) => {
 	    console.log("Failed to fetch ", wasm_uri, err);
