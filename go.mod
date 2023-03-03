@@ -31,7 +31,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-export/v2 v2.7.0
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.26
 	github.com/whosonfirst/go-whosonfirst-image v0.1.0
-	github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.0.3
+	github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.1.0
 	github.com/whosonfirst/go-whosonfirst-reader v1.0.1
 	github.com/whosonfirst/go-whosonfirst-search v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spatial v0.5.4
@@ -100,6 +100,7 @@ require (
 	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/coreos/go-iptables v0.6.0 // indirect
+	github.com/dominikbraun/graph v0.16.0 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
@@ -180,7 +181,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-id v1.2.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.1 // indirect
 	github.com/whosonfirst/go-whosonfirst-names v0.1.0 // indirect
-	github.com/whosonfirst/go-whosonfirst-placetypes v0.5.0 // indirect
+	github.com/whosonfirst/go-whosonfirst-placetypes v0.6.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-sources v0.1.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-spatial-sqlite v0.6.4 // indirect
 	github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.0 // indirect
