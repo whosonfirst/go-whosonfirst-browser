@@ -65,6 +65,11 @@
 			  </whosonfirst-existential-flag>
 		      </div>
 
+		      <div class="col-auto wof-property-block">
+			  <label for="src:geom" >src:geom</label>
+			  <textarea class="form-control-plaintext wof-property wof-property-string" id="src:geom"></textarea>
+		      </div>
+		      
 		      {{ range $idx, $pr := .CustomProperties }}
 		      <div class="col-auto wof-property-block{{ if not $pr.Required }} wof-property-optional{{ end }}" id="{{ $pr.Name }}-wrapper">
 			  <label for="{{ $pr.Name }}" >{{ $pr.Name }}</label>

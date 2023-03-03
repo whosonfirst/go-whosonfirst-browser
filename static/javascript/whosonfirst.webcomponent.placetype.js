@@ -22,6 +22,12 @@ class WhosOnFirstPlacetype extends HTMLElement {
 	    var select = document.createElement('select');
 	    select.setAttribute("class", "form-select wof-property");
 
+	    // I don't understand why this is necessary; it appears that shadow DOM elements don't get CSS?
+	    select.setAttribute("style", "display: block; padding: .3rem; font-size: 1rem; width: 100%;");
+
+	    var opt = document.createElement("option");
+	    select.appendChild(opt);
+	    
 	    for (var i=0; i < count; i++){
 		var pt = placetypes[i];
 		var name = pt["name"];

@@ -51,6 +51,13 @@
 
 /* Classes */
 
+.form-select {
+	display: block !important;
+	padding: .3rem !important;
+	font-size: 1rem !important;
+	width: 100% !important;
+}
+
 .wof-property-block {
 	margin-bottom:1rem;
 }
