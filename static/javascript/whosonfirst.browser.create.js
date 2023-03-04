@@ -237,6 +237,8 @@ whosonfirst.browser.create = (function(){
 		    var k = el.getAttribute("id");
 		    var v = el.value;
 
+		    // console.log("Debug", k, v);
+		    
 		    if (v == ""){
 
 			continue;
@@ -317,17 +319,15 @@ whosonfirst.browser.create = (function(){
 
 		    var do_create = function(){
 
-			whosonfirst.browser.api.do("PUT", create_uri, feature)
-				   .then((data) => {
-				       var props = data["properties"];
-				       var id = props["wof:id"];
-				       whosonfirst.browser.feedback.emit("New feature created with ID " + id);
-				       save_button.removeAttribute("disabled");			
-				   })
-				   .catch((err) => {
-				       whosonfirst.browser.feedback.emit("Failed to create new feature", err);
-				       save_button.removeAttribute("disabled");						
-				   });			
+			whosonfirst.browser.api.do("PUT", create_uri, feature).then((data) => {
+			    var props = data["properties"];
+			    var id = props["wof:id"];
+			    whosonfirst.browser.feedback.emit("New feature created with ID " + id);
+			    save_button.removeAttribute("disabled");			
+			}).catch((err) => {
+			    whosonfirst.browser.feedback.emit("Failed to create new feature", err);
+			    save_button.removeAttribute("disabled");						
+			});			
 			
 			whosonfirst.browser.feedback.emit("Creating new feature...");
 			save_button.setAttribute("disabled", "disabled");
@@ -362,8 +362,8 @@ whosonfirst.browser.create = (function(){
 			})
 			
 		    }).catch(err => {
-
-			whosonfirst.browser.feedback.emit("Document failed to validate:", err);			
+			whosonfirst.browser.feedback.emit("Document failed to validate:", err);
+			console.log("Document failed to validate", err, feature);
 		    });
 		   		    
 		} catch (err) {

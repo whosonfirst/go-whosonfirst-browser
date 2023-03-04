@@ -40,7 +40,7 @@ class WhosOnFirstPlacetype extends HTMLElement {
 	    
 	    select.onchange = function(){
 		var textarea = document.getElementById(id);
-		textarea.value = parseInt(select.value);
+		textarea.value = select.value;
 	    };
 	    
 	    shadow.appendChild(select);
