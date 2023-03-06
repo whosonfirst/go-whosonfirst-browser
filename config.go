@@ -90,6 +90,7 @@ type Config struct {
 	PathSVGAlt                     []string `json:"path_svg_alt,omitempty"`
 	PathWebFinger                  string   `json:"path_webfinger,omitempty"`
 	PathWebFingerAlt               []string `json:"path_webfinger_alt,omitempty"`
+	PlacetypesFooURI               string   `json:"placetypes_foo_uri,omitempty"`
 	ReaderURIs                     []string `json:"reader_uris"`
 	SearchDatabaseURI              string   `json:"search_database_uri,omitempty"`
 	SelectPattern                  string   `json:"select_pattern,omitempty"`

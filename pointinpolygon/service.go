@@ -26,16 +26,13 @@ type PointInPolygonService struct {
 	parent_reader   reader.Reader
 	ResultsCallback hierarchy_filter.FilterSPRResultsFunc
 	UpdateCallback  hierarchy.PointInPolygonHierarchyResolverUpdateCallback
-	// PlacetypesSpecification is the `placetypes.WOFPlacetypeSpecification` instance to use for placetype-related operations.
-	PlacetypesSpecification *placetypes.WOFPlacetypeSpecification
-	PlacetypeProperty       string
+	PlacetypesFoo   placetypes.Foo
 }
 
 type PointInPolygonServiceOptions struct {
-	SpatialDatabase         database.SpatialDatabase
-	ParentReader            reader.Reader
-	PlacetypesSpecification *placetypes.WOFPlacetypeSpecification
-	PlacetypeProperty       string
+	SpatialDatabase database.SpatialDatabase
+	ParentReader    reader.Reader
+	PlacetypesFoo   placetypes.Foo
 	// Mapshaper ...
 
 }
@@ -70,10 +67,9 @@ func NewPointInPolygonServiceWithDatabaseAndReader(ctx context.Context, spatial_
 func NewPointInPolygonServiceWithOptions(ctx context.Context, opts *PointInPolygonServiceOptions) (*PointInPolygonService, error) {
 
 	resolver_opts := &hierarchy.PointInPolygonHierarchyResolverOptions{
-		Database:                opts.SpatialDatabase,
-		PlacetypesSpecification: opts.PlacetypesSpecification,
-		PlacetypeProperty:       opts.PlacetypeProperty,
-		Mapshaper:               nil,
+		Database:      opts.SpatialDatabase,
+		PlacetypesFoo: opts.PlacetypesFoo,
+		Mapshaper:     nil,
 	}
 
 	resolver, err := hierarchy.NewPointInPolygonHierarchyResolver(ctx, resolver_opts)

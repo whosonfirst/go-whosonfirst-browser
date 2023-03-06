@@ -78,6 +78,8 @@ const PathSearchDefault string = "/search/"
 
 const PathSearchAPIDefault string = "/api/search/"
 
+const PlacetypesFooURIDefault string = "whosonfirst://"
+
 const SearchDatabaseURIDefault string = "null://"
 
 const VerboseDefault bool = false

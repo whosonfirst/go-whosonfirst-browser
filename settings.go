@@ -28,6 +28,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
 	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
+	"github.com/whosonfirst/go-whosonfirst-placetypes"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"github.com/whosonfirst/go-whosonfirst-spatial/database"
 	github_writer "github.com/whosonfirst/go-writer-github/v3"
@@ -897,7 +898,19 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 			return nil, fmt.Errorf("Failed to create spatial database, %w", err)
 		}
 
-		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithDatabaseAndReader(ctx, spatial_db, cr)
+		pt_foo, err := placetypes.NewFoo(ctx, cfg.PlacetypesFooURI)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to create placetypes foo, %w", err)
+		}
+
+		pip_options := &pointinpolygon.PointInPolygonServiceOptions{
+			SpatialDatabase: spatial_db,
+			ParentReader:    cr,
+			PlacetypesFoo:   pt_foo,
+		}
+
+		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithOptions(ctx, pip_options)
 
 		if err != nil {
 			return nil, fmt.Errorf("Failed to create point in polygon service, %w", err)
