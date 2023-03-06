@@ -37,31 +37,31 @@ type AssetHandlerFunc func(*http.ServeMux, string) error
 type MiddlewareHandlerFunc func(http.Handler) http.Handler
 
 type Settings struct {
-	Authenticator            auth.Authenticator
-	Cache                    cache.Cache
-	Capabilities             *browser_capabilities.Capabilities
-	CORSWrapper              *cors.Cors
-	CustomChrome             chrome.Chrome
-	CustomWWWHandlers        map[string]http.Handler
-	CustomAPIHandlers        map[string]http.Handler
-	CustomMiddlewareHandlers map[string][]MiddlewareHandlerFunc
+	Authenticator               auth.Authenticator
+	Cache                       cache.Cache
+	Capabilities                *browser_capabilities.Capabilities
+	CORSWrapper                 *cors.Cors
+	CustomChrome                chrome.Chrome
+	CustomWWWHandlers           map[string]http.Handler
+	CustomAPIHandlers           map[string]http.Handler
+	CustomMiddlewareHandlers    map[string][]MiddlewareHandlerFunc
 	CustomAssetHandlerFunctions []AssetHandlerFunc
-	CustomEditProperties     []browser_properties.CustomProperty
-	CustomEditValidationFunc browser_custom.CustomValidationFunc
-	CustomEditValidationWasm *browser_custom.CustomValidationWasm
-	Exporter                 export.Exporter
-	MapProvider              provider.Provider
-	NavPlaceMaxFeatures      int
-	URIs                     *browser_uris.URIs
-	PointInPolygonService    *pointinpolygon.PointInPolygonService
-	Reader                   reader.Reader
-	SearchDatabase           fulltext.FullTextDatabase
-	SelectPattern            *regexp.Regexp
-	SpatialDatabase          database.SpatialDatabase
-	Templates                []fs.FS
-	Verbose                  bool
-	WebFingerHostname        string
-	WriterURIs               []string
+	CustomEditProperties        []browser_properties.CustomProperty
+	CustomEditValidationFunc    browser_custom.CustomValidationFunc
+	CustomEditValidationWasm    *browser_custom.CustomValidationWasm
+	Exporter                    export.Exporter
+	MapProvider                 provider.Provider
+	NavPlaceMaxFeatures         int
+	URIs                        *browser_uris.URIs
+	PointInPolygonService       *pointinpolygon.PointInPolygonService
+	Reader                      reader.Reader
+	SearchDatabase              fulltext.FullTextDatabase
+	SelectPattern               *regexp.Regexp
+	SpatialDatabase             database.SpatialDatabase
+	Templates                   []fs.FS
+	Verbose                     bool
+	WebFingerHostname           string
+	WriterURIs                  []string
 }
 
 func (s *Settings) AddCustomAssetHandlerFunction(fn AssetHandlerFunc) {
@@ -73,7 +73,7 @@ func (s *Settings) AddCustomMiddlewareHandler(path string, fn MiddlewareHandlerF
 	if s.CustomMiddlewareHandlers == nil {
 		s.CustomMiddlewareHandlers = make(map[string][]MiddlewareHandlerFunc)
 	}
-	
+
 	handler_funcs, exists := s.CustomMiddlewareHandlers[path]
 
 	if !exists {

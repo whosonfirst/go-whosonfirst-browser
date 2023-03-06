@@ -13,6 +13,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
+	"github.com/whosonfirst/go-whosonfirst-placetypes"
 	wof_reader "github.com/whosonfirst/go-whosonfirst-reader"
 	"github.com/whosonfirst/go-whosonfirst-spatial-hierarchy"
 	hierarchy_filter "github.com/whosonfirst/go-whosonfirst-spatial-hierarchy/filter"
@@ -25,10 +26,18 @@ type PointInPolygonService struct {
 	parent_reader   reader.Reader
 	ResultsCallback hierarchy_filter.FilterSPRResultsFunc
 	UpdateCallback  hierarchy.PointInPolygonHierarchyResolverUpdateCallback
+	// PlacetypesSpecification is the `placetypes.WOFPlacetypeSpecification` instance to use for placetype-related operations.
+	PlacetypesSpecification *placetypes.WOFPlacetypeSpecification
+	PlacetypeProperty       string
 }
 
 type PointInPolygonServiceOptions struct {
-	ParentReader reader.Reader
+	SpatialDatabase         database.SpatialDatabase
+	ParentReader            reader.Reader
+	PlacetypesSpecification *placetypes.WOFPlacetypeSpecification
+	PlacetypeProperty       string
+	// Mapshaper ...
+
 }
 
 func NewPointInPolygonService(ctx context.Context, spatial_database_uri string, parent_reader_uri string) (*PointInPolygonService, error) {
@@ -50,7 +59,24 @@ func NewPointInPolygonService(ctx context.Context, spatial_database_uri string, 
 
 func NewPointInPolygonServiceWithDatabaseAndReader(ctx context.Context, spatial_db database.SpatialDatabase, parent_reader reader.Reader) (*PointInPolygonService, error) {
 
-	resolver, err := hierarchy.NewPointInPolygonHierarchyResolver(ctx, spatial_db, nil)
+	service_opts := &PointInPolygonServiceOptions{
+		SpatialDatabase: spatial_db,
+		ParentReader:    parent_reader,
+	}
+
+	return NewPointInPolygonServiceWithOptions(ctx, service_opts)
+}
+
+func NewPointInPolygonServiceWithOptions(ctx context.Context, opts *PointInPolygonServiceOptions) (*PointInPolygonService, error) {
+
+	resolver_opts := &hierarchy.PointInPolygonHierarchyResolverOptions{
+		Database:                opts.SpatialDatabase,
+		PlacetypesSpecification: opts.PlacetypesSpecification,
+		PlacetypeProperty:       opts.PlacetypeProperty,
+		Mapshaper:               nil,
+	}
+
+	resolver, err := hierarchy.NewPointInPolygonHierarchyResolver(ctx, resolver_opts)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create hierarchy resolver, %w", err)
@@ -60,14 +86,14 @@ func NewPointInPolygonServiceWithDatabaseAndReader(ctx context.Context, spatial_
 	// because the spatial hierarchy resolver may need to retrieve properties that have not
 	// been encoded in the PMTiles database.
 
-	resolver.SetReader(parent_reader)
+	resolver.SetReader(opts.ParentReader)
 
 	results_cb := hierarchy_filter.FirstButForgivingSPRResultsFunc
 	update_cb := hierarchy.DefaultPointInPolygonHierarchyResolverUpdateCallback()
 
 	s := &PointInPolygonService{
 		resolver:        resolver,
-		parent_reader:   parent_reader,
+		parent_reader:   opts.ParentReader,
 		ResultsCallback: results_cb,
 		UpdateCallback:  update_cb,
 	}

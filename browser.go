@@ -23,14 +23,14 @@ import (
 	"github.com/aaronland/go-http-ping/v2"
 	"github.com/aaronland/go-http-server"
 	aa_log "github.com/aaronland/go-log"
+	wasm_exec "github.com/sfomuseum/go-http-wasm"
 	"github.com/sfomuseum/go-template/html"
 	"github.com/sfomuseum/go-template/text"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/javascript"
-	wasm_exec "github.com/sfomuseum/go-http-wasm"
+	wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"
 	wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
-	wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"	
 )
 
 func Run(ctx context.Context, logger *log.Logger) error {
@@ -99,7 +99,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	mux.Handle(settings.URIs.Ping, ping_handler)
 
 	aa_log.Debug(logger, "Handle ping endpoint at %s\n", settings.URIs.Ping)
-	
+
 	if settings.Capabilities.PNG {
 
 		aa_log.Debug(logger, "PNG support enabled")
@@ -560,27 +560,27 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		mux.Handle(settings.URIs.EditGeometry, geom_handler)
 
 		// START OF wasm stuff
-		
+
 		err = wasm_exec.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append wasm asset handlers, %w", err)
 		}
-		
+
 		err = wasm_placetypes.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append wasm placetypes asset handlers, %w", err)
 		}
-		
+
 		err = wasm_validate.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append wasm validate asset handlers, %w", err)
 		}
 
-		wasm_exec_opts := wasm_exec.DefaultWASMOptions()		
-		
+		wasm_exec_opts := wasm_exec.DefaultWASMOptions()
+
 		// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
 		// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
 		// way to specify the wasm path (yet) this is what we're going to do in conjunction with writing
@@ -590,7 +590,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		// This file is served by the http/www/static.go handlers
 		wasm_validate_uri := "/wasm/validate_feature.wasm"
-		wasm_placetypes_uri := "/wasm/whosonfirst_placetypes.wasm"		
+		wasm_placetypes_uri := "/wasm/whosonfirst_placetypes.wasm"
 
 		if settings.URIs.URIPrefix != "" {
 
@@ -605,21 +605,21 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			if err != nil {
 				return fmt.Errorf("Failed to assign URI prefix to placetypes wasm path, %w", err)
 			}
-			
+
 			wasm_validate_uri = validate_uri
-			wasm_placetypes_uri = placetypes_uri			
+			wasm_placetypes_uri = placetypes_uri
 		}
 
 		settings.URIs.AddCustomURI("validate_wasm", wasm_validate_uri)
-		settings.URIs.AddCustomURI("placetypes_wasm", wasm_placetypes_uri)		
+		settings.URIs.AddCustomURI("placetypes_wasm", wasm_placetypes_uri)
 
 		// END OF I don't like having	to do this
 
 		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
-		create_handler = wasm_exec.AppendResourcesHandlerWithPrefix(create_handler, wasm_exec_opts, settings.URIs.URIPrefix)		
-		
+		create_handler = wasm_exec.AppendResourcesHandlerWithPrefix(create_handler, wasm_exec_opts, settings.URIs.URIPrefix)
+
 		create_handler = appendCustomMiddlewareHandlers(settings, settings.URIs.CreateFeature, create_handler)
-		
+
 		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, settings.URIs.URIPrefix)
 		create_handler = settings.CustomChrome.WrapHandler(create_handler)
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
@@ -766,7 +766,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	// START OF customizable handlers
 	// Note that middleware handlers are applied inline above
-	
+
 	// Custom handlers
 
 	for path, h := range settings.CustomWWWHandlers {
@@ -790,9 +790,9 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	}
 
 	// Custom asset handlers
-	
+
 	if len(settings.CustomAssetHandlerFunctions) > 0 {
-		
+
 		aa_log.Debug(logger, "Register custom asset handlers")
 
 		for idx, handler_func := range settings.CustomAssetHandlerFunctions {
@@ -806,10 +806,10 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	}
 
 	// END OF customizable handlers
-	
+
 	// START OF uris.js
 	// Publish settings.URIs as a JS file so that other JS knows where to find things
-	
+
 	uris_t := js_t.Lookup("uris")
 
 	if uris_t == nil {
@@ -844,9 +844,9 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	mux.Handle(uris_path, uris_handler)
 
 	// END OF uris.js
-	
+
 	// Finally, start the server
-	
+
 	s, err := server.NewServer(ctx, server_uri)
 
 	if err != nil {
