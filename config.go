@@ -202,6 +202,7 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		PathSVGAlt:                     path_svg_alt,
 		PathWebFinger:                  path_webfinger,
 		PathWebFingerAlt:               path_webfinger_alt,
+		PlacetypesFooURI:               placetypes_foo_uri,
 		ReaderURIs:                     reader_uris,
 		SearchDatabaseURI:              search_database_uri,
 		SelectPattern:                  select_pattern,
