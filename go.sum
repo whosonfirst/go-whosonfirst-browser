@@ -554,6 +554,8 @@ github.com/aaronland/go-json-query v0.1.3 h1:wBqGF4d+Qy1+/YFqiFEKL7ja4iaaZi9E/CW
 github.com/aaronland/go-json-query v0.1.3/go.mod h1:+T7tN35K0RtLt92MlNM+N2sr6pxsQMJc6Fd4PsKaVtw=
 github.com/aaronland/go-log v1.0.0 h1:bbGjejv1qjpHWXibpQAep8dNbSRrmP8TMs2gzgF8Vls=
 github.com/aaronland/go-log v1.0.0/go.mod h1:jkvmABZWoTJn9mqR1E6h0hRcjSB9IbegezfmjQwiTYU=
+github.com/aaronland/go-log/v2 v2.0.0 h1:lMoaVDHd4Etaz2+ibze3ReqvHHG68z2SpuxYXv12WlE=
+github.com/aaronland/go-log/v2 v2.0.0/go.mod h1:jOLBCaHVyOC7DQpbVFFQSiuU8CA8MRMrqA1mMSJQtLs=
 github.com/aaronland/go-pagination v0.2.0 h1:ZZ8mNu5oEK5wanAjbYAaE3w5eyQKzFOWu/gsloW1vdw=
 github.com/aaronland/go-pagination v0.2.0/go.mod h1:zrYVkUTBoe6yJ23l6OyTyfSpTyg6s/cNxZxNztXNQpQ=
 github.com/aaronland/go-pagination-sql v0.2.0 h1:WVesObJVvwawIgkl6Twot9DXia09qiZQJQ/7ik64kSU=
@@ -2081,8 +2083,8 @@ github.com/whosonfirst/go-whosonfirst-sources v0.1.0 h1:JuKLa6KWke22jBfJ1pM9WQHo
 github.com/whosonfirst/go-whosonfirst-sources v0.1.0/go.mod h1:EUMHyGzUmqPPxlMmOp+28BFeoBdxxE0HCKRd67lkqGM=
 github.com/whosonfirst/go-whosonfirst-spatial v0.5.6 h1:mFvkF+5qvfBauLqixiWwHX76lb0ohsvJMUnjXm+Gryo=
 github.com/whosonfirst/go-whosonfirst-spatial v0.5.6/go.mod h1:pCh4lz9GFexj865PV4/Txkjd/kdAJiyx9U2eBJ49DJk=
-github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.4.1 h1:HSdYGcpNC9+y3zV0P9BwtPYq09Jpn6IX8TlOCbQRBWQ=
-github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.4.1/go.mod h1:1Iz8gQeg58cVlr0bIeOy9FuZvtuQZGVmo2Ds557/gK8=
+github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.5.0 h1:eUGuXPoYufMg5LwrSRaCIVtYHRtMZI6r91nV8fg4YIU=
+github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.5.0/go.mod h1:1AlT+DkHwx344/sPEc3P6guEakIXkHj1Mwk9lpjNM4s=
 github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.17 h1:l6MyhnIenFfyjwGOY5N8fA5t0tLlT7vzfU9JHiY2DmA=
 github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.17/go.mod h1:FQ3FFlNORmW3Ag9PIYkYRwSdZqhsJynTjllskkGQa7E=
 github.com/whosonfirst/go-whosonfirst-spatial-sqlite v0.6.4 h1:rhh5BycxB99bAal4GtZ0TYdr4+3jOPc5f3ej1Rmlmoo=

@@ -3,6 +3,11 @@ package hierarchy
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+	"strconv"
+
+	aa_log "github.com/aaronland/go-log/v2"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/geojson"
 	"github.com/sfomuseum/go-sfomuseum-mapshaper"
@@ -17,8 +22,17 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-spatial/filter"
 	"github.com/whosonfirst/go-whosonfirst-spatial/geo"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
-	"strconv"
 )
+
+type PointInPolygonHierarchyResolverOptions struct {
+	// Database is the `database.SpatialDatabase` instance used to perform point-in-polygon requests.
+	Database database.SpatialDatabase
+	// Mapshaper is an optional `mapshaper.Client` instance used to derive centroids used in point-in-polygon requests.
+	Mapshaper *mapshaper.Client
+	// PlacetypesDefinition is an optional `go-whosonfirst-placetypes.Definition` instance used to resolve custom or bespoke placetypes.
+	PlacetypesDefinition placetypes.Definition
+	Logger               *log.Logger
+}
 
 // PointInPolygonHierarchyResolver provides methods for constructing a hierarchy of ancestors
 // for a given point, following rules established by the Who's On First project.
@@ -27,6 +41,10 @@ type PointInPolygonHierarchyResolver struct {
 	Database database.SpatialDatabase
 	// Mapshaper is an optional `mapshaper.Client` instance used to derive centroids used in point-in-polygon requests.
 	Mapshaper *mapshaper.Client
+	// PlacetypesDefinition is an optional `go-whosonfirst-placetypes.Definition` instance used to resolve custom or bespoke placetypes.
+	PlacetypesDefinition placetypes.Definition
+	// Logger is a `log.Logger` instance for logging feedback. The default logger sends all messages to `io.Discard`.
+	Logger *log.Logger
 	// reader is the `reader.Reader` instance used to retrieve ancestor records. By default it is the same as `Database` but can be assigned
 	// explicitly using the `SetReader` method.
 	reader reader.Reader
@@ -83,12 +101,38 @@ func DefaultPointInPolygonHierarchyResolverUpdateCallback() PointInPolygonHierar
 // NewPointInPolygonHierarchyResolver returns a `PointInPolygonHierarchyResolver` instance for 'spatial_db' and 'ms_client'.
 // The former is used to perform point in polygon operations and the latter is used to determine a "reverse geocoding" centroid
 // to use for point-in-polygon operations.
-func NewPointInPolygonHierarchyResolver(ctx context.Context, spatial_db database.SpatialDatabase, ms_client *mapshaper.Client) (*PointInPolygonHierarchyResolver, error) {
+func NewPointInPolygonHierarchyResolver(ctx context.Context, opts *PointInPolygonHierarchyResolverOptions) (*PointInPolygonHierarchyResolver, error) {
+
+	var logger *log.Logger
+	var pt_def placetypes.Definition
+
+	if opts.Logger != nil {
+		logger = opts.Logger
+	} else {
+		logger = log.New(io.Discard, "", 0)
+	}
+
+	if opts.PlacetypesDefinition == nil {
+
+		def, err := placetypes.NewDefinition(ctx, "whosonfirst://")
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to create whosonfirst:// placetypes definition, %w", err)
+		}
+
+		pt_def = def
+
+	} else {
+
+		pt_def = opts.PlacetypesDefinition
+	}
 
 	t := &PointInPolygonHierarchyResolver{
-		Database:  spatial_db,
-		Mapshaper: ms_client,
-		reader:    spatial_db,
+		Database:             opts.Database,
+		Mapshaper:            opts.Mapshaper,
+		PlacetypesDefinition: pt_def,
+		Logger:               logger,
+		reader:               opts.Database,
 	}
 
 	return t, nil
@@ -134,29 +178,35 @@ func (t *PointInPolygonHierarchyResolver) PointInPolygonAndUpdate(ctx context.Co
 }
 
 // PointInPolygon will perform a point-in-polygon (reverse geocoding) operation for 'body' using zero or more 'inputs' as query filters.
+// This is known to not work as expected if the `wof:placetype` property is "common". There needs to be a way to a) retrieve placetypes
+// using a custom WOFPlacetypeSpecification (go-whosonfirst-placetypes v0.6.0+) and b) specify an alternate property to retrieve placetypes
+// from if `wof:placetype=custom`.
 func (t *PointInPolygonHierarchyResolver) PointInPolygon(ctx context.Context, inputs *filter.SPRInputs, body []byte) ([]spr.StandardPlacesResult, error) {
 
-	pt_rsp := gjson.GetBytes(body, "properties.wof:placetype")
+	pt_def := t.PlacetypesDefinition
+	pt_spec := pt_def.Specification()
+	pt_prop := pt_def.Property()
+	pt_uri := pt_def.URI()
+
+	pt_path := fmt.Sprintf("properties.%s", pt_prop)
+
+	pt_rsp := gjson.GetBytes(body, pt_path)
 
 	if !pt_rsp.Exists() {
-		return nil, fmt.Errorf("Missing 'wof:placetype' property")
+		return nil, fmt.Errorf("Missing %s property", pt_path)
 	}
 
 	pt_str := pt_rsp.String()
 
-	pt, err := placetypes.GetPlacetypeByName(pt_str)
+	pt, err := pt_spec.GetPlacetypeByName(pt_str)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create new placetype for '%s', %v", pt_str, err)
 	}
 
-	roles := []string{
-		"common",
-		"optional",
-		"common_optional",
-	}
+	roles := placetypes.AllRoles()
 
-	ancestors := placetypes.AncestorsForRoles(pt, roles)
+	ancestors := pt_spec.AncestorsForRoles(pt, roles)
 
 	centroid, err := t.PointInPolygonCentroid(ctx, body)
 
@@ -179,13 +229,17 @@ func (t *PointInPolygonHierarchyResolver) PointInPolygon(ctx context.Context, in
 			return nil, fmt.Errorf("Failed to create new coordinate, %w", err)
 		}
 
-		inputs.Placetypes = []string{a.Name}
+		pt_name := fmt.Sprintf("%s#%s", a.Name, pt_uri)
+
+		inputs.Placetypes = []string{pt_name}
 
 		spr_filter, err := filter.NewSPRFilterFromInputs(inputs)
 
 		if err != nil {
 			return nil, fmt.Errorf("Failed to create SPR filter from input, %v", err)
 		}
+
+		aa_log.Debug(t.Logger, "Perform point in polygon at %f, %f for %s\n", lat, lon, pt_name)
 
 		rsp, err := t.Database.PointInPolygon(ctx, coord, spr_filter)
 
@@ -200,8 +254,11 @@ func (t *PointInPolygonHierarchyResolver) PointInPolygon(ctx context.Context, in
 		}
 
 		results := rsp.Results()
+		count := len(results)
 
-		if len(results) == 0 {
+		aa_log.Debug(t.Logger, "Point in polygon results at %f, %f for %s: %d\n", lat, lon, pt_name, count)
+
+		if count == 0 {
 			continue
 		}
 

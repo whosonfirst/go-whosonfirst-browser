@@ -36,7 +36,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-reader v1.0.1
 	github.com/whosonfirst/go-whosonfirst-search v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spatial v0.5.6
-	github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.4.1
+	github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.5.0
 	github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.17
 	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.8
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.5
@@ -61,6 +61,7 @@ require (
 	github.com/aaronland/go-http-rewrite v1.0.1 // indirect
 	github.com/aaronland/go-http-tangramjs v0.1.3 // indirect
 	github.com/aaronland/go-json-query v0.1.3 // indirect
+	github.com/aaronland/go-log/v2 v2.0.0 // indirect
 	github.com/aaronland/go-pagination v0.2.0 // indirect
 	github.com/aaronland/go-pagination-sql v0.2.0 // indirect
 	github.com/aaronland/go-pool/v2 v2.0.0 // indirect
