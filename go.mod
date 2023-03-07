@@ -32,7 +32,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.26
 	github.com/whosonfirst/go-whosonfirst-image v0.1.0
 	github.com/whosonfirst/go-whosonfirst-placetypes v0.7.0
-	github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.1.0
+	github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.1.1
 	github.com/whosonfirst/go-whosonfirst-reader v1.0.1
 	github.com/whosonfirst/go-whosonfirst-search v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spatial v0.5.6
@@ -42,8 +42,8 @@ require (
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.6
 	github.com/whosonfirst/go-whosonfirst-svg v0.1.0
 	github.com/whosonfirst/go-whosonfirst-uri v1.3.0
-	github.com/whosonfirst/go-whosonfirst-validate v0.3.4
-	github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.4
+	github.com/whosonfirst/go-whosonfirst-validate v0.3.6
+	github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.6
 	github.com/whosonfirst/go-writer-github/v3 v3.0.2
 	github.com/whosonfirst/go-writer/v3 v3.1.0
 	gocloud.dev v0.29.0
@@ -165,8 +165,11 @@ require (
 	github.com/tailscale/netlink v1.1.1-0.20211101221916-cabfb018fe85 // indirect
 	github.com/tailscale/wireguard-go v0.0.0-20221219190806-4fa124729667 // indirect
 	github.com/tcnksm/go-httpstat v0.2.0 // indirect
+	github.com/tidwall/geoindex v1.4.4 // indirect
+	github.com/tidwall/geojson v1.4.3 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/tidwall/rtree v1.3.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/tilezen/go-tilepacks v0.0.0-20230304224913-9d1d60a55bc6 // indirect
 	github.com/u-root/uio v0.0.0-20221213070652-c3537552635f // indirect
