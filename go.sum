@@ -2057,8 +2057,8 @@ github.com/whosonfirst/go-whosonfirst-feature v0.0.26/go.mod h1:ntGT7tkg89WyEalg
 github.com/whosonfirst/go-whosonfirst-findingaid/v2 v2.7.1 h1:xSmKeGzSPjqphiA5h+x6JoQxCdeEjxL1uzLw1bYl/+o=
 github.com/whosonfirst/go-whosonfirst-findingaid/v2 v2.7.1/go.mod h1:J0oTZHbG1AGcSQ4/SX529yxmiiUW40FgX+FYf7lENyA=
 github.com/whosonfirst/go-whosonfirst-flags v0.4.3/go.mod h1:pL17Ryo60FH8RYaQRgfu5XnxhrNRK3x+rn03TYD6Gc8=
-github.com/whosonfirst/go-whosonfirst-flags v0.5.0 h1:VvqI9XWVzDqo9aR2kUeFMaWdk+bOXKG/PurV1d4xXC0=
-github.com/whosonfirst/go-whosonfirst-flags v0.5.0/go.mod h1:VgXcWNtsCZGy/Xnt9bpSUTKJ3nYeqXqvLD3NrE6kzZg=
+github.com/whosonfirst/go-whosonfirst-flags v0.5.1 h1:kRzXK7WZlEK1hNw+CECEdnWNtEDbWbjWdEg0imu1mGE=
+github.com/whosonfirst/go-whosonfirst-flags v0.5.1/go.mod h1:VgXcWNtsCZGy/Xnt9bpSUTKJ3nYeqXqvLD3NrE6kzZg=
 github.com/whosonfirst/go-whosonfirst-format v0.4.1 h1:TVSrbbB/sXhAgyaTenaS93lERRITGQHBKIDwoEgxoqA=
 github.com/whosonfirst/go-whosonfirst-format v0.4.1/go.mod h1:lMBIXCnD9ZA+wCNtu6XFYoq5DTfnEALO8k6OkEn11MM=
 github.com/whosonfirst/go-whosonfirst-id v1.2.0 h1:Nc+1g0DoWcd7H5nzxWrWodMoWThhXtH3lA7xQhdtcPc=
@@ -2092,8 +2092,8 @@ github.com/whosonfirst/go-whosonfirst-spatial-sqlite v0.6.4/go.mod h1:7Dy0+ECgz5
 github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.8 h1:K0rCaKo0xvOtuS/x9r62bEfIK3OTdZqbDmgG+A3xDSs=
 github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.8/go.mod h1:Nh7PwBMDT1kUrp9jBMFw+Ilue6up1tz2KhE39btS/ZU=
 github.com/whosonfirst/go-whosonfirst-spr/v2 v2.2.1/go.mod h1:3P6fiSVGtIbM3UcyaVMs4i1N6Hi88GmTsdouuXzlr78=
-github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.5 h1:3e6A0irI6fOt5Wig9J+QXKRjU/V+P5WUK7ftSdG9+zw=
-github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.5/go.mod h1:gUgDQwQvv24H8Y2GlzYZw9AqZqOVZ/PZ9tit5YEKSFo=
+github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.6 h1:0C1MVb2c/j81SmsDkvzhXiQ6VjBpzCNYFs8XJ6do/jQ=
+github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.6/go.mod h1:pZqrrLV+z6JXSBdDNqKAmTeC1mYtWyn/REQFOC4Z1zA=
 github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.0 h1:iDc9EIjnAraa0DWRKtV9+Nx6Wewoluh3m571E5uzoDI=
 github.com/whosonfirst/go-whosonfirst-sqlite-features/v2 v2.0.0/go.mod h1:rBj5q1bwA5jux36uU808O7pPgnu0XvJoOw7gG/a/8xo=
 github.com/whosonfirst/go-whosonfirst-sqlite-spr/v2 v2.0.0 h1:elNyX+8JYlgxENOLfeTKDKSD/y7orb8atkZnJpATs1o=

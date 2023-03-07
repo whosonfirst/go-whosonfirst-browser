@@ -674,7 +674,7 @@ github.com/whosonfirst/go-whosonfirst-feature/properties
 # github.com/whosonfirst/go-whosonfirst-findingaid/v2 v2.7.1
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-findingaid/v2/resolver
-# github.com/whosonfirst/go-whosonfirst-flags v0.5.0
+# github.com/whosonfirst/go-whosonfirst-flags v0.5.1
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/date
@@ -737,7 +737,7 @@ github.com/whosonfirst/go-whosonfirst-spatial-sqlite
 # github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.8
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-spr-geojson
-# github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.5
+# github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.6
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-spr/v2
 github.com/whosonfirst/go-whosonfirst-spr/v2/util

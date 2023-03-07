@@ -39,7 +39,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.5.0
 	github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.17
 	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.8
-	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.5
+	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.6
 	github.com/whosonfirst/go-whosonfirst-svg v0.1.0
 	github.com/whosonfirst/go-whosonfirst-uri v1.3.0
 	github.com/whosonfirst/go-whosonfirst-validate v0.3.4
@@ -178,7 +178,7 @@ require (
 	github.com/whosonfirst/go-rfc-5646 v0.1.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-crawl v0.2.1 // indirect
 	github.com/whosonfirst/go-whosonfirst-findingaid/v2 v2.7.1 // indirect
-	github.com/whosonfirst/go-whosonfirst-flags v0.5.0 // indirect
+	github.com/whosonfirst/go-whosonfirst-flags v0.5.1 // indirect
 	github.com/whosonfirst/go-whosonfirst-format v0.4.1 // indirect
 	github.com/whosonfirst/go-whosonfirst-id v1.2.0 // indirect
 	github.com/whosonfirst/go-whosonfirst-iterate/v2 v2.3.1 // indirect
