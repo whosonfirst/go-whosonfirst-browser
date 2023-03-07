@@ -7,7 +7,7 @@ require (
 	github.com/aaronland/go-http-maps v0.0.17
 	github.com/aaronland/go-http-ping/v2 v2.0.0
 	github.com/aaronland/go-http-sanitize v0.0.6
-	github.com/aaronland/go-http-server v1.0.0
+	github.com/aaronland/go-http-server v1.0.1
 	github.com/aaronland/go-http-server-tsnet v0.9.3
 	github.com/aaronland/go-http-static v0.0.2
 	github.com/aaronland/go-log v1.0.0
@@ -73,11 +73,11 @@ require (
 	github.com/aaronland/go-uid-proxy v0.0.2 // indirect
 	github.com/aaronland/go-uid-whosonfirst v0.0.2 // indirect
 	github.com/aaronland/gocloud-docstore v0.0.4 // indirect
-	github.com/akrylysov/algnhsa v0.12.1 // indirect
+	github.com/akrylysov/algnhsa v1.0.0 // indirect
 	github.com/akutz/memconn v0.1.0 // indirect
 	github.com/alexbrainman/sspi v0.0.0-20210105120005-909beea2cc74 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
-	github.com/aws/aws-lambda-go v1.36.0 // indirect
+	github.com/aws/aws-lambda-go v1.37.0 // indirect
 	github.com/aws/aws-sdk-go v1.44.200 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.17.4 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.10 // indirect
