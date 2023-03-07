@@ -3,12 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-roster"
 	"log"
 	"net/http"
 	"net/url"
 	"sort"
 	"strings"
+
+	"github.com/aaronland/go-roster"	
 )
 
 type Provider interface {

@@ -2,14 +2,15 @@ package maps
 
 import (
 	"fmt"
-	"github.com/aaronland/go-http-maps/provider"
-	"github.com/aaronland/go-http-maps/static"
-	"github.com/aaronland/go-http-rewrite"
 	"io/fs"
 	_ "log"
 	gohttp "net/http"
 	"path/filepath"
 	"strings"
+
+	"github.com/aaronland/go-http-maps/provider"
+	"github.com/aaronland/go-http-maps/static"
+	"github.com/aaronland/go-http-rewrite"	
 )
 
 // MapsOptions provides a list of JavaScript and CSS link to include with HTML output.

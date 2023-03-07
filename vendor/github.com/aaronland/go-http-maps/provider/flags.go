@@ -3,10 +3,11 @@ package provider
 import (
 	"flag"
 	"fmt"
-	"github.com/aaronland/go-http-tangramjs"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/aaronland/go-http-tangramjs"	
 )
 
 // The name of the commandline flag or query parameter used to assign the `map_provider` variable.

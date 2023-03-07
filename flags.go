@@ -121,9 +121,9 @@ const PathPointInPolygonAPIFlag string = "path-point-in-polygon-api"
 
 var path_point_in_polygon_api string
 
-const PlacetypesFooURIFlag string = "placetypes-foo-uri"
+const PlacetypesDefinitionURIFlag string = "placetypes-definition-uri"
 
-var placetypes_foo_uri string
+var placetypes_definition_uri string
 
 const ReaderURIFlag string = "reader-uri"
 
@@ -429,7 +429,7 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.Var(&path_svg_alt, "path-svg-alt", "Zero or more alternate paths that SVG requests should be served from.")
 	fs.StringVar(&path_webfinger, "path-webfinger", "/.well-known/webfinger/", "The path that 'webfinger' requests should be served from.")
 	fs.Var(&path_webfinger_alt, "path-webfinger-alt", "Zero or more alternate paths that 'webfinger' requests should be served from.")
-	fs.StringVar(&placetypes_foo_uri, PlacetypesFooURIFlag, PlacetypesFooURIDefault, "A valid go-whosonfirst-placetypes.Foo URI.")
+	fs.StringVar(&placetypes_definition_uri, PlacetypesDefinitionURIFlag, PlacetypesDefinitionURIDefault, "A valid go-whosonfirst-placetypes.Definition URI.")
 
 	fs.Var(&reader_uris, ReaderURIFlag, "One or more valid go-reader Reader URI strings.")
 

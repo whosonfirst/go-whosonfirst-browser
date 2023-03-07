@@ -26,13 +26,13 @@ type PointInPolygonService struct {
 	parent_reader   reader.Reader
 	ResultsCallback hierarchy_filter.FilterSPRResultsFunc
 	UpdateCallback  hierarchy.PointInPolygonHierarchyResolverUpdateCallback
-	PlacetypesFoo   placetypes.Foo
+	PlacetypesDefinition   placetypes.Definition
 }
 
 type PointInPolygonServiceOptions struct {
 	SpatialDatabase database.SpatialDatabase
 	ParentReader    reader.Reader
-	PlacetypesFoo   placetypes.Foo
+	PlacetypesDefinition   placetypes.Definition
 	// Mapshaper ...
 
 }
@@ -68,7 +68,7 @@ func NewPointInPolygonServiceWithOptions(ctx context.Context, opts *PointInPolyg
 
 	resolver_opts := &hierarchy.PointInPolygonHierarchyResolverOptions{
 		Database:      opts.SpatialDatabase,
-		PlacetypesFoo: opts.PlacetypesFoo,
+		PlacetypesDefinition: opts.PlacetypesDefinition,
 		Mapshaper:     nil,
 	}
 

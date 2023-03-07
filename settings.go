@@ -898,16 +898,16 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 			return nil, fmt.Errorf("Failed to create spatial database, %w", err)
 		}
 
-		pt_foo, err := placetypes.NewFoo(ctx, cfg.PlacetypesFooURI)
+		pt_definition, err := placetypes.NewDefinition(ctx, cfg.PlacetypesDefinitionURI)
 
 		if err != nil {
-			return nil, fmt.Errorf("Failed to create placetypes foo, %w", err)
+			return nil, fmt.Errorf("Failed to create placetypes definition, %w", err)
 		}
 
 		pip_options := &pointinpolygon.PointInPolygonServiceOptions{
 			SpatialDatabase: spatial_db,
 			ParentReader:    cr,
-			PlacetypesFoo:   pt_foo,
+			PlacetypesDefinition:   pt_definition,
 		}
 
 		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithOptions(ctx, pip_options)

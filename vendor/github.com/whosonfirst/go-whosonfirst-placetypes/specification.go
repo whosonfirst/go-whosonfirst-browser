@@ -19,6 +19,9 @@ import (
 //go:embed placetypes.json
 var FS embed.FS
 
+// This needs to be renamed to "Specification" either at a /v1 or a v2 release. Either
+// way it will be a breaking change. Doing it v2 (even if there is no explicit v1 release)
+// might be "cleaner"...
 type WOFPlacetypeSpecification struct {
 	catalog                map[string]WOFPlacetype
 	mu                     *sync.RWMutex

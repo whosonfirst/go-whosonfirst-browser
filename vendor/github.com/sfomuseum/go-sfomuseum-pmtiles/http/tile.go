@@ -8,7 +8,7 @@ import (
 )
 
 // TileHandler provides a `http.Handler` for serving Protomaps tile requests using 'loop'.
-func TileHandler(loop *pmtiles.Loop, logger *log.Logger) gohttp.Handler {
+func TileHandler(loop *pmtiles.Server, logger *log.Logger) gohttp.Handler {
 
 	fn := func(rsp gohttp.ResponseWriter, req *gohttp.Request) {
 

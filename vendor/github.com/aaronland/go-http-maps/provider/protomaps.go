@@ -7,12 +7,6 @@ import (
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-http-leaflet"
-	"github.com/aaronland/go-http-maps/templates/javascript"
-	"github.com/protomaps/go-pmtiles/pmtiles"
-	"github.com/sfomuseum/go-http-protomaps"
-	pmhttp "github.com/sfomuseum/go-sfomuseum-pmtiles/http"
-	"github.com/sfomuseum/runtimevar"
 	"io"
 	"log"
 	"net/http"
@@ -20,6 +14,13 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/aaronland/go-http-leaflet"
+	"github.com/aaronland/go-http-maps/templates/javascript"
+	"github.com/protomaps/go-pmtiles/pmtiles"
+	"github.com/sfomuseum/go-http-protomaps"
+	pmhttp "github.com/sfomuseum/go-sfomuseum-pmtiles/http"
+	"github.com/sfomuseum/runtimevar"	
 )
 
 const PROTOMAPS_SCHEME string = "protomaps"
@@ -198,7 +199,7 @@ func (p *ProtomapsProvider) AppendAssetHandlersWithPrefix(mux *http.ServeMux, pr
 
 	if p.serve_tiles {
 
-		loop, err := pmtiles.NewLoop(p.bucket_uri, p.logger, p.cache_size, "")
+		loop, err := pmtiles.NewServer(p.bucket_uri, "", p.logger, p.cache_size, "")
 
 		if err != nil {
 			return fmt.Errorf("Failed to create pmtiles.Loop, %w", err)

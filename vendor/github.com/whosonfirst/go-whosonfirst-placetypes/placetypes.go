@@ -19,6 +19,10 @@ type WOFPlacetypeAltNames map[string][]string
 // instance. The choice of naming this "WOFPlacetype" is unfortunate because since it is easily
 // confused with the actual JSON definition files for placetypes. However, we're stuck with it
 // for now in order to preserve backwards compatibility. Womp womp...
+//
+// This needs to be renamed to "Placetype" or something either at a /v1 or a v2 release. Either
+// way it will be a breaking change. Doing it v2 (even if there is no explicit v1 release)
+// might be "cleaner"...
 type WOFPlacetype struct {
 	Id     int64   `json:"id"`
 	Name   string  `json:"name"`

@@ -3,10 +3,6 @@ package reader
 import (
 	"context"
 	"fmt"
-	"github.com/google/go-github/v48/github"
-	"github.com/whosonfirst/go-ioutil"
-	wof_reader "github.com/whosonfirst/go-reader"
-	"golang.org/x/oauth2"
 	"io"
 	_ "log"
 	"net/http"
@@ -14,6 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/google/go-github/v48/github"
+	"github.com/whosonfirst/go-ioutil"
+	wof_reader "github.com/whosonfirst/go-reader"
+	"golang.org/x/oauth2"
 )
 
 type GitHubAPIReader struct {

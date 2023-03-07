@@ -3,14 +3,15 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-http-leaflet"
-	"github.com/aaronland/go-http-tangramjs"
-	tilepack_http "github.com/tilezen/go-tilepacks/http"
-	"github.com/tilezen/go-tilepacks/tilepack"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/aaronland/go-http-leaflet"
+	"github.com/aaronland/go-http-tangramjs"
+	tilepack_http "github.com/tilezen/go-tilepacks/http"
+	"github.com/tilezen/go-tilepacks/tilepack"	
 )
 
 const TANGRAM_SCHEME string = "tangram"

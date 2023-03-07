@@ -3,12 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-http-leaflet"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/aaronland/go-http-leaflet"	
 )
 
 const LEAFLET_SCHEME string = "leaflet"
