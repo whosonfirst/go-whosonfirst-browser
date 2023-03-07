@@ -90,7 +90,7 @@ type Config struct {
 	PathSVGAlt                     []string `json:"path_svg_alt,omitempty"`
 	PathWebFinger                  string   `json:"path_webfinger,omitempty"`
 	PathWebFingerAlt               []string `json:"path_webfinger_alt,omitempty"`
-	PlacetypesDefinitionURI               string   `json:"placetypes_definition_uri,omitempty"`
+	PlacetypesDefinitionURI        string   `json:"placetypes_definition_uri,omitempty"`
 	ReaderURIs                     []string `json:"reader_uris"`
 	SearchDatabaseURI              string   `json:"search_database_uri,omitempty"`
 	SelectPattern                  string   `json:"select_pattern,omitempty"`
@@ -202,7 +202,7 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		PathSVGAlt:                     path_svg_alt,
 		PathWebFinger:                  path_webfinger,
 		PathWebFingerAlt:               path_webfinger_alt,
-		PlacetypesDefinitionURI:               placetypes_definition_uri,
+		PlacetypesDefinitionURI:        placetypes_definition_uri,
 		ReaderURIs:                     reader_uris,
 		SearchDatabaseURI:              search_database_uri,
 		SelectPattern:                  select_pattern,

@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"time"
 
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
@@ -73,6 +74,8 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	} else {
 		aa_log.SetMinLevelWithPrefix(aa_log.INFO_PREFIX)
 	}
+
+	t1 := time.Now()
 
 	t, err := html.LoadTemplates(ctx, settings.Templates...)
 
@@ -844,6 +847,8 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	mux.Handle(uris_path, uris_handler)
 
 	// END OF uris.js
+
+	aa_log.Info(logger, "Time to set up: %v\n", time.Since(t1))
 
 	// Finally, start the server
 

@@ -905,9 +905,9 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 		}
 
 		pip_options := &pointinpolygon.PointInPolygonServiceOptions{
-			SpatialDatabase: spatial_db,
-			ParentReader:    cr,
-			PlacetypesDefinition:   pt_definition,
+			SpatialDatabase:      spatial_db,
+			ParentReader:         cr,
+			PlacetypesDefinition: pt_definition,
 		}
 
 		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithOptions(ctx, pip_options)

@@ -22,17 +22,17 @@ import (
 )
 
 type PointInPolygonService struct {
-	resolver        *hierarchy.PointInPolygonHierarchyResolver
-	parent_reader   reader.Reader
-	ResultsCallback hierarchy_filter.FilterSPRResultsFunc
-	UpdateCallback  hierarchy.PointInPolygonHierarchyResolverUpdateCallback
-	PlacetypesDefinition   placetypes.Definition
+	resolver             *hierarchy.PointInPolygonHierarchyResolver
+	parent_reader        reader.Reader
+	ResultsCallback      hierarchy_filter.FilterSPRResultsFunc
+	UpdateCallback       hierarchy.PointInPolygonHierarchyResolverUpdateCallback
+	PlacetypesDefinition placetypes.Definition
 }
 
 type PointInPolygonServiceOptions struct {
-	SpatialDatabase database.SpatialDatabase
-	ParentReader    reader.Reader
-	PlacetypesDefinition   placetypes.Definition
+	SpatialDatabase      database.SpatialDatabase
+	ParentReader         reader.Reader
+	PlacetypesDefinition placetypes.Definition
 	// Mapshaper ...
 
 }
@@ -67,9 +67,9 @@ func NewPointInPolygonServiceWithDatabaseAndReader(ctx context.Context, spatial_
 func NewPointInPolygonServiceWithOptions(ctx context.Context, opts *PointInPolygonServiceOptions) (*PointInPolygonService, error) {
 
 	resolver_opts := &hierarchy.PointInPolygonHierarchyResolverOptions{
-		Database:      opts.SpatialDatabase,
+		Database:             opts.SpatialDatabase,
 		PlacetypesDefinition: opts.PlacetypesDefinition,
-		Mapshaper:     nil,
+		Mapshaper:            nil,
 	}
 
 	resolver, err := hierarchy.NewPointInPolygonHierarchyResolver(ctx, resolver_opts)
