@@ -1877,8 +1877,8 @@ github.com/sfomuseum/go-http-auth v0.0.6 h1:f1QpdTcSXxQBX8NAHy7aQLWh9EQCb0vSX1K7
 github.com/sfomuseum/go-http-auth v0.0.6/go.mod h1:rAWkkf9KlG9HhyLLOToiu4MqluH8HVE5Si03z0e6kb0=
 github.com/sfomuseum/go-http-protomaps v0.0.16 h1:cEsJGuW1TFqydFdGZJQoDeEvyQZxFaSIlx9YcrapVxs=
 github.com/sfomuseum/go-http-protomaps v0.0.16/go.mod h1:VkfLbtYbOBc6/Xe0Sy8/Y/+okfz93Kz394UdJ48OQFs=
-github.com/sfomuseum/go-http-wasm v1.1.0 h1:J8mTCpZo8P6HUjyM5VqlL+8AYuohF/b6J+JNHi6Vho8=
-github.com/sfomuseum/go-http-wasm v1.1.0/go.mod h1:njFA3D6WDdiawJKKvOtymMwkh4lYLsZ9X9SBuB7ldJg=
+github.com/sfomuseum/go-http-wasm v1.1.1 h1:ChjTLstxyo+6OwLnNK/pdUngnbW9sNjp3Jgz+fxnM9Q=
+github.com/sfomuseum/go-http-wasm v1.1.1/go.mod h1:njFA3D6WDdiawJKKvOtymMwkh4lYLsZ9X9SBuB7ldJg=
 github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1 h1:ecjCnrzs1QhSi2R2jQem0y8/6oNrvmUgyM9kMKxZjtw=
 github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1/go.mod h1:+JVebjhj6f3H3ESBlO1b5pkzS2ZxaqnpUyCHxA8/too=
 github.com/sfomuseum/go-sfomuseum-pmtiles v1.1.0 h1:LvCvXcxwtsdbL16Gk80b5TlJ9L/fn6R8hBD4ck0aGTM=

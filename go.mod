@@ -18,7 +18,7 @@ require (
 	github.com/sfomuseum/go-flags v0.10.0
 	github.com/sfomuseum/go-geojsonld v1.0.0
 	github.com/sfomuseum/go-http-auth v0.0.6
-	github.com/sfomuseum/go-http-wasm v1.1.0
+	github.com/sfomuseum/go-http-wasm v1.1.1
 	github.com/sfomuseum/go-template v1.5.1
 	github.com/sfomuseum/runtimevar v1.0.4
 	github.com/tidwall/gjson v1.14.4

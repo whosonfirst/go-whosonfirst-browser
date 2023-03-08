@@ -544,7 +544,7 @@ github.com/sfomuseum/go-http-auth
 ## explicit; go 1.18
 github.com/sfomuseum/go-http-protomaps
 github.com/sfomuseum/go-http-protomaps/static
-# github.com/sfomuseum/go-http-wasm v1.1.0
+# github.com/sfomuseum/go-http-wasm v1.1.1
 ## explicit; go 1.18
 github.com/sfomuseum/go-http-wasm
 github.com/sfomuseum/go-http-wasm/static
