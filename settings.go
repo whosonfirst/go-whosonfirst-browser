@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -95,7 +96,7 @@ func (s *Settings) HasHTMLCapabilities() bool {
 }
 
 // SettingsFromFlagSet will create a new `Settings` instance derived from 'fs'.
-func SettingsFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Settings, error) {
+func SettingsFromFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) (*Settings, error) {
 
 	cfg, err := ConfigFromFlagSet(ctx, fs)
 
@@ -103,11 +104,11 @@ func SettingsFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Settings, erro
 		return nil, fmt.Errorf("Failed to derive config from flagset, %w", err)
 	}
 
-	return SettingsFromConfig(ctx, cfg)
+	return SettingsFromConfig(ctx, cfg, logger)
 }
 
 // SettingsFromFlagSet will create a new `Settings` instance derived from 'cfg'.
-func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
+func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*Settings, error) {
 
 	// To do: pre-fill defaults in cfg
 
@@ -908,6 +909,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config) (*Settings, error) {
 			SpatialDatabase:      spatial_db,
 			ParentReader:         cr,
 			PlacetypesDefinition: pt_definition,
+			Logger:               logger,
 		}
 
 		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithOptions(ctx, pip_options)

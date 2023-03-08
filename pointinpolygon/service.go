@@ -9,6 +9,8 @@ import (
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
 
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
@@ -21,20 +23,21 @@ import (
 	spatial_filter "github.com/whosonfirst/go-whosonfirst-spatial/filter"
 )
 
+type PointInPolygonServiceOptions struct {
+	SpatialDatabase      database.SpatialDatabase
+	ParentReader         reader.Reader
+	PlacetypesDefinition placetypes.Definition
+	// Mapshaper ...
+	Logger *log.Logger
+}
+
 type PointInPolygonService struct {
 	resolver             *hierarchy.PointInPolygonHierarchyResolver
 	parent_reader        reader.Reader
 	ResultsCallback      hierarchy_filter.FilterSPRResultsFunc
 	UpdateCallback       hierarchy.PointInPolygonHierarchyResolverUpdateCallback
 	PlacetypesDefinition placetypes.Definition
-}
-
-type PointInPolygonServiceOptions struct {
-	SpatialDatabase      database.SpatialDatabase
-	ParentReader         reader.Reader
-	PlacetypesDefinition placetypes.Definition
-	// Mapshaper ...
-
+	logger               *log.Logger
 }
 
 func NewPointInPolygonService(ctx context.Context, spatial_database_uri string, parent_reader_uri string) (*PointInPolygonService, error) {
@@ -66,10 +69,19 @@ func NewPointInPolygonServiceWithDatabaseAndReader(ctx context.Context, spatial_
 
 func NewPointInPolygonServiceWithOptions(ctx context.Context, opts *PointInPolygonServiceOptions) (*PointInPolygonService, error) {
 
+	var logger *log.Logger
+
+	if opts.Logger != nil {
+		logger = opts.Logger
+	} else {
+		logger = log.New(io.Discard, "", 0)
+	}
+
 	resolver_opts := &hierarchy.PointInPolygonHierarchyResolverOptions{
 		Database:             opts.SpatialDatabase,
 		PlacetypesDefinition: opts.PlacetypesDefinition,
 		Mapshaper:            nil,
+		Logger:               logger,
 	}
 
 	resolver, err := hierarchy.NewPointInPolygonHierarchyResolver(ctx, resolver_opts)
@@ -92,6 +104,7 @@ func NewPointInPolygonServiceWithOptions(ctx context.Context, opts *PointInPolyg
 		parent_reader:   opts.ParentReader,
 		ResultsCallback: results_cb,
 		UpdateCallback:  update_cb,
+		logger:          logger,
 	}
 
 	return s, nil

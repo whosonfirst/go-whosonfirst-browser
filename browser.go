@@ -58,7 +58,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
 
-	settings, err := SettingsFromConfig(ctx, cfg)
+	settings, err := SettingsFromConfig(ctx, cfg, logger)
 
 	if err != nil {
 		return fmt.Errorf("Failed to create settings from config, %w", err)
