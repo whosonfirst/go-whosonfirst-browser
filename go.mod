@@ -37,7 +37,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-search v0.1.0
 	github.com/whosonfirst/go-whosonfirst-spatial v0.5.6
 	github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.5.0
-	github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.17
+	github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.18
 	github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.8
 	github.com/whosonfirst/go-whosonfirst-spr/v2 v2.3.6
 	github.com/whosonfirst/go-whosonfirst-svg v0.1.0

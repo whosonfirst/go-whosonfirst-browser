@@ -2096,8 +2096,8 @@ github.com/whosonfirst/go-whosonfirst-spatial v0.5.6 h1:mFvkF+5qvfBauLqixiWwHX76
 github.com/whosonfirst/go-whosonfirst-spatial v0.5.6/go.mod h1:pCh4lz9GFexj865PV4/Txkjd/kdAJiyx9U2eBJ49DJk=
 github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.5.0 h1:eUGuXPoYufMg5LwrSRaCIVtYHRtMZI6r91nV8fg4YIU=
 github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.5.0/go.mod h1:1AlT+DkHwx344/sPEc3P6guEakIXkHj1Mwk9lpjNM4s=
-github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.17 h1:l6MyhnIenFfyjwGOY5N8fA5t0tLlT7vzfU9JHiY2DmA=
-github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.17/go.mod h1:FQ3FFlNORmW3Ag9PIYkYRwSdZqhsJynTjllskkGQa7E=
+github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.18 h1:qTTbhu43gB9zRDF4OK2tuaioGMVZHcDWVfVVRiLL1aM=
+github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.18/go.mod h1:Rj2CpxtUznOPcrtMEXYdkYy83Eua/m/Pw0yyQa6mSNA=
 github.com/whosonfirst/go-whosonfirst-spatial-sqlite v0.6.4 h1:rhh5BycxB99bAal4GtZ0TYdr4+3jOPc5f3ej1Rmlmoo=
 github.com/whosonfirst/go-whosonfirst-spatial-sqlite v0.6.4/go.mod h1:7Dy0+ECgz53IxnSomcAy9j02Fw8kMRlgXAo33UnyUDI=
 github.com/whosonfirst/go-whosonfirst-spr-geojson v0.0.8 h1:K0rCaKo0xvOtuS/x9r62bEfIK3OTdZqbDmgG+A3xDSs=

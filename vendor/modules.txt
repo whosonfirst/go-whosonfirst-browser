@@ -739,7 +739,7 @@ github.com/whosonfirst/go-whosonfirst-spatial/geo
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-spatial-hierarchy
 github.com/whosonfirst/go-whosonfirst-spatial-hierarchy/filter
-# github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.17
+# github.com/whosonfirst/go-whosonfirst-spatial-pmtiles v0.0.18
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-spatial-pmtiles
 # github.com/whosonfirst/go-whosonfirst-spatial-sqlite v0.6.4
