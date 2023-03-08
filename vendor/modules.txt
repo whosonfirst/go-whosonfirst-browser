@@ -713,7 +713,7 @@ github.com/whosonfirst/go-whosonfirst-names/tags
 # github.com/whosonfirst/go-whosonfirst-placetypes v0.7.0
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-placetypes
-# github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.1.1
+# github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.2.0
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http
 github.com/whosonfirst/go-whosonfirst-placetypes-wasm/static
