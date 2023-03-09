@@ -735,7 +735,7 @@ github.com/whosonfirst/go-whosonfirst-spatial/database
 github.com/whosonfirst/go-whosonfirst-spatial/filter
 github.com/whosonfirst/go-whosonfirst-spatial/flags
 github.com/whosonfirst/go-whosonfirst-spatial/geo
-# github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.5.0
+# github.com/whosonfirst/go-whosonfirst-spatial-hierarchy v0.6.0
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-spatial-hierarchy
 github.com/whosonfirst/go-whosonfirst-spatial-hierarchy/filter

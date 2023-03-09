@@ -31,7 +31,11 @@ type PointInPolygonHierarchyResolverOptions struct {
 	Mapshaper *mapshaper.Client
 	// PlacetypesDefinition is an optional `go-whosonfirst-placetypes.Definition` instance used to resolve custom or bespoke placetypes.
 	PlacetypesDefinition placetypes.Definition
-	Logger               *log.Logger
+	// Logger is an optional `log.Logger` instance for logging feedback.
+	Logger *log.Logger
+	// SkipPlacetypeFilter is an optional boolean flag to signal whether or not point-in-polygon operations should be performed using
+	// the list of known ancestors for a given placetype. Default is false.
+	SkipPlacetypeFilter bool
 }
 
 // PointInPolygonHierarchyResolver provides methods for constructing a hierarchy of ancestors
@@ -48,6 +52,9 @@ type PointInPolygonHierarchyResolver struct {
 	// reader is the `reader.Reader` instance used to retrieve ancestor records. By default it is the same as `Database` but can be assigned
 	// explicitly using the `SetReader` method.
 	reader reader.Reader
+	// skip_placetype_filter is an optional boolean flag to signal whether or not point-in-polygon operations should be performed using
+	// the list of known ancestors for a given placetype. Default is false.
+	skip_placetype_filter bool
 }
 
 // PointInPolygonHierarchyResolverUpdateCallback is a function definition for a custom callback to convert 'spr' in to a dictionary of properties
@@ -128,11 +135,12 @@ func NewPointInPolygonHierarchyResolver(ctx context.Context, opts *PointInPolygo
 	}
 
 	t := &PointInPolygonHierarchyResolver{
-		Database:             opts.Database,
-		Mapshaper:            opts.Mapshaper,
-		PlacetypesDefinition: pt_def,
-		Logger:               logger,
-		reader:               opts.Database,
+		Database:              opts.Database,
+		Mapshaper:             opts.Mapshaper,
+		PlacetypesDefinition:  pt_def,
+		Logger:                logger,
+		reader:                opts.Database,
+		skip_placetype_filter: opts.SkipPlacetypeFilter,
 	}
 
 	return t, nil
@@ -183,6 +191,51 @@ func (t *PointInPolygonHierarchyResolver) PointInPolygonAndUpdate(ctx context.Co
 // from if `wof:placetype=custom`.
 func (t *PointInPolygonHierarchyResolver) PointInPolygon(ctx context.Context, inputs *filter.SPRInputs, body []byte) ([]spr.StandardPlacesResult, error) {
 
+	centroid, err := t.PointInPolygonCentroid(ctx, body)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to derive centroid, %w", err)
+	}
+
+	lon := centroid.X()
+	lat := centroid.Y()
+
+	coord, err := geo.NewCoordinate(lon, lat)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create new coordinate, %w", err)
+	}
+
+	if t.skip_placetype_filter {
+
+		spr_filter, err := filter.NewSPRFilterFromInputs(inputs)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to create SPR filter from input, %v", err)
+		}
+
+		aa_log.Debug(t.Logger, "Perform point in polygon at %f, %f with no placetype filter\n", lat, lon)
+
+		rsp, err := t.Database.PointInPolygon(ctx, coord, spr_filter)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to point in polygon for %v, %v", coord, err)
+		}
+
+		// This should never happen...
+
+		if rsp == nil {
+			return nil, fmt.Errorf("Failed to point in polygon for %v, null response", coord)
+		}
+
+		possible := rsp.Results()
+		return possible, nil
+	}
+
+	// Start PIP-ing the list of ancestors - stop at the first match
+
+	possible := make([]spr.StandardPlacesResult, 0)
+
 	pt_def := t.PlacetypesDefinition
 	pt_spec := pt_def.Specification()
 	pt_prop := pt_def.Property()
@@ -208,26 +261,7 @@ func (t *PointInPolygonHierarchyResolver) PointInPolygon(ctx context.Context, in
 
 	ancestors := pt_spec.AncestorsForRoles(pt, roles)
 
-	centroid, err := t.PointInPolygonCentroid(ctx, body)
-
-	if err != nil {
-		return nil, fmt.Errorf("Failed to derive centroid, %w", err)
-	}
-
-	lon := centroid.X()
-	lat := centroid.Y()
-
-	// Start PIP-ing the list of ancestors - stop at the first match
-
-	possible := make([]spr.StandardPlacesResult, 0)
-
 	for _, a := range ancestors {
-
-		coord, err := geo.NewCoordinate(lon, lat)
-
-		if err != nil {
-			return nil, fmt.Errorf("Failed to create new coordinate, %w", err)
-		}
 
 		pt_name := fmt.Sprintf("%s#%s", a.Name, pt_uri)
 
