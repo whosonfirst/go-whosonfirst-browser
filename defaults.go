@@ -80,6 +80,8 @@ const PathSearchAPIDefault string = "/api/search/"
 
 const PlacetypesDefinitionURIDefault string = "whosonfirst://"
 
+const PointInPolygonSkipPlacetypeFilterDefault bool = false
+
 const SearchDatabaseURIDefault string = "null://"
 
 const VerboseDefault bool = false

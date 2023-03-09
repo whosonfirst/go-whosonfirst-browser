@@ -910,6 +910,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			ParentReader:         cr,
 			PlacetypesDefinition: pt_definition,
 			Logger:               logger,
+			SkipPlacetypeFilter: cfg.PointInPolygonSkipPlacetypeFilter,
 		}
 
 		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithOptions(ctx, pip_options)

@@ -91,6 +91,7 @@ type Config struct {
 	PathWebFinger                  string   `json:"path_webfinger,omitempty"`
 	PathWebFingerAlt               []string `json:"path_webfinger_alt,omitempty"`
 	PlacetypesDefinitionURI        string   `json:"placetypes_definition_uri,omitempty"`
+	PointInPolygonSkipPlacetypeFilter bool `json:"point_in_polygon_skip_placetype_filter"`
 	ReaderURIs                     []string `json:"reader_uris"`
 	SearchDatabaseURI              string   `json:"search_database_uri,omitempty"`
 	SelectPattern                  string   `json:"select_pattern,omitempty"`
@@ -193,7 +194,7 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		PathPNG:                        path_png,
 		PathPNGAlt:                     path_png_alt,
 		PathPointInPolygon:             path_point_in_polygon,
-		PathPointInPolygonAPI:          path_point_in_polygon_api,
+		PathPointInPolygonAPI:          path_point_in_polygon_api,		
 		PathSelect:                     path_select,
 		PathSelectAlt:                  path_select_alt,
 		PathSPR:                        path_spr,
@@ -203,6 +204,7 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		PathWebFinger:                  path_webfinger,
 		PathWebFingerAlt:               path_webfinger_alt,
 		PlacetypesDefinitionURI:        placetypes_definition_uri,
+		PointInPolygonSkipPlacetypeFilter: point_in_polygon_skip_placetype_filter,
 		ReaderURIs:                     reader_uris,
 		SearchDatabaseURI:              search_database_uri,
 		SelectPattern:                  select_pattern,

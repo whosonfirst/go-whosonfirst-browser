@@ -125,6 +125,10 @@ const PlacetypesDefinitionURIFlag string = "placetypes-definition-uri"
 
 var placetypes_definition_uri string
 
+const PointInPolygonSkipPlacetypeFilterFlag string = "point-in-polygon-skip-placetype-filter"
+
+var point_in_polygon_skip_placetype_filter bool
+
 const ReaderURIFlag string = "reader-uri"
 
 var reader_uris multi.MultiCSVString
@@ -430,7 +434,8 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.StringVar(&path_webfinger, "path-webfinger", "/.well-known/webfinger/", "The path that 'webfinger' requests should be served from.")
 	fs.Var(&path_webfinger_alt, "path-webfinger-alt", "Zero or more alternate paths that 'webfinger' requests should be served from.")
 	fs.StringVar(&placetypes_definition_uri, PlacetypesDefinitionURIFlag, PlacetypesDefinitionURIDefault, "A valid go-whosonfirst-placetypes.Definition URI.")
-
+	fs.BoolVar(&point_in_polygon_skip_placetype_filter, PointInPolygonSkipPlacetypeFilterFlag, PointInPolygonSkipPlacetypeFilterDefault, "An optional boolean flag to skip placetype filtering in default point-in-polygon lookups.")
+	
 	fs.Var(&reader_uris, ReaderURIFlag, "One or more valid go-reader Reader URI strings.")
 
 	fs.StringVar(&search_database_uri, SearchDatabaseURIFlag, SearchDatabaseURIDefault, "A valid whosonfirst/go-whosonfist-search/fulltext URI.")

@@ -29,6 +29,9 @@ type PointInPolygonServiceOptions struct {
 	PlacetypesDefinition placetypes.Definition
 	// Mapshaper ...
 	Logger *log.Logger
+	// SkipPlacetypeFilter is an optional boolean flag to signal whether or not point-in-polygon operations should be performed using
+	// the list of known ancestors for a given placetype. Default is false.
+	SkipPlacetypeFilter bool
 }
 
 type PointInPolygonService struct {
@@ -82,6 +85,7 @@ func NewPointInPolygonServiceWithOptions(ctx context.Context, opts *PointInPolyg
 		PlacetypesDefinition: opts.PlacetypesDefinition,
 		Mapshaper:            nil,
 		Logger:               logger,
+		SkipPlacetypeFilter: opts.SkipPlacetypeFilter,
 	}
 
 	resolver, err := hierarchy.NewPointInPolygonHierarchyResolver(ctx, resolver_opts)
