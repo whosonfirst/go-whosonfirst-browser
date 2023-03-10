@@ -20,7 +20,7 @@ import (
 	"github.com/protomaps/go-pmtiles/pmtiles"
 	"github.com/sfomuseum/go-http-protomaps"
 	pmhttp "github.com/sfomuseum/go-sfomuseum-pmtiles/http"
-	"github.com/sfomuseum/runtimevar"	
+	"github.com/sfomuseum/runtimevar"
 )
 
 const PROTOMAPS_SCHEME string = "protomaps"
@@ -93,6 +93,21 @@ func NewProtomapsProvider(ctx context.Context, uri string) (Provider, error) {
 
 	q_tile_url := q.Get(ProtomapsTileURLFlag)
 	protomaps_opts.TileURL = q_tile_url
+
+	q_javascript_at_eof := q.Get(JavaScriptAtEOFFlag)
+
+	if q_javascript_at_eof != "" {
+
+		v, err := strconv.ParseBool(q_javascript_at_eof)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse ?%s= parameter, %w", JavaScriptAtEOFFlag, err)
+		}
+
+		if v == true {
+			protomaps_opts.AppendJavaScriptAtEOF = true
+		}
+	}
 
 	logger := log.New(io.Discard, "", 0)
 

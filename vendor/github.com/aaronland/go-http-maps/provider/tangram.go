@@ -7,11 +7,12 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/aaronland/go-http-leaflet"
 	"github.com/aaronland/go-http-tangramjs"
 	tilepack_http "github.com/tilezen/go-tilepacks/http"
-	"github.com/tilezen/go-tilepacks/tilepack"	
+	"github.com/tilezen/go-tilepacks/tilepack"
 )
 
 const TANGRAM_SCHEME string = "tangram"
@@ -51,6 +52,21 @@ func TangramJSOptionsFromURL(u *url.URL) (*tangramjs.TangramJSOptions, error) {
 
 	if q_style_url != "" {
 		opts.NextzenOptions.TileURL = q_tile_url
+	}
+
+	q_javascript_at_eof := q.Get(JavaScriptAtEOFFlag)
+
+	if q_javascript_at_eof != "" {
+
+		v, err := strconv.ParseBool(q_javascript_at_eof)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse ?%s= parameter, %w", JavaScriptAtEOFFlag, err)
+		}
+
+		if v == true {
+			opts.AppendJavaScriptAtEOF = true
+		}
 	}
 
 	return opts, nil

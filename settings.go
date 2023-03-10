@@ -52,6 +52,7 @@ type Settings struct {
 	CustomEditValidationFunc    browser_custom.CustomValidationFunc
 	CustomEditValidationWasm    *browser_custom.CustomValidationWasm
 	Exporter                    export.Exporter
+	JavaScriptAtEOF             bool
 	MapProvider                 provider.Provider
 	NavPlaceMaxFeatures         int
 	URIs                        *browser_uris.URIs
@@ -203,8 +204,9 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 	}
 
 	settings := &Settings{
-		Templates: []fs.FS{html.FS},
-		Verbose:   cfg.Verbose,
+		Templates:       []fs.FS{html.FS},
+		Verbose:         cfg.Verbose,
+		JavaScriptAtEOF: cfg.JavaScriptAtEOF,
 	}
 
 	reader_uris := cfg.ReaderURIs
@@ -841,7 +843,9 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	if cfg.EnableHTML {
 
-		map_provider, err := provider.NewProvider(ctx, cfg.MapProviderURI)
+		map_provider_uri := cfg.MapProviderURI
+
+		map_provider, err := provider.NewProvider(ctx, map_provider_uri)
 
 		if err != nil {
 			return nil, fmt.Errorf("Failed to create new map provider, %w", err)
@@ -910,7 +914,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 			ParentReader:         cr,
 			PlacetypesDefinition: pt_definition,
 			Logger:               logger,
-			SkipPlacetypeFilter: cfg.PointInPolygonSkipPlacetypeFilter,
+			SkipPlacetypeFilter:  cfg.PointInPolygonSkipPlacetypeFilter,
 		}
 
 		pip_service, err := pointinpolygon.NewPointInPolygonServiceWithOptions(ctx, pip_options)

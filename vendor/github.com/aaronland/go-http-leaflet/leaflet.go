@@ -12,6 +12,9 @@ type LeafletOptions struct {
 	JS             []string
 	CSS            []string
 	DataAttributes map[string]string
+	// AppendJavaScriptAtEOF is a boolean flag to append JavaScript markup at the end of an HTML document
+	// rather than in the <head> HTML element. Default is false
+	AppendJavaScriptAtEOF bool
 }
 
 // Append the Javascript and CSS URLs for the Leaflet.Fullscreen plugin.
@@ -60,6 +63,7 @@ func AppendResourcesHandlerWithPrefix(next http.Handler, opts *LeafletOptions, p
 	static_opts.CSS = opts.CSS
 	static_opts.JS = opts.JS
 	static_opts.DataAttributes = opts.DataAttributes
+	static_opts.AppendJavaScriptAtEOF = opts.AppendJavaScriptAtEOF
 
 	return aa_static.AppendResourcesHandlerWithPrefix(next, static_opts, prefix)
 }

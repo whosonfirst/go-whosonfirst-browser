@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/aaronland/go-http-leaflet"	
+	"github.com/aaronland/go-http-leaflet"
 )
 
 const LEAFLET_SCHEME string = "leaflet"
@@ -31,6 +31,21 @@ func LeafletOptionsFromURL(u *url.URL) (*leaflet.LeafletOptions, error) {
 	opts := leaflet.DefaultLeafletOptions()
 
 	q := u.Query()
+
+	q_javascript_at_eof := q.Get(JavaScriptAtEOFFlag)
+
+	if q_javascript_at_eof != "" {
+
+		v, err := strconv.ParseBool(q_javascript_at_eof)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse ?%s= parameter, %w", JavaScriptAtEOFFlag, err)
+		}
+
+		if v == true {
+			opts.AppendJavaScriptAtEOF = true
+		}
+	}
 
 	q_enable_hash := q.Get("leaflet-enable-hash")
 

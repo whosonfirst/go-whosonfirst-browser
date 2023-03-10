@@ -376,6 +376,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	if settings.HasHTMLCapabilities() {
 
 		bootstrap_opts = bootstrap.DefaultBootstrapOptions()
+		bootstrap_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
 
 		err = bootstrap.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
@@ -398,7 +399,8 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		// Final map stuff
 
 		maps_opts = maps.DefaultMapsOptions()
-
+		maps_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
+		
 		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
 
 		if err != nil {
@@ -583,7 +585,8 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		wasm_exec_opts := wasm_exec.DefaultWASMOptions()
-
+		wasm_exec_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
+		
 		// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
 		// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
 		// way to specify the wasm path (yet) this is what we're going to do in conjunction with writing

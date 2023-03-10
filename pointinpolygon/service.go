@@ -85,7 +85,7 @@ func NewPointInPolygonServiceWithOptions(ctx context.Context, opts *PointInPolyg
 		PlacetypesDefinition: opts.PlacetypesDefinition,
 		Mapshaper:            nil,
 		Logger:               logger,
-		SkipPlacetypeFilter: opts.SkipPlacetypeFilter,
+		SkipPlacetypeFilter:  opts.SkipPlacetypeFilter,
 	}
 
 	resolver, err := hierarchy.NewPointInPolygonHierarchyResolver(ctx, resolver_opts)

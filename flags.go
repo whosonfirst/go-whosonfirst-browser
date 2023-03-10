@@ -435,7 +435,7 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.Var(&path_webfinger_alt, "path-webfinger-alt", "Zero or more alternate paths that 'webfinger' requests should be served from.")
 	fs.StringVar(&placetypes_definition_uri, PlacetypesDefinitionURIFlag, PlacetypesDefinitionURIDefault, "A valid go-whosonfirst-placetypes.Definition URI.")
 	fs.BoolVar(&point_in_polygon_skip_placetype_filter, PointInPolygonSkipPlacetypeFilterFlag, PointInPolygonSkipPlacetypeFilterDefault, "An optional boolean flag to skip placetype filtering in default point-in-polygon lookups.")
-	
+
 	fs.Var(&reader_uris, ReaderURIFlag, "One or more valid go-reader Reader URI strings.")
 
 	fs.StringVar(&search_database_uri, SearchDatabaseURIFlag, SearchDatabaseURIDefault, "A valid whosonfirst/go-whosonfist-search/fulltext URI.")

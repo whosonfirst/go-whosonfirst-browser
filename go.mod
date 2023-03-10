@@ -3,14 +3,15 @@ module github.com/whosonfirst/go-whosonfirst-browser/v7
 go 1.18
 
 require (
-	github.com/aaronland/go-http-bootstrap v0.2.0
-	github.com/aaronland/go-http-maps v0.0.17
+	github.com/aaronland/go-http-bootstrap v0.3.0
+	github.com/aaronland/go-http-maps v0.1.0
 	github.com/aaronland/go-http-ping/v2 v2.0.0
 	github.com/aaronland/go-http-sanitize v0.0.6
 	github.com/aaronland/go-http-server v1.0.1
 	github.com/aaronland/go-http-server-tsnet v0.9.3
-	github.com/aaronland/go-http-static v0.0.2
+	github.com/aaronland/go-http-static v0.0.3
 	github.com/aaronland/go-log v1.0.0
+	github.com/aaronland/go-log/v2 v2.0.0
 	github.com/aaronland/go-roster v1.0.0
 	github.com/aaronland/gocloud-blob-s3 v0.2.2
 	github.com/paulmach/orb v0.9.0
@@ -18,7 +19,7 @@ require (
 	github.com/sfomuseum/go-flags v0.10.0
 	github.com/sfomuseum/go-geojsonld v1.0.0
 	github.com/sfomuseum/go-http-auth v0.0.6
-	github.com/sfomuseum/go-http-wasm v1.1.1
+	github.com/sfomuseum/go-http-wasm v1.2.0
 	github.com/sfomuseum/go-template v1.5.1
 	github.com/sfomuseum/runtimevar v1.0.4
 	github.com/tidwall/gjson v1.14.4
@@ -57,11 +58,10 @@ require (
 	github.com/aaronland/go-aws-dynamodb v0.0.5 // indirect
 	github.com/aaronland/go-aws-session v0.1.0 // indirect
 	github.com/aaronland/go-brooklynintegers-api v1.2.6 // indirect
-	github.com/aaronland/go-http-leaflet v0.2.2 // indirect
-	github.com/aaronland/go-http-rewrite v1.0.1 // indirect
-	github.com/aaronland/go-http-tangramjs v0.1.3 // indirect
+	github.com/aaronland/go-http-leaflet v0.3.0 // indirect
+	github.com/aaronland/go-http-rewrite v1.1.0 // indirect
+	github.com/aaronland/go-http-tangramjs v0.2.0 // indirect
 	github.com/aaronland/go-json-query v0.1.3 // indirect
-	github.com/aaronland/go-log/v2 v2.0.0 // indirect
 	github.com/aaronland/go-pagination v0.2.0 // indirect
 	github.com/aaronland/go-pagination-sql v0.2.0 // indirect
 	github.com/aaronland/go-pool/v2 v2.0.0 // indirect
@@ -154,7 +154,7 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/schollz/progressbar/v3 v3.11.0 // indirect
 	github.com/sfomuseum/go-edtf v1.1.1 // indirect
-	github.com/sfomuseum/go-http-protomaps v0.0.16 // indirect
+	github.com/sfomuseum/go-http-protomaps v0.1.0 // indirect
 	github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1 // indirect
 	github.com/sfomuseum/go-sfomuseum-pmtiles v1.1.0 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76 // indirect
@@ -201,15 +201,15 @@ require (
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/exp v0.0.0-20230124195608-d38c7dcee874 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/mod v0.7.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/mod v0.8.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/term v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.5.0 // indirect
+	golang.org/x/tools v0.6.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	golang.zx2c4.com/wintun v0.0.0-20230126152724-0fa3db229ce2 // indirect
 	golang.zx2c4.com/wireguard/windows v0.5.3 // indirect

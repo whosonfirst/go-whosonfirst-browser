@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/aaronland/go-http-tangramjs"	
+	"github.com/aaronland/go-http-tangramjs"
 )
 
 // The name of the commandline flag or query parameter used to assign the `map_provider` variable.
@@ -112,6 +112,12 @@ const ProtomapsLabelRulesURIFlag string = "protomaps-label-rules-uri"
 // An optional `gocloud.dev/runtimevar` URI referencing a custom Javascript variable used to define Protomaps label rules.
 var protomaps_label_rules_uri string
 
+// The names of the commandline flag or query parameter used to assign the `javascript_at_eof` variable.
+const JavaScriptAtEOFFlag string = "javascript-at-eof"
+
+// An optional boolean flag to indicate that JavaScript resources (<script> tags) should be appended to the end of the HTML output.
+var javascript_at_eof bool
+
 func AppendProviderFlags(fs *flag.FlagSet) error {
 
 	schemes := Schemes()
@@ -125,6 +131,8 @@ func AppendProviderFlags(fs *flag.FlagSet) error {
 	map_provider_desc := fmt.Sprintf("The name of the map provider to use. Valid options are: %s", str_schemes)
 
 	fs.StringVar(&map_provider, MapProviderFlag, "", map_provider_desc)
+
+	fs.BoolVar(&javascript_at_eof, JavaScriptAtEOFFlag, false, "An optional boolean flag to indicate that JavaScript resources (<script> tags) should be appended to the end of the HTML output.")
 
 	err := AppendLeafletFlags(fs)
 
@@ -201,6 +209,10 @@ func ProviderURIFromFlagSet(fs *flag.FlagSet) (string, error) {
 
 	if leaflet_enable_draw {
 		q.Set("leaflet-enable-draw", strconv.FormatBool(leaflet_enable_draw))
+	}
+
+	if javascript_at_eof {
+		q.Set(JavaScriptAtEOFFlag, strconv.FormatBool(javascript_at_eof))
 	}
 
 	switch map_provider {

@@ -2,14 +2,11 @@ package tangramjs
 
 import (
 	"fmt"
-	"github.com/aaronland/go-http-leaflet"
-	"github.com/aaronland/go-http-rewrite"
-	"github.com/aaronland/go-http-tangramjs/static"
-	"io/fs"
-	_ "log"
 	"net/http"
-	"path/filepath"
-	"strings"
+
+	"github.com/aaronland/go-http-leaflet"
+	aa_static "github.com/aaronland/go-http-static"
+	"github.com/aaronland/go-http-tangramjs/static"
 )
 
 // NEXTZEN_MVT_ENDPOINT is the default endpoint for Nextzen vector tiles
@@ -41,6 +38,9 @@ type TangramJSOptions struct {
 	NextzenOptions *NextzenOptions
 	// A leaflet.LeafletOptions instance.
 	LeafletOptions *leaflet.LeafletOptions
+	// AppendJavaScriptAtEOF is a boolean flag to append JavaScript markup at the end of an HTML document
+	// rather than in the <head> HTML element. Default is false
+	AppendJavaScriptAtEOF bool
 }
 
 // Return a *NextzenOptions struct with default values.
@@ -81,8 +81,10 @@ func AppendResourcesHandler(next http.Handler, opts *TangramJSOptions) http.Hand
 // AppendResourcesHandlerWithPrefix will rewrite any HTML produced by previous handler to include the necessary markup to load Tangram.js files and related assets ensuring that all URIs are prepended with a prefix.
 func AppendResourcesHandlerWithPrefix(next http.Handler, opts *TangramJSOptions, prefix string) http.Handler {
 
-	js := opts.JS
-	css := opts.CSS
+	if APPEND_LEAFLET_RESOURCES {
+		opts.LeafletOptions.AppendJavaScriptAtEOF = opts.AppendJavaScriptAtEOF
+		next = leaflet.AppendResourcesHandlerWithPrefix(next, opts.LeafletOptions, prefix)
+	}
 
 	attrs := map[string]string{
 		"nextzen-api-key":   opts.NextzenOptions.APIKey,
@@ -90,66 +92,13 @@ func AppendResourcesHandlerWithPrefix(next http.Handler, opts *TangramJSOptions,
 		"nextzen-tile-url":  opts.NextzenOptions.TileURL,
 	}
 
-	if prefix != "" {
+	static_opts := aa_static.DefaultResourcesOptions()
+	static_opts.CSS = opts.CSS
+	static_opts.JS = opts.JS
+	static_opts.DataAttributes = attrs
+	static_opts.AppendJavaScriptAtEOF = opts.AppendJavaScriptAtEOF
 
-		for i, path := range js {
-			js[i] = appendPrefix(prefix, path)
-		}
-
-		for i, path := range css {
-			css[i] = appendPrefix(prefix, path)
-		}
-
-		for k, path := range attrs {
-
-			if strings.HasSuffix(k, "-url") && !strings.HasPrefix(path, "http") {
-				attrs[k] = appendPrefix(prefix, path)
-			}
-		}
-	}
-
-	append_opts := &rewrite.AppendResourcesOptions{
-		JavaScript:     js,
-		Stylesheets:    css,
-		DataAttributes: attrs,
-	}
-
-	if APPEND_LEAFLET_RESOURCES {
-		next = leaflet.AppendResourcesHandlerWithPrefix(next, opts.LeafletOptions, prefix)
-	}
-
-	return rewrite.AppendResourcesHandler(next, append_opts)
-}
-
-// AssetsHandler returns a net/http FS instance containing the embedded Tangram.js assets that are included with this package.
-func AssetsHandler() (http.Handler, error) {
-
-	http_fs := http.FS(static.FS)
-	return http.FileServer(http_fs), nil
-}
-
-// AssetsHandler returns a net/http FS instance containing the embedded Tangram.js assets that are included with this package ensuring that all URLs are stripped of prefix.
-func AssetsHandlerWithPrefix(prefix string) (http.Handler, error) {
-
-	fs_handler, err := AssetsHandler()
-
-	if err != nil {
-		return nil, err
-	}
-
-	prefix = strings.TrimRight(prefix, "/")
-
-	if prefix == "" {
-		return fs_handler, nil
-	}
-
-	rewrite_func := func(req *http.Request) (*http.Request, error) {
-		req.URL.Path = strings.Replace(req.URL.Path, prefix, "", 1)
-		return req, nil
-	}
-
-	rewrite_handler := rewrite.RewriteRequestHandler(fs_handler, rewrite_func)
-	return rewrite_handler, nil
+	return aa_static.AppendResourcesHandlerWithPrefix(next, static_opts, prefix)
 }
 
 // Append all the files in the net/http FS instance containing the embedded Tangram.js assets to an *http.ServeMux instance.
@@ -165,51 +114,9 @@ func AppendAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
 		err := leaflet.AppendAssetHandlersWithPrefix(mux, prefix)
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to append Leaflet assets, %w", err)
 		}
 	}
 
-	asset_handler, err := AssetsHandlerWithPrefix(prefix)
-
-	if err != nil {
-		return nil
-	}
-
-	walk_func := func(path string, info fs.DirEntry, err error) error {
-
-		if path == "." {
-			return nil
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		if prefix != "" {
-			path = appendPrefix(prefix, path)
-		}
-
-		if !strings.HasPrefix(path, "/") {
-			path = fmt.Sprintf("/%s", path)
-		}
-
-		// log.Println("APPEND", path)
-
-		mux.Handle(path, asset_handler)
-		return nil
-	}
-
-	return fs.WalkDir(static.FS, ".", walk_func)
-}
-
-func appendPrefix(prefix string, path string) string {
-
-	prefix = strings.TrimRight(prefix, "/")
-
-	if prefix != "" {
-		path = strings.TrimLeft(path, "/")
-		path = filepath.Join(prefix, path)
-	}
-
-	return path
+	return aa_static.AppendStaticAssetHandlersWithPrefix(mux, static.FS, prefix)
 }

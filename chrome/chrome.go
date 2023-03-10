@@ -4,12 +4,13 @@ package chrome
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-roster"
 	_ "log"
 	"net/http"
 	"net/url"
 	"sort"
 	"strings"
+
+	"github.com/aaronland/go-roster"	
 )
 
 // type Chrome is a simple interface for	enforcing chromeentication in HTTP handlers.

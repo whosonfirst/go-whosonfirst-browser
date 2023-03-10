@@ -1,5 +1,5 @@
 example:
-	go run -mod vendor cmd/example/main.go -api-key $(APIKEY)
+	go run -mod vendor cmd/example/main.go -api-key $(APIKEY) -javascript-at-eof
 
 tangram: 
 	curl -s -o static/javascript/tangram.debug.js https://raw.githubusercontent.com/tangrams/tangram/master/dist/tangram.debug.js

@@ -1,8 +1,8 @@
 package www
 
 import (
-	aa_static "github.com/aaronland/go-http-static"	
 	"github.com/aaronland/go-http-maps/static"
+	aa_static "github.com/aaronland/go-http-static"
 	_ "log"
 	"net/http"
 )
