@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	aa_log "github.com/aaronland/go-log/v2"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
 	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
@@ -45,7 +46,7 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 				return
 
 			default:
-				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				aa_log.Error(opts.Logger, "Failed to determine account for request, %v", err)
 				http.Error(rsp, "Internal server error", http.StatusInternalServerError)
 				return
 			}
