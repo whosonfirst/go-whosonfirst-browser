@@ -1,11 +1,6 @@
 {{ define "geometry" }}
 {{ template "browser_header" . }}
 
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.api.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.leaflet.js" }}"></script>      
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.geometry.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.geometry.init.js" }}"></script>	 
-
       <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.css" }}" />
       <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.geometry.css" }}" />            
 
@@ -42,5 +37,11 @@
 	  
       </div>
 
-{{ template "browser_footer" . }}
+      {{ template "browser_footer" . }}
+
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.api.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.leaflet.js" }}"></script>      
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.geometry.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.geometry.init.js" }}"></script>	 
+      
 {{ end }}

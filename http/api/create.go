@@ -49,11 +49,11 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 		if err != nil {
 			switch err.(type) {
 			case auth.NotLoggedIn:
-				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				aa_log.Info(opts.Logger, "Failed to determine account for request, %v", err)
 				http.Error(rsp, "Not authorized", http.StatusUnauthorized)
 				return
 			default:
-				opts.Logger.Printf("Failed to determine account for request, %v", err)
+				aa_log.Error(opts.Logger, "Failed to determine account for request, %v", err)
 				http.Error(rsp, "Internal server error", http.StatusInternalServerError)
 				return
 			}

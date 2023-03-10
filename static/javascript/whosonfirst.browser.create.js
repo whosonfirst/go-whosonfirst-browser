@@ -111,9 +111,6 @@ whosonfirst.browser.create = (function(){
 		self.add_remove_button(optional_els[i]);
 	    }
 
-	    //
-
-	    
 	    var add_button = document.getElementById("add-property");
 
 	    if (! add_button){
@@ -231,7 +228,6 @@ whosonfirst.browser.create = (function(){
 		for (var i=0; i < count; i++){
 
 		    var el = inputs[i];
-
 		    var el_class = el.getAttribute("class");
 
 		    var k = el.getAttribute("id");
@@ -240,17 +236,7 @@ whosonfirst.browser.create = (function(){
 		    // console.log("Debug", k, v);
 		    
 		    if (v == ""){
-
 			continue;
-
-			/*
-			if (el_class.includes("wof-property-optional")){
-			    continue;
-			}
-
-			whosonfirst.browser.feedback.emit("Required property is missing a value: ", k)
-			return false;
-			*/
 		    }
 
 		    // Account for arbitrary JSON in textarea elements
