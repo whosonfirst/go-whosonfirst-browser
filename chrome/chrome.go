@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/aaronland/go-roster"	
+	"github.com/aaronland/go-roster"
 )
 
 // type Chrome is a simple interface for	enforcing chromeentication in HTTP handlers.

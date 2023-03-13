@@ -306,6 +306,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 	// Set up www.Paths and www.Capabilities structs for passing between handlers
 
 	capabilities := &browser_capabilities.Capabilities{}
+	capabilities.RollupAssets = cfg.RollupAssets
 
 	uris := &browser_uris.URIs{
 		URIPrefix: cfg.URIPrefix,

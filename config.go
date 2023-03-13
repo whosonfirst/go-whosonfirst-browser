@@ -95,6 +95,7 @@ type Config struct {
 	PlacetypesDefinitionURI           string   `json:"placetypes_definition_uri,omitempty"`
 	PointInPolygonSkipPlacetypeFilter bool     `json:"point_in_polygon_skip_placetype_filter"`
 	ReaderURIs                        []string `json:"reader_uris"`
+	RollupAssets                      bool     `json:"rollup_assets"`
 	SearchDatabaseURI                 string   `json:"search_database_uri,omitempty"`
 	SelectPattern                     string   `json:"select_pattern,omitempty"`
 	ServerURI                         string   `json:"server_uri"`
@@ -215,6 +216,7 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		PlacetypesDefinitionURI:           placetypes_definition_uri,
 		PointInPolygonSkipPlacetypeFilter: point_in_polygon_skip_placetype_filter,
 		ReaderURIs:                        reader_uris,
+		RollupAssets:                      rollup_assets,
 		SearchDatabaseURI:                 search_database_uri,
 		SelectPattern:                     select_pattern,
 		ServerURI:                         server_uri,

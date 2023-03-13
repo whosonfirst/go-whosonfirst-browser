@@ -12,9 +12,13 @@
       <meta name="HandheldFriendly" content="true" />
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 
+      {{ if .Capabilities.RollupAssets }}
+      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.rollup.css" }}" />
+      {{ else }}
       <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.www.css" }}" />
       <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.common.css"  }}" />
       <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.css" }}" />
+      {{ end }}
       
   </head>
   <body data-whosonfirst-uri-endpoint="{{ .Paths.GeoJSON }}">

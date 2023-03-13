@@ -603,6 +603,16 @@ github.com/tailscale/wireguard-go/tun
 # github.com/tcnksm/go-httpstat v0.2.0
 ## explicit
 github.com/tcnksm/go-httpstat
+# github.com/tdewolff/minify/v2 v2.12.4
+## explicit; go 1.13
+github.com/tdewolff/minify/v2
+github.com/tdewolff/minify/v2/js
+# github.com/tdewolff/parse/v2 v2.6.5
+## explicit; go 1.13
+github.com/tdewolff/parse/v2
+github.com/tdewolff/parse/v2/buffer
+github.com/tdewolff/parse/v2/js
+github.com/tdewolff/parse/v2/strconv
 # github.com/tidwall/geoindex v1.4.4
 ## explicit; go 1.15
 github.com/tidwall/geoindex/child

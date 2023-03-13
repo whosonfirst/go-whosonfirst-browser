@@ -133,6 +133,11 @@ const ReaderURIFlag string = "reader-uri"
 
 var reader_uris multi.MultiCSVString
 
+const RollupAssetsFlag string = "rollup-assets"
+const RollupAssetsDefault bool = false
+
+var rollup_assets bool
+
 const ServerURIFlag string = "server-uri"
 
 var server_uri string
@@ -437,6 +442,7 @@ func DefaultFlagSet(ctx context.Context) (*flag.FlagSet, error) {
 	fs.BoolVar(&point_in_polygon_skip_placetype_filter, PointInPolygonSkipPlacetypeFilterFlag, PointInPolygonSkipPlacetypeFilterDefault, "An optional boolean flag to skip placetype filtering in default point-in-polygon lookups.")
 
 	fs.Var(&reader_uris, ReaderURIFlag, "One or more valid go-reader Reader URI strings.")
+	fs.BoolVar(&rollup_assets, RollupAssetsFlag, RollupAssetsDefault, "Use bundled (or \"rolled up\") versions of JavaScript and CSS assets.")
 
 	fs.StringVar(&search_database_uri, SearchDatabaseURIFlag, SearchDatabaseURIDefault, "A valid whosonfirst/go-whosonfist-search/fulltext URI.")
 	fs.StringVar(&select_pattern, "select-pattern", "properties(?:.[a-zA-Z0-9-_]+){1,}", "A valid regular expression for sanitizing select parameters.")

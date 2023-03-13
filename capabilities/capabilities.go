@@ -25,4 +25,5 @@ type Capabilities struct {
 	EditGeometryAPI     bool
 	PointInPolygon      bool
 	PointInPolygonAPI   bool
+	RollupAssets        bool
 }

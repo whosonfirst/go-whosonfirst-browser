@@ -22,6 +22,7 @@ require (
 	github.com/sfomuseum/go-http-wasm v1.2.0
 	github.com/sfomuseum/go-template v1.5.1
 	github.com/sfomuseum/runtimevar v1.0.4
+	github.com/tdewolff/minify/v2 v2.12.4
 	github.com/tidwall/gjson v1.14.4
 	github.com/whosonfirst/go-cache v0.5.2
 	github.com/whosonfirst/go-reader v1.0.2
@@ -165,7 +166,6 @@ require (
 	github.com/tailscale/netlink v1.1.1-0.20211101221916-cabfb018fe85 // indirect
 	github.com/tailscale/wireguard-go v0.0.0-20221219190806-4fa124729667 // indirect
 	github.com/tcnksm/go-httpstat v0.2.0 // indirect
-	github.com/tdewolff/minify/v2 v2.12.4 // indirect
 	github.com/tdewolff/parse/v2 v2.6.5 // indirect
 	github.com/tidwall/geoindex v1.4.4 // indirect
 	github.com/tidwall/geojson v1.4.3 // indirect
