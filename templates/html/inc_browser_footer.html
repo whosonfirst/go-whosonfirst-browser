@@ -8,6 +8,7 @@
 {{ if .Capabilities.RollupAssets }}
 <script src="{{ JoinPath .Paths.URIPrefix "/javascript/rollup/whosonfirst.browser.common.js" }}"></script>
 {{ else }}
+<!-- Remember: If you add something here it needs to be added to settings.go too. That's not awesome but that's how we roll today... -->
 <script src="{{ JoinPath .Paths.URIPrefix "/javascript/localforage.min.js" }}"></script>	  
 <script src="{{ JoinPath .Paths.URIPrefix "/javascript/slippymap.crosshairs.js" }}"></script>
 <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.www.js" }}"></script>	 
@@ -26,7 +27,7 @@
 <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.maps.js" }}"></script>
 {{ end }}
 
-<!-- remember: this is generated and served dynamically -->
+<!-- Remember: this is generated and served dynamically -->
 <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.uris.js" }}"></script>
 
 {{ end }}

@@ -38,7 +38,7 @@
       </div>
 
       {{ template "browser_footer" . }}
-
+      <!-- Remember: If you add something here it needs to be added to settings.go too. That's not awesome but that's how we roll today... -->
       {{ if .Capabilities.RollupAssets }}
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/rollup/whosonfirst.browser.geometry.js" }}"></script>
       {{ else }}
