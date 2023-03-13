@@ -852,8 +852,12 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	// END OF uris.js
 
+	// START OF JS/CSS rollups
+	
 	if settings.Capabilities.RollupAssets {
 
+		// JS
+		
 		for prefix, details := range settings.JavaScriptRollups {
 			
 			rollupjs_path := "/javascript/"
@@ -894,10 +898,52 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			mux.Handle(rollupjs_path, rollupjs_handler)
 		}
 		
-		// END
+		// CSS
 
+		for prefix, details := range settings.CSSRollups {
+			
+			rollupcss_path := "/css/"
+
+			path, err := url.JoinPath(rollupcss_path, prefix)
+			
+			if err != nil {
+				return fmt.Errorf("Failed to assign URI prefix to %s, %w", rollupcss_path, err)
+			}
+			
+			rollupcss_path = path
+			
+			if settings.URIs.URIPrefix != "" {
+				
+				path, err := url.JoinPath(settings.URIs.URIPrefix, rollupcss_path)
+				
+				if err != nil {
+					return fmt.Errorf("Failed to assign URI prefix to %s, %w", rollupcss_path, err)
+				}
+				
+				rollupcss_path = path
+			}
+
+			rollupcss_opts := &rollup.RollupCSSHandlerOptions{
+				FS: details.FS,
+				Paths: details.Paths,
+				Logger: logger,
+			}
+			
+			rollupcss_handler, err := rollup.RollupCSSHandler(rollupcss_opts)
+			
+			if err != nil {
+				return fmt.Errorf("Failed to create rollup CSS handler, %w", err)
+			}
+			
+			
+			aa_log.Debug(logger, "Handle CSS rollup endpoint at %s\n", rollupcss_path)
+			mux.Handle(rollupcss_path, rollupcss_handler)
+		}
+		
 	}
 
+	// END OF JS/CSS rollups
+	
 	aa_log.Info(logger, "Time to set up: %v\n", time.Since(t1))
 
 	// Finally, start the server

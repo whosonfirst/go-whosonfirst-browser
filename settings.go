@@ -49,6 +49,7 @@ type Settings struct {
 	Cache                       cache.Cache
 	Capabilities                *browser_capabilities.Capabilities
 	CORSWrapper                 *cors.Cors
+	CSSRollups map[string]*RollupPaths	
 	CustomChrome                chrome.Chrome
 	CustomWWWHandlers           map[string]http.Handler
 	CustomAPIHandlers           map[string]http.Handler
@@ -990,6 +991,24 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 				FS: browser_static.FS,
 			},
 		}
+
+		// CSS
+
+		rollupcss_paths := map[string][]string{
+			"whosonfirst.browser.common.css": []string{
+				"css/whosonfirst.www.css",
+				"css/whosonfirst.common.css",
+				"css/whosonfirst.browser.css",
+			},
+		}
+
+		settings.CSSRollups = map[string]*RollupPaths{
+			"rollup/": &RollupPaths{
+				Paths: rollupcss_paths,
+				FS: browser_static.FS,
+			},
+		}
+		
 	}
 	
 	return settings, nil

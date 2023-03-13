@@ -23,20 +23,6 @@ lambda-browser:
 	zip browser.zip main
 	rm -f main
 
-# https://github.com/tdewolff/minify
-
-rollup:
-	@make rollup-css
-	@make rollup-js
-
-rollup-js:
-	if test -f static/javascript/whosonfirst.browser.rollup.js; then rm static/javascript/whosonfirst.browser.rollup.js; fi
-	minify static/javascript/*.js -o static/javascript/whosonfirst.browser.rollup.js
-
-rollup-css:
-	if test -f static/css/whosonfirst.browser.rollup.css; then rm static/css/whosonfirst.browser.rollup.css; fi
-	minify static/css/*.css -o static/css/whosonfirst.browser.rollup.css
-
 docker:
 	docker build -t whosonfirst-browser .
 

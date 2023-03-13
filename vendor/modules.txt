@@ -544,7 +544,7 @@ github.com/sfomuseum/go-http-auth
 ## explicit; go 1.18
 github.com/sfomuseum/go-http-protomaps
 github.com/sfomuseum/go-http-protomaps/static
-# github.com/sfomuseum/go-http-rollup v0.0.1
+# github.com/sfomuseum/go-http-rollup v0.0.2
 ## explicit; go 1.20
 github.com/sfomuseum/go-http-rollup
 # github.com/sfomuseum/go-http-wasm v1.2.0

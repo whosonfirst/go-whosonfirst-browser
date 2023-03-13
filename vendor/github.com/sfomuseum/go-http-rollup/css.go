@@ -34,7 +34,7 @@ func RollupCSSHandler(opts *RollupCSSHandlerOptions) (http.Handler, error) {
 			return
 		}
 
-		rsp.Header().Set("Content-type", "text/javascript")
+		rsp.Header().Set("Content-type", "text/css")
 
 		for _, path := range js_paths {
 
