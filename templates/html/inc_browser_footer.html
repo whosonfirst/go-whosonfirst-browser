@@ -6,7 +6,7 @@
 </html>
 
 {{ if .Capabilities.RollupAssets }}
-<script src="{{ JoinPath .Paths.URIPrefix "/javascript/rollup/common.js" }}"></script>
+<script src="{{ JoinPath .Paths.URIPrefix "/javascript/rollup/whosonfirst.browser.common.js" }}"></script>
 {{ else }}
 <script src="{{ JoinPath .Paths.URIPrefix "/javascript/localforage.min.js" }}"></script>	  
 <script src="{{ JoinPath .Paths.URIPrefix "/javascript/slippymap.crosshairs.js" }}"></script>

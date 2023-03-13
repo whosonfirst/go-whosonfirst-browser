@@ -544,6 +544,9 @@ github.com/sfomuseum/go-http-auth
 ## explicit; go 1.18
 github.com/sfomuseum/go-http-protomaps
 github.com/sfomuseum/go-http-protomaps/static
+# github.com/sfomuseum/go-http-rollup v0.0.1
+## explicit; go 1.20
+github.com/sfomuseum/go-http-rollup
 # github.com/sfomuseum/go-http-wasm v1.2.0
 ## explicit; go 1.18
 github.com/sfomuseum/go-http-wasm
@@ -606,11 +609,13 @@ github.com/tcnksm/go-httpstat
 # github.com/tdewolff/minify/v2 v2.12.4
 ## explicit; go 1.13
 github.com/tdewolff/minify/v2
+github.com/tdewolff/minify/v2/css
 github.com/tdewolff/minify/v2/js
 # github.com/tdewolff/parse/v2 v2.6.5
 ## explicit; go 1.13
 github.com/tdewolff/parse/v2
 github.com/tdewolff/parse/v2/buffer
+github.com/tdewolff/parse/v2/css
 github.com/tdewolff/parse/v2/js
 github.com/tdewolff/parse/v2/strconv
 # github.com/tidwall/geoindex v1.4.4

@@ -25,11 +25,11 @@ import (
 	"github.com/aaronland/go-http-server"
 	aa_log "github.com/aaronland/go-log"
 	wasm_exec "github.com/sfomuseum/go-http-wasm"
+	"github.com/sfomuseum/go-http-rollup"
 	"github.com/sfomuseum/go-template/html"
 	"github.com/sfomuseum/go-template/text"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/static"	
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/javascript"
 	wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"
 	wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
@@ -854,74 +854,46 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	if settings.Capabilities.RollupAssets {
 
-		// START OF rollup js
+		for prefix, details := range settings.JavaScriptRollups {
+			
+			rollupjs_path := "/javascript/"
 
-		// To do: Put these in Settings
-		// To do: Add entries relevant to other feature flags
-
-		rollupjs_paths := map[string][]string{
-			"whosonfirst.browser.common.js": []string{
-				"javascript/localforage.min.js",
-				"javascript/slippymap.crosshairs.js",
-				"javascript/whosonfirst.www.js",
-				"javascript/whosonfirst.render.js",
-				"javascript/whosonfirst.properties.js",
-				"javascript/whosonfirst.cache.js",
-				"javascript/whosonfirst.uri.js",
-				"javascript/whosonfirst.net.js",
-				"javascript/whosonfirst.namify.js",
-				"javascript/whosonfirst.geojson.js",
-				"javascript/whosonfirst.leaflet.utils.js",
-				"javascript/whosonfirst.leaflet.styles.js",
-				"javascript/whosonfirst.leaflet.handlers.js",
-				"javascript/whosonfirst.browser.common.js",
-				"javascript/whosonfirst.browser.feedback.js",
-				"javascript/whosonfirst.browser.maps.js",
-			},
-			"whosonfirst.browser.geometry.js": []string{
-				"javascript/whosonfirst.browser.api.js",
-				"javascript/whosonfirst.browser.leaflet.js",
-				"javascript/whosonfirst.browser.geometry.js",
-				"javascript/whosonfirst.browser.geometry.init.js",
-			},
-			"whosonfirst.browser.create.js": []string{
-				"javascript/whosonfirst.browser.api.js",
-				"javascript/whosonfirst.browser.leaflet.js",
-				"javascript/whosonfirst.webcomponent.existentialflag.js",
-				"javascript/whosonfirst.webcomponent.placetype.js",
-				"javascript/whosonfirst.browser.create.js",
-				"javascript/whosonfirst.browser.create.init.js",
-			},
-		}
-
-		rollupjs_opts := &www.RollupJSHandlerOptions{
-			FS: static.FS,
-			Paths: rollupjs_paths,
-			Logger: logger,
-		}
-
-		rollupjs_handler, err := www.RollupJSHandler(rollupjs_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create rollup JS handler, %w", err)
-		}
-
-		rollupjs_path := "/javascript/rollup/"
-
-		if settings.URIs.URIPrefix != "" {
-
-			path, err := url.JoinPath(settings.URIs.URIPrefix, rollupjs_path)
-
+			path, err := url.JoinPath(rollupjs_path, prefix)
+			
 			if err != nil {
 				return fmt.Errorf("Failed to assign URI prefix to %s, %w", rollupjs_path, err)
 			}
-
+			
 			rollupjs_path = path
+			
+			if settings.URIs.URIPrefix != "" {
+				
+				path, err := url.JoinPath(settings.URIs.URIPrefix, rollupjs_path)
+				
+				if err != nil {
+					return fmt.Errorf("Failed to assign URI prefix to %s, %w", rollupjs_path, err)
+				}
+				
+				rollupjs_path = path
+			}
+
+			rollupjs_opts := &rollup.RollupJSHandlerOptions{
+				FS: details.FS,
+				Paths: details.Paths,
+				Logger: logger,
+			}
+			
+			rollupjs_handler, err := rollup.RollupJSHandler(rollupjs_opts)
+			
+			if err != nil {
+				return fmt.Errorf("Failed to create rollup JS handler, %w", err)
+			}
+			
+			
+			aa_log.Debug(logger, "Handle JS rollup endpoint at %s\n", rollupjs_path)
+			mux.Handle(rollupjs_path, rollupjs_handler)
 		}
-
-		aa_log.Debug(logger, "Handle JS rollup endpoint at %s\n", rollupjs_path)
-		mux.Handle(rollupjs_path, rollupjs_handler)
-
+		
 		// END
 
 	}

@@ -1,34 +1,26 @@
-package www
+package rollup
 
 import (
-	"fmt"
 	"net/http"
 	"path/filepath"
-	"regexp"
 	"io/fs"
 	"log"
 
-	// aa_log "github.com/aaronland/go-log/v2"
+	aa_log "github.com/aaronland/go-log/v2"
 	"github.com/tdewolff/minify/v2"
-	"github.com/tdewolff/minify/v2/js"
+	"github.com/tdewolff/minify/v2/css"
 )
 
-type RollupJSHandlerOptions struct {
+type RollupCSSHandlerOptions struct {
 	FS fs.FS
 	Paths map[string][]string
 	Logger *log.Logger
 }
 
-func RollupJSHandler(opts *RollupJSHandlerOptions) (http.Handler, error) {
-
-	js_regexp, err := regexp.Compile("^(application|text)/(x-)?(java|ecma)script$")
-
-	if err != nil {
-		return nil, fmt.Errorf("Failed to compile JS pattern, %w", err)
-	}
+func RollupCSSHandler(opts *RollupCSSHandlerOptions) (http.Handler, error) {
 
 	m := minify.New()
-	m.AddFuncRegexp(js_regexp, js.Minify)
+	m.AddFunc("text/css", css.Minify)
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
@@ -49,20 +41,20 @@ func RollupJSHandler(opts *RollupJSHandlerOptions) (http.Handler, error) {
 			r, err := opts.FS.Open(path)
 
 			if err != nil {
+				aa_log.Error(opts.Logger, "Failed to open %s for reading, %v", path, err)
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			defer r.Close()
 
-			err = m.Minify("text/javascript", rsp, r)
+			err = m.Minify("text/css", rsp, r)
 
 			if err != nil {
+				aa_log.Error(opts.Logger, "Failed to minify %s, %v", path, err)				
 				http.Error(rsp, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
-			rsp.Write([]byte(`;`))
 		}
 
 		return

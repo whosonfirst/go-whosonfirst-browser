@@ -40,7 +40,7 @@
       {{ template "browser_footer" . }}
 
       {{ if .Capabilities.RollupAssets }}
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/rollup/common.js" }}"></script>
+      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/rollup/whosonfirst.browser.geometry.js" }}"></script>
       {{ else }}
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.api.js" }}"></script>
       <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.leaflet.js" }}"></script>      
