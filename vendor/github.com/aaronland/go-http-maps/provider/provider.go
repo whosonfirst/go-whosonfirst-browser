@@ -15,9 +15,7 @@ import (
 type Provider interface {
 	Scheme() string
 	AppendResourcesHandler(handler http.Handler) http.Handler
-	AppendResourcesHandlerWithPrefix(http.Handler, string) http.Handler
 	AppendAssetHandlers(mux *http.ServeMux) error
-	AppendAssetHandlersWithPrefix(*http.ServeMux, string) error
 	SetLogger(*log.Logger) error
 }
 

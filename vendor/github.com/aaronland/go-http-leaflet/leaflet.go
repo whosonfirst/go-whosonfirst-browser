@@ -1,11 +1,19 @@
 package leaflet
 
 import (
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
+	"strings"
+
 	"github.com/aaronland/go-http-leaflet/static"
 	aa_static "github.com/aaronland/go-http-static"
-	_ "log"
-	"net/http"
+	"github.com/sfomuseum/go-http-rollup"
 )
+
+var ROLLUP_ASSETS = false
 
 // LeafletOptions provides a list of JavaScript and CSS link to include with HTML output.
 type LeafletOptions struct {
@@ -15,6 +23,9 @@ type LeafletOptions struct {
 	// AppendJavaScriptAtEOF is a boolean flag to append JavaScript markup at the end of an HTML document
 	// rather than in the <head> HTML element. Default is false
 	AppendJavaScriptAtEOF bool
+	RollupAssets          bool
+	Prefix                string
+	Logger                *log.Logger
 }
 
 // Append the Javascript and CSS URLs for the Leaflet.Fullscreen plugin.
@@ -38,6 +49,8 @@ func (opts *LeafletOptions) EnableDraw() {
 // Return a *LeafletOptions struct with default paths and URIs.
 func DefaultLeafletOptions() *LeafletOptions {
 
+	logger := log.New(io.Discard, "", 0)
+
 	opts := &LeafletOptions{
 		CSS: []string{
 			"/css/leaflet.css",
@@ -46,36 +59,120 @@ func DefaultLeafletOptions() *LeafletOptions {
 			"/javascript/leaflet.js",
 		},
 		DataAttributes: make(map[string]string),
+		Logger:         logger,
 	}
 
 	return opts
 }
 
-// AppendResourcesHandler will rewrite any HTML produced by previous handler to include the necessary markup to load Leaflet JavaScript and CSS files and related assets.
-func AppendResourcesHandler(next http.Handler, opts *LeafletOptions) http.Handler {
-	return AppendResourcesHandlerWithPrefix(next, opts, "")
-}
-
 // AppendResourcesHandlerWithPrefix will rewrite any HTML produced by previous handler to include the necessary markup to load Leaflet JavaScript files and related assets ensuring that all URIs are prepended with a prefix.
-func AppendResourcesHandlerWithPrefix(next http.Handler, opts *LeafletOptions, prefix string) http.Handler {
+func AppendResourcesHandler(next http.Handler, opts *LeafletOptions) http.Handler {
 
 	static_opts := aa_static.DefaultResourcesOptions()
-	static_opts.CSS = opts.CSS
-	static_opts.JS = opts.JS
 	static_opts.DataAttributes = opts.DataAttributes
 	static_opts.AppendJavaScriptAtEOF = opts.AppendJavaScriptAtEOF
 
-	return aa_static.AppendResourcesHandlerWithPrefix(next, static_opts, prefix)
+	if opts.RollupAssets {
+
+		static_opts.CSS = []string{
+			"/css/leaflet.rollup.css",
+		}
+
+		static_opts.JS = []string{
+			"/javascript/leaflet.rollup.js",
+		}
+
+	} else {
+
+		static_opts.CSS = opts.CSS
+		static_opts.JS = opts.JS
+	}
+
+	return aa_static.AppendResourcesHandlerWithPrefix(next, static_opts, opts.Prefix)
 }
 
 // Append all the files in the net/http FS instance containing the embedded Leaflet assets to an *http.ServeMux instance.
-func AppendAssetHandlers(mux *http.ServeMux) error {
+func AppendAssetHandlers(mux *http.ServeMux, opts *LeafletOptions) error {
 
-	return aa_static.AppendStaticAssetHandlers(mux, static.FS)
-}
+	if !opts.RollupAssets {
+		return aa_static.AppendStaticAssetHandlersWithPrefix(mux, static.FS, opts.Prefix)
+	}
 
-// Append all the files in the net/http FS instance containing the embedded Leaflet assets to an *http.ServeMux instance ensuring that all URLs are prepended with prefix.
-func AppendAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
+	js_paths := make([]string, len(opts.JS))
+	css_paths := make([]string, len(opts.CSS))
 
-	return aa_static.AppendStaticAssetHandlersWithPrefix(mux, static.FS, prefix)
+	for idx, path := range opts.JS {
+		path = strings.TrimLeft(path, "/")
+		js_paths[idx] = path
+	}
+
+	for idx, path := range opts.CSS {
+		path = strings.TrimLeft(path, "/")
+		css_paths[idx] = path
+	}
+
+	rollup_js_paths := map[string][]string{
+		"leaflet.rollup.js": js_paths,
+	}
+
+	rollup_js_opts := &rollup.RollupJSHandlerOptions{
+		FS:     static.FS,
+		Paths:  rollup_js_paths,
+		Logger: opts.Logger,
+	}
+
+	rollup_js_handler, err := rollup.RollupJSHandler(rollup_js_opts)
+
+	if err != nil {
+		return fmt.Errorf("Failed to create rollup JS handler, %w", err)
+	}
+
+	rollup_js_uri := "/javascript/leaflet.rollup.js"
+
+	if opts.Prefix != "" {
+
+		u, err := url.JoinPath(opts.Prefix, rollup_js_uri)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append prefix to %s, %w", rollup_js_uri, err)
+		}
+
+		rollup_js_uri = u
+	}
+
+	mux.Handle(rollup_js_uri, rollup_js_handler)
+
+	// CSS
+
+	rollup_css_paths := map[string][]string{
+		"leaflet.rollup.css": css_paths,
+	}
+
+	rollup_css_opts := &rollup.RollupCSSHandlerOptions{
+		FS:     static.FS,
+		Paths:  rollup_css_paths,
+		Logger: opts.Logger,
+	}
+
+	rollup_css_handler, err := rollup.RollupCSSHandler(rollup_css_opts)
+
+	if err != nil {
+		return fmt.Errorf("Failed to create rollup CSS handler, %w", err)
+	}
+
+	rollup_css_uri := "/css/leaflet.rollup.css"
+
+	if opts.Prefix != "" {
+
+		u, err := url.JoinPath(opts.Prefix, rollup_css_uri)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append prefix to %s, %w", rollup_css_uri, err)
+		}
+
+		rollup_css_uri = u
+	}
+
+	mux.Handle(rollup_css_uri, rollup_css_handler)
+	return nil
 }

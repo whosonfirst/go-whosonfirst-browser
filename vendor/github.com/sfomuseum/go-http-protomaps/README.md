@@ -10,7 +10,7 @@
 
 `go-http-protomaps` is an HTTP middleware package for including Protomaps.js assets in web applications. It exports two principal methods: 
 
-* `protomaps.AppendAssetHandlers(*http.ServeMux)` which is used to append HTTP handlers to a `http.ServeMux` instance for serving Protomaps JavaScript files, and related assets.
+* `protomaps.AppendAssetHandlers(*http.ServeMux, *ProtomapsOptions)` which is used to append HTTP handlers to a `http.ServeMux` instance for serving Protomaps JavaScript files, and related assets.
 * `protomaps.AppendResourcesHandler(http.Handler, *ProtomapsOptions)` which is used to rewrite any HTML produced by previous handler to include the necessary markup to load Protomaps JavaScript files and related assets.
 
 ## Example
@@ -20,10 +20,11 @@ package main
 
 import (
 	"embed"
-	"github.com/sfomuseum/go-http-protomaps"
 	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/sfomuseum/go-http-protomaps"
 )
 
 //go:embed index.html sfo.pmtiles
@@ -39,12 +40,12 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.Handle(*tile_url, static_handler)
-
-	protomaps.AppendAssetHandlers(mux)
 	
 	pm_opts := protomaps.DefaultProtomapsOptions()
 	pm_opts.TileURL = *tile_url
 
+	protomaps.AppendAssetHandlers(mux, pm_opts)
+	
 	index_handler := protomaps.AppendResourcesHandler(static_handler, pm_opts)
 	mux.Handle("/", index_handler)
 

@@ -23,9 +23,10 @@ package main
 import (
         "embed"
 	"flag"
-	"github.com/aaronland/go-http-leaflet"
 	"log"
 	"net/http"
+
+	"github.com/aaronland/go-http-leaflet"
 )
 
 //go:embed *.html
@@ -54,6 +55,8 @@ func main() {
 	leaflet_opts.EnableFullscreen()
 	leaflet_opts.EnableDraw()
 
+	leaflet.AppendAssetHandlers(mux, leaflet_opts)
+	
 	example_handler, _ := ExampleHandler(t)
 	example_handler = leaflet.AppendResourcesHandler(example_handler, leaflet_opts)
 

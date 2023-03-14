@@ -25,9 +25,9 @@ import (
 	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/chrome"
 	browser_custom "github.com/whosonfirst/go-whosonfirst-browser/v7/custom"
-	browser_static "github.com/whosonfirst/go-whosonfirst-browser/v7/static"		
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	browser_properties "github.com/whosonfirst/go-whosonfirst-browser/v7/properties"
+	browser_static "github.com/whosonfirst/go-whosonfirst-browser/v7/static"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
 	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
@@ -42,7 +42,7 @@ type MiddlewareHandlerFunc func(http.Handler) http.Handler
 
 type RollupPaths struct {
 	Paths map[string][]string
-	FS fs.FS
+	FS    fs.FS
 }
 
 type Settings struct {
@@ -50,7 +50,7 @@ type Settings struct {
 	Cache                       cache.Cache
 	Capabilities                *browser_capabilities.Capabilities
 	CORSWrapper                 *cors.Cors
-	CSSRollups map[string]*RollupPaths	
+	CSSRollups                  map[string]*RollupPaths
 	CustomChrome                chrome.Chrome
 	CustomWWWHandlers           map[string]http.Handler
 	CustomAPIHandlers           map[string]http.Handler
@@ -61,7 +61,7 @@ type Settings struct {
 	CustomEditValidationWasm    *browser_custom.CustomValidationWasm
 	Exporter                    export.Exporter
 	JavaScriptAtEOF             bool
-	JavaScriptRollups map[string]*RollupPaths
+	JavaScriptRollups           map[string]*RollupPaths
 	MapProvider                 provider.Provider
 	NavPlaceMaxFeatures         int
 	URIs                        *browser_uris.URIs
@@ -878,18 +878,18 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 		chrome_q := chrome_u.Query()
 
-		if !chrome_q.Has("rollup"){
+		if !chrome_q.Has("rollup") {
 			chrome_q.Set("rollup", strconv.FormatBool(cfg.RollupAssets))
 		}
 
-		if !chrome_q.Has("javascript-at-eof"){
+		if !chrome_q.Has("javascript-at-eof") {
 			chrome_q.Set("javascript-at-eof", strconv.FormatBool(cfg.JavaScriptAtEOF))
 		}
 
 		chrome_u.RawQuery = chrome_q.Encode()
 		chrome_uri = chrome_u.String()
 	}
-	
+
 	custom, err := chrome.NewChrome(ctx, chrome_uri)
 
 	if err != nil {
@@ -964,9 +964,8 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		settings.PointInPolygonService = pip_service
 	}
 
-
 	if cfg.RollupAssets {
-		
+
 		rollupjs_paths := map[string][]string{
 			"whosonfirst.browser.common.js": []string{
 				"javascript/localforage.min.js",
@@ -989,7 +988,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		}
 
 		if capabilities.EditGeometry {
-			
+
 			rollupjs_paths["whosonfirst.browser.geometry.js"] = []string{
 				"javascript/whosonfirst.browser.api.js",
 				"javascript/whosonfirst.browser.leaflet.js",
@@ -999,7 +998,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		}
 
 		if capabilities.CreateFeature {
-			
+
 			rollupjs_paths["whosonfirst.browser.create.js"] = []string{
 				"javascript/whosonfirst.browser.api.js",
 				"javascript/whosonfirst.browser.leaflet.js",
@@ -1013,7 +1012,7 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		settings.JavaScriptRollups = map[string]*RollupPaths{
 			"rollup/": &RollupPaths{
 				Paths: rollupjs_paths,
-				FS: browser_static.FS,
+				FS:    browser_static.FS,
 			},
 		}
 
@@ -1030,11 +1029,11 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		settings.CSSRollups = map[string]*RollupPaths{
 			"rollup/": &RollupPaths{
 				Paths: rollupcss_paths,
-				FS: browser_static.FS,
+				FS:    browser_static.FS,
 			},
 		}
-		
+
 	}
-	
+
 	return settings, nil
 }

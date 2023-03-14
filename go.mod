@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/aaronland/go-http-bootstrap v0.3.0
-	github.com/aaronland/go-http-maps v0.1.0
+	github.com/aaronland/go-http-maps v0.2.0
 	github.com/aaronland/go-http-ping/v2 v2.0.0
 	github.com/aaronland/go-http-sanitize v0.0.6
 	github.com/aaronland/go-http-server v1.0.1
@@ -59,9 +59,9 @@ require (
 	github.com/aaronland/go-aws-dynamodb v0.0.5 // indirect
 	github.com/aaronland/go-aws-session v0.1.0 // indirect
 	github.com/aaronland/go-brooklynintegers-api v1.2.6 // indirect
-	github.com/aaronland/go-http-leaflet v0.3.0 // indirect
+	github.com/aaronland/go-http-leaflet v0.4.0 // indirect
 	github.com/aaronland/go-http-rewrite v1.1.0 // indirect
-	github.com/aaronland/go-http-tangramjs v0.2.0 // indirect
+	github.com/aaronland/go-http-tangramjs v0.3.0 // indirect
 	github.com/aaronland/go-json-query v0.1.3 // indirect
 	github.com/aaronland/go-pagination v0.2.0 // indirect
 	github.com/aaronland/go-pagination-sql v0.2.0 // indirect
@@ -155,7 +155,7 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/schollz/progressbar/v3 v3.11.0 // indirect
 	github.com/sfomuseum/go-edtf v1.1.1 // indirect
-	github.com/sfomuseum/go-http-protomaps v0.1.0 // indirect
+	github.com/sfomuseum/go-http-protomaps v0.2.0 // indirect
 	github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1 // indirect
 	github.com/sfomuseum/go-sfomuseum-pmtiles v1.1.0 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220731023508-a61f04f16b76 // indirect
@@ -167,7 +167,7 @@ require (
 	github.com/tailscale/wireguard-go v0.0.0-20221219190806-4fa124729667 // indirect
 	github.com/tcnksm/go-httpstat v0.2.0 // indirect
 	github.com/tdewolff/minify/v2 v2.12.4 // indirect
-	github.com/tdewolff/parse/v2 v2.6.5 // indirect
+	github.com/tdewolff/parse/v2 v2.6.4 // indirect
 	github.com/tidwall/geoindex v1.4.4 // indirect
 	github.com/tidwall/geojson v1.4.3 // indirect
 	github.com/tidwall/match v1.1.1 // indirect

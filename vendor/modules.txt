@@ -28,11 +28,11 @@ github.com/aaronland/go-brooklynintegers-api
 ## explicit; go 1.18
 github.com/aaronland/go-http-bootstrap
 github.com/aaronland/go-http-bootstrap/static
-# github.com/aaronland/go-http-leaflet v0.3.0
+# github.com/aaronland/go-http-leaflet v0.4.0
 ## explicit; go 1.18
 github.com/aaronland/go-http-leaflet
 github.com/aaronland/go-http-leaflet/static
-# github.com/aaronland/go-http-maps v0.1.0
+# github.com/aaronland/go-http-maps v0.2.0
 ## explicit; go 1.18
 github.com/aaronland/go-http-maps
 github.com/aaronland/go-http-maps/http/www
@@ -57,7 +57,7 @@ github.com/aaronland/go-http-server-tsnet
 # github.com/aaronland/go-http-static v0.0.3
 ## explicit; go 1.18
 github.com/aaronland/go-http-static
-# github.com/aaronland/go-http-tangramjs v0.2.0
+# github.com/aaronland/go-http-tangramjs v0.3.0
 ## explicit; go 1.18
 github.com/aaronland/go-http-tangramjs
 github.com/aaronland/go-http-tangramjs/static
@@ -540,7 +540,7 @@ github.com/sfomuseum/go-geojsonld
 # github.com/sfomuseum/go-http-auth v0.0.6
 ## explicit; go 1.19
 github.com/sfomuseum/go-http-auth
-# github.com/sfomuseum/go-http-protomaps v0.1.0
+# github.com/sfomuseum/go-http-protomaps v0.2.0
 ## explicit; go 1.18
 github.com/sfomuseum/go-http-protomaps
 github.com/sfomuseum/go-http-protomaps/static
@@ -611,7 +611,7 @@ github.com/tcnksm/go-httpstat
 github.com/tdewolff/minify/v2
 github.com/tdewolff/minify/v2/css
 github.com/tdewolff/minify/v2/js
-# github.com/tdewolff/parse/v2 v2.6.5
+# github.com/tdewolff/parse/v2 v2.6.4
 ## explicit; go 1.13
 github.com/tdewolff/parse/v2
 github.com/tdewolff/parse/v2/buffer

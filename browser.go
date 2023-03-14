@@ -20,12 +20,11 @@ import (
 
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
-	map_www "github.com/aaronland/go-http-maps/http/www"
 	"github.com/aaronland/go-http-ping/v2"
 	"github.com/aaronland/go-http-server"
 	aa_log "github.com/aaronland/go-log"
-	wasm_exec "github.com/sfomuseum/go-http-wasm"
 	"github.com/sfomuseum/go-http-rollup"
+	wasm_exec "github.com/sfomuseum/go-http-wasm"
 	"github.com/sfomuseum/go-template/html"
 	"github.com/sfomuseum/go-template/text"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
@@ -401,14 +400,17 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		maps_opts = maps.DefaultMapsOptions()
 		maps_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
+		maps_opts.RollupAssets = settings.Capabilities.RollupAssets
+		maps_opts.Prefix = settings.URIs.URIPrefix
+		maps_opts.Logger = logger
 
-		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
+		err = maps.AppendAssetHandlers(mux, maps_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append static asset handlers, %v")
 		}
 
-		err = settings.MapProvider.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
+		err = settings.MapProvider.AppendAssetHandlers(mux)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append provider asset handlers, %v", err)
@@ -441,7 +443,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, settings.URIs.URIPrefix)
-		index_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(index_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		index_handler = maps.AppendResourcesHandlerWithProvider(index_handler, settings.MapProvider, maps_opts)
 		index_handler = settings.CustomChrome.WrapHandler(index_handler)
 		index_handler = settings.Authenticator.WrapHandler(index_handler)
 
@@ -467,7 +469,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, settings.URIs.URIPrefix)
-		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		id_handler = maps.AppendResourcesHandlerWithProvider(id_handler, settings.MapProvider, maps_opts)
 		id_handler = settings.CustomChrome.WrapHandler(id_handler)
 		id_handler = settings.Authenticator.WrapHandler(id_handler)
 
@@ -492,7 +494,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.URIs.URIPrefix)
-		search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		search_handler = maps.AppendResourcesHandlerWithProvider(search_handler, settings.MapProvider, maps_opts)
 		search_handler = settings.CustomChrome.WrapHandler(search_handler)
 		search_handler = settings.Authenticator.WrapHandler(search_handler)
 
@@ -557,7 +559,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			return fmt.Errorf("Failed to create create feature handler, %w", err)
 		}
 
-		geom_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(geom_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		geom_handler = maps.AppendResourcesHandlerWithProvider(geom_handler, settings.MapProvider, maps_opts)
 		geom_handler = bootstrap.AppendResourcesHandlerWithPrefix(geom_handler, bootstrap_opts, settings.URIs.URIPrefix)
 		geom_handler = settings.CustomChrome.WrapHandler(geom_handler)
 		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
@@ -567,7 +569,13 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		// START OF wasm stuff
 
-		err = wasm_exec.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
+		wasm_exec_opts := wasm_exec.DefaultWASMOptions()
+		wasm_exec_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
+		wasm_exec_opts.RollupAssets = settings.Capabilities.RollupAssets
+		wasm_exec_opts.Prefix = settings.URIs.URIPrefix
+		wasm_exec_opts.Logger = logger
+
+		err = wasm_exec.AppendAssetHandlers(mux, wasm_exec_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append wasm asset handlers, %w", err)
@@ -584,9 +592,6 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		if err != nil {
 			return fmt.Errorf("Failed to append wasm validate asset handlers, %w", err)
 		}
-
-		wasm_exec_opts := wasm_exec.DefaultWASMOptions()
-		wasm_exec_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
 
 		// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
 		// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
@@ -622,8 +627,8 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		// END OF I don't like having	to do this
 
-		create_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(create_handler, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
-		create_handler = wasm_exec.AppendResourcesHandlerWithPrefix(create_handler, wasm_exec_opts, settings.URIs.URIPrefix)
+		create_handler = maps.AppendResourcesHandlerWithProvider(create_handler, settings.MapProvider, maps_opts)
+		create_handler = wasm_exec.AppendResourcesHandler(create_handler, wasm_exec_opts)
 
 		create_handler = appendCustomMiddlewareHandlers(settings, settings.URIs.CreateFeature, create_handler)
 
@@ -778,7 +783,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	for path, h := range settings.CustomWWWHandlers {
 
-		h = maps.AppendResourcesHandlerWithPrefixAndProvider(h, settings.MapProvider, maps_opts, settings.URIs.URIPrefix)
+		h = maps.AppendResourcesHandlerWithProvider(h, settings.MapProvider, maps_opts)
 		h = bootstrap.AppendResourcesHandlerWithPrefix(h, bootstrap_opts, settings.URIs.URIPrefix)
 		h = settings.CustomChrome.WrapHandler(h)
 
@@ -853,97 +858,95 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	// END OF uris.js
 
 	// START OF JS/CSS rollups
-	
+
 	if settings.Capabilities.RollupAssets {
 
 		// JS
-		
+
 		for prefix, details := range settings.JavaScriptRollups {
-			
+
 			rollupjs_path := "/javascript/"
 
 			path, err := url.JoinPath(rollupjs_path, prefix)
-			
+
 			if err != nil {
 				return fmt.Errorf("Failed to assign URI prefix to %s, %w", rollupjs_path, err)
 			}
-			
+
 			rollupjs_path = path
-			
+
 			if settings.URIs.URIPrefix != "" {
-				
+
 				path, err := url.JoinPath(settings.URIs.URIPrefix, rollupjs_path)
-				
+
 				if err != nil {
 					return fmt.Errorf("Failed to assign URI prefix to %s, %w", rollupjs_path, err)
 				}
-				
+
 				rollupjs_path = path
 			}
 
 			rollupjs_opts := &rollup.RollupJSHandlerOptions{
-				FS: details.FS,
-				Paths: details.Paths,
+				FS:     details.FS,
+				Paths:  details.Paths,
 				Logger: logger,
 			}
-			
+
 			rollupjs_handler, err := rollup.RollupJSHandler(rollupjs_opts)
-			
+
 			if err != nil {
 				return fmt.Errorf("Failed to create rollup JS handler, %w", err)
 			}
-			
-			
+
 			aa_log.Debug(logger, "Handle JS rollup endpoint at %s\n", rollupjs_path)
 			mux.Handle(rollupjs_path, rollupjs_handler)
 		}
-		
+
 		// CSS
 
 		for prefix, details := range settings.CSSRollups {
-			
+
 			rollupcss_path := "/css/"
 
 			path, err := url.JoinPath(rollupcss_path, prefix)
-			
+
 			if err != nil {
 				return fmt.Errorf("Failed to assign URI prefix to %s, %w", rollupcss_path, err)
 			}
-			
+
 			rollupcss_path = path
-			
+
 			if settings.URIs.URIPrefix != "" {
-				
+
 				path, err := url.JoinPath(settings.URIs.URIPrefix, rollupcss_path)
-				
+
 				if err != nil {
 					return fmt.Errorf("Failed to assign URI prefix to %s, %w", rollupcss_path, err)
 				}
-				
+
 				rollupcss_path = path
 			}
 
 			rollupcss_opts := &rollup.RollupCSSHandlerOptions{
-				FS: details.FS,
-				Paths: details.Paths,
+				FS:     details.FS,
+				Paths:  details.Paths,
 				Logger: logger,
 			}
-			
+
 			rollupcss_handler, err := rollup.RollupCSSHandler(rollupcss_opts)
-			
+
 			if err != nil {
 				return fmt.Errorf("Failed to create rollup CSS handler, %w", err)
 			}
-			
-			
+
 			aa_log.Debug(logger, "Handle CSS rollup endpoint at %s\n", rollupcss_path)
 			mux.Handle(rollupcss_path, rollupcss_handler)
 		}
-		
+
 	}
 
 	// END OF JS/CSS rollups
-	
+
 	aa_log.Info(logger, "Time to set up: %v\n", time.Since(t1))
 
 	// Finally, start the server

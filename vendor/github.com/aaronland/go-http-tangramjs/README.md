@@ -20,10 +20,11 @@ package main
 
 import (
 	"embed"
-	"github.com/aaronland/go-http-tangramjs"
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/aaronland/go-http-tangramjs"
 )
 
 //go:embed *.html
@@ -49,8 +50,6 @@ func main() {
 	t, _ := template.ParseFS(FS, "*.html")
 
 	mux := http.NewServeMux()
-
-	tangramjs.AppendAssetHandlers(mux)
 	
 	map_handler, _:= ExampleHandler(t)
 
@@ -58,6 +57,8 @@ func main() {
 	tangramjs_opts.NextzenOptions.APIKey = api_key
 	tangramjs_opts.NextzenOptions.StyleURL = style_url
 
+	tangramjs.AppendAssetHandlers(mux, tangramjs_opts)
+	
 	map_handler = tangramjs.AppendResourcesHandler(map_handler, tangramjs_opts)
 
 	mux.Handle("/", map_handler)
@@ -121,7 +122,6 @@ func main() {
 	// append Tangram.js assets handlers to the mux
 	
 	mux := http.NewServeMux()	
-	tangramjs.AppendAssetHandlers(mux)
 
 	// Create a default TangramJSOptions instance
 	// Assign the API key and style URL as usual
@@ -130,6 +130,8 @@ func main() {
 	tangramjs_opts.NextzenOptions.APIKey = *nextzen_api_key
 	tangramjs_opts.NextzenOptions.StyleURL = *nextzen_style_url
 
+	tangramjs.AppendAssetHandlers(mux, tangramjs_opts)
+	
 	// If tilepack_db is not empty the first thing we want to is
 	// update the tile URL that Tangram.js will use to find vector
 	// data to point to the value of the `tilepack_uri` flag
