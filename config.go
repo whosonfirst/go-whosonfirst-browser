@@ -116,6 +116,8 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		return nil, fmt.Errorf("Failed to set flags from environment variables, %w", err)
 	}
 
+	fs.Set(provider.MapPrefixFlag, static_prefix)
+	
 	if config_uri != "" {
 
 		var cfg *Config
