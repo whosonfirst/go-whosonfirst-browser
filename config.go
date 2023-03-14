@@ -150,6 +150,12 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		return nil, fmt.Errorf("Failed to lookup %s flag, %w", provider.JavaScriptAtEOFFlag, err)
 	}
 
+	rollup_assets, err := lookup.BoolVar(fs, provider.RollupAssetsFlag)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to lookup %s flag, %w", provider.RollupAssetsFlag, err)
+	}
+	
 	cfg := &Config{
 		AuthenticatorURI:                  authenticator_uri,
 		CacheURI:                          cache_uri,

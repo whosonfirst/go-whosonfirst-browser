@@ -528,8 +528,8 @@ github.com/aaronland/go-http-bootstrap v0.3.0 h1:mUc0qaLbjQjiNDm5DLIpz815hUNyc/J
 github.com/aaronland/go-http-bootstrap v0.3.0/go.mod h1:D4WckFH8x5+oT6oSNy6OulbFbthUAlX4UxWgpXEa5ck=
 github.com/aaronland/go-http-leaflet v0.4.0 h1:1aUH60aINVtRl0C2k/zLlYIngFOFchKYXlif9CxS6Ys=
 github.com/aaronland/go-http-leaflet v0.4.0/go.mod h1:wdo1JQvSZ3SvTnanwY1vmaRp4Nt7zynAom0MWXtTP6A=
-github.com/aaronland/go-http-maps v0.2.0 h1:6Nsr+HQt9SiEVlRnc5+MwMuE+CIoZt+iyqumjMVeDYQ=
-github.com/aaronland/go-http-maps v0.2.0/go.mod h1:zxaA71ru7HKCcZysgWRetWjGzef8jRrdK4X0fWGAMoE=
+github.com/aaronland/go-http-maps v0.3.0 h1:vdusnJdpjwTMYPsvboMQYfuDwQmOleJRmYJ2KPetnzU=
+github.com/aaronland/go-http-maps v0.3.0/go.mod h1:zxaA71ru7HKCcZysgWRetWjGzef8jRrdK4X0fWGAMoE=
 github.com/aaronland/go-http-ping v1.0.0/go.mod h1:zU9CSFLh2XzPlrFgoyCysNED+DoLRioCKaa2Kl+O6DA=
 github.com/aaronland/go-http-ping/v2 v2.0.0 h1:PO/CfpNwxPSMqEuDAA+2/IzSoArAa/0deSHCmCuvfiA=
 github.com/aaronland/go-http-ping/v2 v2.0.0/go.mod h1:fXKuw0WvfXMyt09ibXILN4LzEIhCnxoAhmZqoC5iBm8=
@@ -1879,8 +1879,8 @@ github.com/sfomuseum/go-http-protomaps v0.2.0 h1:+RTc8UAsQEMJewnwIeUwnfaEIzQKKsA
 github.com/sfomuseum/go-http-protomaps v0.2.0/go.mod h1:DwnViouTsAEiqScxQY2ew1kHmyO4nydWQ1I96SXPySU=
 github.com/sfomuseum/go-http-rollup v0.0.2 h1:cc0p0pppG1VJc6o3IUdkbocPnJedRzOqxWFNlz2mkYM=
 github.com/sfomuseum/go-http-rollup v0.0.2/go.mod h1:kxVTXkkaUsxVAMq3lFSNoILzKkv1L4ETuaQiDCQcBfI=
-github.com/sfomuseum/go-http-wasm v1.2.0 h1:P452JeWZXTP2wcZuX6W/yF54izusxP9Wt4u4f80/u7I=
-github.com/sfomuseum/go-http-wasm v1.2.0/go.mod h1:/4+K3vkIwCR/XkEyw03eIZkT2cw9YWdZyMMcbObLqC4=
+github.com/sfomuseum/go-http-wasm/v2 v2.0.0 h1:dpWEMAt9z9pfXqeo+FsLliibN+SL55G84mEnyahvG0o=
+github.com/sfomuseum/go-http-wasm/v2 v2.0.0/go.mod h1:42p9f6BmPN/s5wsCm9d+XMNJdkyTYlmVx/L3kXx+GAg=
 github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1 h1:ecjCnrzs1QhSi2R2jQem0y8/6oNrvmUgyM9kMKxZjtw=
 github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1/go.mod h1:+JVebjhj6f3H3ESBlO1b5pkzS2ZxaqnpUyCHxA8/too=
 github.com/sfomuseum/go-sfomuseum-pmtiles v1.1.0 h1:LvCvXcxwtsdbL16Gk80b5TlJ9L/fn6R8hBD4ck0aGTM=

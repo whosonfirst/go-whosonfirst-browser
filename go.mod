@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/aaronland/go-http-bootstrap v0.3.0
-	github.com/aaronland/go-http-maps v0.2.0
+	github.com/aaronland/go-http-maps v0.3.0
 	github.com/aaronland/go-http-ping/v2 v2.0.0
 	github.com/aaronland/go-http-sanitize v0.0.6
 	github.com/aaronland/go-http-server v1.0.1
@@ -20,7 +20,7 @@ require (
 	github.com/sfomuseum/go-geojsonld v1.0.0
 	github.com/sfomuseum/go-http-auth v0.0.6
 	github.com/sfomuseum/go-http-rollup v0.0.2
-	github.com/sfomuseum/go-http-wasm v1.2.0
+	github.com/sfomuseum/go-http-wasm/v2 v2.0.0
 	github.com/sfomuseum/go-template v1.5.1
 	github.com/sfomuseum/runtimevar v1.0.4
 	github.com/tidwall/gjson v1.14.4

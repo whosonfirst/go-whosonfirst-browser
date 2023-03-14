@@ -32,10 +32,9 @@ github.com/aaronland/go-http-bootstrap/static
 ## explicit; go 1.18
 github.com/aaronland/go-http-leaflet
 github.com/aaronland/go-http-leaflet/static
-# github.com/aaronland/go-http-maps v0.2.0
+# github.com/aaronland/go-http-maps v0.3.0
 ## explicit; go 1.18
 github.com/aaronland/go-http-maps
-github.com/aaronland/go-http-maps/http/www
 github.com/aaronland/go-http-maps/provider
 github.com/aaronland/go-http-maps/static
 github.com/aaronland/go-http-maps/templates/javascript
@@ -547,10 +546,10 @@ github.com/sfomuseum/go-http-protomaps/static
 # github.com/sfomuseum/go-http-rollup v0.0.2
 ## explicit; go 1.20
 github.com/sfomuseum/go-http-rollup
-# github.com/sfomuseum/go-http-wasm v1.2.0
+# github.com/sfomuseum/go-http-wasm/v2 v2.0.0
 ## explicit; go 1.18
-github.com/sfomuseum/go-http-wasm
-github.com/sfomuseum/go-http-wasm/static
+github.com/sfomuseum/go-http-wasm/v2
+github.com/sfomuseum/go-http-wasm/v2/static
 # github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1
 ## explicit; go 1.12
 github.com/sfomuseum/go-sfomuseum-mapshaper

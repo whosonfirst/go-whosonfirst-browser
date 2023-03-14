@@ -24,7 +24,7 @@ import (
 	"github.com/aaronland/go-http-server"
 	aa_log "github.com/aaronland/go-log"
 	"github.com/sfomuseum/go-http-rollup"
-	wasm_exec "github.com/sfomuseum/go-http-wasm"
+	wasm_exec "github.com/sfomuseum/go-http-wasm/v2"
 	"github.com/sfomuseum/go-template/html"
 	"github.com/sfomuseum/go-template/text"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
