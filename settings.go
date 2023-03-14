@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -865,7 +866,31 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 
 	// Custom chrome (this is still in flux)
 
-	custom, err := chrome.NewChrome(ctx, cfg.CustomChromeURI)
+	chrome_uri := cfg.CustomChromeURI
+
+	if cfg.JavaScriptAtEOF || cfg.RollupAssets {
+
+		chrome_u, err := url.Parse(chrome_uri)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse custom chrome URI, %w", err)
+		}
+
+		chrome_q := chrome_u.Query()
+
+		if !chrome_q.Has("rollup"){
+			chrome_q.Set("rollup", strconv.FormatBool(cfg.RollupAssets))
+		}
+
+		if !chrome_q.Has("javascript-at-eof"){
+			chrome_q.Set("javascript-at-eof", strconv.FormatBool(cfg.JavaScriptAtEOF))
+		}
+
+		chrome_u.RawQuery = chrome_q.Encode()
+		chrome_uri = chrome_u.String()
+	}
+	
+	custom, err := chrome.NewChrome(ctx, chrome_uri)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create custom chrome, %w", err)
