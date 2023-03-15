@@ -56,6 +56,7 @@ type Config struct {
 	EnableSPR                         bool     `json:"enable_spr,omitempty"`
 	EnableSVG                         bool     `json:"enable_svg,omitempty"`
 	EnableWebFinger                   bool     `json:"enable_webfinger,omitempty"`
+	// A valid whosonfirst/go-whosonfirst-export/v2 URI used to export feature records that are updated.
 	ExporterURI                       string   `json:"exporter_uri,omitempty"`
 	JavaScriptAtEOF                   bool     `json:"javascript_at_eof"`
 	GitHubAccessTokenURI              string   `json:"github_accesstoken_uri,omitempty"`
@@ -93,16 +94,25 @@ type Config struct {
 	PathWebFinger                     string   `json:"path_webfinger,omitempty"`
 	PathWebFingerAlt                  []string `json:"path_webfinger_alt,omitempty"`
 	PlacetypesDefinitionURI           string   `json:"placetypes_definition_uri,omitempty"`
+	// An optional boolean flag signaling that the point-in-polygon hierarchy resolver should skip placetype filters. If
+	// true it is expected that your code will deal with that as needed elsewhere.
 	PointInPolygonSkipPlacetypeFilter bool     `json:"point_in_polygon_skip_placetype_filter"`
+	// One or more valid whosonfirst/go-reader URIs
 	ReaderURIs                        []string `json:"reader_uris"`
+	// An optional boolean flag signaling whether JavaScript and CSS assets should be combined and minified.
 	RollupAssets                      bool     `json:"rollup_assets"`
 	SearchDatabaseURI                 string   `json:"search_database_uri,omitempty"`
 	SelectPattern                     string   `json:"select_pattern,omitempty"`
+	// A valid aaronland/go-http-server URI
 	ServerURI                         string   `json:"server_uri"`
+	// A valid whosonfirst/go-whosonfirst-spatial.Database URI
 	SpatialDatabaseURI                string   `json:"spatial_database_uri,omitempty"`
 	URIPrefix                         string   `json:"uri_prefix,omitempty"`
+	// Enable verbose logging
 	Verbose                           bool     `json:"verbose,omitempty"`
+	// The hostname to use for WebFinger output
 	WebFingerHostname                 string   `json:"webfinger_hostname,omitempty"`
+	// One or more valid whosonfirst/go-writer/v3 URIs
 	WriterURIs                        []string `json:"writer_uris,omitempty"`
 }
 
