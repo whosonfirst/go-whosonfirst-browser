@@ -1,6 +1,5 @@
-# Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-# Use of this source code is governed by a BSD-style
-# license that can be found in the LICENSE file.
+# Copyright (c) Tailscale Inc & AUTHORS
+# SPDX-License-Identifier: BSD-3-Clause
 
 ############################################################################
 #
@@ -32,7 +31,7 @@
 #     $ docker exec tailscaled tailscale status
 
 
-FROM golang:1.19-alpine AS build-env
+FROM golang:1.20-alpine AS build-env
 
 WORKDIR /go/src/tailscale
 
@@ -63,9 +62,9 @@ ENV VERSION_GIT_HASH=$VERSION_GIT_HASH
 ARG TARGETARCH
 
 RUN GOARCH=$TARGETARCH go install -ldflags="\
-      -X tailscale.com/version.Long=$VERSION_LONG \
-      -X tailscale.com/version.Short=$VERSION_SHORT \
-      -X tailscale.com/version.GitCommit=$VERSION_GIT_HASH" \
+      -X tailscale.com/version.longStamp=$VERSION_LONG \
+      -X tailscale.com/version.shortStamp=$VERSION_SHORT \
+      -X tailscale.com/version.gitCommitStamp=$VERSION_GIT_HASH" \
       -v ./cmd/tailscale ./cmd/tailscaled ./cmd/containerboot
 
 FROM alpine:3.16

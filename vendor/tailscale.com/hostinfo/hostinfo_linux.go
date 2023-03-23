@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build linux && !android
 
@@ -14,7 +13,6 @@ import (
 	"golang.org/x/sys/unix"
 	"tailscale.com/types/ptr"
 	"tailscale.com/util/lineread"
-	"tailscale.com/util/strs"
 	"tailscale.com/version/distro"
 )
 
@@ -74,7 +72,7 @@ func linuxDeviceModel() string {
 
 func getQnapQtsVersion(versionInfo string) string {
 	for _, field := range strings.Fields(versionInfo) {
-		if suffix, ok := strs.CutPrefix(field, "QTSFW_"); ok {
+		if suffix, ok := strings.CutPrefix(field, "QTSFW_"); ok {
 			return suffix
 		}
 	}

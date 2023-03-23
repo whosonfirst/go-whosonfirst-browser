@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package ipnlocal
 
@@ -11,6 +10,7 @@ import (
 	"math/rand"
 	"net/netip"
 	"runtime"
+	"strings"
 	"time"
 
 	"golang.org/x/exp/slices"
@@ -19,7 +19,6 @@ import (
 	"tailscale.com/tailcfg"
 	"tailscale.com/types/logger"
 	"tailscale.com/util/clientmetric"
-	"tailscale.com/util/strs"
 	"tailscale.com/util/winutil"
 	"tailscale.com/version"
 )
@@ -186,7 +185,7 @@ func init() {
 func (pm *profileManager) SetPrefs(prefsIn ipn.PrefsView) error {
 	prefs := prefsIn.AsStruct().View()
 	newPersist := prefs.Persist().AsStruct()
-	if newPersist == nil || newPersist.LoginName == "" {
+	if newPersist == nil || newPersist.NodeID == "" {
 		return pm.setPrefsLocked(prefs)
 	}
 	up := newPersist.UserProfile
@@ -383,6 +382,24 @@ func (pm *profileManager) DeleteProfile(id ipn.ProfileID) error {
 	return pm.writeKnownProfiles()
 }
 
+// DeleteAllProfiles removes all known profiles and switches to a new empty
+// profile.
+func (pm *profileManager) DeleteAllProfiles() error {
+	metricDeleteAllProfile.Add(1)
+
+	for _, kp := range pm.knownProfiles {
+		if err := pm.store.WriteState(kp.Key, nil); err != nil {
+			// Write to remove references to profiles we've already deleted, but
+			// return the original error.
+			pm.writeKnownProfiles()
+			return err
+		}
+		delete(pm.knownProfiles, kp.ID)
+	}
+	pm.NewProfile()
+	return pm.writeKnownProfiles()
+}
+
 func (pm *profileManager) writeKnownProfiles() error {
 	b, err := json.Marshal(pm.knownProfiles)
 	if err != nil {
@@ -435,7 +452,7 @@ func (pm *profileManager) CurrentPrefs() ipn.PrefsView {
 
 // ReadStartupPrefsForTest reads the startup prefs from disk. It is only used for testing.
 func ReadStartupPrefsForTest(logf logger.Logf, store ipn.StateStore) (ipn.PrefsView, error) {
-	pm, err := newProfileManager(store, logf, "")
+	pm, err := newProfileManager(store, logf)
 	if err != nil {
 		return ipn.PrefsView{}, err
 	}
@@ -444,9 +461,8 @@ func ReadStartupPrefsForTest(logf logger.Logf, store ipn.StateStore) (ipn.PrefsV
 
 // newProfileManager creates a new ProfileManager using the provided StateStore.
 // It also loads the list of known profiles from the StateStore.
-// If a state key is provided, it will be used to load the current profile.
-func newProfileManager(store ipn.StateStore, logf logger.Logf, stateKey ipn.StateKey) (*profileManager, error) {
-	return newProfileManagerWithGOOS(store, logf, stateKey, envknob.GOOS())
+func newProfileManager(store ipn.StateStore, logf logger.Logf) (*profileManager, error) {
+	return newProfileManagerWithGOOS(store, logf, envknob.GOOS())
 }
 
 func readAutoStartKey(store ipn.StateStore, goos string) (ipn.StateKey, error) {
@@ -479,14 +495,11 @@ func readKnownProfiles(store ipn.StateStore) (map[ipn.ProfileID]*ipn.LoginProfil
 	return knownProfiles, nil
 }
 
-func newProfileManagerWithGOOS(store ipn.StateStore, logf logger.Logf, stateKey ipn.StateKey, goos string) (*profileManager, error) {
+func newProfileManagerWithGOOS(store ipn.StateStore, logf logger.Logf, goos string) (*profileManager, error) {
 	logf = logger.WithPrefix(logf, "pm: ")
-	if stateKey == "" {
-		var err error
-		stateKey, err = readAutoStartKey(store, goos)
-		if err != nil {
-			return nil, err
-		}
+	stateKey, err := readAutoStartKey(store, goos)
+	if err != nil {
+		return nil, err
 	}
 
 	knownProfiles, err := readKnownProfiles(store)
@@ -507,7 +520,7 @@ func newProfileManagerWithGOOS(store ipn.StateStore, logf logger.Logf, stateKey 
 			}
 		}
 		if pm.currentProfile == nil {
-			if suf, ok := strs.CutPrefix(string(stateKey), "user-"); ok {
+			if suf, ok := strings.CutPrefix(string(stateKey), "user-"); ok {
 				pm.currentUserID = ipn.WindowsUserID(suf)
 			}
 			pm.NewProfile()
@@ -562,9 +575,10 @@ func (pm *profileManager) migrateFromLegacyPrefs() error {
 }
 
 var (
-	metricNewProfile    = clientmetric.NewCounter("profiles_new")
-	metricSwitchProfile = clientmetric.NewCounter("profiles_switch")
-	metricDeleteProfile = clientmetric.NewCounter("profiles_delete")
+	metricNewProfile       = clientmetric.NewCounter("profiles_new")
+	metricSwitchProfile    = clientmetric.NewCounter("profiles_switch")
+	metricDeleteProfile    = clientmetric.NewCounter("profiles_delete")
+	metricDeleteAllProfile = clientmetric.NewCounter("profiles_delete_all")
 
 	metricMigration        = clientmetric.NewCounter("profiles_migration")
 	metricMigrationError   = clientmetric.NewCounter("profiles_migration_error")

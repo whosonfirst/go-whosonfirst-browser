@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package ipnlocal
 
@@ -32,7 +31,7 @@ import (
 	"tailscale.com/tailcfg"
 	"tailscale.com/types/logger"
 	"tailscale.com/util/mak"
-	"tailscale.com/util/strs"
+	"tailscale.com/version"
 )
 
 // serveHTTPContextKey is the context.Value key for a *serveHTTPContext.
@@ -91,7 +90,38 @@ func (s *serveListener) Close() error {
 // Listen is retried until the context is canceled.
 func (s *serveListener) Run() {
 	for {
-		ln, err := net.Listen("tcp", s.ap.String())
+		ip := s.ap.Addr()
+		ipStr := ip.String()
+
+		var lc net.ListenConfig
+		if initListenConfig != nil {
+			// On macOS, this sets the lc.Control hook to
+			// setsockopt the interface index to bind to. This is
+			// required by the network sandbox to allow binding to
+			// a specific interface. Without this hook, the system
+			// chooses a default interface to bind to.
+			if err := initListenConfig(&lc, ip, s.b.prevIfState, s.b.dialer.TUNName()); err != nil {
+				s.logf("serve failed to init listen config %v, backing off: %v", s.ap, err)
+				s.bo.BackOff(s.ctx, err)
+				continue
+			}
+			// On macOS (AppStore or macsys) and if we're binding to a privileged port,
+			if version.IsSandboxedMacOS() && s.ap.Port() < 1024 {
+				// On macOS, we need to bind to ""/all-interfaces due to
+				// the network sandbox. Ideally we would only bind to the
+				// Tailscale interface, but macOS errors out if we try to
+				// to listen on privileged ports binding only to a specific
+				// interface. (#6364)
+				ipStr = ""
+			}
+		}
+
+		tcp4or6 := "tcp4"
+		if ip.Is6() {
+			tcp4or6 = "tcp6"
+		}
+
+		ln, err := lc.Listen(s.ctx, tcp4or6, net.JoinHostPort(ipStr, fmt.Sprint(s.ap.Port())))
 		if err != nil {
 			if s.shouldWarnAboutListenError(err) {
 				s.logf("serve failed to listen on %v, backing off: %v", s.ap, err)
@@ -211,7 +241,6 @@ func (b *LocalBackend) SetServeConfig(config *ipn.ServeConfig) error {
 	}
 
 	b.setTCPPortsInterceptedFromNetmapAndPrefsLocked(b.pm.CurrentPrefs())
-
 	return nil
 }
 
@@ -252,9 +281,22 @@ func (b *LocalBackend) HandleIngressTCPConn(ingressPeer *tailcfg.Node, target ip
 		sendRST()
 		return
 	}
+	dport := uint16(port16)
+	if b.getTCPHandlerForFunnelFlow != nil {
+		handler := b.getTCPHandlerForFunnelFlow(srcAddr, dport)
+		if handler != nil {
+			c, ok := getConn()
+			if !ok {
+				b.logf("localbackend: getConn didn't complete from %v to port %v", srcAddr, dport)
+				return
+			}
+			handler(c)
+			return
+		}
+	}
 	// TODO(bradfitz): pass ingressPeer etc in context to HandleInterceptedTCPConn,
 	// extend serveHTTPContext or similar.
-	b.HandleInterceptedTCPConn(uint16(port16), srcAddr, getConn, sendRST)
+	b.HandleInterceptedTCPConn(dport, srcAddr, getConn, sendRST)
 }
 
 func (b *LocalBackend) HandleInterceptedTCPConn(dport uint16, srcAddr netip.AddrPort, getConn func() (net.Conn, bool), sendRST func()) {
@@ -389,6 +431,30 @@ func (b *LocalBackend) getServeHandler(r *http.Request) (_ ipn.HTTPHandlerView, 
 	}
 }
 
+// proxyHandlerForBackend creates a new HTTP reverse proxy for a particular backend that
+// we serve requests for. `backend` is a HTTPHandler.Proxy string (url, hostport or just port).
+func (b *LocalBackend) proxyHandlerForBackend(backend string) (*httputil.ReverseProxy, error) {
+	targetURL, insecure := expandProxyArg(backend)
+	u, err := url.Parse(targetURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid url %s: %w", targetURL, err)
+	}
+	rp := httputil.NewSingleHostReverseProxy(u)
+	rp.Transport = &http.Transport{
+		DialContext: b.dialer.SystemDial,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: insecure,
+		},
+		// Values for the following parameters have been copied from http.DefaultTransport.
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+	return rp, nil
+}
+
 func (b *LocalBackend) serveWebHandler(w http.ResponseWriter, r *http.Request) {
 	h, mountPoint, ok := b.getServeHandler(r)
 	if !ok {
@@ -405,23 +471,12 @@ func (b *LocalBackend) serveWebHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if v := h.Proxy(); v != "" {
-		// TODO(bradfitz): this is a lot of setup per HTTP request. We should
-		// build the whole http.Handler with all the muxing and child handlers
-		// only on start/config change. But this works for now (2022-11-09).
-		targetURL, insecure := expandProxyArg(v)
-		u, err := url.Parse(targetURL)
-		if err != nil {
-			http.Error(w, "bad proxy config", http.StatusInternalServerError)
+		p, ok := b.serveProxyHandlers.Load(v)
+		if !ok {
+			http.Error(w, "unknown proxy destination", http.StatusInternalServerError)
 			return
 		}
-		rp := httputil.NewSingleHostReverseProxy(u)
-		rp.Transport = &http.Transport{
-			DialContext: b.dialer.SystemDial,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: insecure,
-			},
-		}
-		rp.ServeHTTP(w, r)
+		p.(http.Handler).ServeHTTP(w, r)
 		return
 	}
 
@@ -509,7 +564,7 @@ func expandProxyArg(s string) (targetURL string, insecureSkipVerify bool) {
 	if strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://") {
 		return s, false
 	}
-	if rest, ok := strs.CutPrefix(s, "https+insecure://"); ok {
+	if rest, ok := strings.CutPrefix(s, "https+insecure://"); ok {
 		return "https://" + rest, true
 	}
 	if allNumeric(s) {

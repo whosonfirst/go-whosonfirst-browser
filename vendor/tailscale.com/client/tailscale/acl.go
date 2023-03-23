@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build go1.19
 
@@ -104,7 +103,7 @@ func (c *Client) ACL(ctx context.Context) (acl *ACL, err error) {
 // it as a string.
 // HuJSON is JSON with a few modifications to make it more human-friendly. The primary
 // changes are allowing comments and trailing comments. See the following links for more info:
-// https://tailscale.com/kb/1018/acls?q=acl#tailscale-acl-policy-format
+// https://tailscale.com/s/acl-format
 // https://github.com/tailscale/hujson
 func (c *Client) ACLHuJSON(ctx context.Context) (acl *ACLHuJSON, err error) {
 	// Format return errors to be descriptive.

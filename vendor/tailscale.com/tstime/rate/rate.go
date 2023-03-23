@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // This is a modified, simplified version of code from golang.org/x/time/rate.
 
@@ -32,12 +31,14 @@ func Every(interval time.Duration) Limit {
 }
 
 // A Limiter controls how frequently events are allowed to happen.
-// It implements a "token bucket" of size b, initially full and refilled
-// at rate r tokens per second.
-// Informally, in any large enough time interval, the Limiter limits the
-// rate to r tokens per second, with a maximum burst size of b events.
-// See https://en.wikipedia.org/wiki/Token_bucket for more about token buckets.
+// It implements a [token bucket] of a particular size b,
+// initially full and refilled at rate r tokens per second.
+// Informally, in any large enough time interval,
+// the Limiter limits the rate to r tokens per second,
+// with a maximum burst size of b events.
 // Use NewLimiter to create non-zero Limiters.
+//
+// [token bucket]: https://en.wikipedia.org/wiki/Token_bucket
 type Limiter struct {
 	limit  Limit
 	burst  float64
@@ -55,7 +56,7 @@ func NewLimiter(r Limit, b int) *Limiter {
 	return &Limiter{limit: r, burst: float64(b)}
 }
 
-// AllowN reports whether an event may happen now.
+// Allow reports whether an event may happen now.
 func (lim *Limiter) Allow() bool {
 	return lim.allow(mono.Now())
 }

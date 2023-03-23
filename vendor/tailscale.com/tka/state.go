@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package tka
 
@@ -29,9 +28,6 @@ type State struct {
 
 	// DisablementSecrets are KDF-derived values which can be used
 	// to turn off the TKA in the event of a consensus-breaking bug.
-	//
-	// TODO(tom): This is an alpha feature, remove this mechanism once
-	//            we have confidence in our implementation.
 	DisablementSecrets [][]byte `cbor:"2,keyasint"`
 
 	// Keys are the public keys currently trusted by the TKA.
@@ -48,7 +44,12 @@ type State struct {
 // GetKey returns the trusted key with the specified KeyID.
 func (s State) GetKey(key tkatype.KeyID) (Key, error) {
 	for _, k := range s.Keys {
-		if bytes.Equal(k.ID(), key) {
+		keyID, err := k.ID()
+		if err != nil {
+			return Key{}, err
+		}
+
+		if bytes.Equal(keyID, key) {
 			return k, nil
 		}
 	}
@@ -172,7 +173,11 @@ func (s State) applyVerifiedAUM(update AUM) (State, error) {
 		if update.Key == nil {
 			return State{}, errors.New("no key to add provided")
 		}
-		if _, err := s.GetKey(update.Key.ID()); err == nil {
+		keyID, err := update.Key.ID()
+		if err != nil {
+			return State{}, err
+		}
+		if _, err := s.GetKey(keyID); err == nil {
 			return State{}, errors.New("key already exists")
 		}
 		out := s.cloneForUpdate(&update)
@@ -195,7 +200,11 @@ func (s State) applyVerifiedAUM(update AUM) (State, error) {
 		}
 		out := s.cloneForUpdate(&update)
 		for i := range out.Keys {
-			if bytes.Equal(out.Keys[i].ID(), update.KeyID) {
+			keyID, err := out.Keys[i].ID()
+			if err != nil {
+				return State{}, err
+			}
+			if bytes.Equal(keyID, update.KeyID) {
 				out.Keys[i] = k
 			}
 		}
@@ -204,7 +213,11 @@ func (s State) applyVerifiedAUM(update AUM) (State, error) {
 	case AUMRemoveKey:
 		idx := -1
 		for i := range s.Keys {
-			if bytes.Equal(update.KeyID, s.Keys[i].ID()) {
+			keyID, err := s.Keys[i].ID()
+			if err != nil {
+				return State{}, err
+			}
+			if bytes.Equal(update.KeyID, keyID) {
 				idx = i
 				break
 			}
@@ -217,9 +230,15 @@ func (s State) applyVerifiedAUM(update AUM) (State, error) {
 		return out, nil
 
 	default:
-		// TODO(tom): Instead of erroring, update lastHash and
-		// continue (to preserve future compatibility).
-		return State{}, fmt.Errorf("unhandled message: %v", update.MessageKind)
+		// An AUM with an unknown message kind was received! That means
+		// that a future version of tailscaled added some feature we don't
+		// understand.
+		//
+		// The future-compatibility contract for AUM message types is that
+		// they must only add new features, not change the semantics of existing
+		// mechanisms or features. As such, old clients can safely ignore them.
+		out := s.cloneForUpdate(&update)
+		return out, nil
 	}
 }
 
@@ -274,7 +293,17 @@ func (s *State) staticValidateCheckpoint() error {
 			if i == j {
 				continue
 			}
-			if bytes.Equal(k.ID(), k2.ID()) {
+
+			id1, err := k.ID()
+			if err != nil {
+				return fmt.Errorf("key[%d]: %w", i, err)
+			}
+			id2, err := k2.ID()
+			if err != nil {
+				return fmt.Errorf("key[%d]: %w", j, err)
+			}
+
+			if bytes.Equal(id1, id2) {
 				return fmt.Errorf("key[%d]: duplicates key[%d]", i, j)
 			}
 		}

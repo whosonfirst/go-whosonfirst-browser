@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build go1.19
 
@@ -37,6 +36,7 @@ import (
 	"tailscale.com/tailcfg"
 	"tailscale.com/tka"
 	"tailscale.com/types/key"
+	"tailscale.com/types/tkatype"
 )
 
 // defaultLocalClient is the default LocalClient when using the legacy
@@ -114,6 +114,7 @@ func (lc *LocalClient) defaultDialer(ctx context.Context, network, addr string) 
 //
 // DoLocalRequest may mutate the request to add Authorization headers.
 func (lc *LocalClient) DoLocalRequest(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Tailscale-Cap", strconv.Itoa(int(tailcfg.CurrentCapabilityVersion)))
 	lc.tsClientOnce.Do(func() {
 		lc.tsClient = &http.Client{
 			Transport: &http.Transport{
@@ -257,6 +258,23 @@ func (lc *LocalClient) DaemonMetrics(ctx context.Context) ([]byte, error) {
 	return lc.get200(ctx, "/localapi/v0/metrics")
 }
 
+// TailDaemonLogs returns a stream the Tailscale daemon's logs as they arrive.
+// Close the context to stop the stream.
+func (lc *LocalClient) TailDaemonLogs(ctx context.Context) (io.Reader, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", "http://"+apitype.LocalAPIHost+"/localapi/v0/logtap", nil)
+	if err != nil {
+		return nil, err
+	}
+	res, err := lc.doLocalRequestNiceError(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, errors.New(res.Status)
+	}
+	return res.Body, nil
+}
+
 // Pprof returns a pprof profile of the Tailscale daemon.
 func (lc *LocalClient) Pprof(ctx context.Context, pprofType string, sec int) ([]byte, error) {
 	var secArg string
@@ -348,6 +366,34 @@ func (lc *LocalClient) DebugAction(ctx context.Context, action string) error {
 		return fmt.Errorf("error %w: %s", err, body)
 	}
 	return nil
+}
+
+// DebugPortmap invokes the debug-portmap endpoint, and returns an
+// io.ReadCloser that can be used to read the logs that are printed during this
+// process.
+func (lc *LocalClient) DebugPortmap(ctx context.Context, duration time.Duration, ty, gwSelf string) (io.ReadCloser, error) {
+	vals := make(url.Values)
+	vals.Set("duration", duration.String())
+	vals.Set("type", ty)
+	if gwSelf != "" {
+		vals.Set("gateway_and_self", gwSelf)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "GET", "http://"+apitype.LocalAPIHost+"/localapi/v0/debug-portmap?"+vals.Encode(), nil)
+	if err != nil {
+		return nil, err
+	}
+	res, err := lc.doLocalRequestNiceError(req)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		body, _ := io.ReadAll(res.Body)
+		res.Body.Close()
+		return nil, fmt.Errorf("HTTP %s: %s", res.Status, body)
+	}
+
+	return res.Body, nil
 }
 
 // SetDevStoreKeyValue set a statestore key/value. It's only meant for development.
@@ -804,8 +850,32 @@ func (lc *LocalClient) NetworkLockInit(ctx context.Context, keys []tka.Key, disa
 	return decodeJSON[*ipnstate.NetworkLockStatus](body)
 }
 
+// NetworkLockWrapPreauthKey wraps a pre-auth key with information to
+// enable unattended bringup in the locked tailnet.
+func (lc *LocalClient) NetworkLockWrapPreauthKey(ctx context.Context, preauthKey string, tkaKey key.NLPrivate) (string, error) {
+	encodedPrivate, err := tkaKey.MarshalText()
+	if err != nil {
+		return "", err
+	}
+
+	var b bytes.Buffer
+	type wrapRequest struct {
+		TSKey  string
+		TKAKey string // key.NLPrivate.MarshalText
+	}
+	if err := json.NewEncoder(&b).Encode(wrapRequest{TSKey: preauthKey, TKAKey: string(encodedPrivate)}); err != nil {
+		return "", err
+	}
+
+	body, err := lc.send(ctx, "POST", "/localapi/v0/tka/wrap-preauth-key", 200, &b)
+	if err != nil {
+		return "", fmt.Errorf("error: %w", err)
+	}
+	return string(body), nil
+}
+
 // NetworkLockModify adds and/or removes key(s) to the tailnet key authority.
-func (lc *LocalClient) NetworkLockModify(ctx context.Context, addKeys, removeKeys []tka.Key) (*ipnstate.NetworkLockStatus, error) {
+func (lc *LocalClient) NetworkLockModify(ctx context.Context, addKeys, removeKeys []tka.Key) error {
 	var b bytes.Buffer
 	type modifyRequest struct {
 		AddKeys    []tka.Key
@@ -813,14 +883,13 @@ func (lc *LocalClient) NetworkLockModify(ctx context.Context, addKeys, removeKey
 	}
 
 	if err := json.NewEncoder(&b).Encode(modifyRequest{AddKeys: addKeys, RemoveKeys: removeKeys}); err != nil {
-		return nil, err
+		return err
 	}
 
-	body, err := lc.send(ctx, "POST", "/localapi/v0/tka/modify", 200, &b)
-	if err != nil {
-		return nil, fmt.Errorf("error: %w", err)
+	if _, err := lc.send(ctx, "POST", "/localapi/v0/tka/modify", 204, &b); err != nil {
+		return fmt.Errorf("error: %w", err)
 	}
-	return decodeJSON[*ipnstate.NetworkLockStatus](body)
+	return nil
 }
 
 // NetworkLockSign signs the specified node-key and transmits that signature to the control plane.
@@ -840,6 +909,15 @@ func (lc *LocalClient) NetworkLockSign(ctx context.Context, nodeKey key.NodePubl
 		return fmt.Errorf("error: %w", err)
 	}
 	return nil
+}
+
+// NetworkLockAffectedSigs returns all signatures signed by the specified keyID.
+func (lc *LocalClient) NetworkLockAffectedSigs(ctx context.Context, keyID tkatype.KeyID) ([]tkatype.MarshaledSignature, error) {
+	body, err := lc.send(ctx, "POST", "/localapi/v0/tka/affected-sigs", 200, bytes.NewReader(keyID))
+	if err != nil {
+		return nil, fmt.Errorf("error: %w", err)
+	}
+	return decodeJSON[[]tkatype.MarshaledSignature](body)
 }
 
 // NetworkLockLog returns up to maxEntries number of changes to network-lock state.
@@ -866,7 +944,6 @@ func (lc *LocalClient) NetworkLockForceLocalDisable(ctx context.Context) error {
 	}
 	return nil
 }
-
 
 // SetServeConfig sets or replaces the serving settings.
 // If config is nil, settings are cleared and serving is disabled.
@@ -1002,6 +1079,36 @@ func (lc *LocalClient) DebugDERPRegion(ctx context.Context, regionIDOrCode strin
 		return nil, fmt.Errorf("error %w: %s", err, body)
 	}
 	return decodeJSON[*ipnstate.DebugDERPRegionReport](body)
+}
+
+// DebugSetExpireIn marks the current node key to expire in d.
+//
+// This is meant primarily for debug and testing.
+func (lc *LocalClient) DebugSetExpireIn(ctx context.Context, d time.Duration) error {
+	v := url.Values{"expiry": {fmt.Sprint(time.Now().Add(d).Unix())}}
+	_, err := lc.send(ctx, "POST", "/localapi/v0/set-expiry-sooner?"+v.Encode(), 200, nil)
+	return err
+}
+
+// StreamDebugCapture streams a pcap-formatted packet capture.
+//
+// The provided context does not determine the lifetime of the
+// returned io.ReadCloser.
+func (lc *LocalClient) StreamDebugCapture(ctx context.Context) (io.ReadCloser, error) {
+	req, err := http.NewRequestWithContext(ctx, "POST", "http://"+apitype.LocalAPIHost+"/localapi/v0/debug-capture", nil)
+	if err != nil {
+		return nil, err
+	}
+	res, err := lc.doLocalRequestNiceError(req)
+	if err != nil {
+		res.Body.Close()
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		res.Body.Close()
+		return nil, errors.New(res.Status)
+	}
+	return res.Body, nil
 }
 
 // WatchIPNBus subscribes to the IPN notification bus. It returns a watcher

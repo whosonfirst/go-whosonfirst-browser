@@ -1,8 +1,20 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package ipn
+
+import (
+	"errors"
+	"fmt"
+	"net"
+	"net/netip"
+	"net/url"
+	"strconv"
+	"strings"
+
+	"golang.org/x/exp/slices"
+	"tailscale.com/tailcfg"
+)
 
 // ServeConfigKey returns a StateKey that stores the
 // JSON-encoded ServeConfig for a config profile.
@@ -29,6 +41,26 @@ type ServeConfig struct {
 // HostPort is an SNI name and port number, joined by a colon.
 // There is no implicit port 443. It must contain a colon.
 type HostPort string
+
+// A FunnelConn wraps a net.Conn that is coming over a
+// Funnel connection. It can be used to determine further
+// information about the connection, like the source address
+// and the target SNI name.
+type FunnelConn struct {
+	// Conn is the underlying connection.
+	net.Conn
+
+	// Target is what was presented in the "Tailscale-Ingress-Target"
+	// HTTP header.
+	Target HostPort
+
+	// Src is the source address of the connection.
+	// This is the address of the client that initiated the
+	// connection, not the address of the Tailscale Funnel
+	// node which is relaying the connection. That address
+	// can be found in Conn.RemoteAddr.
+	Src netip.AddrPort
+}
 
 // WebServerConfig describes a web server's configuration.
 type WebServerConfig struct {
@@ -81,15 +113,18 @@ func (sc *ServeConfig) WebHandlerExists(hp HostPort, mount string) bool {
 // GetWebHandler returns the HTTPHandler for the given host:port and mount point.
 // Returns nil if the handler does not exist.
 func (sc *ServeConfig) GetWebHandler(hp HostPort, mount string) *HTTPHandler {
-	if sc.Web[hp] != nil {
-		return sc.Web[hp].Handlers[mount]
+	if sc == nil || sc.Web[hp] == nil {
+		return nil
 	}
-	return nil
+	return sc.Web[hp].Handlers[mount]
 }
 
 // GetTCPPortHandler returns the TCPPortHandler for the given port.
 // If the port is not configured, nil is returned.
 func (sc *ServeConfig) GetTCPPortHandler(port uint16) *TCPPortHandler {
+	if sc == nil {
+		return nil
+	}
 	return sc.TCP[port]
 }
 
@@ -97,7 +132,7 @@ func (sc *ServeConfig) GetTCPPortHandler(port uint16) *TCPPortHandler {
 // in TCPForward mode on any port.
 // This is exclusive of Web/HTTPS serving.
 func (sc *ServeConfig) IsTCPForwardingAny() bool {
-	if len(sc.TCP) == 0 {
+	if sc == nil || len(sc.TCP) == 0 {
 		return false
 	}
 	for _, h := range sc.TCP {
@@ -112,7 +147,7 @@ func (sc *ServeConfig) IsTCPForwardingAny() bool {
 // in TCPForward mode on the given port.
 // This is exclusive of Web/HTTPS serving.
 func (sc *ServeConfig) IsTCPForwardingOnPort(port uint16) bool {
-	if sc.TCP[port] == nil {
+	if sc == nil || sc.TCP[port] == nil {
 		return false
 	}
 	return !sc.TCP[port].HTTPS
@@ -122,14 +157,102 @@ func (sc *ServeConfig) IsTCPForwardingOnPort(port uint16) bool {
 // Web/HTTPS on the given port.
 // This is exclusive of TCPForwarding.
 func (sc *ServeConfig) IsServingWeb(port uint16) bool {
-	if sc.TCP[port] == nil {
+	if sc == nil || sc.TCP[port] == nil {
 		return false
 	}
 	return sc.TCP[port].HTTPS
 }
 
 // IsFunnelOn checks if ServeConfig is currently allowing
-// funnel traffic on for the given host:port.
-func (sc *ServeConfig) IsFunnelOn(hp HostPort) bool {
-	return sc.AllowFunnel[hp]
+// funnel traffic for any host:port.
+func (sc *ServeConfig) IsFunnelOn() bool {
+	if sc == nil {
+		return false
+	}
+	for _, b := range sc.AllowFunnel {
+		if b {
+			return true
+		}
+	}
+	return false
+}
+
+// CheckFunnelAccess checks whether Funnel access is allowed for the given node
+// and port.
+// It checks:
+//  1. an invite was used to join the Funnel alpha
+//  2. HTTPS is enabled on the Tailnet
+//  3. the node has the "funnel" nodeAttr
+//  4. the port is allowed for Funnel
+//
+// The nodeAttrs arg should be the node's Self.Capabilities which should contain
+// the attribute we're checking for and possibly warning-capabilities for
+// Funnel.
+func CheckFunnelAccess(port uint16, nodeAttrs []string) error {
+	if slices.Contains(nodeAttrs, tailcfg.CapabilityWarnFunnelNoInvite) {
+		return errors.New("Funnel not available; an invite is required to join the alpha. See https://tailscale.com/s/no-funnel.")
+	}
+	if slices.Contains(nodeAttrs, tailcfg.CapabilityWarnFunnelNoHTTPS) {
+		return errors.New("Funnel not available; HTTPS must be enabled. See https://tailscale.com/s/https.")
+	}
+	if !slices.Contains(nodeAttrs, tailcfg.NodeAttrFunnel) {
+		return errors.New("Funnel not available; \"funnel\" node attribute not set. See https://tailscale.com/s/no-funnel.")
+	}
+	return checkFunnelPort(port, nodeAttrs)
+}
+
+// checkFunnelPort checks whether the given port is allowed for Funnel.
+// It uses the tailcfg.CapabilityFunnelPorts nodeAttr to determine the allowed
+// ports.
+func checkFunnelPort(wantedPort uint16, nodeAttrs []string) error {
+	deny := func(allowedPorts string) error {
+		if allowedPorts == "" {
+			return fmt.Errorf("port %d is not allowed for funnel", wantedPort)
+		}
+		return fmt.Errorf("port %d is not allowed for funnel; allowed ports are: %v", wantedPort, allowedPorts)
+	}
+	var portsStr string
+	for _, attr := range nodeAttrs {
+		if !strings.HasPrefix(attr, tailcfg.CapabilityFunnelPorts) {
+			continue
+		}
+		u, err := url.Parse(attr)
+		if err != nil {
+			return deny("")
+		}
+		portsStr = u.Query().Get("ports")
+		if portsStr == "" {
+			return deny("")
+		}
+		u.RawQuery = ""
+		if u.String() != tailcfg.CapabilityFunnelPorts {
+			return deny("")
+		}
+	}
+	wantedPortString := strconv.Itoa(int(wantedPort))
+	for _, ps := range strings.Split(portsStr, ",") {
+		if ps == "" {
+			continue
+		}
+		first, last, ok := strings.Cut(ps, "-")
+		if !ok {
+			if first == wantedPortString {
+				return nil
+			}
+			continue
+		}
+		fp, err := strconv.ParseUint(first, 10, 16)
+		if err != nil {
+			continue
+		}
+		lp, err := strconv.ParseUint(last, 10, 16)
+		if err != nil {
+			continue
+		}
+		pr := tailcfg.PortRange{First: uint16(fp), Last: uint16(lp)}
+		if pr.Contains(wantedPort) {
+			return nil
+		}
+	}
+	return deny(portsStr)
 }

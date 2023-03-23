@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build !ios && !android && !js
 
@@ -9,9 +8,9 @@ package localapi
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"tailscale.com/ipn/ipnlocal"
-	"tailscale.com/util/strs"
 )
 
 func (h *Handler) serveCert(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +18,7 @@ func (h *Handler) serveCert(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "cert access denied", http.StatusForbidden)
 		return
 	}
-	domain, ok := strs.CutPrefix(r.URL.Path, "/localapi/v0/cert/")
+	domain, ok := strings.CutPrefix(r.URL.Path, "/localapi/v0/cert/")
 	if !ok {
 		http.Error(w, "internal handler config wired wrong", 500)
 		return

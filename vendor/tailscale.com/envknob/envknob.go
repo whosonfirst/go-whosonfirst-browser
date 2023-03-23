@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package envknob provides access to environment-variable tweakable
 // debug settings.
@@ -29,6 +28,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"tailscale.com/types/opt"
 	"tailscale.com/version"
@@ -36,11 +36,13 @@ import (
 )
 
 var (
-	mu         sync.Mutex
-	set        = map[string]string{}
-	regStr     = map[string]*string{}
-	regBool    = map[string]*bool{}
-	regOptBool = map[string]*opt.Bool{}
+	mu          sync.Mutex
+	set         = map[string]string{}
+	regStr      = map[string]*string{}
+	regBool     = map[string]*bool{}
+	regOptBool  = map[string]*opt.Bool{}
+	regDuration = map[string]*time.Duration{}
+	regInt      = map[string]*int{}
 )
 
 func noteEnv(k, v string) {
@@ -96,6 +98,9 @@ func Setenv(envVar, val string) {
 	}
 	if p := regOptBool[envVar]; p != nil {
 		setOptBoolLocked(p, envVar, val)
+	}
+	if p := regDuration[envVar]; p != nil {
+		setDurationLocked(p, envVar, val)
 	}
 }
 
@@ -159,6 +164,44 @@ func RegisterOptBool(envVar string) func() opt.Bool {
 	return func() opt.Bool { return *p }
 }
 
+// RegisterDuration returns a func that gets the named environment variable as a
+// duration, without a map lookup per call. It assumes that any mutations happen
+// via envknob.Setenv.
+func RegisterDuration(envVar string) func() time.Duration {
+	mu.Lock()
+	defer mu.Unlock()
+	p, ok := regDuration[envVar]
+	if !ok {
+		val := os.Getenv(envVar)
+		if val != "" {
+			noteEnvLocked(envVar, val)
+		}
+		p = new(time.Duration)
+		setDurationLocked(p, envVar, val)
+		regDuration[envVar] = p
+	}
+	return func() time.Duration { return *p }
+}
+
+// RegisterInt returns a func that gets the named environment variable as an
+// integer, without a map lookup per call. It assumes that any mutations happen
+// via envknob.Setenv.
+func RegisterInt(envVar string) func() int {
+	mu.Lock()
+	defer mu.Unlock()
+	p, ok := regInt[envVar]
+	if !ok {
+		val := os.Getenv(envVar)
+		if val != "" {
+			noteEnvLocked(envVar, val)
+		}
+		p = new(int)
+		setIntLocked(p, envVar, val)
+		regInt[envVar] = p
+	}
+	return func() int { return *p }
+}
+
 func setBoolLocked(p *bool, envVar, val string) {
 	noteEnvLocked(envVar, val)
 	if val == "" {
@@ -183,6 +226,32 @@ func setOptBoolLocked(p *opt.Bool, envVar, val string) {
 		log.Fatalf("invalid boolean environment variable %s value %q", envVar, val)
 	}
 	p.Set(b)
+}
+
+func setDurationLocked(p *time.Duration, envVar, val string) {
+	noteEnvLocked(envVar, val)
+	if val == "" {
+		*p = 0
+		return
+	}
+	var err error
+	*p, err = time.ParseDuration(val)
+	if err != nil {
+		log.Fatalf("invalid duration environment variable %s value %q", envVar, val)
+	}
+}
+
+func setIntLocked(p *int, envVar, val string) {
+	noteEnvLocked(envVar, val)
+	if val == "" {
+		*p = 0
+		return
+	}
+	var err error
+	*p, err = strconv.Atoi(val)
+	if err != nil {
+		log.Fatalf("invalid int environment variable %s value %q", envVar, val)
+	}
 }
 
 // Bool returns the boolean value of the named environment variable.
@@ -291,6 +360,13 @@ func TKASkipSignatureCheck() bool { return Bool("TS_UNSAFE_SKIP_NKS_VERIFICATION
 func NoLogsNoSupport() bool {
 	return Bool("TS_NO_LOGS_NO_SUPPORT")
 }
+
+var allowRemoteUpdate = RegisterBool("TS_ALLOW_ADMIN_CONSOLE_REMOTE_UPDATE")
+
+// AllowsRemoteUpdate reports whether this node has opted-in to letting the
+// Tailscale control plane initiate a Tailscale update (e.g. on behalf of an
+// admin on the admin console).
+func AllowsRemoteUpdate() bool { return allowRemoteUpdate() }
 
 // SetNoLogsNoSupport enables no-logs-no-support mode.
 func SetNoLogsNoSupport() {
@@ -442,5 +518,5 @@ func IPCVersion() string {
 	if v := String("TS_DEBUG_FAKE_IPC_VERSION"); v != "" {
 		return v
 	}
-	return version.Long
+	return version.Long()
 }

@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package metrics contains expvar & Prometheus types and code used by
 // Tailscale for monitoring.
@@ -32,6 +31,11 @@ type Set struct {
 type LabelMap struct {
 	Label string
 	expvar.Map
+}
+
+// SetInt64 sets the *Int value stored under the given map key.
+func (m *LabelMap) SetInt64(key string, v int64) {
+	m.Get(key).Set(v)
 }
 
 // Get returns a direct pointer to the expvar.Int for key, creating it

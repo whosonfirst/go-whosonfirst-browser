@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package ipnstate captures the entire state of the Tailscale network.
 //
@@ -20,6 +19,7 @@ import (
 
 	"tailscale.com/tailcfg"
 	"tailscale.com/types/key"
+	"tailscale.com/types/ptr"
 	"tailscale.com/types/views"
 	"tailscale.com/util/dnsname"
 )
@@ -30,6 +30,10 @@ import (
 type Status struct {
 	// Version is the daemon's long version (see version.Long).
 	Version string
+
+	// TUN is whether /dev/net/tun (or equivalent kernel interface) is being
+	// used. If false, it's running in userspace mode.
+	TUN bool
 
 	// BackendState is an ipn.State string value:
 	//  "NoState", "NeedsLogin", "NeedsMachineAuth", "Stopped",
@@ -84,6 +88,7 @@ type TKAFilteredPeer struct {
 	ID           tailcfg.NodeID
 	StableID     tailcfg.StableNodeID
 	TailscaleIPs []netip.Addr // Tailscale IP(s) assigned to this node
+	NodeKey      key.NodePublic
 }
 
 // NetworkLockStatus represents whether network-lock is enabled,
@@ -179,13 +184,18 @@ type PeerStatusLite struct {
 }
 
 type PeerStatus struct {
-	ID           tailcfg.StableNodeID
-	PublicKey    key.NodePublic
-	HostName     string // HostInfo's Hostname (not a DNS name or necessarily unique)
-	DNSName      string
-	OS           string // HostInfo.OS
-	UserID       tailcfg.UserID
-	TailscaleIPs []netip.Addr // Tailscale IP(s) assigned to this node
+	ID        tailcfg.StableNodeID
+	PublicKey key.NodePublic
+	HostName  string // HostInfo's Hostname (not a DNS name or necessarily unique)
+
+	// DNSName is the Peer's FQDN. It ends with a dot.
+	// It has the form "host.<MagicDNSSuffix>."
+	DNSName string
+	OS      string // HostInfo.OS
+	UserID  tailcfg.UserID
+
+	// TailscaleIPs are the IP addresses assigned to the node.
+	TailscaleIPs []netip.Addr
 
 	// Tags are the list of ACL tags applied to this node.
 	// See tailscale.com/tailcfg#Node.Tags for more information.
@@ -219,7 +229,15 @@ type PeerStatus struct {
 	// change.
 	Active bool
 
-	PeerAPIURL   []string
+	// PeerAPIURL are the URLs of the node's PeerAPI servers.
+	PeerAPIURL []string
+
+	// Capabilities are capabilities that the node has.
+	// They're free-form strings, but should be in the form of URLs/URIs
+	// such as:
+	//    "https://tailscale.com/cap/is-admin"
+	//    "https://tailscale.com/cap/file-sharing"
+	//    "funnel"
 	Capabilities []string `json:",omitempty"`
 
 	// SSH_HostKeys are the node's SSH host keys, if known.
@@ -242,9 +260,20 @@ type PeerStatus struct {
 	// InEngine means that this peer is tracked by the wireguard engine.
 	// In theory, all of InNetworkMap and InMagicSock and InEngine should all be true.
 	InEngine bool
+
+	// Expired means that this peer's node key has expired, based on either
+	// information from control or optimisically set on the client if the
+	// expiration time has passed.
+	Expired bool `json:",omitempty"`
+
+	// KeyExpiry, if present, is the time at which the node key expired or
+	// will expire.
+	KeyExpiry *time.Time `json:",omitempty"`
 }
 
 type StatusBuilder struct {
+	WantPeers bool // whether caller wants peers
+
 	mu     sync.Mutex
 	locked bool
 	st     Status
@@ -420,6 +449,12 @@ func (sb *StatusBuilder) AddPeer(peer key.NodePublic, st *PeerStatus) {
 	}
 	if st.PeerAPIURL != nil {
 		e.PeerAPIURL = st.PeerAPIURL
+	}
+	if st.Expired {
+		e.Expired = true
+	}
+	if t := st.KeyExpiry; t != nil {
+		e.KeyExpiry = ptr.To(*t)
 	}
 }
 

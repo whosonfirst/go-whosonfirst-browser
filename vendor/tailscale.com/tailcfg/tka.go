@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package tailcfg
 
@@ -238,4 +237,28 @@ type TKASubmitSignatureRequest struct {
 // TKASubmitSignatureResponse is the JSON response from a /tka/sign RPC.
 type TKASubmitSignatureResponse struct {
 	// Nothing. (yet?)
+}
+
+// TKASignaturesUsingKeyRequest asks the control plane for
+// all signatures which are signed by the provided keyID.
+//
+// This is the request schema for a /tka/affected-sigs RPC.
+type TKASignaturesUsingKeyRequest struct {
+	// Version is the client's capabilities.
+	Version CapabilityVersion
+
+	// NodeKey is the client's current node key.
+	NodeKey key.NodePublic
+
+	// KeyID is the key we are querying using.
+	KeyID tkatype.KeyID
+}
+
+// TKASignaturesUsingKeyResponse is the JSON response to
+// a /tka/affected-sigs RPC.
+//
+// It enumerates all signatures which are signed by the
+// queried keyID.
+type TKASignaturesUsingKeyResponse struct {
+	Signatures []tkatype.MarshaledSignature
 }

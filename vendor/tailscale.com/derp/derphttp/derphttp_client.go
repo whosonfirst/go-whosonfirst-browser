@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package derphttp implements DERP-over-HTTP.
 //
@@ -24,6 +23,7 @@ import (
 	"net/netip"
 	"net/url"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -32,13 +32,13 @@ import (
 	"tailscale.com/envknob"
 	"tailscale.com/net/dnscache"
 	"tailscale.com/net/netns"
+	"tailscale.com/net/sockstats"
 	"tailscale.com/net/tlsdial"
 	"tailscale.com/net/tshttpproxy"
 	"tailscale.com/syncs"
 	"tailscale.com/tailcfg"
 	"tailscale.com/types/key"
 	"tailscale.com/types/logger"
-	"tailscale.com/util/strs"
 )
 
 // Client is a DERP-over-HTTP client.
@@ -321,7 +321,7 @@ func (c *Client) connect(ctx context.Context, caller string) (client *derp.Clien
 		}
 		c.serverPubKey = derpClient.ServerPublicKey()
 		c.client = derpClient
-		c.netConn = tcpConn
+		c.netConn = conn
 		c.connGen++
 		return c.client, c.connGen, nil
 	case c.url != nil:
@@ -615,6 +615,8 @@ func (c *Client) dialNode(ctx context.Context, n *tailcfg.DERPNode) (net.Conn, e
 	resc := make(chan res) // must be unbuffered
 	ctx, cancel := context.WithTimeout(ctx, dialNodeTimeout)
 	defer cancel()
+
+	ctx = sockstats.WithSockStats(ctx, sockstats.LabelDERPHTTPClient)
 
 	nwait := 0
 	startDial := func(dstPrimary, proto string) {
@@ -1029,7 +1031,7 @@ var ErrClientClosed = errors.New("derphttp.Client closed")
 func parseMetaCert(certs []*x509.Certificate) (serverPub key.NodePublic, serverProtoVersion int) {
 	for _, cert := range certs {
 		// Look for derpkey prefix added by initMetacert() on the server side.
-		if pubHex, ok := strs.CutPrefix(cert.Subject.CommonName, "derpkey"); ok {
+		if pubHex, ok := strings.CutPrefix(cert.Subject.CommonName, "derpkey"); ok {
 			var err error
 			serverPub, err = key.ParseNodePublicUntyped(mem.S(pubHex))
 			if err == nil && cert.SerialNumber.BitLen() <= 8 { // supports up to version 255

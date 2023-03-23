@@ -1,11 +1,11 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package netstack wires up gVisor's netstack into Tailscale.
 package netstack
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -47,6 +47,7 @@ import (
 	"tailscale.com/types/ipproto"
 	"tailscale.com/types/logger"
 	"tailscale.com/types/netmap"
+	"tailscale.com/types/nettype"
 	"tailscale.com/version/distro"
 	"tailscale.com/wgengine"
 	"tailscale.com/wgengine/filter"
@@ -63,17 +64,14 @@ var (
 )
 
 func init() {
-	var debugNetstackLeakMode = envknob.String("TS_DEBUG_NETSTACK_LEAK_MODE")
-	// Note: netstacks refsvfs2 package that will eventually replace refs
-	// consumes the refs.LeakMode setting, but enables some checks when set to
-	// UninitializedLeakChecking which is what empty string becomes. This mode
-	// is largely un-useful, so it is explicitly disabled here, and more useful
-	// modes can be set via the envknob. See #4309 for more references.
-	if debugNetstackLeakMode == "" {
-		debugNetstackLeakMode = "disabled"
+	mode := envknob.String("TS_DEBUG_NETSTACK_LEAK_MODE")
+	if mode == "" {
+		return
 	}
 	var lm refs.LeakMode
-	lm.Set(debugNetstackLeakMode)
+	if err := lm.Set(mode); err != nil {
+		panic(err)
+	}
 	refs.SetLeakMode(lm)
 }
 
@@ -81,11 +79,31 @@ func init() {
 // and implements wgengine.FakeImpl to act as a userspace network
 // stack when Tailscale is running in fake mode.
 type Impl struct {
-	// ForwardTCPIn, if non-nil, handles forwarding an inbound TCP
-	// connection.
-	// TODO(bradfitz): provide mechanism for tsnet to reject a
-	// port other than accepting it and closing it.
-	ForwardTCPIn func(c net.Conn, port uint16)
+	// GetTCPHandlerForFlow conditionally handles an incoming TCP flow for the
+	// provided (src/port, dst/port) 4-tuple.
+	//
+	// A nil value is equivalent to a func returning (nil, false).
+	//
+	// If func returns intercept=false, the default forwarding behavior (if
+	// ProcessLocalIPs and/or ProcesssSubnetIPs) takes place.
+	//
+	// When intercept=true, the behavior depends on whether the returned handler
+	// is non-nil: if nil, the connection is rejected. If non-nil, handler takes
+	// over the TCP conn.
+	GetTCPHandlerForFlow func(src, dst netip.AddrPort) (handler func(net.Conn), intercept bool)
+
+	// GetUDPHandlerForFlow conditionally handles an incoming UDP flow for the
+	// provided (src/port, dst/port) 4-tuple.
+	//
+	// A nil value is equivalent to a func returning (nil, false).
+	//
+	// If func returns intercept=false, the default forwarding behavior (if
+	// ProcessLocalIPs and/or ProcesssSubnetIPs) takes place.
+	//
+	// When intercept=true, the behavior depends on whether the returned handler
+	// is non-nil: if nil, the connection is rejected. If non-nil, handler takes
+	// over the UDP flow.
+	GetUDPHandlerForFlow func(src, dst netip.AddrPort) (handler func(nettype.ConnPacketConn), intercept bool)
 
 	// ProcessLocalIPs is whether netstack should handle incoming
 	// traffic directed at the Node.Addresses (local IPs).
@@ -110,8 +128,8 @@ type Impl struct {
 	lb        *ipnlocal.LocalBackend // or nil
 	dns       *dns.Manager
 
-	peerapiPort4Atomic uint32 // uint16 port number for IPv4 peerapi
-	peerapiPort6Atomic uint32 // uint16 port number for IPv6 peerapi
+	peerapiPort4Atomic atomic.Uint32 // uint16 port number for IPv4 peerapi
+	peerapiPort6Atomic atomic.Uint32 // uint16 port number for IPv6 peerapi
 
 	// atomicIsLocalIPFunc holds a func that reports whether an IP
 	// is a local (non-subnet) Tailscale IP address of this
@@ -207,17 +225,11 @@ func (ns *Impl) Close() error {
 	return nil
 }
 
-// SetLocalBackend sets the LocalBackend; it should only be run before
-// the Start method is called.
-func (ns *Impl) SetLocalBackend(lb *ipnlocal.LocalBackend) {
-	ns.lb = lb
-}
-
 // wrapProtoHandler returns protocol handler h wrapped in a version
 // that dynamically reconfigures ns's subnet addresses as needed for
 // outbound traffic.
-func (ns *Impl) wrapProtoHandler(h func(stack.TransportEndpointID, *stack.PacketBuffer) bool) func(stack.TransportEndpointID, *stack.PacketBuffer) bool {
-	return func(tei stack.TransportEndpointID, pb *stack.PacketBuffer) bool {
+func (ns *Impl) wrapProtoHandler(h func(stack.TransportEndpointID, stack.PacketBufferPtr) bool) func(stack.TransportEndpointID, stack.PacketBufferPtr) bool {
+	return func(tei stack.TransportEndpointID, pb stack.PacketBufferPtr) bool {
 		addr := tei.LocalAddress
 		ip, ok := netip.AddrFromSlice(net.IP(addr))
 		if !ok {
@@ -234,7 +246,11 @@ func (ns *Impl) wrapProtoHandler(h func(stack.TransportEndpointID, *stack.Packet
 
 // Start sets up all the handlers so netstack can start working. Implements
 // wgengine.FakeImpl.
-func (ns *Impl) Start() error {
+func (ns *Impl) Start(lb *ipnlocal.LocalBackend) error {
+	if lb == nil {
+		panic("nil LocalBackend")
+	}
+	ns.lb = lb
 	ns.e.AddNetworkMapCallback(ns.updateIPs)
 	// size = 0 means use default buffer size
 	const tcpReceiveBufferSize = 0
@@ -407,7 +423,7 @@ func (ns *Impl) handleLocalPackets(p *packet.Parsed, t *tstun.Wrapper) filter.Re
 	}
 
 	packetBuf := stack.NewPacketBuffer(stack.PacketBufferOptions{
-		Payload: bufferv2.MakeWithData(append([]byte(nil), p.Buffer()...)),
+		Payload: bufferv2.MakeWithData(bytes.Clone(p.Buffer())),
 	})
 	ns.linkEP.InjectInbound(pn, packetBuf)
 	packetBuf.DecRef()
@@ -451,7 +467,7 @@ func (ns *Impl) DialContextUDP(ctx context.Context, ipp netip.AddrPort) (*gonet.
 func (ns *Impl) inject() {
 	for {
 		pkt := ns.linkEP.ReadContext(ns.ctx)
-		if pkt == nil {
+		if pkt.IsNil() {
 			if ns.ctx.Err() != nil {
 				// Return without logging.
 				return
@@ -521,7 +537,7 @@ func (ns *Impl) processSSH() bool {
 	return ns.lb != nil && ns.lb.ShouldRunSSH()
 }
 
-func (ns *Impl) peerAPIPortAtomic(ip netip.Addr) *uint32 {
+func (ns *Impl) peerAPIPortAtomic(ip netip.Addr) *atomic.Uint32 {
 	if ip.Is4() {
 		return &ns.peerapiPort4Atomic
 	} else {
@@ -545,10 +561,10 @@ func (ns *Impl) shouldProcessInbound(p *packet.Parsed, t *tstun.Wrapper) bool {
 		if p.TCPFlags&packet.TCPSynAck == packet.TCPSyn {
 			if port, ok := ns.lb.GetPeerAPIPort(dstIP); ok {
 				peerAPIPort = port
-				atomic.StoreUint32(ns.peerAPIPortAtomic(dstIP), uint32(port))
+				ns.peerAPIPortAtomic(dstIP).Store(uint32(port))
 			}
 		} else {
-			peerAPIPort = uint16(atomic.LoadUint32(ns.peerAPIPortAtomic(dstIP)))
+			peerAPIPort = uint16(ns.peerAPIPortAtomic(dstIP).Load())
 		}
 		dport := p.Dst.Port()
 		if dport == peerAPIPort {
@@ -561,11 +577,6 @@ func (ns *Impl) shouldProcessInbound(p *packet.Parsed, t *tstun.Wrapper) bool {
 	}
 	if p.IPVersion == 6 && !isLocal && viaRange.Contains(dstIP) {
 		return ns.lb != nil && ns.lb.ShouldHandleViaIP(dstIP)
-	}
-	if !ns.ProcessLocalIPs && !ns.ProcessSubnets {
-		// Fast path for common case (e.g. Linux server in TUN mode) where
-		// netstack isn't used at all; don't even do an isLocalIP lookup.
-		return false
 	}
 	if ns.ProcessLocalIPs && isLocal {
 		return true
@@ -694,7 +705,7 @@ func (ns *Impl) injectInbound(p *packet.Parsed, t *tstun.Wrapper) filter.Respons
 		ns.logf("[v2] packet in (from %v): % x", p.Src, p.Buffer())
 	}
 	packetBuf := stack.NewPacketBuffer(stack.PacketBufferOptions{
-		Payload: bufferv2.MakeWithData(append([]byte(nil), p.Buffer()...)),
+		Payload: bufferv2.MakeWithData(bytes.Clone(p.Buffer())),
 	})
 	ns.linkEP.InjectInbound(pn, packetBuf)
 	packetBuf.DecRef()
@@ -789,6 +800,8 @@ func (ns *Impl) acceptTCP(r *tcp.ForwarderRequest) {
 
 	dialIP := netaddrIPFromNetstackIP(reqDetails.LocalAddress)
 	isTailscaleIP := tsaddr.IsTailscaleIP(dialIP)
+
+	dstAddrPort := netip.AddrPortFrom(dialIP, reqDetails.LocalPort)
 
 	if viaRange.Contains(dialIP) {
 		isTailscaleIP = false
@@ -908,13 +921,20 @@ func (ns *Impl) acceptTCP(r *tcp.ForwarderRequest) {
 		}
 	}
 
-	if ns.ForwardTCPIn != nil {
-		c := createConn()
-		if c == nil {
+	if ns.GetTCPHandlerForFlow != nil {
+		handler, ok := ns.GetTCPHandlerForFlow(clientRemoteAddrPort, dstAddrPort)
+		if ok {
+			if handler == nil {
+				r.Complete(true)
+				return
+			}
+			c := createConn() // will send a RST if it fails
+			if c == nil {
+				return
+			}
+			handler(c)
 			return
 		}
-		ns.ForwardTCPIn(c, reqDetails.LocalPort)
-		return
 	}
 	if isTailscaleIP {
 		dialIP = netaddr.IPv4(127, 0, 0, 1)
@@ -1030,8 +1050,20 @@ func (ns *Impl) acceptUDP(r *udp.ForwarderRequest) {
 		return
 	}
 
+	if get := ns.GetUDPHandlerForFlow; get != nil {
+		h, intercept := get(srcAddr, dstAddr)
+		if intercept {
+			if h == nil {
+				ep.Close()
+				return
+			}
+			go h(gonet.NewUDPConn(ns.ipstack, &wq, ep))
+			return
+		}
+	}
+
 	c := gonet.NewUDPConn(ns.ipstack, &wq, ep)
-	go ns.forwardUDP(c, &wq, srcAddr, dstAddr)
+	go ns.forwardUDP(c, srcAddr, dstAddr)
 }
 
 func (ns *Impl) handleMagicDNSUDP(srcAddr netip.AddrPort, c *gonet.UDPConn) {
@@ -1075,7 +1107,7 @@ func (ns *Impl) handleMagicDNSUDP(srcAddr netip.AddrPort, c *gonet.UDPConn) {
 // dstAddr may be either a local Tailscale IP, in which we case we proxy to
 // 127.0.0.1, or any other IP (from an advertised subnet), in which case we
 // proxy to it directly.
-func (ns *Impl) forwardUDP(client *gonet.UDPConn, wq *waiter.Queue, clientAddr, dstAddr netip.AddrPort) {
+func (ns *Impl) forwardUDP(client *gonet.UDPConn, clientAddr, dstAddr netip.AddrPort) {
 	port, srcPort := dstAddr.Port(), clientAddr.Port()
 	if debugNetstack() {
 		ns.logf("[v2] netstack: forwarding incoming UDP connection on port %v", port)

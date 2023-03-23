@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package wgengine
 
@@ -14,6 +13,7 @@ import (
 	"tailscale.com/tailcfg"
 	"tailscale.com/types/key"
 	"tailscale.com/types/netmap"
+	"tailscale.com/wgengine/capture"
 	"tailscale.com/wgengine/filter"
 	"tailscale.com/wgengine/monitor"
 	"tailscale.com/wgengine/router"
@@ -172,4 +172,9 @@ type Engine interface {
 	// WhoIsIPPort looks up an IP:port in the temporary registrations,
 	// and returns a matching Tailscale IP, if it exists.
 	WhoIsIPPort(netip.AddrPort) (netip.Addr, bool)
+
+	// InstallCaptureHook registers a function to be called to capture
+	// packets traversing the data path. The hook can be uninstalled by
+	// calling this function with a nil value.
+	InstallCaptureHook(capture.Callback)
 }
