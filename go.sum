@@ -524,8 +524,8 @@ github.com/aaronland/go-aws-session v0.1.0 h1:1dj3oQhw8Jtecz8jeT5AAzTul0KbLZ8Yhm
 github.com/aaronland/go-aws-session v0.1.0/go.mod h1:M5imkutLPvwnI1Bb38minI3TCy1eSvwP6odMtCmBzqk=
 github.com/aaronland/go-brooklynintegers-api v1.2.6 h1:Hb+JrAA77ZLvcLnoRryAX2J1rjcPYoXlWD3u7AFQwzE=
 github.com/aaronland/go-brooklynintegers-api v1.2.6/go.mod h1:HwGtLOIxqBXN+jmOzg5/VYuNbD9yg03t30hC+jlfwpI=
-github.com/aaronland/go-http-bootstrap v0.3.0 h1:mUc0qaLbjQjiNDm5DLIpz815hUNyc/J/T7+Xb/AjeU4=
-github.com/aaronland/go-http-bootstrap v0.3.0/go.mod h1:D4WckFH8x5+oT6oSNy6OulbFbthUAlX4UxWgpXEa5ck=
+github.com/aaronland/go-http-bootstrap v0.4.0 h1:W+wXKbJvpT7eW3hjjLNXDfJy980+G/xju6Y4S2VD7Kk=
+github.com/aaronland/go-http-bootstrap v0.4.0/go.mod h1:v71tU1uyr8cSInBOV2vhnaV+l3bQ/yEtkPvchD1Ho64=
 github.com/aaronland/go-http-leaflet v0.4.0 h1:1aUH60aINVtRl0C2k/zLlYIngFOFchKYXlif9CxS6Ys=
 github.com/aaronland/go-http-leaflet v0.4.0/go.mod h1:wdo1JQvSZ3SvTnanwY1vmaRp4Nt7zynAom0MWXtTP6A=
 github.com/aaronland/go-http-maps v0.3.0 h1:vdusnJdpjwTMYPsvboMQYfuDwQmOleJRmYJ2KPetnzU=

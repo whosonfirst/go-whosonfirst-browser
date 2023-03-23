@@ -377,8 +377,11 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		bootstrap_opts = bootstrap.DefaultBootstrapOptions()
 		bootstrap_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
-
-		err = bootstrap.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
+		bootstrap_opts.RollupAssets = settings.Capabilities.RollupAssets		
+		bootstrap_opts.Prefix = settings.URIs.URIPrefix
+		bootstrap_opts.Logger = logger
+		
+		err = bootstrap.AppendAssetHandlers(mux, bootstrap_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append Bootstrap asset handlers, %w", err)
@@ -442,7 +445,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			return fmt.Errorf("Failed to create Index handler, %w", err)
 		}
 
-		index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, settings.URIs.URIPrefix)
+		index_handler = bootstrap.AppendResourcesHandler(index_handler, bootstrap_opts)
 		index_handler = maps.AppendResourcesHandlerWithProvider(index_handler, settings.MapProvider, maps_opts)
 		index_handler = settings.CustomChrome.WrapHandler(index_handler)
 		index_handler = settings.Authenticator.WrapHandler(index_handler)
@@ -468,7 +471,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			return fmt.Errorf("Failed to create Id handler, %w", err)
 		}
 
-		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, settings.URIs.URIPrefix)
+		id_handler = bootstrap.AppendResourcesHandler(id_handler, bootstrap_opts)
 		id_handler = maps.AppendResourcesHandlerWithProvider(id_handler, settings.MapProvider, maps_opts)
 		id_handler = settings.CustomChrome.WrapHandler(id_handler)
 		id_handler = settings.Authenticator.WrapHandler(id_handler)
@@ -493,7 +496,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			return fmt.Errorf("Failed to create Search handler, %w", err)
 		}
 
-		search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, settings.URIs.URIPrefix)
+		search_handler = bootstrap.AppendResourcesHandler(search_handler, bootstrap_opts)
 		search_handler = maps.AppendResourcesHandlerWithProvider(search_handler, settings.MapProvider, maps_opts)
 		search_handler = settings.CustomChrome.WrapHandler(search_handler)
 		search_handler = settings.Authenticator.WrapHandler(search_handler)
@@ -560,7 +563,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		geom_handler = maps.AppendResourcesHandlerWithProvider(geom_handler, settings.MapProvider, maps_opts)
-		geom_handler = bootstrap.AppendResourcesHandlerWithPrefix(geom_handler, bootstrap_opts, settings.URIs.URIPrefix)
+		geom_handler = bootstrap.AppendResourcesHandler(geom_handler, bootstrap_opts)
 		geom_handler = settings.CustomChrome.WrapHandler(geom_handler)
 		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
 
@@ -632,7 +635,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		create_handler = appendCustomMiddlewareHandlers(settings, settings.URIs.CreateFeature, create_handler)
 
-		create_handler = bootstrap.AppendResourcesHandlerWithPrefix(create_handler, bootstrap_opts, settings.URIs.URIPrefix)
+		create_handler = bootstrap.AppendResourcesHandler(create_handler, bootstrap_opts)
 		create_handler = settings.CustomChrome.WrapHandler(create_handler)
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
 
@@ -784,7 +787,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	for path, h := range settings.CustomWWWHandlers {
 
 		h = maps.AppendResourcesHandlerWithProvider(h, settings.MapProvider, maps_opts)
-		h = bootstrap.AppendResourcesHandlerWithPrefix(h, bootstrap_opts, settings.URIs.URIPrefix)
+		h = bootstrap.AppendResourcesHandler(h, bootstrap_opts)
 		h = settings.CustomChrome.WrapHandler(h)
 
 		h = settings.Authenticator.WrapHandler(h)

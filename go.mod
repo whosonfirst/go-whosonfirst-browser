@@ -3,7 +3,7 @@ module github.com/whosonfirst/go-whosonfirst-browser/v7
 go 1.18
 
 require (
-	github.com/aaronland/go-http-bootstrap v0.3.0
+	github.com/aaronland/go-http-bootstrap v0.4.0
 	github.com/aaronland/go-http-maps v0.3.0
 	github.com/aaronland/go-http-ping/v2 v2.0.0
 	github.com/aaronland/go-http-sanitize v0.0.6
