@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package netcheck checks the network conditions from the current host.
 package netcheck
@@ -32,6 +31,7 @@ import (
 	"tailscale.com/net/netns"
 	"tailscale.com/net/ping"
 	"tailscale.com/net/portmapper"
+	"tailscale.com/net/sockstats"
 	"tailscale.com/net/stun"
 	"tailscale.com/syncs"
 	"tailscale.com/tailcfg"
@@ -783,6 +783,8 @@ func (c *Client) GetReport(ctx context.Context, dm *tailcfg.DERPMap) (_ *Report,
 	// (User ctx might be context.Background, etc)
 	ctx, cancel := context.WithTimeout(ctx, overallProbeTimeout)
 	defer cancel()
+
+	ctx = sockstats.WithSockStats(ctx, sockstats.LabelNetcheckClient)
 
 	if dm == nil {
 		return nil, errors.New("netcheck: GetReport: DERP map is nil")

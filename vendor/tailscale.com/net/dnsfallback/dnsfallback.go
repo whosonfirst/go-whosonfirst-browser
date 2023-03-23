@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:generate go run update-dns-fallbacks.go
 
@@ -15,7 +14,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
 	"net/http"
 	"net/netip"
@@ -32,6 +30,7 @@ import (
 	"tailscale.com/syncs"
 	"tailscale.com/tailcfg"
 	"tailscale.com/types/logger"
+	"tailscale.com/util/slicesx"
 )
 
 func Lookup(ctx context.Context, host string) ([]netip.Addr, error) {
@@ -57,8 +56,8 @@ func Lookup(ctx context.Context, host string) ([]netip.Addr, error) {
 			}
 		}
 	}
-	rand.Shuffle(len(cands4), func(i, j int) { cands4[i], cands4[j] = cands4[j], cands4[i] })
-	rand.Shuffle(len(cands6), func(i, j int) { cands6[i], cands6[j] = cands6[j], cands6[i] })
+	slicesx.Shuffle(cands4)
+	slicesx.Shuffle(cands6)
 
 	const maxCands = 6
 	var cands []nameIP // up to maxCands alternating v4/v6 as long as we have both
@@ -88,6 +87,7 @@ func Lookup(ctx context.Context, host string) ([]netip.Addr, error) {
 			continue
 		}
 		if ips := dm[host]; len(ips) > 0 {
+			slicesx.Shuffle(ips)
 			logf("bootstrapDNS(%q, %q) for %q = %v", cand.dnsName, cand.ip, host, ips)
 			return ips, nil
 		}
@@ -250,10 +250,13 @@ func SetCachePath(path string) {
 // logfunc stores the logging function to use for this package.
 var logfunc syncs.AtomicValue[logger.Logf]
 
-// SetLogger sets the logging function that this package will use. The default
-// logger if this function is not called is 'log.Printf'.
-func SetLogger(log logger.Logf) {
-	logfunc.Store(log)
+// SetLogger sets the logging function that this package will use, and returns
+// the old value (which may be nil).
+//
+// If this function is never called, or if this function is called with a nil
+// value, 'log.Printf' will be used to print logs.
+func SetLogger(log logger.Logf) (old logger.Logf) {
+	return logfunc.Swap(log)
 }
 
 func logf(format string, args ...any) {

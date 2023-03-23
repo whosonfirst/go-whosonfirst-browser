@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package logpolicy manages the creation or reuse of logtail loggers,
 // caching collection instance state on disk for use on future runs of
@@ -44,7 +43,9 @@ import (
 	"tailscale.com/safesocket"
 	"tailscale.com/smallzstd"
 	"tailscale.com/types/logger"
+	"tailscale.com/types/logid"
 	"tailscale.com/util/clientmetric"
+	"tailscale.com/util/must"
 	"tailscale.com/util/racebuild"
 	"tailscale.com/util/winutil"
 	"tailscale.com/version"
@@ -95,8 +96,8 @@ func LogHost() string {
 // Config represents an instance of logs in a collection.
 type Config struct {
 	Collection string
-	PrivateID  logtail.PrivateID
-	PublicID   logtail.PublicID
+	PrivateID  logid.PrivateID
+	PublicID   logid.PublicID
 }
 
 // Policy is a logger and its public ID.
@@ -104,15 +105,12 @@ type Policy struct {
 	// Logtail is the logger.
 	Logtail *logtail.Logger
 	// PublicID is the logger's instance identifier.
-	PublicID logtail.PublicID
+	PublicID logid.PublicID
 }
 
 // NewConfig creates a Config with collection and a newly generated PrivateID.
 func NewConfig(collection string) *Config {
-	id, err := logtail.NewPrivateID()
-	if err != nil {
-		panic("logtail.NewPrivateID should never fail")
-	}
+	id := must.Get(logid.NewPrivateID())
 	return &Config{
 		Collection: collection,
 		PrivateID:  id,
@@ -194,9 +192,9 @@ func (l logWriter) Write(buf []byte) (int, error) {
 	return len(buf), nil
 }
 
-// logsDir returns the directory to use for log configuration and
+// LogsDir returns the directory to use for log configuration and
 // buffer storage.
-func logsDir(logf logger.Logf) string {
+func LogsDir(logf logger.Logf) string {
 	if d := os.Getenv("TS_LOGS_DIR"); d != "" {
 		fi, err := os.Stat(d)
 		if err == nil && fi.IsDir() {
@@ -480,7 +478,7 @@ func NewWithConfigPath(collection, dir, cmdName string) *Policy {
 	}
 
 	if dir == "" {
-		dir = logsDir(earlyLogf)
+		dir = LogsDir(earlyLogf)
 	}
 	if cmdName == "" {
 		cmdName = version.CmdName()
@@ -613,7 +611,7 @@ func NewWithConfigPath(collection, dir, cmdName string) *Policy {
 	log.SetOutput(logOutput)
 
 	log.Printf("Program starting: v%v, Go %v: %#v",
-		version.Long,
+		version.Long(),
 		goVersion(),
 		os.Args)
 	log.Printf("LogID: %v", newc.PublicID)

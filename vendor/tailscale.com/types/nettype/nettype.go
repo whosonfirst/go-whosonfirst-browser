@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package nettype defines an interface that doesn't exist in the Go net package.
 package nettype
@@ -48,4 +47,10 @@ func (a packetListenerAdapter) ListenPacket(ctx context.Context, network, addres
 		return nil, err
 	}
 	return pc.(PacketConn), nil
+}
+
+// ConnPacketConn is the interface that's a superset of net.Conn and net.PacketConn.
+type ConnPacketConn interface {
+	net.Conn
+	net.PacketConn
 }

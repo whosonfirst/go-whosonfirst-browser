@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package resolver
 
@@ -16,20 +15,18 @@ import (
 	"net/http"
 	"net/netip"
 	"net/url"
-	"runtime"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	dns "golang.org/x/net/dns/dnsmessage"
 	"tailscale.com/envknob"
-	"tailscale.com/hostinfo"
 	"tailscale.com/net/dns/publicdns"
 	"tailscale.com/net/dnscache"
 	"tailscale.com/net/neterror"
 	"tailscale.com/net/netns"
+	"tailscale.com/net/sockstats"
 	"tailscale.com/net/tsdial"
 	"tailscale.com/types/dnstype"
 	"tailscale.com/types/logger"
@@ -182,7 +179,6 @@ type forwarder struct {
 	linkMon *monitor.Mon
 	linkSel ForwardLinkSelector // TODO(bradfitz): remove this when tsdial.Dialer absorbs it
 	dialer  *tsdial.Dialer
-	dohSem  chan struct{}
 
 	ctx       context.Context    // good until Close
 	ctxCancel context.CancelFunc // closes ctx
@@ -210,36 +206,12 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func maxDoHInFlight(goos string) int {
-	if goos != "ios" {
-		return 1000 // effectively unlimited
-	}
-	// iOS <  15 limits the memory to 15MB for NetworkExtensions.
-	// iOS >= 15 gives us 50MB.
-	// See: https://tailscale.com/blog/go-linker/
-	ver := hostinfo.GetOSVersion()
-	if ver == "" {
-		// Unknown iOS version, be cautious.
-		return 10
-	}
-	major, _, ok := strings.Cut(ver, ".")
-	if !ok {
-		// Unknown iOS version, be cautious.
-		return 10
-	}
-	if m, err := strconv.Atoi(major); err != nil || m < 15 {
-		return 10
-	}
-	return 1000
-}
-
 func newForwarder(logf logger.Logf, linkMon *monitor.Mon, linkSel ForwardLinkSelector, dialer *tsdial.Dialer) *forwarder {
 	f := &forwarder{
 		logf:    logger.WithPrefix(logf, "forward: "),
 		linkMon: linkMon,
 		linkSel: linkSel,
 		dialer:  dialer,
-		dohSem:  make(chan struct{}, maxDoHInFlight(runtime.GOOS)),
 	}
 	f.ctx, f.ctxCancel = context.WithCancel(context.Background())
 	return f
@@ -412,6 +384,7 @@ func (f *forwarder) getKnownDoHClientForProvider(urlBase string) (c *http.Client
 	dialer := dnscache.Dialer(nsDialer.DialContext, &dnscache.Resolver{
 		SingleHost:             dohURL.Hostname(),
 		SingleHostStaticResult: allIPs,
+		Logf:                   f.logf,
 	})
 	c = &http.Client{
 		Transport: &http.Transport{
@@ -434,22 +407,8 @@ func (f *forwarder) getKnownDoHClientForProvider(urlBase string) (c *http.Client
 
 const dohType = "application/dns-message"
 
-func (f *forwarder) releaseDoHSem() { <-f.dohSem }
-
 func (f *forwarder) sendDoH(ctx context.Context, urlBase string, c *http.Client, packet []byte) ([]byte, error) {
-	// Bound the number of HTTP requests in flight. This primarily
-	// matters for iOS where we're very memory constrained and
-	// HTTP requests are heavier on iOS where we don't include
-	// HTTP/2 for binary size reasons (as binaries on iOS linked
-	// with Go code cost memory proportional to the binary size,
-	// for reasons not fully understood).
-	select {
-	case f.dohSem <- struct{}{}:
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	}
-	defer f.releaseDoHSem()
-
+	ctx = sockstats.WithSockStats(ctx, sockstats.LabelDNSForwarderDoH)
 	metricDNSFwdDoH.Add(1)
 	req, err := http.NewRequestWithContext(ctx, "POST", urlBase, bytes.NewReader(packet))
 	if err != nil {
@@ -457,7 +416,7 @@ func (f *forwarder) sendDoH(ctx context.Context, urlBase string, c *http.Client,
 	}
 	req.Header.Set("Content-Type", dohType)
 	req.Header.Set("Accept", dohType)
-	req.Header.Set("User-Agent", "tailscaled/"+version.Long)
+	req.Header.Set("User-Agent", "tailscaled/"+version.Long())
 
 	hres, err := c.Do(req)
 	if err != nil {
@@ -529,6 +488,7 @@ func (f *forwarder) sendUDP(ctx context.Context, fq *forwardQuery, rr resolverAn
 		return nil, fmt.Errorf("unrecognized resolver type %q", rr.name.Addr)
 	}
 	metricDNSFwdUDP.Add(1)
+	ctx = sockstats.WithSockStats(ctx, sockstats.LabelDNSForwarderUDP)
 
 	ln, err := f.packetListener(ipp.Addr())
 	if err != nil {

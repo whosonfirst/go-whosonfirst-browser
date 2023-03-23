@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package ipnlocal
 
@@ -10,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hash/adler32"
 	"hash/crc32"
 	"html"
 	"io"
@@ -45,9 +45,10 @@ import (
 	"tailscale.com/net/interfaces"
 	"tailscale.com/net/netaddr"
 	"tailscale.com/net/netutil"
+	"tailscale.com/net/sockstats"
 	"tailscale.com/tailcfg"
 	"tailscale.com/util/clientmetric"
-	"tailscale.com/util/strs"
+	"tailscale.com/util/multierr"
 	"tailscale.com/wgengine"
 	"tailscale.com/wgengine/filter"
 )
@@ -163,7 +164,7 @@ func (s *peerAPIServer) hasFilesWaiting() bool {
 			if strings.HasSuffix(name, partialSuffix) {
 				continue
 			}
-			if name, ok := strs.CutSuffix(name, deletedSuffix); ok { // for Windows + tests
+			if name, ok := strings.CutSuffix(name, deletedSuffix); ok { // for Windows + tests
 				// After we're done looping over files, then try
 				// to delete this file. Don't do it proactively,
 				// as the OS may return "foo.jpg.deleted" before "foo.jpg"
@@ -222,7 +223,7 @@ func (s *peerAPIServer) WaitingFiles() (ret []apitype.WaitingFile, err error) {
 			if strings.HasSuffix(name, partialSuffix) {
 				continue
 			}
-			if name, ok := strs.CutSuffix(name, deletedSuffix); ok { // for Windows + tests
+			if name, ok := strings.CutSuffix(name, deletedSuffix); ok { // for Windows + tests
 				if deleted == nil {
 					deleted = map[string]bool{}
 				}
@@ -341,11 +342,68 @@ func (s *peerAPIServer) DeleteFile(baseName string) error {
 // accidentally logging actual filenames anywhere.
 const redacted = "redacted"
 
-func redactErr(err error) error {
-	if pe, ok := err.(*os.PathError); ok {
-		pe.Path = redacted
+type redactedErr struct {
+	msg   string
+	inner error
+}
+
+func (re *redactedErr) Error() string {
+	return re.msg
+}
+
+func (re *redactedErr) Unwrap() error {
+	return re.inner
+}
+
+func redactString(s string) string {
+	hash := adler32.Checksum([]byte(s))
+
+	var buf [len(redacted) + len(".12345678")]byte
+	b := append(buf[:0], []byte(redacted)...)
+	b = append(b, '.')
+	b = strconv.AppendUint(b, uint64(hash), 16)
+	return string(b)
+}
+
+func redactErr(root error) error {
+	// redactStrings is a list of sensitive strings that were redacted.
+	// It is not sufficient to just snub out sensitive fields in Go errors
+	// since some wrapper errors like fmt.Errorf pre-cache the error string,
+	// which would unfortunately remain unaffected.
+	var redactStrings []string
+
+	// Redact sensitive fields in known Go error types.
+	var unknownErrors int
+	multierr.Range(root, func(err error) bool {
+		switch err := err.(type) {
+		case *os.PathError:
+			redactStrings = append(redactStrings, err.Path)
+			err.Path = redactString(err.Path)
+		case *os.LinkError:
+			redactStrings = append(redactStrings, err.New, err.Old)
+			err.New = redactString(err.New)
+			err.Old = redactString(err.Old)
+		default:
+			unknownErrors++
+		}
+		return true
+	})
+
+	// If there are no redacted strings or no unknown error types,
+	// then we can return the possibly modified root error verbatim.
+	// Otherwise, we must replace redacted strings from any wrappers.
+	if len(redactStrings) == 0 || unknownErrors == 0 {
+		return root
 	}
-	return err
+
+	// Stringify and replace any paths that we found above, then return
+	// the error wrapped in a type that uses the newly-redacted string
+	// while also allowing Unwrap()-ing to the inner error type(s).
+	s := root.Error()
+	for _, toRedact := range redactStrings {
+		s = strings.ReplaceAll(s, toRedact, redactString(toRedact))
+	}
+	return &redactedErr{msg: s, inner: root}
 }
 
 func touchFile(path string) error {
@@ -613,7 +671,7 @@ func (h *peerAPIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if peerAPIRequestShouldGetSecurityHeaders(r) {
-		w.Header().Set("Content-Security-Policy", `default-src 'none'; frame-ancestors 'none'; script-src 'none'; script-src-elem 'none'; script-src-attr 'none'`)
+		w.Header().Set("Content-Security-Policy", `default-src 'none'; frame-ancestors 'none'; script-src 'none'; script-src-elem 'none'; script-src-attr 'none'; style-src 'unsafe-inline'`)
 		w.Header().Set("X-Frame-Options", "DENY")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 	}
@@ -649,6 +707,11 @@ func (h *peerAPIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	case "/v0/interfaces":
 		h.handleServeInterfaces(w, r)
+		return
+	case "/v0/doctor":
+		h.handleServeDoctor(w, r)
+	case "/v0/sockstats":
+		h.handleServeSockStats(w, r)
 		return
 	case "/v0/ingress":
 		metricIngressCalls.Add(1)
@@ -698,12 +761,12 @@ func (h *peerAPIHandler) handleServeIngress(w http.ResponseWriter, r *http.Reque
 		bad("Tailscale-Ingress-Src header invalid; want ip:port")
 		return
 	}
-	target := r.Header.Get("Tailscale-Ingress-Target")
+	target := ipn.HostPort(r.Header.Get("Tailscale-Ingress-Target"))
 	if target == "" {
 		bad("Tailscale-Ingress-Target header not set")
 		return
 	}
-	if _, _, err := net.SplitHostPort(target); err != nil {
+	if _, _, err := net.SplitHostPort(string(target)); err != nil {
 		bad("Tailscale-Ingress-Target header invalid; want host:port")
 		return
 	}
@@ -716,13 +779,17 @@ func (h *peerAPIHandler) handleServeIngress(w http.ResponseWriter, r *http.Reque
 			return nil, false
 		}
 		io.WriteString(conn, "HTTP/1.1 101 Switching Protocols\r\n\r\n")
-		return conn, true
+		return &ipn.FunnelConn{
+			Conn:   conn,
+			Src:    srcAddr,
+			Target: target,
+		}, true
 	}
 	sendRST := func() {
 		http.Error(w, "denied", http.StatusForbidden)
 	}
 
-	h.ps.b.HandleIngressTCPConn(h.peerNode, ipn.HostPort(target), srcAddr, getConn, sendRST)
+	h.ps.b.HandleIngressTCPConn(h.peerNode, target, srcAddr, getConn, sendRST)
 }
 
 func (h *peerAPIHandler) handleServeInterfaces(w http.ResponseWriter, r *http.Request) {
@@ -739,15 +806,21 @@ func (h *peerAPIHandler) handleServeInterfaces(w http.ResponseWriter, r *http.Re
 		fmt.Fprintf(w, "<h3>Could not get the default route: %s</h3>\n", html.EscapeString(err.Error()))
 	}
 
+	if hasCGNATInterface, err := interfaces.HasCGNATInterface(); hasCGNATInterface {
+		fmt.Fprintln(w, "<p>There is another interface using the CGNAT range.</p>")
+	} else if err != nil {
+		fmt.Fprintf(w, "<p>Could not check for CGNAT interfaces: %s</p>\n", html.EscapeString(err.Error()))
+	}
+
 	i, err := interfaces.GetList()
 	if err != nil {
 		fmt.Fprintf(w, "Could not get interfaces: %s\n", html.EscapeString(err.Error()))
 		return
 	}
 
-	fmt.Fprintln(w, "<table>")
+	fmt.Fprintln(w, "<table style='border-collapse: collapse' border=1 cellspacing=0 cellpadding=2>")
 	fmt.Fprint(w, "<tr>")
-	for _, v := range []any{"Index", "Name", "MTU", "Flags", "Addrs"} {
+	for _, v := range []any{"Index", "Name", "MTU", "Flags", "Addrs", "Extra"} {
 		fmt.Fprintf(w, "<th>%v</th> ", v)
 	}
 	fmt.Fprint(w, "</tr>\n")
@@ -756,8 +829,116 @@ func (h *peerAPIHandler) handleServeInterfaces(w http.ResponseWriter, r *http.Re
 		for _, v := range []any{iface.Index, iface.Name, iface.MTU, iface.Flags, ipps} {
 			fmt.Fprintf(w, "<td>%s</td> ", html.EscapeString(fmt.Sprintf("%v", v)))
 		}
+		if extras, err := interfaces.InterfaceDebugExtras(iface.Index); err == nil && extras != "" {
+			fmt.Fprintf(w, "<td>%s</td> ", html.EscapeString(extras))
+		} else if err != nil {
+			fmt.Fprintf(w, "<td>%s</td> ", html.EscapeString(err.Error()))
+		}
 		fmt.Fprint(w, "</tr>\n")
 	})
+	fmt.Fprintln(w, "</table>")
+}
+
+func (h *peerAPIHandler) handleServeDoctor(w http.ResponseWriter, r *http.Request) {
+	if !h.canDebug() {
+		http.Error(w, "denied; no debug access", http.StatusForbidden)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprintln(w, "<h1>Doctor Output</h1>")
+
+	fmt.Fprintln(w, "<pre>")
+
+	h.ps.b.Doctor(r.Context(), func(format string, args ...any) {
+		line := fmt.Sprintf(format, args...)
+		fmt.Fprintln(w, html.EscapeString(line))
+	})
+
+	fmt.Fprintln(w, "</pre>")
+}
+
+func (h *peerAPIHandler) handleServeSockStats(w http.ResponseWriter, r *http.Request) {
+	if !h.canDebug() {
+		http.Error(w, "denied; no debug access", http.StatusForbidden)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprintln(w, "<!DOCTYPE html><h1>Socket Stats</h1>")
+
+	stats, validation := sockstats.GetWithValidation()
+	if stats == nil {
+		fmt.Fprintln(w, "No socket stats available")
+		return
+	}
+
+	fmt.Fprintln(w, "<table border='1' cellspacing='0' style='border-collapse: collapse;'>")
+	fmt.Fprintln(w, "<thead>")
+	fmt.Fprintln(w, "<th>Label</th>")
+	fmt.Fprintln(w, "<th>Tx</th>")
+	fmt.Fprintln(w, "<th>Rx</th>")
+	for _, iface := range stats.Interfaces {
+		fmt.Fprintf(w, "<th>Tx (%s)</th>", html.EscapeString(iface))
+		fmt.Fprintf(w, "<th>Rx (%s)</th>", html.EscapeString(iface))
+	}
+	fmt.Fprintln(w, "<th>Validation</th>")
+	fmt.Fprintln(w, "</thead>")
+
+	fmt.Fprintln(w, "<tbody>")
+	labels := make([]sockstats.Label, 0, len(stats.Stats))
+	for label := range stats.Stats {
+		labels = append(labels, label)
+	}
+	slices.SortFunc(labels, func(a, b sockstats.Label) bool {
+		return a.String() < b.String()
+	})
+
+	txTotal := uint64(0)
+	rxTotal := uint64(0)
+	txTotalByInterface := map[string]uint64{}
+	rxTotalByInterface := map[string]uint64{}
+
+	for _, label := range labels {
+		stat := stats.Stats[label]
+		fmt.Fprintln(w, "<tr>")
+		fmt.Fprintf(w, "<td>%s</td>", html.EscapeString(label.String()))
+		fmt.Fprintf(w, "<td align=right>%d</td>", stat.TxBytes)
+		fmt.Fprintf(w, "<td align=right>%d</td>", stat.RxBytes)
+
+		txTotal += stat.TxBytes
+		rxTotal += stat.RxBytes
+
+		for _, iface := range stats.Interfaces {
+			fmt.Fprintf(w, "<td align=right>%d</td>", stat.TxBytesByInterface[iface])
+			fmt.Fprintf(w, "<td align=right>%d</td>", stat.RxBytesByInterface[iface])
+			txTotalByInterface[iface] += stat.TxBytesByInterface[iface]
+			rxTotalByInterface[iface] += stat.RxBytesByInterface[iface]
+		}
+
+		if validationStat, ok := validation.Stats[label]; ok && (validationStat.RxBytes > 0 || validationStat.TxBytes > 0) {
+			fmt.Fprintf(w, "<td>Tx=%d (%+d) Rx=%d (%+d)</td>",
+				validationStat.TxBytes,
+				int64(validationStat.TxBytes)-int64(stat.TxBytes),
+				validationStat.RxBytes,
+				int64(validationStat.RxBytes)-int64(stat.RxBytes))
+		} else {
+			fmt.Fprintln(w, "<td></td>")
+		}
+
+		fmt.Fprintln(w, "</tr>")
+	}
+	fmt.Fprintln(w, "</tbody>")
+
+	fmt.Fprintln(w, "<tfoot>")
+	fmt.Fprintln(w, "<th>Total</th>")
+	fmt.Fprintf(w, "<th>%d</th>", txTotal)
+	fmt.Fprintf(w, "<th>%d</th>", rxTotal)
+	for _, iface := range stats.Interfaces {
+		fmt.Fprintf(w, "<th>%d</th>", txTotalByInterface[iface])
+		fmt.Fprintf(w, "<th>%d</th>", rxTotalByInterface[iface])
+	}
+	fmt.Fprintln(w, "<th></th>")
+	fmt.Fprintln(w, "</tfoot>")
+
 	fmt.Fprintln(w, "</table>")
 }
 
@@ -844,6 +1025,9 @@ func (h *peerAPIHandler) canDebug() bool {
 
 // canWakeOnLAN reports whether h can send a Wake-on-LAN packet from this node.
 func (h *peerAPIHandler) canWakeOnLAN() bool {
+	if h.peerNode.UnsignedPeerAPIOnly {
+		return false
+	}
 	return h.isSelf || h.peerHasCap(tailcfg.CapabilityWakeOnLAN)
 }
 
@@ -885,7 +1069,7 @@ func (h *peerAPIHandler) handlePeerPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rawPath := r.URL.EscapedPath()
-	suffix, ok := strs.CutPrefix(rawPath, "/v0/put/")
+	suffix, ok := strings.CutPrefix(rawPath, "/v0/put/")
 	if !ok {
 		http.Error(w, "misconfigured internals", 500)
 		return

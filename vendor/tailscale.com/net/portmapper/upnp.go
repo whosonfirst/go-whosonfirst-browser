@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build !js
 
@@ -14,6 +13,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/netip"
 	"net/url"
@@ -44,11 +44,21 @@ type upnpMapping struct {
 	client upnpClient
 }
 
+// upnpProtocolUDP represents the protocol name for UDP, to be used in the UPnP
+// <AddPortMapping> message in the <NewProtocol> field.
+//
+// NOTE: this must be an upper-case string, or certain routers will reject the
+// mapping request. Other implementations like miniupnp send an upper-case
+// protocol as well. See:
+//
+//	https://github.com/tailscale/tailscale/issues/7377
+const upnpProtocolUDP = "UDP"
+
 func (u *upnpMapping) GoodUntil() time.Time     { return u.goodUntil }
 func (u *upnpMapping) RenewAfter() time.Time    { return u.renewAfter }
 func (u *upnpMapping) External() netip.AddrPort { return u.external }
 func (u *upnpMapping) Release(ctx context.Context) {
-	u.client.DeletePortMapping(ctx, "", u.external.Port(), "udp")
+	u.client.DeletePortMapping(ctx, "", u.external.Port(), upnpProtocolUDP)
 }
 
 // upnpClient is an interface over the multiple different clients exported by goupnp,
@@ -69,7 +79,7 @@ type upnpClient interface {
 		// `AddAnyPortMapping` is not supported.
 		externalPort uint16,
 
-		// protocol is whether this is over TCP or UDP. Either "tcp" or "udp".
+		// protocol is whether this is over TCP or UDP. Either "TCP" or "UDP".
 		protocol string,
 
 		// internalPort is the port that the gateway device forwards the traffic to.
@@ -116,7 +126,7 @@ func addAnyPortMapping(
 			ctx,
 			"",
 			externalPort,
-			"udp",
+			upnpProtocolUDP,
 			internalPort,
 			internalClient,
 			true,
@@ -124,14 +134,21 @@ func addAnyPortMapping(
 			uint32(leaseDuration.Seconds()),
 		)
 	}
-	for externalPort == 0 {
-		externalPort = uint16(rand.Intn(65535))
+
+	// Some devices don't let clients add a port mapping for privileged
+	// ports (ports below 1024).
+	//
+	// Pick an external port that's greater than 1024 by getting a random
+	// number in [0, 65535 - 1024] and then adding 1024 to it, shifting the
+	// range to [1024, 65535].
+	if externalPort < 1024 {
+		externalPort = uint16(rand.Intn(65535-1024) + 1024)
 	}
 	err = upnp.AddPortMapping(
 		ctx,
 		"",
 		externalPort,
-		"udp",
+		upnpProtocolUDP,
 		internalPort,
 		internalClient,
 		true,
@@ -152,8 +169,8 @@ func addAnyPortMapping(
 //
 // The provided ctx is not retained in the returned upnpClient, but
 // its associated HTTP client is (if set via goupnp.WithHTTPClient).
-func getUPnPClient(ctx context.Context, logf logger.Logf, gw netip.Addr, meta uPnPDiscoResponse) (client upnpClient, err error) {
-	if controlknobs.DisableUPnP() || DisableUPnP {
+func getUPnPClient(ctx context.Context, logf logger.Logf, debug DebugKnobs, gw netip.Addr, meta uPnPDiscoResponse) (client upnpClient, err error) {
+	if controlknobs.DisableUPnP() || debug.DisableUPnP {
 		return nil, nil
 	}
 
@@ -161,7 +178,7 @@ func getUPnPClient(ctx context.Context, logf logger.Logf, gw netip.Addr, meta uP
 		return nil, nil
 	}
 
-	if VerboseLogs {
+	if debug.VerboseLogs {
 		logf("fetching %v", meta.Location)
 	}
 	u, err := url.Parse(meta.Location)
@@ -174,8 +191,10 @@ func getUPnPClient(ctx context.Context, logf logger.Logf, gw netip.Addr, meta uP
 		return nil, fmt.Errorf("unexpected host %q in %q", u.Host, meta.Location)
 	}
 	if ipp.Addr() != gw {
-		return nil, fmt.Errorf("UPnP discovered root %q does not match gateway IP %v; ignoring UPnP",
+		// https://github.com/tailscale/tailscale/issues/5502
+		logf("UPnP discovered root %q does not match gateway IP %v; repointing at gateway which is assumed to be floating",
 			meta.Location, gw)
+		u.Host = net.JoinHostPort(gw.String(), u.Port())
 	}
 
 	// We're fetching a smallish XML document over plain HTTP
@@ -235,9 +254,10 @@ func (c *Client) getUPnPPortMapping(
 	internal netip.AddrPort,
 	prevPort uint16,
 ) (external netip.AddrPort, ok bool) {
-	if controlknobs.DisableUPnP() || DisableUPnP {
+	if controlknobs.DisableUPnP() || c.debug.DisableUPnP {
 		return netip.AddrPort{}, false
 	}
+
 	now := time.Now()
 	upnp := &upnpMapping{
 		gw:       gw,
@@ -255,8 +275,8 @@ func (c *Client) getUPnPPortMapping(
 		client = oldMapping.client
 	} else {
 		ctx := goupnp.WithHTTPClient(ctx, httpClient)
-		client, err = getUPnPClient(ctx, c.logf, gw, meta)
-		if VerboseLogs {
+		client, err = getUPnPClient(ctx, c.logf, c.debug, gw, meta)
+		if c.debug.VerboseLogs {
 			c.logf("getUPnPClient: %T, %v", client, err)
 		}
 		if err != nil {
@@ -276,15 +296,15 @@ func (c *Client) getUPnPPortMapping(
 		internal.Addr().String(),
 		time.Second*pmpMapLifetimeSec,
 	)
-	if VerboseLogs {
-		c.logf("addAnyPortMapping: %v, %v", newPort, err)
+	if c.debug.VerboseLogs {
+		c.logf("addAnyPortMapping: %v, err=%q", newPort, err)
 	}
 	if err != nil {
 		return netip.AddrPort{}, false
 	}
 	// TODO cache this ip somewhere?
 	extIP, err := client.GetExternalIPAddress(ctx)
-	if VerboseLogs {
+	if c.debug.VerboseLogs {
 		c.logf("client.GetExternalIPAddress: %v, %v", extIP, err)
 	}
 	if err != nil {

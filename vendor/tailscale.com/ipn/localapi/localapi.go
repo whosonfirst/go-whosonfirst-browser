@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package localapi contains the HTTP server handlers for tailscaled's API server.
 package localapi
@@ -34,17 +33,19 @@ import (
 	"tailscale.com/ipn"
 	"tailscale.com/ipn/ipnlocal"
 	"tailscale.com/ipn/ipnstate"
+	"tailscale.com/logtail"
 	"tailscale.com/net/netutil"
-	"tailscale.com/safesocket"
+	"tailscale.com/net/portmapper"
 	"tailscale.com/tailcfg"
 	"tailscale.com/tka"
 	"tailscale.com/types/key"
 	"tailscale.com/types/logger"
 	"tailscale.com/types/ptr"
 	"tailscale.com/util/clientmetric"
+	"tailscale.com/util/httpm"
 	"tailscale.com/util/mak"
-	"tailscale.com/util/strs"
 	"tailscale.com/version"
+	"tailscale.com/wgengine/monitor"
 )
 
 type localAPIHandler func(*Handler, http.ResponseWriter, *http.Request)
@@ -61,39 +62,49 @@ var handler = map[string]localAPIHandler{
 
 	// The other /localapi/v0/NAME handlers are exact matches and contain only NAME
 	// without a trailing slash:
-	"bugreport":               (*Handler).serveBugReport,
-	"check-ip-forwarding":     (*Handler).serveCheckIPForwarding,
-	"check-prefs":             (*Handler).serveCheckPrefs,
-	"component-debug-logging": (*Handler).serveComponentDebugLogging,
-	"debug":                   (*Handler).serveDebug,
-	"debug-derp-region":       (*Handler).serveDebugDERPRegion,
-	"derpmap":                 (*Handler).serveDERPMap,
-	"dev-set-state-store":     (*Handler).serveDevSetStateStore,
-	"dial":                    (*Handler).serveDial,
-	"file-targets":            (*Handler).serveFileTargets,
-	"goroutines":              (*Handler).serveGoroutines,
-	"id-token":                (*Handler).serveIDToken,
-	"login-interactive":       (*Handler).serveLoginInteractive,
-	"logout":                  (*Handler).serveLogout,
-	"metrics":                 (*Handler).serveMetrics,
-	"ping":                    (*Handler).servePing,
-	"prefs":                   (*Handler).servePrefs,
-	"pprof":                   (*Handler).servePprof,
-	"serve-config":            (*Handler).serveServeConfig,
-	"set-dns":                 (*Handler).serveSetDNS,
-	"set-expiry-sooner":       (*Handler).serveSetExpirySooner,
-	"start":                   (*Handler).serveStart,
-	"status":                  (*Handler).serveStatus,
-	"tka/init":                (*Handler).serveTKAInit,
-	"tka/log":                 (*Handler).serveTKALog,
-	"tka/modify":              (*Handler).serveTKAModify,
-	"tka/sign":                (*Handler).serveTKASign,
-	"tka/status":              (*Handler).serveTKAStatus,
-	"tka/disable":             (*Handler).serveTKADisable,
-	"tka/force-local-disable": (*Handler).serveTKALocalDisable,
-	"upload-client-metrics":   (*Handler).serveUploadClientMetrics,
-	"watch-ipn-bus":           (*Handler).serveWatchIPNBus,
-	"whois":                   (*Handler).serveWhoIs,
+	"bugreport":                   (*Handler).serveBugReport,
+	"check-ip-forwarding":         (*Handler).serveCheckIPForwarding,
+	"check-prefs":                 (*Handler).serveCheckPrefs,
+	"component-debug-logging":     (*Handler).serveComponentDebugLogging,
+	"debug":                       (*Handler).serveDebug,
+	"debug-derp-region":           (*Handler).serveDebugDERPRegion,
+	"debug-packet-filter-matches": (*Handler).serveDebugPacketFilterMatches,
+	"debug-packet-filter-rules":   (*Handler).serveDebugPacketFilterRules,
+	"debug-portmap":               (*Handler).serveDebugPortmap,
+	"debug-peer-endpoint-changes": (*Handler).serveDebugPeerEndpointChanges,
+	"debug-capture":               (*Handler).serveDebugCapture,
+	"derpmap":                     (*Handler).serveDERPMap,
+	"dev-set-state-store":         (*Handler).serveDevSetStateStore,
+	"set-push-device-token":       (*Handler).serveSetPushDeviceToken,
+	"dial":                        (*Handler).serveDial,
+	"file-targets":                (*Handler).serveFileTargets,
+	"goroutines":                  (*Handler).serveGoroutines,
+	"id-token":                    (*Handler).serveIDToken,
+	"login-interactive":           (*Handler).serveLoginInteractive,
+	"logout":                      (*Handler).serveLogout,
+	"logtap":                      (*Handler).serveLogTap,
+	"metrics":                     (*Handler).serveMetrics,
+	"ping":                        (*Handler).servePing,
+	"prefs":                       (*Handler).servePrefs,
+	"pprof":                       (*Handler).servePprof,
+	"reset-auth":                  (*Handler).serveResetAuth,
+	"serve-config":                (*Handler).serveServeConfig,
+	"set-dns":                     (*Handler).serveSetDNS,
+	"set-expiry-sooner":           (*Handler).serveSetExpirySooner,
+	"start":                       (*Handler).serveStart,
+	"status":                      (*Handler).serveStatus,
+	"tka/init":                    (*Handler).serveTKAInit,
+	"tka/log":                     (*Handler).serveTKALog,
+	"tka/modify":                  (*Handler).serveTKAModify,
+	"tka/sign":                    (*Handler).serveTKASign,
+	"tka/status":                  (*Handler).serveTKAStatus,
+	"tka/disable":                 (*Handler).serveTKADisable,
+	"tka/force-local-disable":     (*Handler).serveTKALocalDisable,
+	"tka/affected-sigs":           (*Handler).serveTKAAffectedSigs,
+	"tka/wrap-preauth-key":        (*Handler).serveTKAWrapPreauthKey,
+	"upload-client-metrics":       (*Handler).serveUploadClientMetrics,
+	"watch-ipn-bus":               (*Handler).serveWatchIPNBus,
+	"whois":                       (*Handler).serveWhoIs,
 }
 
 func randHex(n int) string {
@@ -145,12 +156,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "server has no local backend", http.StatusInternalServerError)
 		return
 	}
-	if r.Referer() != "" || r.Header.Get("Origin") != "" || !validHost(r.Host) {
+	if r.Referer() != "" || r.Header.Get("Origin") != "" || !h.validHost(r.Host) {
 		metricInvalidRequests.Add(1)
 		http.Error(w, "invalid localapi request", http.StatusForbidden)
 		return
 	}
-	w.Header().Set("Tailscale-Version", version.Long)
+	w.Header().Set("Tailscale-Version", version.Long())
+	w.Header().Set("Tailscale-Cap", strconv.Itoa(int(tailcfg.CurrentCapabilityVersion)))
 	w.Header().Set("Content-Security-Policy", `default-src 'none'; frame-ancestors 'none'; script-src 'none'; script-src-elem 'none'; script-src-attr 'none'`)
 	w.Header().Set("X-Frame-Options", "DENY")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
@@ -174,29 +186,27 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// validLocalHostForTesting allows loopback handlers without RequiredPassword for testing.
+var validLocalHostForTesting = false
+
 // validHost reports whether h is a valid Host header value for a LocalAPI request.
-func validHost(h string) bool {
+func (h *Handler) validHost(hostname string) bool {
 	// The client code sends a hostname of "local-tailscaled.sock".
-	switch h {
+	switch hostname {
 	case "", apitype.LocalAPIHost:
 		return true
 	}
-	// Allow either localhost or loopback IP hosts.
-	host, portStr, err := net.SplitHostPort(h)
-	if err != nil {
-		return false
+	if !validLocalHostForTesting && h.RequiredPassword == "" {
+		return false // only allow localhost with basic auth or in tests
 	}
-	port, err := strconv.ParseUint(portStr, 10, 16)
+	host, _, err := net.SplitHostPort(hostname)
 	if err != nil {
-		return false
-	}
-	if runtime.GOOS == "windows" && port != safesocket.WindowsLocalPort {
 		return false
 	}
 	if host == "localhost" {
 		return true
 	}
-	addr, err := netip.ParseAddr(h)
+	addr, err := netip.ParseAddr(host)
 	if err != nil {
 		return false
 	}
@@ -209,7 +219,7 @@ func handlerForPath(urlPath string) (h localAPIHandler, ok bool) {
 	if urlPath == "/" {
 		return (*Handler).serveLocalAPIRoot, true
 	}
-	suff, ok := strs.CutPrefix(urlPath, "/localapi/v0/")
+	suff, ok := strings.CutPrefix(urlPath, "/localapi/v0/")
 	if !ok {
 		// Currently all LocalAPI methods start with "/localapi/v0/" to signal
 		// to people that they're not necessarily stable APIs. In practice we'll
@@ -290,6 +300,7 @@ func (h *Handler) serveBugReport(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "only POST allowed", http.StatusMethodNotAllowed)
 		return
 	}
+	defer h.b.TryFlushLogs() // kick off upload after bugreport's done logging
 
 	logMarker := func() string {
 		return fmt.Sprintf("BUG-%v-%v-%v", h.backendLogID, time.Now().UTC().Format("20060102150405Z"), randHex(8))
@@ -310,6 +321,22 @@ func (h *Handler) serveBugReport(w http.ResponseWriter, r *http.Request) {
 	} else {
 		h.logf("user bugreport health: ok")
 	}
+
+	// Information about the current node from the netmap
+	if nm := h.b.NetMap(); nm != nil {
+		if self := nm.SelfNode; self != nil {
+			h.logf("user bugreport node info: nodeid=%q stableid=%q expiry=%q", self.ID, self.StableID, self.KeyExpiry.Format(time.RFC3339))
+		}
+		h.logf("user bugreport public keys: machine=%q node=%q", nm.MachineKey, nm.NodeKey)
+	} else {
+		h.logf("user bugreport netmap: no active netmap")
+	}
+
+	// Print all envknobs; we otherwise only print these on startup, and
+	// printing them here ensures we don't have to go spelunking through
+	// logs for them.
+	envknob.LogCurrent(logger.WithPrefix(h.logf, "user bugreport: "))
+
 	if defBool(r.URL.Query().Get("diagnose"), false) {
 		h.b.Doctor(r.Context(), logger.WithPrefix(h.logf, "diag: "))
 	}
@@ -418,6 +445,45 @@ func (h *Handler) serveGoroutines(w http.ResponseWriter, r *http.Request) {
 	w.Write(buf)
 }
 
+// serveLogTap taps into the tailscaled/logtail server output and streams
+// it to the client.
+func (h *Handler) serveLogTap(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Require write access (~root) as the logs could contain something
+	// sensitive.
+	if !h.PermitWrite {
+		http.Error(w, "logtap access denied", http.StatusForbidden)
+		return
+	}
+	if r.Method != "GET" {
+		http.Error(w, "GET required", http.StatusMethodNotAllowed)
+		return
+	}
+	f, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+
+	io.WriteString(w, `{"text":"[logtap connected]\n"}`+"\n")
+	f.Flush()
+
+	msgc := make(chan string, 16)
+	unreg := logtail.RegisterLogTap(msgc)
+	defer unreg()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case msg := <-msgc:
+			io.WriteString(w, msg)
+			f.Flush()
+		}
+	}
+}
+
 func (h *Handler) serveMetrics(w http.ResponseWriter, r *http.Request) {
 	// Require write access out of paranoia that the metrics
 	// might contain something sensitive.
@@ -506,6 +572,187 @@ func (h *Handler) serveDevSetStateStore(w http.ResponseWriter, r *http.Request) 
 	io.WriteString(w, "done\n")
 }
 
+func (h *Handler) serveDebugPacketFilterRules(w http.ResponseWriter, r *http.Request) {
+	if !h.PermitWrite {
+		http.Error(w, "debug access denied", http.StatusForbidden)
+		return
+	}
+	nm := h.b.NetMap()
+	if nm == nil {
+		http.Error(w, "no netmap", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "\t")
+	enc.Encode(nm.PacketFilterRules)
+}
+
+func (h *Handler) serveDebugPacketFilterMatches(w http.ResponseWriter, r *http.Request) {
+	if !h.PermitWrite {
+		http.Error(w, "debug access denied", http.StatusForbidden)
+		return
+	}
+	nm := h.b.NetMap()
+	if nm == nil {
+		http.Error(w, "no netmap", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "\t")
+	enc.Encode(nm.PacketFilter)
+}
+
+func (h *Handler) serveDebugPortmap(w http.ResponseWriter, r *http.Request) {
+	if !h.PermitWrite {
+		http.Error(w, "debug access denied", http.StatusForbidden)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain")
+
+	dur, err := time.ParseDuration(r.FormValue("duration"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	gwSelf := r.FormValue("gateway_and_self")
+
+	// Update portmapper debug flags
+	debugKnobs := &portmapper.DebugKnobs{VerboseLogs: true}
+	switch r.FormValue("type") {
+	case "":
+	case "pmp":
+		debugKnobs.DisablePCP = true
+		debugKnobs.DisableUPnP = true
+	case "pcp":
+		debugKnobs.DisablePMP = true
+		debugKnobs.DisableUPnP = true
+	case "upnp":
+		debugKnobs.DisablePCP = true
+		debugKnobs.DisablePMP = true
+	default:
+		http.Error(w, "unknown portmap debug type", http.StatusBadRequest)
+		return
+	}
+
+	var (
+		logLock     sync.Mutex
+		handlerDone bool
+	)
+	logf := func(format string, args ...any) {
+		if !strings.HasSuffix(format, "\n") {
+			format = format + "\n"
+		}
+
+		logLock.Lock()
+		defer logLock.Unlock()
+
+		// The portmapper can call this log function after the HTTP
+		// handler returns, which is not allowed and can cause a panic.
+		// If this happens, ignore the log lines since this typically
+		// occurs due to a client disconnect.
+		if handlerDone {
+			return
+		}
+
+		// Write and flush each line to the client so that output is streamed
+		fmt.Fprintf(w, format, args...)
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
+	}
+	defer func() {
+		logLock.Lock()
+		handlerDone = true
+		logLock.Unlock()
+	}()
+
+	ctx, cancel := context.WithTimeout(r.Context(), dur)
+	defer cancel()
+
+	done := make(chan bool, 1)
+
+	var c *portmapper.Client
+	c = portmapper.NewClient(logger.WithPrefix(logf, "portmapper: "), debugKnobs, func() {
+		logf("portmapping changed.")
+		logf("have mapping: %v", c.HaveMapping())
+
+		if ext, ok := c.GetCachedMappingOrStartCreatingOne(); ok {
+			logf("cb: mapping: %v", ext)
+			select {
+			case done <- true:
+			default:
+			}
+			return
+		}
+		logf("cb: no mapping")
+	})
+	defer c.Close()
+
+	linkMon, err := monitor.New(logger.WithPrefix(logf, "monitor: "))
+	if err != nil {
+		logf("error creating monitor: %v", err)
+		return
+	}
+
+	gatewayAndSelfIP := func() (gw, self netip.Addr, ok bool) {
+		if a, b, ok := strings.Cut(gwSelf, "/"); ok {
+			gw = netip.MustParseAddr(a)
+			self = netip.MustParseAddr(b)
+			return gw, self, true
+		}
+		return linkMon.GatewayAndSelfIP()
+	}
+
+	c.SetGatewayLookupFunc(gatewayAndSelfIP)
+
+	gw, selfIP, ok := gatewayAndSelfIP()
+	if !ok {
+		logf("no gateway or self IP; %v", linkMon.InterfaceState())
+		return
+	}
+	logf("gw=%v; self=%v", gw, selfIP)
+
+	uc, err := net.ListenPacket("udp", "0.0.0.0:0")
+	if err != nil {
+		return
+	}
+	defer uc.Close()
+	c.SetLocalPort(uint16(uc.LocalAddr().(*net.UDPAddr).Port))
+
+	res, err := c.Probe(ctx)
+	if err != nil {
+		logf("error in Probe: %v", err)
+		return
+	}
+	logf("Probe: %+v", res)
+
+	if !res.PCP && !res.PMP && !res.UPnP {
+		logf("no portmapping services available")
+		return
+	}
+
+	if ext, ok := c.GetCachedMappingOrStartCreatingOne(); ok {
+		logf("mapping: %v", ext)
+	} else {
+		logf("no mapping")
+	}
+
+	select {
+	case <-done:
+	case <-ctx.Done():
+		if r.Context().Err() == nil {
+			logf("serveDebugPortmap: context done: %v", ctx.Err())
+		} else {
+			h.logf("serveDebugPortmap: context done: %v", ctx.Err())
+		}
+	}
+}
+
 func (h *Handler) serveComponentDebugLogging(w http.ResponseWriter, r *http.Request) {
 	if !h.PermitWrite {
 		http.Error(w, "debug access denied", http.StatusForbidden)
@@ -542,38 +789,50 @@ func (h *Handler) servePprof(w http.ResponseWriter, r *http.Request) {
 	servePprofFunc(w, r)
 }
 
-func (h *Handler) serveServeConfig(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) serveResetAuth(w http.ResponseWriter, r *http.Request) {
 	if !h.PermitWrite {
-		http.Error(w, "serve config denied", http.StatusForbidden)
+		http.Error(w, "reset-auth modify access denied", http.StatusForbidden)
+		return
+	}
+	if r.Method != httpm.POST {
+		http.Error(w, "use POST", http.StatusMethodNotAllowed)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	if err := h.b.ResetAuth(); err != nil {
+		http.Error(w, "reset-auth failed: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
 
+func (h *Handler) serveServeConfig(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
+		if !h.PermitRead {
+			http.Error(w, "serve config denied", http.StatusForbidden)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
 		config := h.b.ServeConfig()
 		json.NewEncoder(w).Encode(config)
 	case "POST":
-		configIn := new(ipn.ServeConfig)
-		if err := json.NewDecoder(r.Body).Decode(configIn); err != nil {
-			json.NewEncoder(w).Encode(struct {
-				Error error
-			}{
-				Error: fmt.Errorf("decoding config: %w", err),
-			})
+		if !h.PermitWrite {
+			http.Error(w, "serve config denied", http.StatusForbidden)
 			return
 		}
-		err := h.b.SetServeConfig(configIn)
-		if err != nil {
-			json.NewEncoder(w).Encode(struct {
-				Error error
-			}{
-				Error: fmt.Errorf("updating config: %w", err),
-			})
+		configIn := new(ipn.ServeConfig)
+		if err := json.NewDecoder(r.Body).Decode(configIn); err != nil {
+			writeErrorJSON(w, fmt.Errorf("decoding config: %w", err))
+			return
+		}
+		if err := h.b.SetServeConfig(configIn); err != nil {
+			writeErrorJSON(w, fmt.Errorf("updating config: %w", err))
 			return
 		}
 		w.WriteHeader(http.StatusOK)
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -611,6 +870,34 @@ func (h *Handler) serveStatus(w http.ResponseWriter, r *http.Request) {
 	e.Encode(st)
 }
 
+func (h *Handler) serveDebugPeerEndpointChanges(w http.ResponseWriter, r *http.Request) {
+	if !h.PermitRead {
+		http.Error(w, "status access denied", http.StatusForbidden)
+		return
+	}
+
+	ipStr := r.FormValue("ip")
+	if ipStr == "" {
+		http.Error(w, "missing 'ip' parameter", 400)
+		return
+	}
+	ip, err := netip.ParseAddr(ipStr)
+	if err != nil {
+		http.Error(w, "invalid IP", 400)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	chs, err := h.b.GetPeerEndpointChanges(r.Context(), ip)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	e := json.NewEncoder(w)
+	e.SetIndent("", "\t")
+	e.Encode(chs)
+}
+
 // InUseOtherUserIPNStream reports whether r is a request for the watch-ipn-bus
 // handler. If so, it writes an ipn.Notify InUseOtherUser message to the user
 // and returns true. Otherwise it returns false, in which case it doesn't write
@@ -624,7 +911,7 @@ func InUseOtherUserIPNStream(w http.ResponseWriter, r *http.Request, err error) 
 		return false
 	}
 	js, err := json.Marshal(&ipn.Notify{
-		Version:    version.Long,
+		Version:    version.Long(),
 		State:      ptr.To(ipn.InUseOtherUser),
 		ErrMessage: ptr.To(err.Error()),
 	})
@@ -648,7 +935,6 @@ func (h *Handler) serveWatchIPNBus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	f.Flush()
 
 	var mask ipn.NotifyWatchOpt
 	if s := r.FormValue("mask"); s != "" {
@@ -660,7 +946,7 @@ func (h *Handler) serveWatchIPNBus(w http.ResponseWriter, r *http.Request) {
 		mask = ipn.NotifyWatchOpt(v)
 	}
 	ctx := r.Context()
-	h.b.WatchNotifications(ctx, mask, func(roNotify *ipn.Notify) (keepGoing bool) {
+	h.b.WatchNotifications(ctx, mask, f.Flush, func(roNotify *ipn.Notify) (keepGoing bool) {
 		js, err := json.Marshal(roNotify)
 		if err != nil {
 			h.logf("json.Marshal: %v", err)
@@ -797,7 +1083,7 @@ func (h *Handler) serveFiles(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "file access denied", http.StatusForbidden)
 		return
 	}
-	suffix, ok := strs.CutPrefix(r.URL.EscapedPath(), "/localapi/v0/files/")
+	suffix, ok := strings.CutPrefix(r.URL.EscapedPath(), "/localapi/v0/files/")
 	if !ok {
 		http.Error(w, "misconfigured", http.StatusInternalServerError)
 		return
@@ -919,7 +1205,7 @@ func (h *Handler) serveFilePut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	upath, ok := strs.CutPrefix(r.URL.EscapedPath(), "/localapi/v0/file-put/")
+	upath, ok := strings.CutPrefix(r.URL.EscapedPath(), "/localapi/v0/file-put/")
 	if !ok {
 		http.Error(w, "misconfigured", http.StatusInternalServerError)
 		return
@@ -992,6 +1278,10 @@ func (h *Handler) serveDERPMap(w http.ResponseWriter, r *http.Request) {
 // serveSetExpirySooner sets the expiry date on the current machine, specified
 // by an `expiry` unix timestamp as POST or query param.
 func (h *Handler) serveSetExpirySooner(w http.ResponseWriter, r *http.Request) {
+	if !h.PermitWrite {
+		http.Error(w, "access denied", http.StatusForbidden)
+		return
+	}
 	if r.Method != "POST" {
 		http.Error(w, "POST required", http.StatusMethodNotAllowed)
 		return
@@ -1105,6 +1395,25 @@ func (h *Handler) serveDial(w http.ResponseWriter, r *http.Request) {
 	<-errc
 }
 
+func (h *Handler) serveSetPushDeviceToken(w http.ResponseWriter, r *http.Request) {
+	if !h.PermitWrite {
+		http.Error(w, "set push device token access denied", http.StatusForbidden)
+		return
+	}
+	if r.Method != "POST" {
+		http.Error(w, "unsupported method", http.StatusMethodNotAllowed)
+		return
+	}
+	var params apitype.SetPushDeviceTokenRequest
+	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
+		http.Error(w, "invalid JSON body", 400)
+		return
+	}
+	hostinfo.SetPushDeviceToken(params.PushDeviceToken)
+	h.b.ResendHostinfoIfNeeded()
+	w.WriteHeader(http.StatusOK)
+}
+
 func (h *Handler) serveUploadClientMetrics(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "unsupported method", http.StatusMethodNotAllowed)
@@ -1158,7 +1467,7 @@ func (h *Handler) serveTKAStatus(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "lock status access denied", http.StatusForbidden)
 		return
 	}
-	if r.Method != http.MethodGet {
+	if r.Method != httpm.GET {
 		http.Error(w, "use GET", http.StatusMethodNotAllowed)
 		return
 	}
@@ -1177,7 +1486,7 @@ func (h *Handler) serveTKASign(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "lock status access denied", http.StatusForbidden)
 		return
 	}
-	if r.Method != http.MethodPost {
+	if r.Method != httpm.POST {
 		http.Error(w, "use POST", http.StatusMethodNotAllowed)
 		return
 	}
@@ -1205,7 +1514,7 @@ func (h *Handler) serveTKAInit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "lock init access denied", http.StatusForbidden)
 		return
 	}
-	if r.Method != http.MethodPost {
+	if r.Method != httpm.POST {
 		http.Error(w, "use POST", http.StatusMethodNotAllowed)
 		return
 	}
@@ -1240,7 +1549,7 @@ func (h *Handler) serveTKAModify(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "network-lock modify access denied", http.StatusForbidden)
 		return
 	}
-	if r.Method != http.MethodPost {
+	if r.Method != httpm.POST {
 		http.Error(w, "use POST", http.StatusMethodNotAllowed)
 		return
 	}
@@ -1259,14 +1568,41 @@ func (h *Handler) serveTKAModify(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "network-lock modify failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.WriteHeader(204)
+}
 
-	j, err := json.MarshalIndent(h.b.NetworkLockStatus(), "", "\t")
-	if err != nil {
-		http.Error(w, "JSON encoding error", 500)
+func (h *Handler) serveTKAWrapPreauthKey(w http.ResponseWriter, r *http.Request) {
+	if !h.PermitWrite {
+		http.Error(w, "network-lock modify access denied", http.StatusForbidden)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(j)
+	if r.Method != httpm.POST {
+		http.Error(w, "use POST", http.StatusMethodNotAllowed)
+		return
+	}
+
+	type wrapRequest struct {
+		TSKey  string
+		TKAKey string // key.NLPrivate.MarshalText
+	}
+	var req wrapRequest
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 12*1024)).Decode(&req); err != nil {
+		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+		return
+	}
+	var priv key.NLPrivate
+	if err := priv.UnmarshalText([]byte(req.TKAKey)); err != nil {
+		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+		return
+	}
+
+	wrappedKey, err := h.b.NetworkLockWrapPreauthKey(req.TSKey, priv)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(200)
+	w.Write([]byte(wrappedKey))
 }
 
 func (h *Handler) serveTKADisable(w http.ResponseWriter, r *http.Request) {
@@ -1274,7 +1610,7 @@ func (h *Handler) serveTKADisable(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "network-lock modify access denied", http.StatusForbidden)
 		return
 	}
-	if r.Method != http.MethodPost {
+	if r.Method != httpm.POST {
 		http.Error(w, "use POST", http.StatusMethodNotAllowed)
 		return
 	}
@@ -1298,7 +1634,7 @@ func (h *Handler) serveTKALocalDisable(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "network-lock modify access denied", http.StatusForbidden)
 		return
 	}
-	if r.Method != http.MethodPost {
+	if r.Method != httpm.POST {
 		http.Error(w, "use POST", http.StatusMethodNotAllowed)
 		return
 	}
@@ -1318,7 +1654,7 @@ func (h *Handler) serveTKALocalDisable(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) serveTKALog(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+	if r.Method != httpm.GET {
 		http.Error(w, "use GET", http.StatusMethodNotAllowed)
 		return
 	}
@@ -1348,6 +1684,32 @@ func (h *Handler) serveTKALog(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
+func (h *Handler) serveTKAAffectedSigs(w http.ResponseWriter, r *http.Request) {
+	if r.Method != httpm.POST {
+		http.Error(w, "use POST", http.StatusMethodNotAllowed)
+		return
+	}
+	keyID, err := ioutil.ReadAll(http.MaxBytesReader(w, r.Body, 2048))
+	if err != nil {
+		http.Error(w, "reading body", http.StatusBadRequest)
+		return
+	}
+
+	sigs, err := h.b.NetworkLockAffectedSigs(keyID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	j, err := json.MarshalIndent(sigs, "", "\t")
+	if err != nil {
+		http.Error(w, "JSON encoding error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(j)
+}
+
 // serveProfiles serves profile switching-related endpoints. Supported methods
 // and paths are:
 //   - GET /profiles/: list all profiles (JSON-encoded array of ipn.LoginProfiles)
@@ -1362,17 +1724,17 @@ func (h *Handler) serveProfiles(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "profiles access denied", http.StatusForbidden)
 		return
 	}
-	suffix, ok := strs.CutPrefix(r.URL.EscapedPath(), "/localapi/v0/profiles/")
+	suffix, ok := strings.CutPrefix(r.URL.EscapedPath(), "/localapi/v0/profiles/")
 	if !ok {
 		http.Error(w, "misconfigured", http.StatusInternalServerError)
 		return
 	}
 	if suffix == "" {
 		switch r.Method {
-		case http.MethodGet:
+		case httpm.GET:
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(h.b.ListProfiles())
-		case http.MethodPut:
+		case httpm.PUT:
 			err := h.b.NewProfile()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1391,7 +1753,7 @@ func (h *Handler) serveProfiles(w http.ResponseWriter, r *http.Request) {
 	}
 	if suffix == "current" {
 		switch r.Method {
-		case http.MethodGet:
+		case httpm.GET:
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(h.b.CurrentProfile())
 		default:
@@ -1402,7 +1764,7 @@ func (h *Handler) serveProfiles(w http.ResponseWriter, r *http.Request) {
 
 	profileID := ipn.ProfileID(suffix)
 	switch r.Method {
-	case http.MethodGet:
+	case httpm.GET:
 		profiles := h.b.ListProfiles()
 		profileIndex := slices.IndexFunc(profiles, func(p ipn.LoginProfile) bool {
 			return p.ID == profileID
@@ -1413,14 +1775,14 @@ func (h *Handler) serveProfiles(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(profiles[profileIndex])
-	case http.MethodPost:
+	case httpm.POST:
 		err := h.b.SwitchProfile(profileID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)
-	case http.MethodDelete:
+	case httpm.DELETE:
 		err := h.b.DeleteProfile(profileID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1441,6 +1803,21 @@ func defBool(a string, def bool) bool {
 		return def
 	}
 	return v
+}
+
+func (h *Handler) serveDebugCapture(w http.ResponseWriter, r *http.Request) {
+	if !h.PermitWrite {
+		http.Error(w, "debug access denied", http.StatusForbidden)
+		return
+	}
+	if r.Method != "POST" {
+		http.Error(w, "POST required", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.WriteHeader(200)
+	w.(http.Flusher).Flush()
+	h.b.StreamDebugCapture(r.Context(), w)
 }
 
 var (

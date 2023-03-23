@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package apitype contains types for the Tailscale LocalAPI and control plane API.
 package apitype
@@ -32,4 +31,10 @@ type FileTarget struct {
 type WaitingFile struct {
 	Name string
 	Size int64
+}
+
+// SetPushDeviceTokenRequest is the body POSTed to the LocalAPI endpoint /set-device-token.
+type SetPushDeviceTokenRequest struct {
+	// PushDeviceToken is the iOS/macOS APNs device token (and any future Android equivalent).
+	PushDeviceToken string
 }

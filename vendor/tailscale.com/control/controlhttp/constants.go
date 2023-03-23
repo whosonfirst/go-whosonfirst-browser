@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package controlhttp
 
@@ -79,9 +78,9 @@ type Dialer struct {
 	proxyFunc func(*http.Request) (*url.URL, error) // or nil
 
 	// For tests only
-	drainFinished     chan struct{}
-	insecureTLS       bool
-	testFallbackDelay time.Duration
+	drainFinished        chan struct{}
+	omitCertErrorLogging bool
+	testFallbackDelay    time.Duration
 }
 
 func strDef(v1, v2 string) string {
