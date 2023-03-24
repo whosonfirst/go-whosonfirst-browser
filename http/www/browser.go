@@ -217,6 +217,8 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 
 	static_opts.DataAttributes = opts.DataAttributes
 
+	aa_log.Debug(opts.Logger, "Append resource handler for %T", next)
+
 	if opts.RollupAssets {
 
 		static_opts.CSS = make([]string, len(opts.assets))
@@ -227,11 +229,13 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 			if len(assets_table[label].CSS) > 0 {
 				css_uri := fmt.Sprintf("/css/%s.rollup.css", label)
 				static_opts.CSS[idx] = css_uri
+				aa_log.Debug(opts.Logger, "Add resource for %s (%s)", css_uri, label)
 			}
 
 			if len(assets_table[label].JS) > 0 {
 				js_uri := fmt.Sprintf("/javascript/%s.rollup.js", label)
 				static_opts.JS[idx] = js_uri
+				aa_log.Debug(opts.Logger, "Add resource for %s (%s)", js_uri, label)
 			}
 		}
 
@@ -244,14 +248,19 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 
 			for _, uri := range assets_table[label].CSS {
 				static_opts.CSS = append(static_opts.CSS, uri)
+				aa_log.Debug(opts.Logger, "Add resource for %s (%s)", uri, label)
 			}
 
 			for _, uri := range assets_table[label].JS {
 				static_opts.JS = append(static_opts.JS, uri)
+				aa_log.Debug(opts.Logger, "Add resource for %s (%s)", uri, label)
 			}
 
 		}
 	}
+
+	// TBD - can we squirt whosonfirst.browser.uris.js here in a way that isn't just
+	// as confusing as the alternatives?
 
 	return aa_static.AppendResourcesHandlerWithPrefix(next, static_opts, opts.Prefix)
 }
@@ -260,6 +269,12 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 
 	if !opts.RollupAssets {
+
+		// Note: If there are handlers with bespoke assets (for example the CreateHandler) and you are running
+		// the browser without rollups you will need to wrap the call to AppendAssetHandlers(mux, opts.WithCreateHandlerAssets)
+		// in a boolean check to determine if rollups are enabled. Otherwise this will get triggered and it
+		// will fail with duplicate handler errors (assuming that AppendAssetHandlers has been already been
+		// invoked in a non-bespoke context).
 		return aa_static.AppendStaticAssetHandlersWithPrefix(mux, static.FS, opts.Prefix)
 	}
 

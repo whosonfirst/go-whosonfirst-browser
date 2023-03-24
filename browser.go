@@ -488,12 +488,13 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		aa_log.Debug(logger, "Handle Id endpoint at %s\n", settings.URIs.Id)
 		mux.Handle(settings.URIs.Id, id_handler)
 
-		err = www.AppendAssetHandlers(mux, www_opts.WithIdHandlerAssets())
+		if settings.Capabilities.RollupAssets {
+			err = www.AppendAssetHandlers(mux, www_opts.WithIdHandlerAssets())
 
-		if err != nil {
-			return fmt.Errorf("Failed to append asset handler for ID handler, %w", err)
+			if err != nil {
+				return fmt.Errorf("Failed to append asset handler for ID handler, %w", err)
+			}
 		}
-
 	}
 
 	if settings.Capabilities.Search {
@@ -588,10 +589,13 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		aa_log.Debug(logger, "Handle edit geometry endpoint at %s\n", path_edit_geometry)
 		mux.Handle(settings.URIs.EditGeometry, geom_handler)
 
-		err = www.AppendAssetHandlers(mux, www_opts.WithGeometryHandlerAssets())
+		if settings.Capabilities.RollupAssets {
+			
+			err = www.AppendAssetHandlers(mux, www_opts.WithGeometryHandlerAssets())
 
-		if err != nil {
-			return fmt.Errorf("Failed to append asset handler for geometry handler, %w", err)
+			if err != nil {
+				return fmt.Errorf("Failed to append asset handler for geometry handler, %w", err)
+			}
 		}
 
 		// START OF wasm stuff
@@ -667,10 +671,12 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		aa_log.Debug(logger, "Handle create feature endpoint at %s\n", path_create_feature)
 		mux.Handle(settings.URIs.CreateFeature, create_handler)
 
-		err = www.AppendAssetHandlers(mux, www_opts.WithCreateHandlerAssets())
+		if settings.Capabilities.RollupAssets {
+			err = www.AppendAssetHandlers(mux, www_opts.WithCreateHandlerAssets())
 
-		if err != nil {
-			return fmt.Errorf("Failed to append asset handler for create handler, %w", err)
+			if err != nil {
+				return fmt.Errorf("Failed to append asset handler for create handler, %w", err)
+			}
 		}
 
 		// Custom client-side WASM/JS validation (optional)
