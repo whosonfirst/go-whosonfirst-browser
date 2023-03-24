@@ -15,15 +15,27 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/static"
 )
 
-type Foo struct {
+// We keep all the assets listed here because, if we are serving asset "rollups" (bundling and
+// minifying) then we want to append common and bespoke resources (pointers) at the same time
+// but also be able to call the AppendAssetHandlers method to create handler for bespoke rollups
+// since it will (presumably) have already been invoked once before for common asset handlers.
+
+// TBD, whether to move all of this logic (including the rollup stuff) in to go-http-static...
+
+type Assets struct {
 	JS  []string
 	CSS []string
 }
 
-var foo = map[string]Foo{
+var assets_table = map[string]Assets{
 
 	// Core JS/CSS for all HTML pages
-	"whosonfirst.browser": Foo{
+	"whosonfirst.browser": Assets{
+		CSS: []string{
+			"/css/whosonfirst.www.css",
+			"/css/whosonfirst.common.css",
+			"/css/whosonfirst.browser.css",
+		},
 		JS: []string{
 			"/javascript/localforage.min.js",
 			"/javascript/whosonfirst.www.js",
@@ -41,14 +53,12 @@ var foo = map[string]Foo{
 			"/javascript/whosonfirst.browser.feedback.js",
 			"/javascript/whosonfirst.browser.maps.js",
 		},
-		CSS: []string{
-			"/css/whosonfirst.www.css",
-			"/css/whosonfirst.common.css",
-			"/css/whosonfirst.browser.css",
-		},
 	},
 	// JS/CSS assets for the /create (edit) endpoint
-	"whosonfirst.browser.create": Foo{
+	"whosonfirst.browser.create": Assets{
+		CSS: []string{
+			"/css/whosonfirst.browser.edit.css",
+		},
 		JS: []string{
 			"/javascript/whosonfirst.browser.api.js",
 			"/javascript/whosonfirst.browser.leaflet.js",
@@ -57,27 +67,24 @@ var foo = map[string]Foo{
 			"/javascript/whosonfirst.browser.create.js",
 			"/javascript/whosonfirst.browser.create.init.js",
 		},
-		CSS: []string{
-			"/css/whosonfirst.browser.edit.css",
-		},
 	},
 
 	// JS/CSS assets for the /geometry (edit) endpoint
-	"whosonfirst.browser.geometry": Foo{
+	"whosonfirst.browser.geometry": Assets{
+		CSS: []string{
+			"/css/whosonfirst.browser.edit.css",
+			"/css/whosonfirst.browser.edit.geometry.css",
+		},
 		JS: []string{
 			"/javascript/whosonfirst.browser.api.js",
 			"/javascript/whosonfirst.browser.leaflet.js",
 			"/javascript/whosonfirst.browser.geometry.js",
 			"/javascript/whosonfirst.browser.geometry.init.js",
 		},
-		CSS: []string{
-			"/css/whosonfirst.browser.edit.css",
-			"/css/whosonfirst.browser.edit.geometry.css",
-		},
 	},
 
 	// JS/CSS assets for the /id endpoint
-	"whosonfirst.browser.id": Foo{
+	"whosonfirst.browser.id": Assets{
 		CSS: []string{
 			"/css/whosonfirst.browser.id.css",
 		},
@@ -217,12 +224,12 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 
 		for idx, label := range opts.assets {
 
-			if len(foo[label].CSS) > 0 {
+			if len(assets_table[label].CSS) > 0 {
 				css_uri := fmt.Sprintf("/css/%s.rollup.css", label)
 				static_opts.CSS[idx] = css_uri
 			}
 
-			if len(foo[label].JS) > 0 {
+			if len(assets_table[label].JS) > 0 {
 				js_uri := fmt.Sprintf("/javascript/%s.rollup.js", label)
 				static_opts.JS[idx] = js_uri
 			}
@@ -235,11 +242,11 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 
 		for _, label := range opts.assets {
 
-			for _, uri := range foo[label].CSS {
+			for _, uri := range assets_table[label].CSS {
 				static_opts.CSS = append(static_opts.CSS, uri)
 			}
 
-			for _, uri := range foo[label].JS {
+			for _, uri := range assets_table[label].JS {
 				static_opts.JS = append(static_opts.JS, uri)
 			}
 
@@ -264,17 +271,19 @@ func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 		js_label := filepath.Base(rollup_js_uri)
 		css_label := filepath.Base(rollup_css_uri)
 
-		js_paths := make([]string, len(foo[label].JS))
-		css_paths := make([]string, len(foo[label].CSS))
+		js_paths := make([]string, len(assets_table[label].JS))
+		css_paths := make([]string, len(assets_table[label].CSS))
 
-		for idx, path := range foo[label].JS {
+		for idx, path := range assets_table[label].JS {
+
 			path = strings.TrimLeft(path, "/")
 
 			aa_log.Debug(opts.Logger, "Add %s to JS rollup %s", path, rollup_js_uri)
 			js_paths[idx] = path
 		}
 
-		for idx, path := range foo[label].CSS {
+		for idx, path := range assets_table[label].CSS {
+
 			path = strings.TrimLeft(path, "/")
 
 			aa_log.Debug(opts.Logger, "Add %s to CSS rollup %s", path, rollup_css_uri)
