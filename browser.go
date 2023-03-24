@@ -480,7 +480,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		id_handler = bootstrap.AppendResourcesHandler(id_handler, bootstrap_opts)
-		id_handler = www.AppendResourcesHandler(id_handler, www_opts.WithIdHandlerFoo())
+		id_handler = www.AppendResourcesHandler(id_handler, www_opts.WithIdHandlerResources())
 		id_handler = maps.AppendResourcesHandlerWithProvider(id_handler, settings.MapProvider, maps_opts)
 		id_handler = settings.CustomChrome.WrapHandler(id_handler)
 		id_handler = settings.Authenticator.WrapHandler(id_handler)
@@ -488,7 +488,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		aa_log.Debug(logger, "Handle Id endpoint at %s\n", settings.URIs.Id)
 		mux.Handle(settings.URIs.Id, id_handler)
 
-		err = www.AppendAssetHandlers(mux, www_opts.WithIdHandlerFoo())
+		err = www.AppendAssetHandlers(mux, www_opts.WithIdHandlerAssets())
 
 		if err != nil {
 			return fmt.Errorf("Failed to append asset handler for ID handler, %w", err)
@@ -581,12 +581,18 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		geom_handler = maps.AppendResourcesHandlerWithProvider(geom_handler, settings.MapProvider, maps_opts)
 		geom_handler = bootstrap.AppendResourcesHandler(geom_handler, bootstrap_opts)
-		geom_handler = www.AppendResourcesHandler(geom_handler, www_opts.WithGeometryHandlerFoo())
+		geom_handler = www.AppendResourcesHandler(geom_handler, www_opts.WithGeometryHandlerResources())
 		geom_handler = settings.CustomChrome.WrapHandler(geom_handler)
 		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
 
 		aa_log.Debug(logger, "Handle edit geometry endpoint at %s\n", path_edit_geometry)
 		mux.Handle(settings.URIs.EditGeometry, geom_handler)
+
+		err = www.AppendAssetHandlers(mux, www_opts.WithGeometryHandlerAssets())
+
+		if err != nil {
+			return fmt.Errorf("Failed to append asset handler for geometry handler, %w", err)
+		}
 
 		// START OF wasm stuff
 
@@ -654,12 +660,18 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		create_handler = appendCustomMiddlewareHandlers(settings, settings.URIs.CreateFeature, create_handler)
 
 		create_handler = bootstrap.AppendResourcesHandler(create_handler, bootstrap_opts)
-		create_handler = www.AppendResourcesHandler(create_handler, www_opts.WithCreateHandlerFoo())
+		create_handler = www.AppendResourcesHandler(create_handler, www_opts.WithCreateHandlerResources())
 		create_handler = settings.CustomChrome.WrapHandler(create_handler)
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
 
 		aa_log.Debug(logger, "Handle create feature endpoint at %s\n", path_create_feature)
 		mux.Handle(settings.URIs.CreateFeature, create_handler)
+
+		err = www.AppendAssetHandlers(mux, www_opts.WithCreateHandlerAssets())
+
+		if err != nil {
+			return fmt.Errorf("Failed to append asset handler for create handler, %w", err)
+		}
 
 		// Custom client-side WASM/JS validation (optional)
 

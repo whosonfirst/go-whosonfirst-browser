@@ -145,7 +145,7 @@ func (opts *BrowserOptions) Clone() *BrowserOptions {
 	return new_opts
 }
 
-func (opts *BrowserOptions) WithIdHandlerFoo() *BrowserOptions {
+func (opts *BrowserOptions) WithIdHandlerResources() *BrowserOptions {
 
 	new_opts := opts.Clone()
 
@@ -164,7 +164,7 @@ func (opts *BrowserOptions) WithIdHandlerAssets() *BrowserOptions {
 	return new_opts
 }
 
-func (opts *BrowserOptions) WithCreateHandlerFoo() *BrowserOptions {
+func (opts *BrowserOptions) WithCreateHandlerResources() *BrowserOptions {
 
 	new_opts := opts.Clone()
 
@@ -183,7 +183,7 @@ func (opts *BrowserOptions) WithCreateHandlerAssets() *BrowserOptions {
 	return new_opts
 }
 
-func (opts *BrowserOptions) WithGeometryHandlerFoo() *BrowserOptions {
+func (opts *BrowserOptions) WithGeometryHandlerResources() *BrowserOptions {
 
 	new_opts := opts.Clone()
 
@@ -218,12 +218,12 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 		for idx, label := range opts.assets {
 
 			if len(foo[label].CSS) > 0 {
-				css_uri := fmt.Sprintf("/css/%s.rollup.css")
+				css_uri := fmt.Sprintf("/css/%s.rollup.css", label)
 				static_opts.CSS[idx] = css_uri
 			}
 
 			if len(foo[label].JS) > 0 {
-				js_uri := fmt.Sprintf("/javascript/%s.rollup.js")
+				js_uri := fmt.Sprintf("/javascript/%s.rollup.js", label)
 				static_opts.JS[idx] = js_uri
 			}
 		}
