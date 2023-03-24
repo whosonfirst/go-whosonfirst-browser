@@ -4,7 +4,13 @@ cli:
 	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 
 debug:
-	go run -mod $(GOMOD) cmd/whosonfirst-browser/main.go -enable-all -map-provider leaflet -leaflet-tile-url https://tile.openstreetmap.org/{z}/{x}/{y}.png -reader-uri $(READER)
+	go run -mod $(GOMOD) cmd/whosonfirst-browser/main.go \
+		-enable-all \
+		-map-provider leaflet \
+		-leaflet-tile-url https://tile.openstreetmap.org/{z}/{x}/{y}.png \
+		-javascript-at-eof \
+		-rollup-assets \
+		-reader-uri $(READER)
 
 debug-docker:
 	docker run -it -p 8080:8080 whosonfirst-browser /usr/local/bin/whosonfirst-browser -server-uri 'http://0.0.0.0:8080' -enable-all -nextzen-api-key $(APIKEY)

@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/aaronland/go-http-leaflet/static"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/static"
 	aa_static "github.com/aaronland/go-http-static"
 	"github.com/sfomuseum/go-http-rollup"
 )
@@ -35,11 +35,24 @@ func DefaultBrowserOptions() *BrowserOptions {
 		CSS: []string{
 			"/css/whosonfirst.www.css",
 			"/css/whosonfirst.common.css",
-			"/css/whosonfirst.browser.css",						
+			"/css/whosonfirst.browser.css",
 		},
 		JS: []string{
 			"/javascript/localforage.min.js",
-			"/javascript/slippymaps.crosshairs.js",			
+			"/javascript/whosonfirst.www.js",
+			"/javascript/whosonfirst.render.js",
+			"/javascript/whosonfirst.properties.js",
+			"/javascript/whosonfirst.cache.js",
+			"/javascript/whosonfirst.uri.js",
+			"/javascript/whosonfirst.net.js",
+			"/javascript/whosonfirst.namify.js",
+			"/javascript/whosonfirst.geojson.js",
+			"/javascript/whosonfirst.leaflet.utils.js",
+			"/javascript/whosonfirst.leaflet.styles.js",
+			"/javascript/whosonfirst.leaflet.handlers.js",
+			"/javascript/whosonfirst.browser.common.js",
+			"/javascript/whosonfirst.browser.feedback.js",
+			"/javascript/whosonfirst.browser.maps.js",
 		},
 		DataAttributes: make(map[string]string),
 		Logger:         logger,
@@ -57,26 +70,13 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 
 	if opts.RollupAssets {
 
-		static_opts.CSS = []string{
-			"/css/browser.rollup.css",
-		}
+			static_opts.CSS = []string{
+				"/css/browser.rollup.css",
+			}
 
-		static_opts.JS = []string{
-			"/javascript/browser.rollup.js",
-			"/javascript/whosonfirst.www.js",
-			"/javascript/whosonfirst.render.js",
-			"/javascript/whosonfirst.properties.js",
-			"/javascript/whosonfirst.cache.js",
-			"/javascript/whosonfirst.uri.js",
-			"/javascript/whosonfirst.net.js",
-			"/javascript/whosonfirst.namify.js",
-			"/javascript/whosonfirst.geojson.js",
-			"/javascript/whosonfirst.leaflet.utils.js",
-			"/javascript/whosonfirst.leaflet.styles.js",
-			"/javascript/whosonfirst.browser.common.js",
-			"/javascript/whosonfirst.browser.feedback.js",
-			"/javascript/whosonfirst.browser.maps.js",
-		}
+			static_opts.JS = []string{
+				"/javascript/browser.rollup.js",
+			}
 
 	} else {
 
@@ -172,5 +172,3 @@ func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 	mux.Handle(rollup_css_uri, rollup_css_handler)
 	return nil
 }
-
-
