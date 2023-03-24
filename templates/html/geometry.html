@@ -1,9 +1,6 @@
 {{ define "geometry" }}
 {{ template "browser_header" . }}
 
-      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.css" }}" />
-      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.geometry.css" }}" />            
-
       <div class="container" id="edit-geometry" data-whosonfirst-id="{{ .Id }}">
 
 	  <div class="grid-view">	      
@@ -38,14 +35,5 @@
       </div>
 
       {{ template "browser_footer" . }}
-      <!-- Remember: If you add something here it needs to be added to settings.go too. That's not awesome but that's how we roll today... -->
-      {{ if .Capabilities.RollupAssets }}
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/rollup/whosonfirst.browser.geometry.js" }}"></script>
-      {{ else }}
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.api.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.leaflet.js" }}"></script>      
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.geometry.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.geometry.init.js" }}"></script>	 
-      {{ end }}
       
 {{ end }}

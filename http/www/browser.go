@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/static"
 	aa_static "github.com/aaronland/go-http-static"
 	"github.com/sfomuseum/go-http-rollup"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/static"
 )
 
 // BrowserOptions provides a list of JavaScript and CSS link to include with HTML output.
@@ -61,6 +61,116 @@ func DefaultBrowserOptions() *BrowserOptions {
 	return opts
 }
 
+func (opts *BrowserOptions) WithIdHandlerResources() *BrowserOptions {
+
+	css := []string{
+		"/css/whosonfirst.browser.id.css",
+	}
+
+	js := []string{
+		"/javascript/whosonfirst.browser.id.js",
+		"/javascript/whosonfirst.browser.id.init.js",
+	}
+
+	new_opts := opts.Clone()
+
+	for _, uri := range css {
+		new_opts.CSS = append(new_opts.CSS, uri)
+	}
+
+	for _, uri := range js {
+		new_opts.JS = append(new_opts.JS, uri)
+	}
+
+	return new_opts
+}
+
+func (opts *BrowserOptions) WithCreateHandlerResources() *BrowserOptions {
+
+	css := []string{
+		"/css/whosonfirst.browser.edit.css",
+	}
+
+	js := []string{
+		"/javascript/whosonfirst.browser.api.js",
+		"/javascript/whosonfirst.browser.leaflet.js",
+		"/javascript/whosonfirst.webcomponent.existentialflag.js",
+		"/javascript/whosonfirst.webcomponent.placetype.js",
+		"/javascript/whosonfirst.browser.create.js",
+		"/javascript/whosonfirst.browser.create.init.js",
+	}
+
+	new_opts := opts.Clone()
+
+	for _, uri := range css {
+		new_opts.CSS = append(new_opts.CSS, uri)
+	}
+
+	for _, uri := range js {
+		new_opts.JS = append(new_opts.JS, uri)
+	}
+
+	return new_opts
+}
+
+func (opts *BrowserOptions) WithGeometryHandlerResources() *BrowserOptions {
+
+	css := []string{
+		"/css/whosonfirst.browser.edit.css",
+		"/css/whosonfirst.browser.edit.geometry.css",
+	}
+
+	js := []string{
+		"/javascript/whosonfirst.browser.api.js",
+		"/javascript/whosonfirst.browser.leaflet.js",
+		"/javascript/whosonfirst.browser.geometry.js",
+		"/javascript/whosonfirst.browser.geometry.init.js",
+	}
+
+	new_opts := opts.Clone()
+
+	for _, uri := range css {
+		new_opts.CSS = append(new_opts.CSS, uri)
+	}
+
+	for _, uri := range js {
+		new_opts.JS = append(new_opts.JS, uri)
+	}
+
+	return new_opts
+}
+
+func (opts *BrowserOptions) Clone() *BrowserOptions {
+
+	css := make([]string, len(opts.CSS))
+	js := make([]string, len(opts.JS))
+	attrs := make(map[string]string)
+
+	for idx, uri := range opts.CSS {
+		css[idx] = uri
+	}
+
+	for idx, uri := range opts.JS {
+		js[idx] = uri
+	}
+
+	for k, v := range opts.DataAttributes {
+		attrs[k] = v
+	}
+
+	new_opts := &BrowserOptions{
+		Logger:                opts.Logger,
+		AppendJavaScriptAtEOF: opts.AppendJavaScriptAtEOF,
+		RollupAssets:          opts.RollupAssets,
+		Prefix:                opts.Prefix,
+		CSS:                   css,
+		JS:                    js,
+		DataAttributes:        attrs,
+	}
+
+	return new_opts
+}
+
 // AppendResourcesHandlerWithPrefix will rewrite any HTML produced by previous handler to include the necessary markup to load Browser JavaScript files and related assets ensuring that all URIs are prepended with a prefix.
 func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handler {
 
@@ -70,13 +180,13 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 
 	if opts.RollupAssets {
 
-			static_opts.CSS = []string{
-				"/css/browser.rollup.css",
-			}
+		static_opts.CSS = []string{
+			"/css/browser.rollup.css",
+		}
 
-			static_opts.JS = []string{
-				"/javascript/browser.rollup.js",
-			}
+		static_opts.JS = []string{
+			"/javascript/browser.rollup.js",
+		}
 
 	} else {
 

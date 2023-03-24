@@ -9,7 +9,7 @@ debug:
 		-map-provider leaflet \
 		-leaflet-tile-url https://tile.openstreetmap.org/{z}/{x}/{y}.png \
 		-javascript-at-eof \
-		-rollup-assets \
+		-rollup-assets=false \
 		-reader-uri $(READER)
 
 debug-docker:

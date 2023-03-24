@@ -480,7 +480,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 
 		id_handler = bootstrap.AppendResourcesHandler(id_handler, bootstrap_opts)
-		id_handler = www.AppendResourcesHandler(id_handler, www_opts)
+		id_handler = www.AppendResourcesHandler(id_handler, www_opts.WithIdHandlerResources())
 		id_handler = maps.AppendResourcesHandlerWithProvider(id_handler, settings.MapProvider, maps_opts)
 		id_handler = settings.CustomChrome.WrapHandler(id_handler)
 		id_handler = settings.Authenticator.WrapHandler(id_handler)
@@ -574,7 +574,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		geom_handler = maps.AppendResourcesHandlerWithProvider(geom_handler, settings.MapProvider, maps_opts)
 		geom_handler = bootstrap.AppendResourcesHandler(geom_handler, bootstrap_opts)
-		geom_handler = www.AppendResourcesHandler(geom_handler, www_opts)
+		geom_handler = www.AppendResourcesHandler(geom_handler, www_opts.WithGeometryHandlerResources())
 		geom_handler = settings.CustomChrome.WrapHandler(geom_handler)
 		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
 
@@ -647,7 +647,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		create_handler = appendCustomMiddlewareHandlers(settings, settings.URIs.CreateFeature, create_handler)
 
 		create_handler = bootstrap.AppendResourcesHandler(create_handler, bootstrap_opts)
-		create_handler = www.AppendResourcesHandler(create_handler, www_opts)
+		create_handler = www.AppendResourcesHandler(create_handler, www_opts.WithCreateHandlerResources())
 		create_handler = settings.CustomChrome.WrapHandler(create_handler)
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
 

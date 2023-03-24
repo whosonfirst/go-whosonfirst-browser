@@ -1,8 +1,6 @@
 {{ define "create" }}
 {{ template "browser_header" . }}
       
-      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.edit.css" }}" />
-
       <div class="container" id="create-feature">
 
 	  <div id="feedback"></div>	  
@@ -91,17 +89,4 @@
       
       {{ template "browser_footer" . }}
 
-      {{ if .Capabilities.RollupAssets }}
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/rollup/whosonfirst.browser.create.js" }}"></script>      
-      {{ else }}
-      <!-- Remember: If you add something here it needs to be added to settings.go too. That's not awesome but that's how we roll today... -->
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.api.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.leaflet.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.webcomponent.existentialflag.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.webcomponent.placetype.js" }}"></script>                  
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.create.js" }}"></script>
-      <script src="{{ JoinPath .Paths.URIPrefix "/javascript/whosonfirst.browser.create.init.js" }}"></script>	 
-
-      {{ end }}
-      
 {{ end }} 
