@@ -487,6 +487,13 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		aa_log.Debug(logger, "Handle Id endpoint at %s\n", settings.URIs.Id)
 		mux.Handle(settings.URIs.Id, id_handler)
+
+		err = www.AppendAssetHandlersForIdHandler(mux, www_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append asset handler for ID handler, %w", err)
+		}
+				
 	}
 
 	if settings.Capabilities.Search {

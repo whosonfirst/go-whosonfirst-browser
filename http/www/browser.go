@@ -6,12 +6,48 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strings"
 
 	aa_static "github.com/aaronland/go-http-static"
+	aa_log "github.com/aaronland/go-log/v2"
 	"github.com/sfomuseum/go-http-rollup"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/static"
 )
+
+var createHandlerCSS = []string{
+	"/css/whosonfirst.browser.edit.css",
+}
+
+var createHandlerJS = []string{
+	"/javascript/whosonfirst.browser.api.js",
+	"/javascript/whosonfirst.browser.leaflet.js",
+	"/javascript/whosonfirst.webcomponent.existentialflag.js",
+	"/javascript/whosonfirst.webcomponent.placetype.js",
+	"/javascript/whosonfirst.browser.create.js",
+	"/javascript/whosonfirst.browser.create.init.js",
+}
+
+var geometryHandlerCSS = []string{
+	"/css/whosonfirst.browser.edit.css",
+	"/css/whosonfirst.browser.edit.geometry.css",
+}
+
+var geometryHandlerJS = []string{
+	"/javascript/whosonfirst.browser.api.js",
+	"/javascript/whosonfirst.browser.leaflet.js",
+	"/javascript/whosonfirst.browser.geometry.js",
+	"/javascript/whosonfirst.browser.geometry.init.js",
+}
+
+var idHandlerCSS = []string{
+	"/css/whosonfirst.browser.id.css",
+}
+
+var idHandlerJS = []string{
+	"/javascript/whosonfirst.browser.id.js",
+	"/javascript/whosonfirst.browser.id.init.js",
+}
 
 // BrowserOptions provides a list of JavaScript and CSS link to include with HTML output.
 type BrowserOptions struct {
@@ -63,22 +99,13 @@ func DefaultBrowserOptions() *BrowserOptions {
 
 func (opts *BrowserOptions) WithIdHandlerResources() *BrowserOptions {
 
-	css := []string{
-		"/css/whosonfirst.browser.id.css",
-	}
-
-	js := []string{
-		"/javascript/whosonfirst.browser.id.js",
-		"/javascript/whosonfirst.browser.id.init.js",
-	}
-
 	new_opts := opts.Clone()
 
-	for _, uri := range css {
+	for _, uri := range idHandlerCSS {
 		new_opts.CSS = append(new_opts.CSS, uri)
 	}
 
-	for _, uri := range js {
+	for _, uri := range idHandlerJS {
 		new_opts.JS = append(new_opts.JS, uri)
 	}
 
@@ -87,26 +114,13 @@ func (opts *BrowserOptions) WithIdHandlerResources() *BrowserOptions {
 
 func (opts *BrowserOptions) WithCreateHandlerResources() *BrowserOptions {
 
-	css := []string{
-		"/css/whosonfirst.browser.edit.css",
-	}
-
-	js := []string{
-		"/javascript/whosonfirst.browser.api.js",
-		"/javascript/whosonfirst.browser.leaflet.js",
-		"/javascript/whosonfirst.webcomponent.existentialflag.js",
-		"/javascript/whosonfirst.webcomponent.placetype.js",
-		"/javascript/whosonfirst.browser.create.js",
-		"/javascript/whosonfirst.browser.create.init.js",
-	}
-
 	new_opts := opts.Clone()
 
-	for _, uri := range css {
+	for _, uri := range createHandlerCSS {
 		new_opts.CSS = append(new_opts.CSS, uri)
 	}
 
-	for _, uri := range js {
+	for _, uri := range createHandlerJS {
 		new_opts.JS = append(new_opts.JS, uri)
 	}
 
@@ -115,25 +129,13 @@ func (opts *BrowserOptions) WithCreateHandlerResources() *BrowserOptions {
 
 func (opts *BrowserOptions) WithGeometryHandlerResources() *BrowserOptions {
 
-	css := []string{
-		"/css/whosonfirst.browser.edit.css",
-		"/css/whosonfirst.browser.edit.geometry.css",
-	}
-
-	js := []string{
-		"/javascript/whosonfirst.browser.api.js",
-		"/javascript/whosonfirst.browser.leaflet.js",
-		"/javascript/whosonfirst.browser.geometry.js",
-		"/javascript/whosonfirst.browser.geometry.init.js",
-	}
-
 	new_opts := opts.Clone()
 
-	for _, uri := range css {
+	for _, uri := range geometryHandlerCSS {
 		new_opts.CSS = append(new_opts.CSS, uri)
 	}
 
-	for _, uri := range js {
+	for _, uri := range geometryHandlerJS {
 		new_opts.JS = append(new_opts.JS, uri)
 	}
 
@@ -181,11 +183,11 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 	if opts.RollupAssets {
 
 		static_opts.CSS = []string{
-			"/css/browser.rollup.css",
+			"/css/whosonfirst.browser.rollup.css",
 		}
 
 		static_opts.JS = []string{
-			"/javascript/browser.rollup.js",
+			"/javascript/whosonfirst.browser.rollup.js",
 		}
 
 	} else {
@@ -200,25 +202,48 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 // Append all the files in the net/http FS instance containing the embedded Browser assets to an *http.ServeMux instance.
 func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 
+	return appendAssetHandlers(mux, opts, "/javascript/whosonfirst.browser.rollup.js", "/css/whosonfirst.browser.rollup.css")
+}
+
+func AppendAssetHandlersForIdHandler(mux *http.ServeMux, opts *BrowserOptions) error {
+
+	// This still needs a corresponding "resource" thingy...
+	
+	new_opts := opts.Clone()
+	new_opts.CSS = idHandlerCSS
+	new_opts.JS = idHandlerJS
+	
+	return appendAssetHandlers(mux, new_opts, "/javascript/whosonfirst.browser.id.rollup.js", "/css/whosonfirst.browser.rollup.id.css")
+}
+
+func appendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions, rollup_js_uri string, rollup_css_uri string) error {	
+
 	if !opts.RollupAssets {
 		return aa_static.AppendStaticAssetHandlersWithPrefix(mux, static.FS, opts.Prefix)
 	}
 
+	js_label := filepath.Base(rollup_js_uri)
+	css_label := filepath.Base(rollup_css_uri)
+	
 	js_paths := make([]string, len(opts.JS))
 	css_paths := make([]string, len(opts.CSS))
 
 	for idx, path := range opts.JS {
 		path = strings.TrimLeft(path, "/")
+
+		aa_log.Debug(opts.Logger, "Add %s to JS rollup %s", path, rollup_js_uri)
 		js_paths[idx] = path
 	}
 
 	for idx, path := range opts.CSS {
 		path = strings.TrimLeft(path, "/")
+
+		aa_log.Debug(opts.Logger, "Add %s to CSS rollup %s", path, rollup_css_uri)
 		css_paths[idx] = path
 	}
 
 	rollup_js_paths := map[string][]string{
-		"browser.rollup.js": js_paths,
+		js_label: js_paths,
 	}
 
 	rollup_js_opts := &rollup.RollupJSHandlerOptions{
@@ -232,8 +257,6 @@ func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 	if err != nil {
 		return fmt.Errorf("Failed to create rollup JS handler, %w", err)
 	}
-
-	rollup_js_uri := "/javascript/browser.rollup.js"
 
 	if opts.Prefix != "" {
 
@@ -251,7 +274,7 @@ func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 	// CSS
 
 	rollup_css_paths := map[string][]string{
-		"browser.rollup.css": css_paths,
+		css_label: css_paths,
 	}
 
 	rollup_css_opts := &rollup.RollupCSSHandlerOptions{
@@ -265,8 +288,6 @@ func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 	if err != nil {
 		return fmt.Errorf("Failed to create rollup CSS handler, %w", err)
 	}
-
-	rollup_css_uri := "/css/browser.rollup.css"
 
 	if opts.Prefix != "" {
 
