@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/aaronland/go-http-bootstrap v0.4.0
+	github.com/aaronland/go-http-leaflet v0.4.0
 	github.com/aaronland/go-http-maps v0.3.0
 	github.com/aaronland/go-http-ping/v2 v2.0.0
 	github.com/aaronland/go-http-sanitize v0.0.6
@@ -59,7 +60,6 @@ require (
 	github.com/aaronland/go-aws-dynamodb v0.0.5 // indirect
 	github.com/aaronland/go-aws-session v0.1.0 // indirect
 	github.com/aaronland/go-brooklynintegers-api v1.2.6 // indirect
-	github.com/aaronland/go-http-leaflet v0.4.0 // indirect
 	github.com/aaronland/go-http-rewrite v1.1.0 // indirect
 	github.com/aaronland/go-http-tangramjs v0.3.0 // indirect
 	github.com/aaronland/go-json-query v0.1.3 // indirect

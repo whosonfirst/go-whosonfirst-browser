@@ -12,14 +12,7 @@
       <meta name="HandheldFriendly" content="true" />
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
       
-      {{ if .Capabilities.RollupAssets }}
-      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/rollup/whosonfirst.browser.common.css" }}" />
-      {{ else }}
-      <!-- Remember: If you add something here it needs to be added to settings.go too. That's not awesome but that's how we roll today... -->      
-      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.www.css" }}" />
-      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.common.css"  }}" />
-      <link rel="stylesheet" href="{{ JoinPath .Paths.URIPrefix "/css/whosonfirst.browser.css" }}" />
-      {{ end }}
+      <!-- css is added by http/www/www.go -->
       
   </head>
   <body data-whosonfirst-uri-endpoint="{{ .Paths.GeoJSON }}">
