@@ -590,7 +590,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		mux.Handle(settings.URIs.EditGeometry, geom_handler)
 
 		if settings.Capabilities.RollupAssets {
-			
+
 			err = www.AppendAssetHandlers(mux, www_opts.WithGeometryHandlerAssets())
 
 			if err != nil {

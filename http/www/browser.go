@@ -217,8 +217,6 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 
 	static_opts.DataAttributes = opts.DataAttributes
 
-	aa_log.Debug(opts.Logger, "Append resource handler for %T", next)
-
 	if opts.RollupAssets {
 
 		static_opts.CSS = make([]string, len(opts.assets))
@@ -229,13 +227,13 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 			if len(assets_table[label].CSS) > 0 {
 				css_uri := fmt.Sprintf("/css/%s.rollup.css", label)
 				static_opts.CSS[idx] = css_uri
-				aa_log.Debug(opts.Logger, "Add resource for %s (%s)", css_uri, label)
+				// aa_log.Debug(opts.Logger, "Add resource for %s (%s)", css_uri, label)
 			}
 
 			if len(assets_table[label].JS) > 0 {
 				js_uri := fmt.Sprintf("/javascript/%s.rollup.js", label)
 				static_opts.JS[idx] = js_uri
-				aa_log.Debug(opts.Logger, "Add resource for %s (%s)", js_uri, label)
+				// aa_log.Debug(opts.Logger, "Add resource for %s (%s)", js_uri, label)
 			}
 		}
 
@@ -248,12 +246,12 @@ func AppendResourcesHandler(next http.Handler, opts *BrowserOptions) http.Handle
 
 			for _, uri := range assets_table[label].CSS {
 				static_opts.CSS = append(static_opts.CSS, uri)
-				aa_log.Debug(opts.Logger, "Add resource for %s (%s)", uri, label)
+				// aa_log.Debug(opts.Logger, "Add resource for %s (%s)", uri, label)
 			}
 
 			for _, uri := range assets_table[label].JS {
 				static_opts.JS = append(static_opts.JS, uri)
-				aa_log.Debug(opts.Logger, "Add resource for %s (%s)", uri, label)
+				// aa_log.Debug(opts.Logger, "Add resource for %s (%s)", uri, label)
 			}
 
 		}
@@ -290,18 +288,12 @@ func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 		css_paths := make([]string, len(assets_table[label].CSS))
 
 		for idx, path := range assets_table[label].JS {
-
 			path = strings.TrimLeft(path, "/")
-
-			aa_log.Debug(opts.Logger, "Add %s to JS rollup %s", path, rollup_js_uri)
 			js_paths[idx] = path
 		}
 
 		for idx, path := range assets_table[label].CSS {
-
 			path = strings.TrimLeft(path, "/")
-
-			aa_log.Debug(opts.Logger, "Add %s to CSS rollup %s", path, rollup_css_uri)
 			css_paths[idx] = path
 		}
 
@@ -332,6 +324,7 @@ func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 			rollup_js_uri = u
 		}
 
+		aa_log.Debug(opts.Logger, "Handle %s Javascript rollup at %s", label, rollup_js_uri)
 		mux.Handle(rollup_js_uri, rollup_js_handler)
 
 		// CSS
@@ -363,6 +356,7 @@ func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 			rollup_css_uri = u
 		}
 
+		aa_log.Debug(opts.Logger, "Handle %s CSS rollup at %s", label, rollup_css_uri)
 		mux.Handle(rollup_css_uri, rollup_css_handler)
 	}
 
