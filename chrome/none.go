@@ -26,7 +26,7 @@ func NewNoneChrome(ctx context.Context, uri string) (Chrome, error) {
 }
 
 // WrapHandler returns 'h' unchanged.
-func (c *NoneChrome) WrapHandler(h http.Handler) http.Handler {
+func (c *NoneChrome) WrapHandler(h http.Handler, path string) http.Handler {
 	return h
 }
 

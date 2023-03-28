@@ -16,7 +16,7 @@ import (
 // type Chrome is a simple interface for	enforcing chromeentication in HTTP handlers.
 type Chrome interface {
 	// WrapHandler wraps a `http.Handler` with any implementation-specific middleware.
-	WrapHandler(http.Handler) http.Handler
+	WrapHandler(http.Handler, string) http.Handler
 	AppendStaticAssetHandlers(*http.ServeMux) error
 	AppendStaticAssetHandlersWithPrefix(*http.ServeMux, string) error
 }

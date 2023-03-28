@@ -17,7 +17,8 @@ import (
 	"net/url"
 	"path/filepath"
 	"time"
-
+	"strings"
+	
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
 	"github.com/aaronland/go-http-ping/v2"
@@ -455,7 +456,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		index_handler = bootstrap.AppendResourcesHandler(index_handler, bootstrap_opts)
 		index_handler = www.AppendResourcesHandler(index_handler, www_opts)
 		index_handler = maps.AppendResourcesHandlerWithProvider(index_handler, settings.MapProvider, maps_opts)
-		index_handler = settings.CustomChrome.WrapHandler(index_handler)
+		index_handler = settings.CustomChrome.WrapHandler(index_handler, "whosonfirst.browser.index")
 		index_handler = settings.Authenticator.WrapHandler(index_handler)
 
 		aa_log.Debug(logger, "Handle Index endpoint at %s\n", settings.URIs.Index)
@@ -482,7 +483,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		id_handler = bootstrap.AppendResourcesHandler(id_handler, bootstrap_opts)
 		id_handler = www.AppendResourcesHandler(id_handler, www_opts.WithIdHandlerResources())
 		id_handler = maps.AppendResourcesHandlerWithProvider(id_handler, settings.MapProvider, maps_opts)
-		id_handler = settings.CustomChrome.WrapHandler(id_handler)
+		id_handler = settings.CustomChrome.WrapHandler(id_handler, "whosonfirst.browser.id")
 		id_handler = settings.Authenticator.WrapHandler(id_handler)
 
 		aa_log.Debug(logger, "Handle Id endpoint at %s\n", settings.URIs.Id)
@@ -516,7 +517,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		search_handler = bootstrap.AppendResourcesHandler(search_handler, bootstrap_opts)
 		search_handler = www.AppendResourcesHandler(search_handler, www_opts)
 		search_handler = maps.AppendResourcesHandlerWithProvider(search_handler, settings.MapProvider, maps_opts)
-		search_handler = settings.CustomChrome.WrapHandler(search_handler)
+		search_handler = settings.CustomChrome.WrapHandler(search_handler, "whosonfirst.browser.search")
 		search_handler = settings.Authenticator.WrapHandler(search_handler)
 
 		aa_log.Debug(logger, "Handle Search endpoint at %s\n", settings.URIs.Search)
@@ -583,7 +584,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		geom_handler = maps.AppendResourcesHandlerWithProvider(geom_handler, settings.MapProvider, maps_opts)
 		geom_handler = bootstrap.AppendResourcesHandler(geom_handler, bootstrap_opts)
 		geom_handler = www.AppendResourcesHandler(geom_handler, www_opts.WithGeometryHandlerResources())
-		geom_handler = settings.CustomChrome.WrapHandler(geom_handler)
+		geom_handler = settings.CustomChrome.WrapHandler(geom_handler, "whosonfirst.browser.geometry")
 		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
 
 		aa_log.Debug(logger, "Handle edit geometry endpoint at %s\n", path_edit_geometry)
@@ -661,11 +662,13 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		create_handler = maps.AppendResourcesHandlerWithProvider(create_handler, settings.MapProvider, maps_opts)
 		create_handler = wasm_exec.AppendResourcesHandler(create_handler, wasm_exec_opts)
 
-		create_handler = appendCustomMiddlewareHandlers(settings, settings.URIs.CreateFeature, create_handler)
+		// create_handler = appendCustomMiddlewareHandlers(settings, settings.URIs.CreateFeature, create_handler)
 
 		create_handler = bootstrap.AppendResourcesHandler(create_handler, bootstrap_opts)
 		create_handler = www.AppendResourcesHandler(create_handler, www_opts.WithCreateHandlerResources())
-		create_handler = settings.CustomChrome.WrapHandler(create_handler)
+		
+		create_handler = settings.CustomChrome.WrapHandler(create_handler, "whosonfirst.browser.create")
+		
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
 
 		aa_log.Debug(logger, "Handle create feature endpoint at %s\n", path_create_feature)
@@ -821,13 +824,21 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	// Custom handlers
 
-	for path, h := range settings.CustomWWWHandlers {
+	for uri, h := range settings.CustomWWWHandlers {
 
+		parts := strings.Split(uri, "#")
+
+		path := parts[0]
+		label := path
+
+		if len(parts) == 2 {
+			label = parts[1]
+		}
+		
 		h = www.AppendResourcesHandler(h, www_opts)
 		h = maps.AppendResourcesHandlerWithProvider(h, settings.MapProvider, maps_opts)
 		h = bootstrap.AppendResourcesHandler(h, bootstrap_opts)
-		h = settings.CustomChrome.WrapHandler(h)
-
+		h = settings.CustomChrome.WrapHandler(h, label)
 		h = settings.Authenticator.WrapHandler(h)
 
 		aa_log.Debug(logger, "Handle custom www endpoint at %s\n", path)
