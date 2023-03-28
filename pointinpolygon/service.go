@@ -39,6 +39,8 @@ type PointInPolygonService struct {
 	parent_reader        reader.Reader
 	ResultsCallback      hierarchy_filter.FilterSPRResultsFunc
 	UpdateCallback       hierarchy.PointInPolygonHierarchyResolverUpdateCallback
+	// An optional list of paths (properties) to copy from a parent record to a matching point-in-polygon record.
+	ToCopyFromParentOnUpdate []string
 	PlacetypesDefinition placetypes.Definition
 	logger               *log.Logger
 }
@@ -144,14 +146,9 @@ func (s *PointInPolygonService) UpdateWithInputs(ctx context.Context, body []byt
 
 		if err == nil {
 
-			to_copy := []string{
-				"properties.sfomuseum:post_security",
-				"properties.sfo:level",
-			}
-
 			updates := make(map[string]interface{})
 
-			for _, path := range to_copy {
+			for _, path := range s.ToCopyFromParentOnUpdate {
 
 				rsp := gjson.GetBytes(parent_f, path)
 
