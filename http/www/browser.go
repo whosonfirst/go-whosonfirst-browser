@@ -176,8 +176,6 @@ func (opts *BrowserOptions) WithCreateHandlerResources() *BrowserOptions {
 	new_opts := opts.Clone()
 
 	new_opts.assets = append(new_opts.assets, "whosonfirst.browser.create")
-
-	aa_log.Debug(opts.Logger, "CREATE RESOURCES %s", new_opts.assets)
 	return new_opts
 }
 
@@ -189,8 +187,6 @@ func (opts *BrowserOptions) WithCreateHandlerAssets() *BrowserOptions {
 		"whosonfirst.browser.create",
 	}
 
-	aa_log.Debug(opts.Logger, "CREATE ASSETS %s", new_opts.assets)
-
 	return new_opts
 }
 
@@ -199,8 +195,6 @@ func (opts *BrowserOptions) WithGeometryHandlerResources() *BrowserOptions {
 	new_opts := opts.Clone()
 
 	new_opts.assets = append(new_opts.assets, "whosonfirst.browser.geometry")
-
-	aa_log.Debug(opts.Logger, "GEOM RESOURCES %s", new_opts.assets)
 	return new_opts
 }
 
@@ -212,7 +206,6 @@ func (opts *BrowserOptions) WithGeometryHandlerAssets() *BrowserOptions {
 		"whosonfirst.browser.geometry",
 	}
 
-	aa_log.Debug(opts.Logger, "GEOM ASSETS %s", new_opts.assets)
 	return new_opts
 }
 
