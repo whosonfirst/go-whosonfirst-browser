@@ -16,9 +16,9 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
-	"time"
 	"strings"
-	
+	"time"
+
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
 	"github.com/aaronland/go-http-ping/v2"
@@ -666,9 +666,9 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		create_handler = bootstrap.AppendResourcesHandler(create_handler, bootstrap_opts)
 		create_handler = www.AppendResourcesHandler(create_handler, www_opts.WithCreateHandlerResources())
-		
+
 		create_handler = settings.CustomChrome.WrapHandler(create_handler, "whosonfirst.browser.create")
-		
+
 		create_handler = settings.Authenticator.WrapHandler(create_handler)
 
 		aa_log.Debug(logger, "Handle create feature endpoint at %s\n", path_create_feature)
@@ -834,7 +834,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		if len(parts) == 2 {
 			label = parts[1]
 		}
-		
+
 		h = www.AppendResourcesHandler(h, www_opts)
 		h = maps.AppendResourcesHandlerWithProvider(h, settings.MapProvider, maps_opts)
 		h = bootstrap.AppendResourcesHandler(h, bootstrap_opts)

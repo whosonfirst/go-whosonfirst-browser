@@ -27,7 +27,6 @@ import (
 	browser_custom "github.com/whosonfirst/go-whosonfirst-browser/v7/custom"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/pointinpolygon"
 	browser_properties "github.com/whosonfirst/go-whosonfirst-browser/v7/properties"
-	browser_static "github.com/whosonfirst/go-whosonfirst-browser/v7/static"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
 	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
@@ -50,7 +49,6 @@ type Settings struct {
 	Cache                       cache.Cache
 	Capabilities                *browser_capabilities.Capabilities
 	CORSWrapper                 *cors.Cors
-	CSSRollups                  map[string]*RollupPaths
 	CustomChrome                chrome.Chrome
 	CustomWWWHandlers           map[string]http.Handler
 	CustomAPIHandlers           map[string]http.Handler
@@ -61,7 +59,6 @@ type Settings struct {
 	CustomEditValidationWasm    *browser_custom.CustomValidationWasm
 	Exporter                    export.Exporter
 	JavaScriptAtEOF             bool
-	JavaScriptRollups           map[string]*RollupPaths
 	MapProvider                 provider.Provider
 	NavPlaceMaxFeatures         int
 	URIs                        *browser_uris.URIs
@@ -962,77 +959,6 @@ func SettingsFromConfig(ctx context.Context, cfg *Config, logger *log.Logger) (*
 		settings.Exporter = ex
 		settings.SpatialDatabase = spatial_db
 		settings.PointInPolygonService = pip_service
-	}
-
-	if cfg.RollupAssets {
-
-		rollupjs_paths := map[string][]string{
-			"whosonfirst.browser.common.js": []string{
-				"javascript/localforage.min.js",
-				"javascript/slippymap.crosshairs.js",
-				"javascript/whosonfirst.www.js",
-				"javascript/whosonfirst.render.js",
-				"javascript/whosonfirst.properties.js",
-				"javascript/whosonfirst.cache.js",
-				"javascript/whosonfirst.uri.js",
-				"javascript/whosonfirst.net.js",
-				"javascript/whosonfirst.namify.js",
-				"javascript/whosonfirst.geojson.js",
-				"javascript/whosonfirst.leaflet.utils.js",
-				"javascript/whosonfirst.leaflet.styles.js",
-				"javascript/whosonfirst.leaflet.handlers.js",
-				"javascript/whosonfirst.browser.common.js",
-				"javascript/whosonfirst.browser.feedback.js",
-				"javascript/whosonfirst.browser.maps.js",
-			},
-		}
-
-		if capabilities.EditGeometry {
-
-			rollupjs_paths["whosonfirst.browser.geometry.js"] = []string{
-				"javascript/whosonfirst.browser.api.js",
-				"javascript/whosonfirst.browser.leaflet.js",
-				"javascript/whosonfirst.browser.geometry.js",
-				"javascript/whosonfirst.browser.geometry.init.js",
-			}
-		}
-
-		if capabilities.CreateFeature {
-
-			rollupjs_paths["whosonfirst.browser.create.js"] = []string{
-				"javascript/whosonfirst.browser.api.js",
-				"javascript/whosonfirst.browser.leaflet.js",
-				"javascript/whosonfirst.webcomponent.existentialflag.js",
-				"javascript/whosonfirst.webcomponent.placetype.js",
-				"javascript/whosonfirst.browser.create.js",
-				"javascript/whosonfirst.browser.create.init.js",
-			}
-		}
-
-		settings.JavaScriptRollups = map[string]*RollupPaths{
-			"rollup/": &RollupPaths{
-				Paths: rollupjs_paths,
-				FS:    browser_static.FS,
-			},
-		}
-
-		// CSS
-
-		rollupcss_paths := map[string][]string{
-			"whosonfirst.browser.common.css": []string{
-				"css/whosonfirst.www.css",
-				"css/whosonfirst.common.css",
-				"css/whosonfirst.browser.css",
-			},
-		}
-
-		settings.CSSRollups = map[string]*RollupPaths{
-			"rollup/": &RollupPaths{
-				Paths: rollupcss_paths,
-				FS:    browser_static.FS,
-			},
-		}
-
 	}
 
 	return settings, nil
