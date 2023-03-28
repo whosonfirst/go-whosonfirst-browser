@@ -273,6 +273,10 @@ func AppendAssetHandlers(mux *http.ServeMux, opts *BrowserOptions) error {
 		// in a boolean check to determine if rollups are enabled. Otherwise this will get triggered and it
 		// will fail with duplicate handler errors (assuming that AppendAssetHandlers has been already been
 		// invoked in a non-bespoke context).
+
+		// In principle we could read the relevant files from static.FS and write them to a new instance of
+		// https://github.com/psanford/memfs but that will require typing that hasn't happened yet...
+
 		return aa_static.AppendStaticAssetHandlersWithPrefix(mux, static.FS, opts.Prefix)
 	}
 

@@ -823,6 +823,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	for path, h := range settings.CustomWWWHandlers {
 
+		h = www.AppendResourcesHandler(h, www_opts)
 		h = maps.AppendResourcesHandlerWithProvider(h, settings.MapProvider, maps_opts)
 		h = bootstrap.AppendResourcesHandler(h, bootstrap_opts)
 		h = settings.CustomChrome.WrapHandler(h)
