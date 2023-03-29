@@ -29,14 +29,15 @@ type CreateFeatureVars struct {
 	Paths            *browser_uris.URIs
 	Capabilities     *browser_capabilities.Capabilities
 	CustomProperties []browser_properties.CustomProperty
-	URIPrefix string
+	URIPrefix        string
+	Account          *auth.Account
 }
 
 func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		_, err := opts.Authenticator.GetAccountForRequest(req)
+		acct, err := opts.Authenticator.GetAccountForRequest(req)
 
 		if err != nil {
 			switch err.(type) {
@@ -58,7 +59,8 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			Capabilities:     opts.Capabilities,
 			MapProvider:      opts.MapProvider,
 			CustomProperties: opts.CustomProperties,
-			URIPrefix: opts.URIs.URIPrefix,
+			URIPrefix:        opts.URIs.URIPrefix,
+			Account:          acct,
 		}
 
 		RenderTemplate(rsp, opts.Template, vars)

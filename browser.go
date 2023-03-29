@@ -466,12 +466,13 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	if settings.Capabilities.Id {
 
 		id_opts := www.IDHandlerOptions{
-			Templates:    t,
-			URIs:         settings.URIs,
-			Capabilities: settings.Capabilities,
-			Reader:       settings.Reader,
-			Logger:       logger,
-			MapProvider:  settings.MapProvider.Scheme(),
+			Templates:     t,
+			URIs:          settings.URIs,
+			Capabilities:  settings.Capabilities,
+			Reader:        settings.Reader,
+			Logger:        logger,
+			MapProvider:   settings.MapProvider.Scheme(),
+			Authenticator: settings.Authenticator,
 		}
 
 		id_handler, err := www.IDHandler(id_opts)

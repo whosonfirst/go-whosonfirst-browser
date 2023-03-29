@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"time"
 
+	aa_log "github.com/aaronland/go-log/v2"
+	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
 	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
 	browser_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
@@ -19,12 +21,13 @@ import (
 )
 
 type IDHandlerOptions struct {
-	Templates    *template.Template
-	Reader       reader.Reader
-	Logger       *log.Logger
-	MapProvider  string
-	URIs         *browser_uris.URIs
-	Capabilities *browser_capabilities.Capabilities
+	Authenticator auth.Authenticator
+	Templates     *template.Template
+	Reader        reader.Reader
+	Logger        *log.Logger
+	MapProvider   string
+	URIs          *browser_uris.URIs
+	Capabilities  *browser_capabilities.Capabilities
 }
 
 type IDVars struct {
@@ -36,7 +39,8 @@ type IDVars struct {
 	Paths        *browser_uris.URIs
 	Capabilities *browser_capabilities.Capabilities
 	MapProvider  string
-	URIPrefix string
+	URIPrefix    string
+	Account      *auth.Account
 }
 
 func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
@@ -98,6 +102,19 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 	}
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
+
+		acct, err := opts.Authenticator.GetAccountForRequest(req)
+
+		if err != nil {
+			switch err.(type) {
+			case auth.NotLoggedIn:
+				// pass
+			default:
+				aa_log.Error(opts.Logger, "Failed to determine account for request, %v", err)
+				http.Error(rsp, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
 
 		uri, err, _ := browser_http.ParseURIFromRequest(req, opts.Reader)
 
@@ -162,7 +179,8 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 			Paths:        opts.URIs,
 			Capabilities: opts.Capabilities,
 			MapProvider:  opts.MapProvider,
-			URIPrefix: opts.URIs.URIPrefix,
+			URIPrefix:    opts.URIs.URIPrefix,
+			Account:      acct,
 		}
 
 		t := id_t

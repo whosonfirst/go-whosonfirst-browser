@@ -35,14 +35,14 @@ type PointInPolygonServiceOptions struct {
 }
 
 type PointInPolygonService struct {
-	resolver             *hierarchy.PointInPolygonHierarchyResolver
-	parent_reader        reader.Reader
-	ResultsCallback      hierarchy_filter.FilterSPRResultsFunc
-	UpdateCallback       hierarchy.PointInPolygonHierarchyResolverUpdateCallback
+	resolver        *hierarchy.PointInPolygonHierarchyResolver
+	parent_reader   reader.Reader
+	ResultsCallback hierarchy_filter.FilterSPRResultsFunc
+	UpdateCallback  hierarchy.PointInPolygonHierarchyResolverUpdateCallback
 	// An optional list of paths (properties) to copy from a parent record to a matching point-in-polygon record.
 	ToCopyFromParentOnUpdate []string
-	PlacetypesDefinition placetypes.Definition
-	logger               *log.Logger
+	PlacetypesDefinition     placetypes.Definition
+	logger                   *log.Logger
 }
 
 func NewPointInPolygonService(ctx context.Context, spatial_database_uri string, parent_reader_uri string) (*PointInPolygonService, error) {

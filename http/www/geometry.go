@@ -30,13 +30,14 @@ type EditGeometryVars struct {
 	Capabilities *browser_capabilities.Capabilities
 	// To do: Support alternate geometries
 	URIPrefix string
+	Account   *auth.Account
 }
 
 func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		_, err := opts.Authenticator.GetAccountForRequest(req)
+		acct, err := opts.Authenticator.GetAccountForRequest(req)
 
 		if err != nil {
 			switch err.(type) {
@@ -72,7 +73,8 @@ func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error)
 			Capabilities: opts.Capabilities,
 			MapProvider:  opts.MapProvider,
 			Id:           id,
-			URIPrefix: opts.URIs.URIPrefix,
+			URIPrefix:    opts.URIs.URIPrefix,
+			Account:      acct,
 		}
 
 		RenderTemplate(rsp, opts.Template, vars)
