@@ -36,6 +36,7 @@ type IDVars struct {
 	Paths        *browser_uris.URIs
 	Capabilities *browser_capabilities.Capabilities
 	MapProvider  string
+	URIPrefix string
 }
 
 func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
@@ -161,6 +162,7 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 			Paths:        opts.URIs,
 			Capabilities: opts.Capabilities,
 			MapProvider:  opts.MapProvider,
+			URIPrefix: opts.URIs.URIPrefix,
 		}
 
 		t := id_t

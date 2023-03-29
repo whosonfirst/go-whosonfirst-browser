@@ -29,6 +29,7 @@ type CreateFeatureVars struct {
 	Paths            *browser_uris.URIs
 	Capabilities     *browser_capabilities.Capabilities
 	CustomProperties []browser_properties.CustomProperty
+	URIPrefix string
 }
 
 func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, error) {
@@ -57,6 +58,7 @@ func CreateFeatureHandler(opts *CreateFeatureHandlerOptions) (http.Handler, erro
 			Capabilities:     opts.Capabilities,
 			MapProvider:      opts.MapProvider,
 			CustomProperties: opts.CustomProperties,
+			URIPrefix: opts.URIs.URIPrefix,
 		}
 
 		RenderTemplate(rsp, opts.Template, vars)

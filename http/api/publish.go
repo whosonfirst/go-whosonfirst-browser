@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"strings"
 
-	aa_log "github.com/aaronland/go-log"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http"

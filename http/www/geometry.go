@@ -29,6 +29,7 @@ type EditGeometryVars struct {
 	Paths        *browser_uris.URIs
 	Capabilities *browser_capabilities.Capabilities
 	// To do: Support alternate geometries
+	URIPrefix string
 }
 
 func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error) {
@@ -71,6 +72,7 @@ func EditGeometryHandler(opts *EditGeometryHandlerOptions) (http.Handler, error)
 			Capabilities: opts.Capabilities,
 			MapProvider:  opts.MapProvider,
 			Id:           id,
+			URIPrefix: opts.URIs.URIPrefix,
 		}
 
 		RenderTemplate(rsp, opts.Template, vars)
