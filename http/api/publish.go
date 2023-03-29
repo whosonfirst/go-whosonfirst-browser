@@ -74,8 +74,6 @@ func publishFeature(ctx context.Context, opts *publishFeatureOptions, body []byt
 		}
 
 		writer_uris[idx] = wr_uri
-
-		aa_log.Debug(opts.Logger, "Writer URI %d %s", idx, wr_uri)
 	}
 
 	// END OF on-the-fly values for https://github.com/whosonfirst/go-writer-github based writers
