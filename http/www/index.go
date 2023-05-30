@@ -6,19 +6,18 @@ import (
 	_ "log"
 	"net/http"
 
-	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
-	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7"
 )
 
 type IndexHandlerOptions struct {
 	Templates    *template.Template
-	URIs         *browser_uris.URIs
-	Capabilities *browser_capabilities.Capabilities
+	URIs         *browser.URIs
+	Capabilities *browser.Capabilities
 }
 
 type IndexVars struct {
-	Paths        *browser_uris.URIs
-	Capabilities *browser_capabilities.Capabilities
+	Paths        *browser.URIs
+	Capabilities *browser.Capabilities
 }
 
 func IndexHandler(opts IndexHandlerOptions) (http.Handler, error) {

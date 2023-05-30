@@ -3,15 +3,16 @@ package http
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-http-sanitize"
-	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/webfinger"
-	wof_uri "github.com/whosonfirst/go-whosonfirst-uri"
 	"io"
 	_ "log"
 	go_http "net/http"
 	"path/filepath"
 	"strings"
+
+	"github.com/aaronland/go-http-sanitize"
+	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/webfinger"
+	wof_uri "github.com/whosonfirst/go-whosonfirst-uri"
 )
 
 type URI struct {

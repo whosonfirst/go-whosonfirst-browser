@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"	
 )
 
 func pngHandlerFunc(ctx context.Context) (http.Handler, error) {
@@ -13,7 +15,7 @@ func pngHandlerFunc(ctx context.Context) (http.Handler, error) {
 	png_opts := &www.RasterHandlerOptions{
 		Sizes:  sizes,
 		Format: "png",
-		Reader: settings.Reader,
+		Reader: wof_reader,
 		Logger: logger,
 	}
 
@@ -32,7 +34,7 @@ func svgHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	svg_opts := &www.SVGHandlerOptions{
 		Sizes:  sizes,
-		Reader: settings.Reader,
+		Reader: wof_reader,
 		Logger: logger,
 	}
 

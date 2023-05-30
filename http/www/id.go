@@ -12,9 +12,8 @@ import (
 	aa_log "github.com/aaronland/go-log/v2"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
-	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7"
 	browser_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
-	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 	"github.com/whosonfirst/go-whosonfirst-uri"
@@ -26,8 +25,8 @@ type IDHandlerOptions struct {
 	Reader        reader.Reader
 	Logger        *log.Logger
 	MapProvider   string
-	URIs          *browser_uris.URIs
-	Capabilities  *browser_capabilities.Capabilities
+	URIs          *browser.URIs
+	Capabilities  *browser.Capabilities
 }
 
 type IDVars struct {
@@ -36,8 +35,8 @@ type IDVars struct {
 	URIArgs      *uri.URIArgs
 	IsAlternate  bool
 	LastModified string
-	Paths        *browser_uris.URIs
-	Capabilities *browser_capabilities.Capabilities
+	Paths        *browser.URIs
+	Capabilities *browser.Capabilities
 	MapProvider  string
 	URIPrefix    string
 	Account      *auth.Account

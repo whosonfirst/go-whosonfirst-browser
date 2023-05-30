@@ -21,21 +21,20 @@ import (
 
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
-
+	
 	"github.com/aaronland/go-http-server"
 	"github.com/aaronland/go-http-server/handler"
 	aa_log "github.com/aaronland/go-log/v2"
 	wasm_exec "github.com/sfomuseum/go-http-wasm/v2"
 	"github.com/sfomuseum/go-template/html"
 	"github.com/sfomuseum/go-template/text"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
+	// "github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/javascript"
 	wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"
 	wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
 )
 
-func Run(ctx context.Context, logger *log.Logger) error {
+func Run(ctx context.Context, run_logger *log.Logger) error {
 
 	fs, err := DefaultFlagSet(ctx)
 
@@ -43,22 +42,244 @@ func Run(ctx context.Context, logger *log.Logger) error {
 		return fmt.Errorf("Failed to create default flagset, %w", err)
 	}
 
-	return RunWithFlagSet(ctx, fs, logger)
+	return RunWithFlagSet(ctx, fs, run_logger)
 }
 
-func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) error {
+func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, run_logger *log.Logger) error {
 
-	cfg, err := ConfigFromFlagSet(ctx, fs)
+	run_cfg, err := ConfigFromFlagSet(ctx, fs)
 
 	if err != nil {
 		return fmt.Errorf("Failed to derive config from flagset, %w", err)
 	}
 
-	if config.Verbose {
+	return RunWithConfig(ctx, run_cfg, run_logger)
+}
+
+func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger) error {
+
+	cfg = run_cfg
+	logger = run_logger
+	
+	if cfg.Verbose {
 		aa_log.SetMinLevelWithPrefix(aa_log.DEBUG_PREFIX)
 	} else {
 		aa_log.SetMinLevelWithPrefix(aa_log.INFO_PREFIX)
 	}
+
+	// START OF auto-set/update config flags
+
+	if cfg.EnableAll {
+		cfg.EnableGraphics = true
+		cfg.EnableData = true
+		cfg.EnableHTML = true
+	}
+
+	if cfg.EnableGraphics {
+		cfg.EnablePNG = true
+		cfg.EnableSVG = true
+	}
+
+	if cfg.EnableData {
+		cfg.EnableGeoJSON = true
+		cfg.EnableGeoJSONLD = true
+		cfg.EnableNavPlace = true
+		cfg.EnableSPR = true
+		cfg.EnableSelect = true
+		cfg.EnableWebFinger = true
+	}
+
+	if cfg.EnableSearch {
+		cfg.EnableSearchAPI = true
+		cfg.EnableHTML = true
+	}
+
+	if cfg.EnablePointInPolygon {
+		cfg.EnablePointInPolygonAPI = true
+		cfg.EnableHTML = true
+	}
+
+	if cfg.EnableHTML {
+		cfg.EnableGeoJSON = true
+		cfg.EnablePNG = true
+		cfg.EnableIndex = true
+		cfg.EnableId = true
+	}
+
+	if cfg.EnableEdit {
+		cfg.EnableEditAPI = true
+		cfg.EnableEditUI = true
+	}
+
+	if cfg.EnableEditUI {
+		cfg.EnableEditAPI = true
+	}
+
+	if cfg.DisableGeoJSON {
+		cfg.EnableGeoJSON = false
+	}
+
+	if cfg.DisableGeoJSONLD {
+		cfg.EnableGeoJSONLD = false
+	}
+
+	if cfg.DisableId {
+		cfg.EnableId = false
+	}
+
+	if cfg.DisableIndex {
+		cfg.EnableIndex = false
+	}
+
+	if cfg.DisableNavPlace {
+		cfg.EnableNavPlace = false
+	}
+
+	if cfg.DisablePNG {
+		cfg.EnablePNG = false
+	}
+
+	if cfg.DisableSearch {
+		cfg.EnableSearch = false
+	}
+
+	if cfg.DisableSelect {
+		cfg.EnableSelect = false
+	}
+
+	if cfg.DisableSPR {
+		cfg.EnableSPR = false
+	}
+
+	if cfg.DisableSVG {
+		cfg.EnableSVG = false
+	}
+
+	if cfg.DisableWebFinger {
+		cfg.EnableWebFinger = false
+	}
+
+	// END OF auto-set/update config flags
+
+	// START OF set up capabilities and uris
+
+	capabilities = &Capabilities{}
+	capabilities.RollupAssets = cfg.RollupAssets
+
+	uris = &URIs{
+		URIPrefix: cfg.URIPrefix,
+		Ping:      cfg.PathPing,
+	}
+
+	if cfg.EnableIndex {
+		capabilities.Index = true
+		uris.Index = cfg.PathIndex
+	}
+
+	if cfg.EnableId {
+		capabilities.Id = true
+		uris.Id = cfg.PathId
+	}
+
+	if cfg.EnableGeoJSON {
+		capabilities.GeoJSON = true
+		uris.GeoJSON = cfg.PathGeoJSON
+		uris.GeoJSONAlt = cfg.PathGeoJSONAlt
+	}
+
+	if cfg.EnableGeoJSONLD {
+		capabilities.GeoJSONLD = true
+		uris.GeoJSONLD = cfg.PathGeoJSONLD
+		uris.GeoJSONLDAlt = cfg.PathGeoJSONLDAlt
+	}
+
+	if cfg.EnableSVG {
+		capabilities.SVG = true
+		uris.SVG = cfg.PathSVG
+		uris.SVGAlt = cfg.PathSVGAlt
+	}
+
+	if cfg.EnablePNG {
+		capabilities.PNG = true
+		uris.PNG = cfg.PathPNG
+		uris.PNGAlt = cfg.PathPNGAlt
+	}
+
+	if cfg.EnableSelect {
+		capabilities.Select = true
+		uris.Select = cfg.PathSelect
+	}
+
+	if cfg.EnableNavPlace {
+		capabilities.NavPlace = true
+		uris.NavPlace = cfg.PathNavPlace
+		uris.NavPlaceAlt = cfg.PathNavPlaceAlt
+	}
+
+	if cfg.EnableSPR {
+		capabilities.SPR = true
+		uris.SPR = cfg.PathSPR
+		uris.SPRAlt = cfg.PathSPRAlt
+	}
+
+	if cfg.EnableWebFinger {
+		capabilities.WebFinger = true
+		uris.WebFinger = cfg.PathWebFinger
+		uris.WebFingerAlt = cfg.PathWebFingerAlt
+	}
+
+	if cfg.EnableEditUI {
+		capabilities.EditUI = true
+		capabilities.CreateFeature = true
+		capabilities.DeprecateFeature = true
+		capabilities.CessateFeature = true
+		capabilities.EditGeometry = true
+		uris.CreateFeature = cfg.PathCreateFeature
+		uris.EditGeometry = cfg.PathEditGeometry
+	}
+
+	if cfg.EnableEditAPI {
+		capabilities.EditAPI = true
+		capabilities.CreateFeatureAPI = true
+		capabilities.DeprecateFeatureAPI = true
+		capabilities.CessateFeatureAPI = true
+		capabilities.EditGeometryAPI = true
+		uris.CreateFeatureAPI = cfg.PathCreateFeatureAPI
+		uris.DeprecateFeatureAPI = cfg.PathDeprecateFeatureAPI
+		uris.CessateFeatureAPI = cfg.PathCessateFeatureAPI
+		uris.EditGeometryAPI = cfg.PathEditGeometryAPI
+	}
+
+	if cfg.EnableSearchAPI {
+		capabilities.SearchAPI = true
+		uris.Search = cfg.PathSearchAPI
+	}
+
+	if cfg.EnableSearch {
+		capabilities.Search = true
+		uris.Search = cfg.PathSearch
+	}
+
+	if cfg.EnablePointInPolygonAPI {
+		capabilities.PointInPolygonAPI = true
+		uris.Search = cfg.PathPointInPolygonAPI
+	}
+
+	if cfg.EnablePointInPolygon {
+		capabilities.PointInPolygon = true
+		uris.PointInPolygon = cfg.PathPointInPolygon
+	}
+
+	if cfg.URIPrefix != "" {
+
+		err := uris.ApplyPrefix(cfg.URIPrefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to apply prefix to URIs table, %w", err)
+		}
+	}
+
+	// END OF set up capabilities and uris
 
 	// Set up uris_table here
 
@@ -68,7 +289,6 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 
 	// Start setting up handlers
 
-	// aa_log.Debug(logger, "Handle ping endpoint at %s\n", uris_table.Ping)
 	route_handlers[uris_table.Ping] = pingHandlerFunc
 
 	if capabilities.PNG {
@@ -144,24 +364,20 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 	}
 
 	if capabilities.SearchAPI {
-
 		route_handlers[uris_table.SearchAPI] = apiSearchHandlerFunc
-	}
-
-	if capabilities.PointInPolygonAPI {
-		// To do: Need to sort out what's necessary to create *spatial_app.SpatialApplication
-		// https://github.com/whosonfirst/go-whosonfirst-spatial/blob/main/app/app.go#L20
 	}
 
 	// Common code for HTML handler (public and/or edit handlers)
 
-	if settings.HasHTMLCapabilities() {
+	if capabilities.HasHTMLCapabilities() {
 
 		setupStaticOnce.Do(setupStatic)
 
 		if setupStaticError != nil {
 			return fmt.Errorf("Failed to configure static setup, %w", setupStaticError)
 		}
+
+		// START OF TBD...
 
 		err = bootstrap.AppendAssetHandlers(mux, bootstrap_opts)
 
@@ -175,11 +391,13 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			return fmt.Errorf("Failed to append static asset handlers, %w", err)
 		}
 
-		err = settings.CustomChrome.AppendStaticAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
+		/*
+			err = settings.CustomChrome.AppendStaticAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
 
-		if err != nil {
-			return fmt.Errorf("Failed to append custom asset handlers, %w", err)
-		}
+			if err != nil {
+				return fmt.Errorf("Failed to append custom asset handlers, %w", err)
+			}
+		*/
 
 		// Final map stuff
 
@@ -202,11 +420,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		// Null handler for annoying things like favicons
-
-		null_handler := www.NewNullHandler()
-
-		favicon_path := filepath.Join(uris_table.Id, "favicon.ico")
-		mux.Handle(favicon_path, null_handler)
+		// null_handler := www.NewNullHandler()
+		// favicon_path := filepath.Join(uris_table.Id, "favicon.ico")
+		// mux.Handle(favicon_path, null_handler)
 	}
 
 	// Public HTML handlers

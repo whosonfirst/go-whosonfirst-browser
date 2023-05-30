@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"text/template"
 
-	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7"
 )
 
 type URIsHandlerOptions struct {
-	URIs     *browser_uris.URIs
+	URIs     *browser.URIs
 	Template *template.Template
 }
 

@@ -5,12 +5,21 @@ import (
 	"sync"
 	"text/template"
 
+	"github.com/whosonfirst/go-cache"
+	"github.com/whosonfirst/go-reader-cachereader"	
+	"github.com/aaronland/go-http-maps"	
+	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/uris"
+	"github.com/whosonfirst/go-whosonfirst-export/v2"
+	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
+	"github.com/whosonfirst/go-whosonfirst-spatial/database"	
 )
 
-var uris_table *uris.URIs
+var logger *log.Logger
+
+var uris_table *URIs
 var capabilities *Capabilities
+var config *Config
 
 var wof_reader reader.Reader
 var wof_cache cache.Cache
@@ -21,6 +30,7 @@ var pointinpolygon_service *pointinpolygon.PointInPolygonService
 var search_database fulltext.FullTextDatabase
 
 var authenticator auth.Authenticator
+var map_provider provider.Provider
 
 var html_t *html_template.Template
 var js_t *text_template.Template

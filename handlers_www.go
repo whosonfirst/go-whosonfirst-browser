@@ -4,10 +4,18 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"	
 )
 
 func wwwIndexHandlerFunc(ctx context.Context) (http.Handler, error) {
 
+	setupWWWOnce.Do(setupWWW)
+
+	if setupWWWError != nil {
+		return nil, fmt.Errorf("Failed to configure www setup, %w", setupWWWError)
+	}
+	
 	index_opts := www.IndexHandlerOptions{
 		Templates:    html_t,
 		URIs:         uris_table,
@@ -22,7 +30,7 @@ func wwwIndexHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	index_handler = bootstrap.AppendResourcesHandler(index_handler, bootstrap_opts)
 	index_handler = www.AppendResourcesHandler(index_handler, www_opts)
-	index_handler = maps.AppendResourcesHandlerWithProvider(index_handler, settings.MapProvider, maps_opts)
+	index_handler = maps.AppendResourcesHandlerWithProvider(index_handler, map_provider, maps_opts)
 	index_handler = settings.CustomChrome.WrapHandler(index_handler, "whosonfirst.browser.index")
 	index_handler = settings.Authenticator.WrapHandler(index_handler)
 
@@ -31,14 +39,20 @@ func wwwIndexHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 func wwwIdHandlerFunc(ctx context.Context) (http.Handler, error) {
 
+	setupWWWOnce.Do(setupWWW)
+
+	if setupWWWError != nil {
+		return nil, fmt.Errorf("Failed to configure www setup, %w", setupWWWError)
+	}
+	
 	id_opts := www.IDHandlerOptions{
 		Templates:     t,
 		URIs:          uris_table,
 		Capabilities:  capabilities,
-		Reader:        settings.Reader,
+		Reader:        wof_reader,
 		Logger:        logger,
-		MapProvider:   settings.MapProvider.Scheme(),
-		Authenticator: settings.Authenticator,
+		MapProvider:   map_provider.Scheme(),
+		Authenticator: authenticator,
 	}
 
 	id_handler, err := www.IDHandler(id_opts)
@@ -49,9 +63,9 @@ func wwwIdHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	id_handler = bootstrap.AppendResourcesHandler(id_handler, bootstrap_opts)
 	id_handler = www.AppendResourcesHandler(id_handler, www_opts.WithIdHandlerResources())
-	id_handler = maps.AppendResourcesHandlerWithProvider(id_handler, settings.MapProvider, maps_opts)
+	id_handler = maps.AppendResourcesHandlerWithProvider(id_handler, map_provider, maps_opts)
 	id_handler = settings.CustomChrome.WrapHandler(id_handler, "whosonfirst.browser.id")
-	id_handler = settings.Authenticator.WrapHandler(id_handler)
+	id_handler = authenticator.WrapHandler(id_handler)
 
 	return id_handler, nil
 }
@@ -63,7 +77,7 @@ func wwwSearchHandlerFunc(ctx context.Context) (http.Handler, error) {
 		URIs:         uris_table,
 		Capabilities: capabilities,
 		Database:     settings.SearchDatabase,
-		MapProvider:  settings.MapProvider.Scheme(),
+		MapProvider:  map_provider.Scheme(),
 	}
 
 	search_handler, err := www.SearchHandler(search_opts)
@@ -74,9 +88,9 @@ func wwwSearchHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	search_handler = bootstrap.AppendResourcesHandler(search_handler, bootstrap_opts)
 	search_handler = www.AppendResourcesHandler(search_handler, www_opts)
-	search_handler = maps.AppendResourcesHandlerWithProvider(search_handler, settings.MapProvider, maps_opts)
+	search_handler = maps.AppendResourcesHandlerWithProvider(search_handler, map_provider, maps_opts)
 	search_handler = settings.CustomChrome.WrapHandler(search_handler, "whosonfirst.browser.search")
-	search_handler = settings.Authenticator.WrapHandler(search_handler)
+	search_handler = authenticator.WrapHandler(search_handler)
 
 	return search_handler, nil
 }

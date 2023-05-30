@@ -1,11 +1,12 @@
 package www
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/sfomuseum/go-geojsonld"
 	"github.com/whosonfirst/go-reader"
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
-	"log"
-	"net/http"
 )
 
 type GeoJSONLDHandlerOptions struct {

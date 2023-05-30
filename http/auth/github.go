@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
+
 	"github.com/sfomuseum/go-http-auth"
 	"net/http"
 )

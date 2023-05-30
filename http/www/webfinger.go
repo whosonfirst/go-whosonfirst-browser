@@ -11,9 +11,8 @@ import (
 	"strings"
 
 	"github.com/whosonfirst/go-reader"
-	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7"
 	browser_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
-	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/webfinger"
 	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	"github.com/whosonfirst/go-whosonfirst-uri"
@@ -23,8 +22,8 @@ type WebfingerHandlerOptions struct {
 	Reader       reader.Reader
 	Logger       *log.Logger
 	Hostname     string
-	URIs         *browser_uris.URIs
-	Capabilities *browser_capabilities.Capabilities
+	URIs         *browser.URIs
+	Capabilities *browser.Capabilities
 }
 
 func WebfingerHandler(opts *WebfingerHandlerOptions) (http.Handler, error) {

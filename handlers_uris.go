@@ -1,5 +1,13 @@
 package browser
 
+import (
+	"context"
+	"net/http"
+	"fmt"
+	
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
+)
+
 func urisHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	uris_t := js_t.Lookup("uris")

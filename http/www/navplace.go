@@ -3,12 +3,13 @@ package www
 // https://preview.iiif.io/api/navplace_extension/api/extension/navplace/
 
 import (
-	"github.com/whosonfirst/go-reader"
-	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
 	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
+
+	"github.com/whosonfirst/go-reader"
+	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
 )
 
 type NavPlaceHandlerOptions struct {

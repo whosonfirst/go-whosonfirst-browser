@@ -1,13 +1,14 @@
 package api
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-cache"
 	"github.com/whosonfirst/go-reader"
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
-	"log"
-	"net/http"
 )
 
 type DeprecateFeatureHandlerOptions struct {

@@ -2,13 +2,14 @@ package www
 
 import (
 	"encoding/json"
+	"log"
+	"net/http"
+	"regexp"
+
 	"github.com/aaronland/go-http-sanitize"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
-	"log"
-	"net/http"
-	"regexp"
 )
 
 type SelectHandlerOptions struct {

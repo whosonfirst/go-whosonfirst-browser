@@ -27,3 +27,12 @@ type Capabilities struct {
 	PointInPolygonAPI   bool
 	RollupAssets        bool
 }
+
+func (c *Capabilities) HasHTMLCapabilities() bool {
+
+	if c.Index || c.Id || c.Search || c.EditUI {
+		return true
+	}
+
+	return false
+}

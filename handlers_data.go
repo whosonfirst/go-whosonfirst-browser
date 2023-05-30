@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
+
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"	
 )
 
 func sprHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	spr_opts := &www.SPRHandlerOptions{
-		Reader: settings.Reader,
+		Reader: wof_reader,
 		Logger: logger,
 	}
 
@@ -29,7 +32,7 @@ func sprHandlerFunc(ctx context.Context) (http.Handler, error) {
 func geojsonHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	geojson_opts := &www.GeoJSONHandlerOptions{
-		Reader: settings.Reader,
+		Reader: wof_reader,
 		Logger: logger,
 	}
 
@@ -49,7 +52,7 @@ func geojsonHandlerFunc(ctx context.Context) (http.Handler, error) {
 func geojsonLDHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	geojsonld_opts := &www.GeoJSONLDHandlerOptions{
-		Reader: settings.Reader,
+		Reader: wof_reader,
 		Logger: logger,
 	}
 
@@ -69,8 +72,9 @@ func geojsonLDHandlerFunc(ctx context.Context) (http.Handler, error) {
 func navPlaceHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	navplace_opts := &www.NavPlaceHandlerOptions{
-		Reader:      settings.Reader,
-		MaxFeatures: settings.NavPlaceMaxFeatures,
+		Reader:      wof_reader,
+		// FIX ME
+		// MaxFeatures: settings.NavPlaceMaxFeatures,
 		Logger:      logger,
 	}
 
@@ -89,9 +93,19 @@ func navPlaceHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 func selectHandlerFunction(ctx context.Context) (http.Handler, error) {
 
+	if cfg.SelectPattern == "" {
+		return nil, fmt.Errorf("Missing -select-pattern parameter.")
+	}
+	
+	select_pat, err := regexp.Compile(select_pattern)
+	
+	if err != nil {
+		return nil, fmt.Errorf("Failed to compile select pattern (%s), %w", cfg.SelectPattern, err)
+	}
+	
 	select_opts := &www.SelectHandlerOptions{
-		Pattern: settings.SelectPattern,
-		Reader:  settings.Reader,
+		Pattern: select_pat,
+		Reader:  wof_reader,
 		Logger:  logger,
 	}
 
@@ -111,11 +125,12 @@ func selectHandlerFunction(ctx context.Context) (http.Handler, error) {
 func webFingerHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	webfinger_opts := &www.WebfingerHandlerOptions{
-		Reader:       settings.Reader,
+		Reader:       wof_reader,
 		Logger:       logger,
 		URIs:         uris_table,
-		Capabilities: settings.Capabilities,
-		Hostname:     settings.WebFingerHostname,
+		Capabilities: capabilities,
+		// FIX ME
+		// Hostname:     settings.WebFingerHostname,
 	}
 
 	webfinger_handler, err := www.WebfingerHandler(webfinger_opts)

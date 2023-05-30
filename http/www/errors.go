@@ -2,14 +2,14 @@
 package www
 
 import (
-	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
+	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7"
 )
 
 type ErrorVars struct {
 	Error error
-	URIs  *browser_uris.URIs
+	URIs  *browser.URIs
 }
 
 type NotFoundVars struct {
-	URIs *browser_uris.URIs
+	URIs *browser.URIs
 }

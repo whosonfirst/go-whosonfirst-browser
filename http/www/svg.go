@@ -2,13 +2,14 @@ package www
 
 import (
 	"errors"
+	"log"
+	"net/http"
+
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-sanitize"
 	wof_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
 	"github.com/whosonfirst/go-whosonfirst-svg"
-	"log"
-	"net/http"
 )
 
 type SVGSize struct {
