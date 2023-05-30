@@ -21,8 +21,9 @@ import (
 
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
-	"github.com/aaronland/go-http-ping/v2"
+
 	"github.com/aaronland/go-http-server"
+	"github.com/aaronland/go-http-server/handler"
 	aa_log "github.com/aaronland/go-log/v2"
 	wasm_exec "github.com/sfomuseum/go-http-wasm/v2"
 	"github.com/sfomuseum/go-template/html"
@@ -53,341 +54,114 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		return fmt.Errorf("Failed to derive config from flagset, %w", err)
 	}
 
-	return RunWithConfig(ctx, cfg, logger)
-}
-
-func RunWithConfig(ctx context.Context, cfg *Config, logger *log.Logger) error {
-
-	settings, err := SettingsFromConfig(ctx, cfg, logger)
-
-	if err != nil {
-		return fmt.Errorf("Failed to create settings from config, %w", err)
-	}
-
-	return RunWithSettings(ctx, settings, logger)
-}
-
-func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger) error {
-
-	if settings.Verbose {
+	if config.Verbose {
 		aa_log.SetMinLevelWithPrefix(aa_log.DEBUG_PREFIX)
 	} else {
 		aa_log.SetMinLevelWithPrefix(aa_log.INFO_PREFIX)
 	}
 
+	// Set up uris_table here
+
 	t1 := time.Now()
 
-	t, err := html.LoadTemplates(ctx, settings.Templates...)
-
-	if err != nil {
-		return fmt.Errorf("Failed to load templates, %w", err)
-	}
-
-	js_t, err := text.LoadTemplatesMatching(ctx, "*.js", javascript.FS)
-
-	if err != nil {
-		return fmt.Errorf("Failed to load JS templates, %w", err)
-	}
+	route_handlers := make(map[string]handler.RouteHandlerFunc)
 
 	// Start setting up handlers
 
-	mux := http.NewServeMux()
+	// aa_log.Debug(logger, "Handle ping endpoint at %s\n", uris_table.Ping)
+	route_handlers[uris_table.Ping] = pingHandlerFunc
 
-	ping_handler, err := ping.PingPongHandler()
+	if capabilities.PNG {
 
-	if err != nil {
-		return fmt.Errorf("Failed to create ping handler, %w", err)
-	}
+		route_handlers[uris_table.PNG] = pngHandlerFunc
 
-	mux.Handle(settings.URIs.Ping, ping_handler)
-
-	aa_log.Debug(logger, "Handle ping endpoint at %s\n", settings.URIs.Ping)
-
-	if settings.Capabilities.PNG {
-
-		aa_log.Debug(logger, "PNG support enabled")
-
-		sizes := www.DefaultRasterSizes()
-
-		png_opts := &www.RasterHandlerOptions{
-			Sizes:  sizes,
-			Format: "png",
-			Reader: settings.Reader,
-			Logger: logger,
-		}
-
-		png_handler, err := www.RasterHandler(png_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create raster/png handler, %w", err)
-		}
-
-		aa_log.Debug(logger, "Handle PNG endpoint at %s\n", settings.URIs.PNG)
-		mux.Handle(settings.URIs.PNG, png_handler)
-
-		for _, alt_path := range settings.URIs.PNGAlt {
-			aa_log.Debug(logger, "Handle png endpoint at %s\n", alt_path)
-			mux.Handle(alt_path, png_handler)
+		for _, alt_path := range uris_table.PNGAlt {
+			route_handlers[alt_path] = pngHandlerFunc
 		}
 	}
 
-	if settings.Capabilities.SVG {
+	if capabilities.SVG {
 
-		aa_log.Debug(logger, "SVG support enabled")
+		route_handlers[uris_table.SVG] = svgHandlerFunc
 
-		sizes := www.DefaultSVGSizes()
-
-		svg_opts := &www.SVGHandlerOptions{
-			Sizes:  sizes,
-			Reader: settings.Reader,
-			Logger: logger,
-		}
-
-		svg_handler, err := www.SVGHandler(svg_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create SVG handler, %w", err)
-		}
-
-		if settings.CORSWrapper != nil {
-			svg_handler = settings.CORSWrapper.Handler(svg_handler)
-		}
-
-		aa_log.Debug(logger, "Handle svg endpoint at %s\n", settings.URIs.SVG)
-		mux.Handle(settings.URIs.SVG, svg_handler)
-
-		for _, alt_path := range settings.URIs.SVGAlt {
-
-			aa_log.Debug(logger, "Handle SVG endpoint at %s\n", alt_path)
-			mux.Handle(alt_path, svg_handler)
+		for _, alt_path := range uris_table.SVGAlt {
+			route_handlers[alt_path] = svgHandlerFunc
 		}
 	}
 
-	if settings.Capabilities.SPR {
+	if capabilities.SPR {
 
-		aa_log.Debug(logger, "SPR support enabled")
+		route_handlers[uris_table.SPR] = sprHandlerFunc
 
-		spr_opts := &www.SPRHandlerOptions{
-			Reader: settings.Reader,
-			Logger: logger,
-		}
-
-		spr_handler, err := www.SPRHandler(spr_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create SPR handler, %w", err)
-		}
-
-		if settings.CORSWrapper != nil {
-			spr_handler = settings.CORSWrapper.Handler(spr_handler)
-		}
-
-		aa_log.Debug(logger, "Handle spr endpoint at %s\n", settings.URIs.SPR)
-		mux.Handle(settings.URIs.SPR, spr_handler)
-
-		for _, alt_path := range settings.URIs.SPRAlt {
-
-			aa_log.Debug(logger, "Handle SPR endpoint at %s\n", alt_path)
-			mux.Handle(alt_path, spr_handler)
+		for _, alt_path := range uris_table.SPRAlt {
+			route_handlers[alt_path] = sprHandlerFunc
 		}
 	}
 
-	if settings.Capabilities.GeoJSON {
+	if capabilities.GeoJSON {
 
-		aa_log.Debug(logger, "GeoJSON support enabled")
+		route_handlers[uris_table.GeoJSON] = geojsonHandlerFunc
 
-		geojson_opts := &www.GeoJSONHandlerOptions{
-			Reader: settings.Reader,
-			Logger: logger,
-		}
-
-		geojson_handler, err := www.GeoJSONHandler(geojson_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create GeoJSON handler, %w", err)
-		}
-
-		if settings.CORSWrapper != nil {
-			geojson_handler = settings.CORSWrapper.Handler(geojson_handler)
-		}
-
-		aa_log.Debug(logger, "Handle GeoJSON endpoint at %s\n", settings.URIs.GeoJSON)
-		mux.Handle(settings.URIs.GeoJSON, geojson_handler)
-
-		for _, alt_path := range settings.URIs.GeoJSONAlt {
-
-			aa_log.Debug(logger, "Handle GeoJSON endpoint at %s\n", alt_path)
-			mux.Handle(alt_path, geojson_handler)
+		for _, alt_path := range uris_table.GeoJSONAlt {
+			route_handlers[alt_path] = sprHandlerFunc
 		}
 	}
 
-	if settings.Capabilities.GeoJSONLD {
+	if capabilities.GeoJSONLD {
 
-		aa_log.Debug(logger, "GeoJSON-LD support enabled")
+		route_handlers[uris_table.GeoJSONLD] = geojsonLDHandlerFunc
 
-		geojsonld_opts := &www.GeoJSONLDHandlerOptions{
-			Reader: settings.Reader,
-			Logger: logger,
-		}
-
-		geojsonld_handler, err := www.GeoJSONLDHandler(geojsonld_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create GeoJSON-LD handler, %w", err)
-		}
-
-		if settings.CORSWrapper != nil {
-			geojsonld_handler = settings.CORSWrapper.Handler(geojsonld_handler)
-		}
-
-		aa_log.Debug(logger, "Handle GeoJSON-LD endpoint at %s\n", settings.URIs.GeoJSONLD)
-		mux.Handle(settings.URIs.GeoJSONLD, geojsonld_handler)
-
-		for _, alt_path := range settings.URIs.GeoJSONLDAlt {
-
-			aa_log.Debug(logger, "Handle GeoJSON-LD endpoint at %s\n", alt_path)
-			mux.Handle(alt_path, geojsonld_handler)
+		for _, alt_path := range uris_table.GeoJSONLDAlt {
+			route_handlers[alt_path] = geojsonLDHandlerFunc
 		}
 	}
 
-	if settings.Capabilities.NavPlace {
+	if capabilities.NavPlace {
 
-		aa_log.Debug(logger, "navPlace support enabled")
+		route_handlers[uris_table.NavPlace] = navPlaceHandlerFunc
 
-		navplace_opts := &www.NavPlaceHandlerOptions{
-			Reader:      settings.Reader,
-			MaxFeatures: settings.NavPlaceMaxFeatures,
-			Logger:      logger,
-		}
-
-		navplace_handler, err := www.NavPlaceHandler(navplace_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create IIIF navPlace handler, %w", err)
-		}
-
-		if settings.CORSWrapper != nil {
-			navplace_handler = settings.CORSWrapper.Handler(navplace_handler)
-		}
-
-		aa_log.Debug(logger, "Handle navPlace endpoint at %s\n", settings.URIs.NavPlace)
-		mux.Handle(settings.URIs.NavPlace, navplace_handler)
-
-		for _, alt_path := range settings.URIs.NavPlaceAlt {
-
-			aa_log.Debug(logger, "Handle navPlace endpoint at %s\n", alt_path)
-			mux.Handle(alt_path, navplace_handler)
+		for _, alt_path := range uris_table.NavPlaceAlt {
+			route_handlers[alt_path] = navPlaceHandlerFunc
 		}
 	}
 
-	if settings.Capabilities.Select {
+	if capabilities.Select {
 
-		aa_log.Debug(logger, "Select support enabled")
+		route_handlers[uris_table.Select] = selectHandlerFunc
 
-		select_opts := &www.SelectHandlerOptions{
-			Pattern: settings.SelectPattern,
-			Reader:  settings.Reader,
-			Logger:  logger,
-		}
-
-		select_handler, err := www.SelectHandler(select_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create Select handler, %w", err)
-		}
-
-		if settings.CORSWrapper != nil {
-			select_handler = settings.CORSWrapper.Handler(select_handler)
-		}
-
-		aa_log.Debug(logger, "Handle Select endpoint at %s\n", settings.URIs.Select)
-		mux.Handle(settings.URIs.Select, select_handler)
-
-		for _, alt_path := range settings.URIs.SelectAlt {
-
-			aa_log.Debug(logger, "Handle select endpoint at %s\n", alt_path)
-			mux.Handle(alt_path, select_handler)
+		for _, alt_path := range uris_table.SelectAlt {
+			route_handlers[alt_path] = selectHandlerFunc
 		}
 	}
 
-	if settings.Capabilities.WebFinger {
+	if capabilities.WebFinger {
 
-		aa_log.Debug(logger, "WebFinger support enabled")
+		route_handlers[uris_table.Select] = webFingerHandlerFunc
 
-		webfinger_opts := &www.WebfingerHandlerOptions{
-			Reader:       settings.Reader,
-			Logger:       logger,
-			URIs:         settings.URIs,
-			Capabilities: settings.Capabilities,
-			Hostname:     settings.WebFingerHostname,
-		}
-
-		webfinger_handler, err := www.WebfingerHandler(webfinger_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create WebFinger handler, %w", err)
-		}
-
-		if settings.CORSWrapper != nil {
-			webfinger_handler = settings.CORSWrapper.Handler(webfinger_handler)
-		}
-
-		aa_log.Debug(logger, "Handle WebFinger endpoint at %s\n", settings.URIs.WebFinger)
-		mux.Handle(settings.URIs.WebFinger, webfinger_handler)
-
-		for _, alt_path := range settings.URIs.WebFingerAlt {
-
-			aa_log.Debug(logger, "Handle WebFinger endpoint at %s\n", alt_path)
-			mux.Handle(alt_path, webfinger_handler)
+		for _, alt_path := range uris_table.WebFingerAlt {
+			route_handlers[alt_path] = webFingerHandlerFunc
 		}
 	}
 
-	if settings.Capabilities.SearchAPI {
+	if capabilities.SearchAPI {
 
-		search_opts := api.SearchAPIHandlerOptions{
-			Database:      settings.SearchDatabase,
-			EnableGeoJSON: true,
-			GeoJSONReader: settings.Reader,
-		}
-
-		search_api_handler, err := api.SearchAPIHandler(search_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create search handler, %w", err)
-		}
-
-		if settings.CORSWrapper != nil {
-			search_api_handler = settings.CORSWrapper.Handler(search_api_handler)
-		}
-
-		mux.Handle(settings.URIs.SearchAPI, search_api_handler)
+		route_handlers[uris_table.SearchAPI] = apiSearchHandlerFunc
 	}
 
-	if settings.Capabilities.PointInPolygonAPI {
+	if capabilities.PointInPolygonAPI {
 		// To do: Need to sort out what's necessary to create *spatial_app.SpatialApplication
 		// https://github.com/whosonfirst/go-whosonfirst-spatial/blob/main/app/app.go#L20
 	}
 
 	// Common code for HTML handler (public and/or edit handlers)
 
-	var www_opts *www.BrowserOptions
-	var bootstrap_opts *bootstrap.BootstrapOptions
-	var maps_opts *maps.MapsOptions
-
 	if settings.HasHTMLCapabilities() {
 
-		www_opts = www.DefaultBrowserOptions()
-		www_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
-		www_opts.RollupAssets = settings.Capabilities.RollupAssets
-		www_opts.Prefix = settings.URIs.URIPrefix
-		www_opts.Logger = logger
-		www_opts.DataAttributes["whosonfirst-uri-endpoint"] = settings.URIs.GeoJSON
+		setupStaticOnce.Do(setupStatic)
 
-		bootstrap_opts = bootstrap.DefaultBootstrapOptions()
-		bootstrap_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
-		bootstrap_opts.RollupAssets = settings.Capabilities.RollupAssets
-		bootstrap_opts.Prefix = settings.URIs.URIPrefix
-		bootstrap_opts.Logger = logger
+		if setupStaticError != nil {
+			return fmt.Errorf("Failed to configure static setup, %w", setupStaticError)
+		}
 
 		err = bootstrap.AppendAssetHandlers(mux, bootstrap_opts)
 
@@ -401,7 +175,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			return fmt.Errorf("Failed to append static asset handlers, %w", err)
 		}
 
-		err = settings.CustomChrome.AppendStaticAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
+		err = settings.CustomChrome.AppendStaticAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append custom asset handlers, %w", err)
@@ -411,8 +185,8 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		maps_opts = maps.DefaultMapsOptions()
 		maps_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
-		maps_opts.RollupAssets = settings.Capabilities.RollupAssets
-		maps_opts.Prefix = settings.URIs.URIPrefix
+		maps_opts.RollupAssets = capabilities.RollupAssets
+		maps_opts.Prefix = uris_table.URIPrefix
 		maps_opts.Logger = logger
 
 		err = maps.AppendAssetHandlers(mux, maps_opts)
@@ -431,7 +205,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		null_handler := www.NewNullHandler()
 
-		favicon_path := filepath.Join(settings.URIs.Id, "favicon.ico")
+		favicon_path := filepath.Join(uris_table.Id, "favicon.ico")
 		mux.Handle(favicon_path, null_handler)
 	}
 
@@ -439,58 +213,18 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	// To do: Consider hooks to require auth?
 
-	if settings.Capabilities.Index {
+	if capabilities.Index {
 
-		index_opts := www.IndexHandlerOptions{
-			Templates:    t,
-			URIs:         settings.URIs,
-			Capabilities: settings.Capabilities,
-		}
-
-		index_handler, err := www.IndexHandler(index_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create Index handler, %w", err)
-		}
-
-		index_handler = bootstrap.AppendResourcesHandler(index_handler, bootstrap_opts)
-		index_handler = www.AppendResourcesHandler(index_handler, www_opts)
-		index_handler = maps.AppendResourcesHandlerWithProvider(index_handler, settings.MapProvider, maps_opts)
-		index_handler = settings.CustomChrome.WrapHandler(index_handler, "whosonfirst.browser.index")
-		index_handler = settings.Authenticator.WrapHandler(index_handler)
-
-		aa_log.Debug(logger, "Handle Index endpoint at %s\n", settings.URIs.Index)
-		mux.Handle(settings.URIs.Index, index_handler)
+		route_handlers[uris_table.Index] = wwwIndexHandlerFunc
 	}
 
-	if settings.Capabilities.Id {
+	if capabilities.Id {
 
-		id_opts := www.IDHandlerOptions{
-			Templates:     t,
-			URIs:          settings.URIs,
-			Capabilities:  settings.Capabilities,
-			Reader:        settings.Reader,
-			Logger:        logger,
-			MapProvider:   settings.MapProvider.Scheme(),
-			Authenticator: settings.Authenticator,
-		}
+		route_handlers[uris_table.Id] = wwwIdHandlerFunc
 
-		id_handler, err := www.IDHandler(id_opts)
+		// TBD...
 
-		if err != nil {
-			return fmt.Errorf("Failed to create Id handler, %w", err)
-		}
-
-		id_handler = bootstrap.AppendResourcesHandler(id_handler, bootstrap_opts)
-		id_handler = www.AppendResourcesHandler(id_handler, www_opts.WithIdHandlerResources())
-		id_handler = maps.AppendResourcesHandlerWithProvider(id_handler, settings.MapProvider, maps_opts)
-		id_handler = settings.CustomChrome.WrapHandler(id_handler, "whosonfirst.browser.id")
-		id_handler = settings.Authenticator.WrapHandler(id_handler)
-
-		aa_log.Debug(logger, "Handle Id endpoint at %s\n", settings.URIs.Id)
-		mux.Handle(settings.URIs.Id, id_handler)
-
-		if settings.Capabilities.RollupAssets {
+		if capabilities.RollupAssets {
 			err = www.AppendAssetHandlers(mux, www_opts.WithIdHandlerAssets())
 
 			if err != nil {
@@ -499,99 +233,19 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		}
 	}
 
-	if settings.Capabilities.Search {
-
-		search_opts := www.SearchHandlerOptions{
-			Templates:    t,
-			URIs:         settings.URIs,
-			Capabilities: settings.Capabilities,
-			Database:     settings.SearchDatabase,
-			MapProvider:  settings.MapProvider.Scheme(),
-		}
-
-		search_handler, err := www.SearchHandler(search_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create Search handler, %w", err)
-		}
-
-		search_handler = bootstrap.AppendResourcesHandler(search_handler, bootstrap_opts)
-		search_handler = www.AppendResourcesHandler(search_handler, www_opts)
-		search_handler = maps.AppendResourcesHandlerWithProvider(search_handler, settings.MapProvider, maps_opts)
-		search_handler = settings.CustomChrome.WrapHandler(search_handler, "whosonfirst.browser.search")
-		search_handler = settings.Authenticator.WrapHandler(search_handler)
-
-		aa_log.Debug(logger, "Handle Search endpoint at %s\n", settings.URIs.Search)
-		mux.Handle(settings.URIs.Search, search_handler)
+	if capabilities.Search {
+		route_handlers[uris_table.Search] = wwwSearchHandlerFunc
 	}
 
 	// Edit/write HTML handlers
 
-	if settings.Capabilities.EditUI {
+	if capabilities.EditUI {
 
-		aa_log.Debug(logger, "Edit user interface support enabled")
+		handler_routes[uris_table.EditGeometry] = wwwEditGeometryHandlerFunc
 
-		// Edit geometry
+		// TBD...
 
-		geom_t := t.Lookup("geometry")
-
-		if geom_t == nil {
-			return fmt.Errorf("Failed to load 'geometry' template")
-		}
-
-		geom_opts := &www.EditGeometryHandlerOptions{
-			Authenticator: settings.Authenticator,
-			MapProvider:   settings.MapProvider.Scheme(),
-			URIs:          settings.URIs,
-			Capabilities:  settings.Capabilities,
-			Template:      geom_t,
-			Logger:        logger,
-			Reader:        settings.Reader,
-		}
-
-		geom_handler, err := www.EditGeometryHandler(geom_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create edit geometry handler, %w", err)
-		}
-
-		// To do: Edit properties
-
-		// Create feature
-
-		create_t := t.Lookup("create")
-
-		if create_t == nil {
-			return fmt.Errorf("Failed to load 'create' template")
-		}
-
-		create_opts := &www.CreateFeatureHandlerOptions{
-			Authenticator:    settings.Authenticator,
-			MapProvider:      settings.MapProvider.Scheme(),
-			URIs:             settings.URIs,
-			Capabilities:     settings.Capabilities,
-			Template:         create_t,
-			Logger:           logger,
-			Reader:           settings.Reader,
-			CustomProperties: settings.CustomEditProperties,
-		}
-
-		create_handler, err := www.CreateFeatureHandler(create_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create create feature handler, %w", err)
-		}
-
-		geom_handler = maps.AppendResourcesHandlerWithProvider(geom_handler, settings.MapProvider, maps_opts)
-		geom_handler = bootstrap.AppendResourcesHandler(geom_handler, bootstrap_opts)
-		geom_handler = www.AppendResourcesHandler(geom_handler, www_opts.WithGeometryHandlerResources())
-		geom_handler = settings.CustomChrome.WrapHandler(geom_handler, "whosonfirst.browser.geometry")
-		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
-
-		aa_log.Debug(logger, "Handle edit geometry endpoint at %s\n", path_edit_geometry)
-		mux.Handle(settings.URIs.EditGeometry, geom_handler)
-
-		if settings.Capabilities.RollupAssets {
+		if capabilities.RollupAssets {
 
 			err = www.AppendAssetHandlers(mux, www_opts.WithGeometryHandlerAssets())
 
@@ -604,8 +258,8 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 		wasm_exec_opts := wasm_exec.DefaultWASMOptions()
 		wasm_exec_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
-		wasm_exec_opts.RollupAssets = settings.Capabilities.RollupAssets
-		wasm_exec_opts.Prefix = settings.URIs.URIPrefix
+		wasm_exec_opts.RollupAssets = capabilities.RollupAssets
+		wasm_exec_opts.Prefix = uris_table.URIPrefix
 		wasm_exec_opts.Logger = logger
 
 		err = wasm_exec.AppendAssetHandlers(mux, wasm_exec_opts)
@@ -614,13 +268,13 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			return fmt.Errorf("Failed to append wasm asset handlers, %w", err)
 		}
 
-		err = wasm_placetypes.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
+		err = wasm_placetypes.AppendAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append wasm placetypes asset handlers, %w", err)
 		}
 
-		err = wasm_validate.AppendAssetHandlersWithPrefix(mux, settings.URIs.URIPrefix)
+		err = wasm_validate.AppendAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append wasm validate asset handlers, %w", err)
@@ -637,15 +291,15 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		wasm_validate_uri := "/wasm/validate_feature.wasm"
 		wasm_placetypes_uri := "/wasm/whosonfirst_placetypes.wasm"
 
-		if settings.URIs.URIPrefix != "" {
+		if uris_table.URIPrefix != "" {
 
-			validate_uri, err := url.JoinPath(settings.URIs.URIPrefix, wasm_validate_uri)
+			validate_uri, err := url.JoinPath(uris_table.URIPrefix, wasm_validate_uri)
 
 			if err != nil {
 				return fmt.Errorf("Failed to assign URI prefix to validate wasm path, %w", err)
 			}
 
-			placetypes_uri, err := url.JoinPath(settings.URIs.URIPrefix, wasm_placetypes_uri)
+			placetypes_uri, err := url.JoinPath(uris_table.URIPrefix, wasm_placetypes_uri)
 
 			if err != nil {
 				return fmt.Errorf("Failed to assign URI prefix to placetypes wasm path, %w", err)
@@ -655,27 +309,15 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			wasm_placetypes_uri = placetypes_uri
 		}
 
-		settings.URIs.AddCustomURI("validate_wasm", wasm_validate_uri)
-		settings.URIs.AddCustomURI("placetypes_wasm", wasm_placetypes_uri)
+		uris_table.AddCustomURI("validate_wasm", wasm_validate_uri)
+		uris_table.AddCustomURI("placetypes_wasm", wasm_placetypes_uri)
 
 		// END OF I don't like having	to do this
 
-		create_handler = maps.AppendResourcesHandlerWithProvider(create_handler, settings.MapProvider, maps_opts)
-		create_handler = wasm_exec.AppendResourcesHandler(create_handler, wasm_exec_opts)
+		handler_routes[uris_table.CreateFeature] = wwwCreateGeometryHandlerFunc
 
-		// create_handler = appendCustomMiddlewareHandlers(settings, settings.URIs.CreateFeature, create_handler)
-
-		create_handler = bootstrap.AppendResourcesHandler(create_handler, bootstrap_opts)
-		create_handler = www.AppendResourcesHandler(create_handler, www_opts.WithCreateHandlerResources())
-
-		create_handler = settings.CustomChrome.WrapHandler(create_handler, "whosonfirst.browser.create")
-
-		create_handler = settings.Authenticator.WrapHandler(create_handler)
-
-		aa_log.Debug(logger, "Handle create feature endpoint at %s\n", path_create_feature)
-		mux.Handle(settings.URIs.CreateFeature, create_handler)
-
-		if settings.Capabilities.RollupAssets {
+		// TBD
+		if capabilities.RollupAssets {
 			err = www.AppendAssetHandlers(mux, www_opts.WithCreateHandlerAssets())
 
 			if err != nil {
@@ -702,9 +344,9 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 			fname := filepath.Base(settings.CustomEditValidationWasm.Path)
 			custom_validate_uri := filepath.Join("/wasm", fname)
 
-			if settings.URIs.URIPrefix != "" {
+			if uris_table.URIPrefix != "" {
 
-				uri, err := url.JoinPath(settings.URIs.URIPrefix, custom_validate_uri)
+				uri, err := url.JoinPath(uris_table.URIPrefix, custom_validate_uri)
 
 				if err != nil {
 					return fmt.Errorf("Failed to assign URI prefix to custom validate wasm path, %w", err)
@@ -713,180 +355,73 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 				custom_validate_uri = uri
 			}
 
-			settings.URIs.AddCustomURI("custom_validate_wasm", custom_validate_uri)
+			uris_table.AddCustomURI("custom_validate_wasm", custom_validate_uri)
 
 			aa_log.Debug(logger, "Handle custom validation WASM endpoint at %s\n", custom_validate_uri)
 			mux.Handle(custom_validate_uri, validation_handler)
 		}
 	}
 
-	if settings.Capabilities.EditAPI {
+	if capabilities.EditAPI {
 
-		aa_log.Debug(logger, "Edit API support enabled")
-
-		// Writers are created at runtime using the http/api/publish.go#publishFeature
-		// method which in turn calls writer/writer.go#NewWriter
-
-		// Deprecate a record
-
-		deprecate_opts := &api.DeprecateFeatureHandlerOptions{
-			Reader:        settings.Reader,
-			Cache:         settings.Cache,
-			Logger:        logger,
-			Authenticator: settings.Authenticator,
-			Exporter:      settings.Exporter,
-			WriterURIs:    settings.WriterURIs,
-		}
-
-		deprecate_handler, err := api.DeprecateFeatureHandler(deprecate_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create deprecate feature handler, %w", err)
-		}
-
-		deprecate_handler = settings.Authenticator.WrapHandler(deprecate_handler)
-
-		aa_log.Debug(logger, "Handle deprecate feature API endpoint at %s\n", settings.URIs.DeprecateFeatureAPI)
-		mux.Handle(settings.URIs.DeprecateFeatureAPI, deprecate_handler)
-
-		// Mark a record as ceased
-
-		cessate_opts := &api.CessateFeatureHandlerOptions{
-			Reader:        settings.Reader,
-			Cache:         settings.Cache,
-			Logger:        logger,
-			Authenticator: settings.Authenticator,
-			Exporter:      settings.Exporter,
-			WriterURIs:    settings.WriterURIs,
-		}
-
-		cessate_handler, err := api.CessateFeatureHandler(cessate_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create cessate feature handler, %w", err)
-		}
-
-		cessate_handler = settings.Authenticator.WrapHandler(cessate_handler)
-
-		aa_log.Debug(logger, "Handle cessate feature API endpoint at %s\n", settings.URIs.CessateFeatureAPI)
-		mux.Handle(settings.URIs.CessateFeatureAPI, cessate_handler)
-
-		// Edit geometry
-
-		geom_opts := &api.UpdateGeometryHandlerOptions{
-			Reader:                settings.Reader,
-			Cache:                 settings.Cache,
-			Logger:                logger,
-			Authenticator:         settings.Authenticator,
-			Exporter:              settings.Exporter,
-			WriterURIs:            settings.WriterURIs,
-			PointInPolygonService: settings.PointInPolygonService,
-		}
-
-		geom_handler, err := api.UpdateGeometryHandler(geom_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create update geometry handler, %w", err)
-		}
-
-		geom_handler = settings.Authenticator.WrapHandler(geom_handler)
-
-		aa_log.Debug(logger, "Handle edit geometry API endpoint at %s\n", settings.URIs.EditGeometryAPI)
-		mux.Handle(settings.URIs.EditGeometryAPI, geom_handler)
-
-		// Create a new feature
-
-		create_opts := &api.CreateFeatureHandlerOptions{
-			Reader:                settings.Reader,
-			Cache:                 settings.Cache,
-			Logger:                logger,
-			Authenticator:         settings.Authenticator,
-			Exporter:              settings.Exporter,
-			WriterURIs:            settings.WriterURIs,
-			PointInPolygonService: settings.PointInPolygonService,
-			CustomProperties:      settings.CustomEditProperties,
-			CustomValidationFunc:  settings.CustomEditValidationFunc,
-		}
-
-		create_handler, err := api.CreateFeatureHandler(create_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to create create feature handler, %w", err)
-		}
-
-		create_handler = settings.Authenticator.WrapHandler(create_handler)
-
-		aa_log.Debug(logger, "Handle create feature API endpoint at %s\n", settings.URIs.CreateFeatureAPI)
-		mux.Handle(settings.URIs.CreateFeatureAPI, create_handler)
+		handler_routes[uris_table.DeprecateFeatureAPI] = apiDeprecateHandlerFunc
+		handler_routes[uris_table.CessateFeatureAPI] = apiCessateHandlerFunc
+		handler_routes[uris_table.EditGeometryAPI] = apiEditGeometryHandlerFunc
+		handler_routes[uris_table.CreateFeatureAPI] = apiCreateFeatureHandlerFunc
 	}
 
-	// START OF customizable handlers
-	// Note that middleware handlers are applied inline above
+	// START OF TBD...
 
-	// Custom handlers
+	/*
+		for uri, h := range settings.CustomWWWHandlers {
 
-	for uri, h := range settings.CustomWWWHandlers {
+			parts := strings.Split(uri, "#")
 
-		parts := strings.Split(uri, "#")
+			path := parts[0]
+			label := path
 
-		path := parts[0]
-		label := path
+			if len(parts) == 2 {
+				label = parts[1]
+			}
 
-		if len(parts) == 2 {
-			label = parts[1]
+			h = www.AppendResourcesHandler(h, www_opts)
+			h = maps.AppendResourcesHandlerWithProvider(h, settings.MapProvider, maps_opts)
+			h = bootstrap.AppendResourcesHandler(h, bootstrap_opts)
+			h = settings.CustomChrome.WrapHandler(h, label)
+			h = settings.Authenticator.WrapHandler(h)
+
+			aa_log.Debug(logger, "Handle custom www endpoint at %s\n", path)
+			mux.Handle(path, h)
 		}
 
-		h = www.AppendResourcesHandler(h, www_opts)
-		h = maps.AppendResourcesHandlerWithProvider(h, settings.MapProvider, maps_opts)
-		h = bootstrap.AppendResourcesHandler(h, bootstrap_opts)
-		h = settings.CustomChrome.WrapHandler(h, label)
-		h = settings.Authenticator.WrapHandler(h)
+		for path, h := range settings.CustomAPIHandlers {
 
-		aa_log.Debug(logger, "Handle custom www endpoint at %s\n", path)
-		mux.Handle(path, h)
-	}
+			h = settings.Authenticator.WrapHandler(h)
 
-	for path, h := range settings.CustomAPIHandlers {
+			aa_log.Debug(logger, "Handle custom API endpoint at %s\n", path)
+			mux.Handle(path, h)
+		}
 
-		h = settings.Authenticator.WrapHandler(h)
+		if len(settings.CustomAssetHandlerFunctions) > 0 {
 
-		aa_log.Debug(logger, "Handle custom API endpoint at %s\n", path)
-		mux.Handle(path, h)
-	}
+			aa_log.Debug(logger, "Register custom asset handlers")
 
-	// Custom asset handlers
+			for idx, handler_func := range settings.CustomAssetHandlerFunctions {
 
-	if len(settings.CustomAssetHandlerFunctions) > 0 {
+				err := handler_func(mux, uris_table.URIPrefix)
 
-		aa_log.Debug(logger, "Register custom asset handlers")
-
-		for idx, handler_func := range settings.CustomAssetHandlerFunctions {
-
-			err := handler_func(mux, settings.URIs.URIPrefix)
-
-			if err != nil {
-				return fmt.Errorf("Failed to register custom asset handler function at offset %d, %w", idx, err)
+				if err != nil {
+					return fmt.Errorf("Failed to register custom asset handler function at offset %d, %w", idx, err)
+				}
 			}
 		}
-	}
 
-	// END OF customizable handlers
+	*/
+
+	// END OF TBD...
 
 	// START OF uris.js
-	// Publish settings.URIs as a JS file so that other JS knows where to find things
-
-	uris_t := js_t.Lookup("uris")
-
-	if uris_t == nil {
-		return fmt.Errorf("Failed to load 'uris' javascript template")
-	}
-
-	uris_opts := &www.URIsHandlerOptions{
-		URIs:     settings.URIs,
-		Template: uris_t,
-	}
-
-	uris_handler, err := www.URIsHandler(uris_opts)
+	// Publish uris_table as a JS file so that other JS knows where to find things
 
 	if err != nil {
 		return fmt.Errorf("Failed to create URIs handler, %w", err)
@@ -894,9 +429,9 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 
 	uris_path := "/javascript/whosonfirst.browser.uris.js"
 
-	if settings.URIs.URIPrefix != "" {
+	if uris_table.URIPrefix != "" {
 
-		path, err := url.JoinPath(settings.URIs.URIPrefix, uris_path)
+		path, err := url.JoinPath(uris_table.URIPrefix, uris_path)
 
 		if err != nil {
 			return fmt.Errorf("Failed to assign URI prefix to %s, %w", uris_path, err)
@@ -905,12 +440,20 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 		uris_path = path
 	}
 
-	aa_log.Debug(logger, "Handle whosonfirst.browser.uris.js endpoint at %s\n", uris_path)
-	mux.Handle(uris_path, uris_handler)
+	route_handlers[uris_path] = urisHandlerFunc
 
 	// END OF uris.js
 
 	aa_log.Info(logger, "Time to set up: %v\n", time.Since(t1))
+
+	route_handler, err := handler.RouteHandler(route_handlers)
+
+	if err != nil {
+		return fmt.Errorf("Failed to create route handler, %w", err)
+	}
+
+	mux := http.NewServeMux()
+	mux.Handle("/", route_handler)
 
 	// Finally, start the server
 
@@ -931,6 +474,7 @@ func RunWithSettings(ctx context.Context, settings *Settings, logger *log.Logger
 	return nil
 }
 
+/*
 func appendCustomMiddlewareHandlers(settings *Settings, path string, handler http.Handler) http.Handler {
 
 	custom_handlers, exists := settings.CustomMiddlewareHandlers[path]
@@ -945,3 +489,4 @@ func appendCustomMiddlewareHandlers(settings *Settings, path string, handler htt
 
 	return handler
 }
+*/
