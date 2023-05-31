@@ -47,4 +47,5 @@ func setupPointInPolygon() {
 		return
 	}
 
+	// To do: Set custom PIP options derived from RunOptions
 }
