@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/aaronland/go-http-bootstrap"
+	"github.com/aaronland/go-http-maps"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 )
 
@@ -24,4 +25,11 @@ func setupStatic() {
 	bootstrap_opts.RollupAssets = capabilities.RollupAssets
 	bootstrap_opts.Prefix = uris_table.URIPrefix
 	bootstrap_opts.Logger = logger
+
+	maps_opts = maps.DefaultMapsOptions()
+	maps_opts.AppendJavaScriptAtEOF = cfg.JavaScriptAtEOF
+	maps_opts.RollupAssets = capabilities.RollupAssets
+	maps_opts.Prefix = uris_table.URIPrefix
+	maps_opts.Logger = logger
+
 }

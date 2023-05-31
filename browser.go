@@ -402,12 +402,6 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 
 		// Final map stuff
 
-		maps_opts = maps.DefaultMapsOptions()
-		maps_opts.AppendJavaScriptAtEOF = cfg.JavaScriptAtEOF
-		maps_opts.RollupAssets = capabilities.RollupAssets
-		maps_opts.Prefix = uris_table.URIPrefix
-		maps_opts.Logger = logger
-
 		err = maps.AppendAssetHandlers(mux, maps_opts)
 
 		if err != nil {
@@ -425,10 +419,6 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 		// favicon_path := filepath.Join(uris_table.Id, "favicon.ico")
 		// mux.Handle(favicon_path, null_handler)
 	}
-
-	// Public HTML handlers
-
-	// To do: Consider hooks to require auth?
 
 	if capabilities.Index {
 
@@ -657,7 +647,7 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 		uris_path = path
 	}
 
-	route_handlers[uris_path] = urisHandlerFunc
+	route_handlers[uris_path] = jsURIsHandlerFunc
 
 	// END OF uris.js
 
