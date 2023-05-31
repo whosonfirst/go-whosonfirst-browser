@@ -1879,8 +1879,6 @@ github.com/sfomuseum/go-http-protomaps v0.2.0 h1:+RTc8UAsQEMJewnwIeUwnfaEIzQKKsA
 github.com/sfomuseum/go-http-protomaps v0.2.0/go.mod h1:DwnViouTsAEiqScxQY2ew1kHmyO4nydWQ1I96SXPySU=
 github.com/sfomuseum/go-http-rollup v0.0.2 h1:cc0p0pppG1VJc6o3IUdkbocPnJedRzOqxWFNlz2mkYM=
 github.com/sfomuseum/go-http-rollup v0.0.2/go.mod h1:kxVTXkkaUsxVAMq3lFSNoILzKkv1L4ETuaQiDCQcBfI=
-github.com/sfomuseum/go-http-wasm/v2 v2.0.0 h1:dpWEMAt9z9pfXqeo+FsLliibN+SL55G84mEnyahvG0o=
-github.com/sfomuseum/go-http-wasm/v2 v2.0.0/go.mod h1:42p9f6BmPN/s5wsCm9d+XMNJdkyTYlmVx/L3kXx+GAg=
 github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1 h1:ecjCnrzs1QhSi2R2jQem0y8/6oNrvmUgyM9kMKxZjtw=
 github.com/sfomuseum/go-sfomuseum-mapshaper v0.0.1/go.mod h1:+JVebjhj6f3H3ESBlO1b5pkzS2ZxaqnpUyCHxA8/too=
 github.com/sfomuseum/go-sfomuseum-pmtiles v1.1.0 h1:LvCvXcxwtsdbL16Gk80b5TlJ9L/fn6R8hBD4ck0aGTM=
@@ -2058,6 +2056,8 @@ github.com/whosonfirst/go-reader-cachereader v1.1.0 h1:TbAnjRJgqMUEpT7LIjtUeRaPi
 github.com/whosonfirst/go-reader-cachereader v1.1.0/go.mod h1:QeU3MWecVQUWorgw2zWJSoUSzqSilqYaDLSXw9ypT8M=
 github.com/whosonfirst/go-reader-findingaid v0.14.2 h1:vmE7awRsBjgAR+iCvt0liF3GJQDNtmTFx+JRc/8Vaf8=
 github.com/whosonfirst/go-reader-findingaid v0.14.2/go.mod h1:0GswLNPujhbR7QODm844NvUSX6+pT9kzT1+qdF44gnw=
+github.com/whosonfirst/go-reader-github v0.6.6 h1:q6dUZprV9ln9aE4WsCIsuSxJj2A2hyDWobBvqTavmMA=
+github.com/whosonfirst/go-reader-github v0.6.6/go.mod h1:CuevAtcCRfMkoOu66qp8hTCc0P/spFNHI3lSTa44iUY=
 github.com/whosonfirst/go-reader-http v0.3.1 h1:05cfqxb0OCyoKmaJgyzyX81mXzPe1J29QV/4NqEUMRQ=
 github.com/whosonfirst/go-reader-http v0.3.1/go.mod h1:F8MO2ti0CFmkf/MUAlkkgUklBhHYtgeh1bUAl6IzsgU=
 github.com/whosonfirst/go-rfc-5646 v0.1.0 h1:HNFPAem6v5De61PXLgbGzx9tfNOP83AAkVvm9WAddJY=
@@ -2090,8 +2090,6 @@ github.com/whosonfirst/go-whosonfirst-names v0.1.0/go.mod h1:0z86/nedM9T/5C8cAdb
 github.com/whosonfirst/go-whosonfirst-placetypes v0.3.0/go.mod h1:ez0VFkGFbgT2/z2oi3PIuW6FewsZ2+5glyfDD79XEHk=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.7.0 h1:hm1dySC23ZZYHDleAE201+s5HTUtgle38JlKzfVZVHA=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.7.0/go.mod h1:d7S4er4OFfFsgzMOnHH8mX8q+iPhXWB+merbrMDx/rk=
-github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.2.0 h1:q4QsLM/+hmgm6/L367hFi1M7tZ0Z6PrVTtI9had8Ki8=
-github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.2.0/go.mod h1:FobE5ewhpzVNWBxgJYz3Bd/ZyVF0t0L7C2RsFwjAzaA=
 github.com/whosonfirst/go-whosonfirst-reader v1.0.1 h1:6edzwFwhm3Kb5wiMMzUhTRyMaHmkE7MQTK18ufs4qgM=
 github.com/whosonfirst/go-whosonfirst-reader v1.0.1/go.mod h1:IPl9yAPYBS0XULSpQprDMkI/Y3++khnL1k/MVHh06+Q=
 github.com/whosonfirst/go-whosonfirst-search v0.1.0 h1:BZctXvgB8HyuVlmtw49IIV2i30EGzR682ZUAbdSfB7w=
@@ -2124,8 +2122,6 @@ github.com/whosonfirst/go-whosonfirst-uri v1.3.0 h1:LYOVLqP9rWQxauYVkdw65j5LZxEi
 github.com/whosonfirst/go-whosonfirst-uri v1.3.0/go.mod h1:CuVygTCUpMG945MMvqHyqxvc/L5YkDaMrrVpRFr7ZxY=
 github.com/whosonfirst/go-whosonfirst-validate v0.3.6 h1:VG5mxf72IfBk/tkvzteZFWnYpW4duZ5HAHBYfAJ0xSE=
 github.com/whosonfirst/go-whosonfirst-validate v0.3.6/go.mod h1:TTN6r/nkZVW62RmLpgRb0/EGWqFBdfyY2cLvGNOkKUM=
-github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.6 h1:EcLvI4zbMiyQkdz154uptG5Ex2VlAnFVGVdG54xb7FY=
-github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.6/go.mod h1:RZTkXmLduQwtEXt1cs4iqLwoP0E8RywCen8VCSggzJg=
 github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0-20220916180959-42588e308a3e h1:FMjhKz9LHZDDZOCrNvof2o7CduM7mSQg3AKSXkJowmg=
 github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0-20220916180959-42588e308a3e/go.mod h1:Ee7DXBL23kO62yG/yzkLaO9OOqOGTcHLnxRIN2BB4Tg=
 github.com/whosonfirst/go-writer-github/v3 v3.0.2 h1:ArgugLUDy6yun8oMfcBHjZkHUTa30ZKnnMuYzCSkXBo=
