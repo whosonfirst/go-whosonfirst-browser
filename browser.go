@@ -372,7 +372,7 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 			return fmt.Errorf("Failed to configure static setup, %w", setupStaticError)
 		}
 
-		setupMapsOnce.Do(setupStatic)
+		setupMapsOnce.Do(setupMaps)
 
 		if setupMapsError != nil {
 			setupWWWError = fmt.Errorf("Failed to configure static setup, %w", setupMapsError)

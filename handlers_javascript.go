@@ -1,5 +1,8 @@
 package browser
 
+// For reasons I do not understand if this file is named handlers_js.go then
+// Go will silently ignore it because... computers? So don't do that...
+
 import (
 	"context"
 	"fmt"
