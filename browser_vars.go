@@ -3,6 +3,7 @@ package browser
 import (
 	html_template "html/template"
 	"log"
+	"io/fs"
 	text_template "text/template"
 
 	"github.com/aaronland/go-http-bootstrap"
@@ -20,10 +21,11 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 )
 
-// Cloned from corresponding run_* variables
+// Cloned from corresponding RunOptions variables
 
 var cfg *Config
 var logger *log.Logger
+var templates_fs []fs.FS
 
 // Set up in browser.go
 

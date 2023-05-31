@@ -12,6 +12,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	io_fs "io/fs"
 	"log"
 	"net/http"
 	"net/url"
@@ -27,7 +28,14 @@ import (
 	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	// wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"
 	// wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"	
 )
+
+type RunOptions struct {
+	Logger *log.Logger
+	Config *Config
+	Templates []io_fs.FS
+}
 
 func Run(ctx context.Context, run_logger *log.Logger) error {
 
@@ -40,22 +48,33 @@ func Run(ctx context.Context, run_logger *log.Logger) error {
 	return RunWithFlagSet(ctx, fs, run_logger)
 }
 
-func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, run_logger *log.Logger) error {
+func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) error {
 
-	run_cfg, err := ConfigFromFlagSet(ctx, fs)
+	cfg, err := ConfigFromFlagSet(ctx, fs)
 
 	if err != nil {
 		return fmt.Errorf("Failed to derive config from flagset, %w", err)
 	}
 
-	return RunWithConfig(ctx, run_cfg, run_logger)
+	opts := &RunOptions{
+		Logger: logger,
+		Config: cfg,
+		Templates: []io_fs.FS{
+			html.FS,
+		},
+	}
+	
+	return RunWithOptions(ctx, opts)
 }
 
-func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger) error {
+func RunWithOptions(ctx context.Context, opts *RunOptions) error {
 
-	cfg = run_cfg
-	logger = run_logger
+	cfg = opts.Config
+	logger = opts.Logger
+	templates_fs = opts.Templates
 
+	//
+	
 	if cfg.Verbose {
 		aa_log.SetMinLevelWithPrefix(aa_log.DEBUG_PREFIX)
 	} else {

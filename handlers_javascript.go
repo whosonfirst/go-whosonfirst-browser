@@ -13,6 +13,12 @@ import (
 
 func jsURIsHandlerFunc(ctx context.Context) (http.Handler, error) {
 
+	setupJSOnce.Do(setupJS)
+
+	if setupJSError != nil {
+		return nil, fmt.Errorf("Failed to configure JS setup, %w", setupJSError)
+	}
+	
 	uris_t := js_t.Lookup("uris")
 
 	if uris_t == nil {
