@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"	
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 )
 
 func pngHandlerFunc(ctx context.Context) (http.Handler, error) {

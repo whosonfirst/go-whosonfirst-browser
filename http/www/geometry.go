@@ -7,8 +7,9 @@ import (
 
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
 	browser_http "github.com/whosonfirst/go-whosonfirst-browser/v7/http"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 )
 
@@ -18,15 +19,15 @@ type EditGeometryHandlerOptions struct {
 	Logger        *log.Logger
 	Template      *template.Template
 	MapProvider   string
-	URIs          *browser.URIs
-	Capabilities  *browser.Capabilities
+	URIs          *uris.URIs
+	Capabilities  *capabilities.Capabilities
 }
 
 type EditGeometryVars struct {
 	MapProvider  string
 	Id           int64
-	Paths        *browser.URIs
-	Capabilities *browser.Capabilities
+	Paths        *uris.URIs
+	Capabilities *capabilities.Capabilities
 	// To do: Support alternate geometries
 	URIPrefix string
 	Account   *auth.Account

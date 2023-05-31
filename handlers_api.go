@@ -4,9 +4,23 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/api"
 )
 
 func apiSearchHandlerFunc(ctx context.Context) (http.Handler, error) {
+
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupWhosOnFirstReader)
+	}
+
+	setupSearchOnce.Do(setupSearch)
+
+	if setupSearchError != nil {
+		return nil, fmt.Errorf("Failed to configure search setup, %w", setupSearchError)
+	}
 
 	search_opts := api.SearchAPIHandlerOptions{
 		Database:      search_database,
@@ -20,14 +34,32 @@ func apiSearchHandlerFunc(ctx context.Context) (http.Handler, error) {
 		return nil, fmt.Errorf("Failed to create search handler, %w", err)
 	}
 
-	if settings.CORSWrapper != nil {
-		search_api_handler = settings.CORSWrapper.Handler(search_api_handler)
+	if cors_wrapper != nil {
+		search_api_handler = cors_wrapper.Handler(search_api_handler)
 	}
 
 	return search_api_handler, nil
 }
 
 func apiDeprecateHandlerFunc(ctx context.Context) (http.Handler, error) {
+
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupWhosOnFirstReader)
+	}
+
+	setupWhosOnFirstWriterOnce.Do(setupWhosOnFirstWriter)
+
+	if setupWhosOnFirstWriterError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupWhosOnFirstWriter)
+	}
+
+	setupAuthenticatorOnce.Do(setupAuthenticator)
+
+	if setupAuthenticatorError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupAuthenticator)
+	}
 
 	// Writers are created at runtime using the http/api/publish.go#publishFeature
 	// method which in turn calls writer/writer.go#NewWriter
@@ -56,6 +88,24 @@ func apiDeprecateHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 func apiCessateHandlerFunc(ctx context.Context) (http.Handler, error) {
 
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupWhosOnFirstReader)
+	}
+
+	setupWhosOnFirstWriterOnce.Do(setupWhosOnFirstWriter)
+
+	if setupWhosOnFirstWriterError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupWhosOnFirstWriter)
+	}
+
+	setupAuthenticatorOnce.Do(setupAuthenticator)
+
+	if setupAuthenticatorError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupAuthenticator)
+	}
+
 	cessate_opts := &api.CessateFeatureHandlerOptions{
 		Reader:        wof_reader,
 		Cache:         wof_cache,
@@ -72,16 +122,33 @@ func apiCessateHandlerFunc(ctx context.Context) (http.Handler, error) {
 	}
 
 	cessate_handler = authenticator.WrapHandler(cessate_handler)
-
 	return cessate_handler, nil
 }
 
 func apiEditGeometryHandlerFunc(ctx context.Context) (http.Handler, error) {
 
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupWhosOnFirstReader)
+	}
+
+	setupWhosOnFirstWriterOnce.Do(setupWhosOnFirstWriter)
+
+	if setupWhosOnFirstWriterError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupWhosOnFirstWriter)
+	}
+
 	setupPointInPolygonOnce.Do(setupPointInPolygon)
 
 	if setupPointInPolygonError != nil {
 		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupPointInPolygonError)
+	}
+
+	setupAuthenticatorOnce.Do(setupAuthenticator)
+
+	if setupPointInPolygonError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupAuthenticator)
 	}
 
 	geom_opts := &api.UpdateGeometryHandlerOptions{
@@ -104,12 +171,30 @@ func apiEditGeometryHandlerFunc(ctx context.Context) (http.Handler, error) {
 	return geom_handler, nil
 }
 
-func apiCreateFeatureHandlerOption(ctx context.Context) (http.Handler, error) {
+func apiCreateFeatureHandlerFunc(ctx context.Context) (http.Handler, error) {
+
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupWhosOnFirstReader)
+	}
+
+	setupWhosOnFirstWriterOnce.Do(setupWhosOnFirstWriter)
+
+	if setupWhosOnFirstWriterError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupWhosOnFirstWriter)
+	}
 
 	setupPointInPolygonOnce.Do(setupPointInPolygon)
 
 	if setupPointInPolygonError != nil {
 		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupPointInPolygonError)
+	}
+
+	setupAuthenticatorOnce.Do(setupAuthenticator)
+
+	if setupAuthenticatorError != nil {
+		return nil, fmt.Errorf("Failed to configure PIP set up, %w", setupAuthenticator)
 	}
 
 	create_opts := &api.CreateFeatureHandlerOptions{

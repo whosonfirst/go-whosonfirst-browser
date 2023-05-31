@@ -6,10 +6,18 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"	
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 )
 
 func sprHandlerFunc(ctx context.Context) (http.Handler, error) {
+
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure WOF reader setup, %w", setupWhosOnFirstReader)
+	}
+
+	setupCORSOnce.Do(setupCORS)
 
 	spr_opts := &www.SPRHandlerOptions{
 		Reader: wof_reader,
@@ -22,14 +30,22 @@ func sprHandlerFunc(ctx context.Context) (http.Handler, error) {
 		return nil, fmt.Errorf("Failed to create SPR handler, %w", err)
 	}
 
-	if cors_handler != nil {
-		spr_handler = cors_handler.Handler(spr_handler)
+	if cors_wrapper != nil {
+		spr_handler = cors_wrapper.Handler(spr_handler)
 	}
 
 	return spr_handler, nil
 }
 
 func geojsonHandlerFunc(ctx context.Context) (http.Handler, error) {
+
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure WOF reader setup, %w", setupWhosOnFirstReader)
+	}
+
+	setupCORSOnce.Do(setupCORS)
 
 	geojson_opts := &www.GeoJSONHandlerOptions{
 		Reader: wof_reader,
@@ -39,7 +55,7 @@ func geojsonHandlerFunc(ctx context.Context) (http.Handler, error) {
 	geojson_handler, err := www.GeoJSONHandler(geojson_opts)
 
 	if err != nil {
-		return fmt.Errorf("Failed to create GeoJSON handler, %w", err)
+		return nil, fmt.Errorf("Failed to create GeoJSON handler, %w", err)
 	}
 
 	if cors_wrapper != nil {
@@ -50,6 +66,14 @@ func geojsonHandlerFunc(ctx context.Context) (http.Handler, error) {
 }
 
 func geojsonLDHandlerFunc(ctx context.Context) (http.Handler, error) {
+
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure WOF reader setup, %w", setupWhosOnFirstReader)
+	}
+
+	setupCORSOnce.Do(setupCORS)
 
 	geojsonld_opts := &www.GeoJSONLDHandlerOptions{
 		Reader: wof_reader,
@@ -71,11 +95,19 @@ func geojsonLDHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 func navPlaceHandlerFunc(ctx context.Context) (http.Handler, error) {
 
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure WOF reader setup, %w", setupWhosOnFirstReader)
+	}
+
+	setupCORSOnce.Do(setupCORS)
+
 	navplace_opts := &www.NavPlaceHandlerOptions{
-		Reader:      wof_reader,
+		Reader: wof_reader,
 		// FIX ME
 		// MaxFeatures: settings.NavPlaceMaxFeatures,
-		Logger:      logger,
+		Logger: logger,
 	}
 
 	navplace_handler, err := www.NavPlaceHandler(navplace_opts)
@@ -91,18 +123,26 @@ func navPlaceHandlerFunc(ctx context.Context) (http.Handler, error) {
 	return navplace_handler, nil
 }
 
-func selectHandlerFunction(ctx context.Context) (http.Handler, error) {
+func selectHandlerFunc(ctx context.Context) (http.Handler, error) {
+
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure WOF reader setup, %w", setupWhosOnFirstReader)
+	}
+
+	setupCORSOnce.Do(setupCORS)
 
 	if cfg.SelectPattern == "" {
 		return nil, fmt.Errorf("Missing -select-pattern parameter.")
 	}
-	
+
 	select_pat, err := regexp.Compile(select_pattern)
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("Failed to compile select pattern (%s), %w", cfg.SelectPattern, err)
 	}
-	
+
 	select_opts := &www.SelectHandlerOptions{
 		Pattern: select_pat,
 		Reader:  wof_reader,
@@ -123,6 +163,14 @@ func selectHandlerFunction(ctx context.Context) (http.Handler, error) {
 }
 
 func webFingerHandlerFunc(ctx context.Context) (http.Handler, error) {
+
+	setupWhosOnFirstReaderOnce.Do(setupWhosOnFirstReader)
+
+	if setupWhosOnFirstReaderError != nil {
+		return nil, fmt.Errorf("Failed to configure WOF reader setup, %w", setupWhosOnFirstReader)
+	}
+
+	setupCORSOnce.Do(setupCORS)
 
 	webfinger_opts := &www.WebfingerHandlerOptions{
 		Reader:       wof_reader,

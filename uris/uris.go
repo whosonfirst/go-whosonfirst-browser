@@ -1,4 +1,4 @@
-package browser
+package uris
 
 import (
 	"fmt"

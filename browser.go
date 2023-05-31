@@ -15,23 +15,18 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
-	
 	"github.com/aaronland/go-http-server"
 	"github.com/aaronland/go-http-server/handler"
 	aa_log "github.com/aaronland/go-log/v2"
-	wasm_exec "github.com/sfomuseum/go-http-wasm/v2"
-	"github.com/sfomuseum/go-template/html"
-	"github.com/sfomuseum/go-template/text"
-	// "github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/javascript"
-	wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"
-	wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
+	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
+	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
+	// wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"
+	// wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
 )
 
 func Run(ctx context.Context, run_logger *log.Logger) error {
@@ -60,7 +55,7 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 
 	cfg = run_cfg
 	logger = run_logger
-	
+
 	if cfg.Verbose {
 		aa_log.SetMinLevelWithPrefix(aa_log.DEBUG_PREFIX)
 	} else {
@@ -163,69 +158,69 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 
 	// START OF set up capabilities and uris
 
-	capabilities = &Capabilities{}
+	capabilities = &browser_capabilities.Capabilities{}
 	capabilities.RollupAssets = cfg.RollupAssets
 
-	uris = &URIs{
+	uris_table = &browser_uris.URIs{
 		URIPrefix: cfg.URIPrefix,
 		Ping:      cfg.PathPing,
 	}
 
 	if cfg.EnableIndex {
 		capabilities.Index = true
-		uris.Index = cfg.PathIndex
+		uris_table.Index = cfg.PathIndex
 	}
 
 	if cfg.EnableId {
 		capabilities.Id = true
-		uris.Id = cfg.PathId
+		uris_table.Id = cfg.PathId
 	}
 
 	if cfg.EnableGeoJSON {
 		capabilities.GeoJSON = true
-		uris.GeoJSON = cfg.PathGeoJSON
-		uris.GeoJSONAlt = cfg.PathGeoJSONAlt
+		uris_table.GeoJSON = cfg.PathGeoJSON
+		uris_table.GeoJSONAlt = cfg.PathGeoJSONAlt
 	}
 
 	if cfg.EnableGeoJSONLD {
 		capabilities.GeoJSONLD = true
-		uris.GeoJSONLD = cfg.PathGeoJSONLD
-		uris.GeoJSONLDAlt = cfg.PathGeoJSONLDAlt
+		uris_table.GeoJSONLD = cfg.PathGeoJSONLD
+		uris_table.GeoJSONLDAlt = cfg.PathGeoJSONLDAlt
 	}
 
 	if cfg.EnableSVG {
 		capabilities.SVG = true
-		uris.SVG = cfg.PathSVG
-		uris.SVGAlt = cfg.PathSVGAlt
+		uris_table.SVG = cfg.PathSVG
+		uris_table.SVGAlt = cfg.PathSVGAlt
 	}
 
 	if cfg.EnablePNG {
 		capabilities.PNG = true
-		uris.PNG = cfg.PathPNG
-		uris.PNGAlt = cfg.PathPNGAlt
+		uris_table.PNG = cfg.PathPNG
+		uris_table.PNGAlt = cfg.PathPNGAlt
 	}
 
 	if cfg.EnableSelect {
 		capabilities.Select = true
-		uris.Select = cfg.PathSelect
+		uris_table.Select = cfg.PathSelect
 	}
 
 	if cfg.EnableNavPlace {
 		capabilities.NavPlace = true
-		uris.NavPlace = cfg.PathNavPlace
-		uris.NavPlaceAlt = cfg.PathNavPlaceAlt
+		uris_table.NavPlace = cfg.PathNavPlace
+		uris_table.NavPlaceAlt = cfg.PathNavPlaceAlt
 	}
 
 	if cfg.EnableSPR {
 		capabilities.SPR = true
-		uris.SPR = cfg.PathSPR
-		uris.SPRAlt = cfg.PathSPRAlt
+		uris_table.SPR = cfg.PathSPR
+		uris_table.SPRAlt = cfg.PathSPRAlt
 	}
 
 	if cfg.EnableWebFinger {
 		capabilities.WebFinger = true
-		uris.WebFinger = cfg.PathWebFinger
-		uris.WebFingerAlt = cfg.PathWebFingerAlt
+		uris_table.WebFinger = cfg.PathWebFinger
+		uris_table.WebFingerAlt = cfg.PathWebFingerAlt
 	}
 
 	if cfg.EnableEditUI {
@@ -234,8 +229,8 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 		capabilities.DeprecateFeature = true
 		capabilities.CessateFeature = true
 		capabilities.EditGeometry = true
-		uris.CreateFeature = cfg.PathCreateFeature
-		uris.EditGeometry = cfg.PathEditGeometry
+		uris_table.CreateFeature = cfg.PathCreateFeature
+		uris_table.EditGeometry = cfg.PathEditGeometry
 	}
 
 	if cfg.EnableEditAPI {
@@ -244,46 +239,46 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 		capabilities.DeprecateFeatureAPI = true
 		capabilities.CessateFeatureAPI = true
 		capabilities.EditGeometryAPI = true
-		uris.CreateFeatureAPI = cfg.PathCreateFeatureAPI
-		uris.DeprecateFeatureAPI = cfg.PathDeprecateFeatureAPI
-		uris.CessateFeatureAPI = cfg.PathCessateFeatureAPI
-		uris.EditGeometryAPI = cfg.PathEditGeometryAPI
+		uris_table.CreateFeatureAPI = cfg.PathCreateFeatureAPI
+		uris_table.DeprecateFeatureAPI = cfg.PathDeprecateFeatureAPI
+		uris_table.CessateFeatureAPI = cfg.PathCessateFeatureAPI
+		uris_table.EditGeometryAPI = cfg.PathEditGeometryAPI
 	}
 
 	if cfg.EnableSearchAPI {
 		capabilities.SearchAPI = true
-		uris.Search = cfg.PathSearchAPI
+		uris_table.Search = cfg.PathSearchAPI
 	}
 
 	if cfg.EnableSearch {
 		capabilities.Search = true
-		uris.Search = cfg.PathSearch
+		uris_table.Search = cfg.PathSearch
 	}
 
 	if cfg.EnablePointInPolygonAPI {
 		capabilities.PointInPolygonAPI = true
-		uris.Search = cfg.PathPointInPolygonAPI
+		uris_table.Search = cfg.PathPointInPolygonAPI
 	}
 
 	if cfg.EnablePointInPolygon {
 		capabilities.PointInPolygon = true
-		uris.PointInPolygon = cfg.PathPointInPolygon
+		uris_table.PointInPolygon = cfg.PathPointInPolygon
 	}
 
 	if cfg.URIPrefix != "" {
 
-		err := uris.ApplyPrefix(cfg.URIPrefix)
+		err := uris_table.ApplyPrefix(cfg.URIPrefix)
 
 		if err != nil {
-			return fmt.Errorf("Failed to apply prefix to URIs table, %w", err)
+			return fmt.Errorf("Failed to apply prefix to Uris_table table, %w", err)
 		}
 	}
 
-	// END OF set up capabilities and uris
-
-	// Set up uris_table here
+	// END OF set up capabilities and uris_table
 
 	t1 := time.Now()
+
+	mux := http.NewServeMux()
 
 	route_handlers := make(map[string]handler.RouteHandlerFunc)
 
@@ -379,7 +374,7 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 
 		// START OF TBD...
 
-		err = bootstrap.AppendAssetHandlers(mux, bootstrap_opts)
+		err := bootstrap.AppendAssetHandlers(mux, bootstrap_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append Bootstrap asset handlers, %w", err)
@@ -402,7 +397,7 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 		// Final map stuff
 
 		maps_opts = maps.DefaultMapsOptions()
-		maps_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
+		maps_opts.AppendJavaScriptAtEOF = cfg.JavaScriptAtEOF
 		maps_opts.RollupAssets = capabilities.RollupAssets
 		maps_opts.Prefix = uris_table.URIPrefix
 		maps_opts.Logger = logger
@@ -413,7 +408,7 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 			return fmt.Errorf("Failed to append static asset handlers, %v")
 		}
 
-		err = settings.MapProvider.AppendAssetHandlers(mux)
+		err = map_provider.AppendAssetHandlers(mux)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append provider asset handlers, %v", err)
@@ -441,7 +436,8 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 		// TBD...
 
 		if capabilities.RollupAssets {
-			err = www.AppendAssetHandlers(mux, www_opts.WithIdHandlerAssets())
+
+			err := www.AppendAssetHandlers(mux, www_opts.WithIdHandlerAssets())
 
 			if err != nil {
 				return fmt.Errorf("Failed to append asset handler for ID handler, %w", err)
@@ -457,13 +453,13 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 
 	if capabilities.EditUI {
 
-		handler_routes[uris_table.EditGeometry] = wwwEditGeometryHandlerFunc
+		route_handlers[uris_table.EditGeometry] = wwwEditGeometryHandlerFunc
 
 		// TBD...
 
 		if capabilities.RollupAssets {
 
-			err = www.AppendAssetHandlers(mux, www_opts.WithGeometryHandlerAssets())
+			err := www.AppendAssetHandlers(mux, www_opts.WithGeometryHandlerAssets())
 
 			if err != nil {
 				return fmt.Errorf("Failed to append asset handler for geometry handler, %w", err)
@@ -472,118 +468,121 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 
 		// START OF wasm stuff
 
-		wasm_exec_opts := wasm_exec.DefaultWASMOptions()
-		wasm_exec_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
-		wasm_exec_opts.RollupAssets = capabilities.RollupAssets
-		wasm_exec_opts.Prefix = uris_table.URIPrefix
-		wasm_exec_opts.Logger = logger
+		/*
+			wasm_exec_opts := wasm_exec.DefaultWASMOptions()
+			wasm_exec_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
+			wasm_exec_opts.RollupAssets = capabilities.RollupAssets
+			wasm_exec_opts.Prefix = uris_table.URIPrefix
+			wasm_exec_opts.Logger = logger
 
-		err = wasm_exec.AppendAssetHandlers(mux, wasm_exec_opts)
-
-		if err != nil {
-			return fmt.Errorf("Failed to append wasm asset handlers, %w", err)
-		}
-
-		err = wasm_placetypes.AppendAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
-
-		if err != nil {
-			return fmt.Errorf("Failed to append wasm placetypes asset handlers, %w", err)
-		}
-
-		err = wasm_validate.AppendAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
-
-		if err != nil {
-			return fmt.Errorf("Failed to append wasm validate asset handlers, %w", err)
-		}
-
-		// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
-		// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
-		// way to specify the wasm path (yet) this is what we're going to do in conjunction with writing
-		// our own 'whosonfirst.browser.validate' package that fetches the custom URI from 'whosonfirst.browser.uris'.
-		// I suppose it would be easy enough to add a 'setWasmURI' or a 'setWasmPrefix' method to 'whosonfirst.validate.feature.js'
-		// but today that hasn't happened.
-
-		// This file is served by the http/www/static.go handlers
-		wasm_validate_uri := "/wasm/validate_feature.wasm"
-		wasm_placetypes_uri := "/wasm/whosonfirst_placetypes.wasm"
-
-		if uris_table.URIPrefix != "" {
-
-			validate_uri, err := url.JoinPath(uris_table.URIPrefix, wasm_validate_uri)
+			err = wasm_exec.AppendAssetHandlers(mux, wasm_exec_opts)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign URI prefix to validate wasm path, %w", err)
+				return fmt.Errorf("Failed to append wasm asset handlers, %w", err)
 			}
 
-			placetypes_uri, err := url.JoinPath(uris_table.URIPrefix, wasm_placetypes_uri)
+			err = wasm_placetypes.AppendAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
 
 			if err != nil {
-				return fmt.Errorf("Failed to assign URI prefix to placetypes wasm path, %w", err)
+				return fmt.Errorf("Failed to append wasm placetypes asset handlers, %w", err)
 			}
 
-			wasm_validate_uri = validate_uri
-			wasm_placetypes_uri = placetypes_uri
-		}
-
-		uris_table.AddCustomURI("validate_wasm", wasm_validate_uri)
-		uris_table.AddCustomURI("placetypes_wasm", wasm_placetypes_uri)
-
-		// END OF I don't like having	to do this
-
-		handler_routes[uris_table.CreateFeature] = wwwCreateGeometryHandlerFunc
-
-		// TBD
-		if capabilities.RollupAssets {
-			err = www.AppendAssetHandlers(mux, www_opts.WithCreateHandlerAssets())
+			err = wasm_validate.AppendAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
 
 			if err != nil {
-				return fmt.Errorf("Failed to append asset handler for create handler, %w", err)
-			}
-		}
-
-		// Custom client-side WASM/JS validation (optional)
-
-		if settings.CustomEditValidationWasm != nil {
-
-			aa_log.Debug(logger, "Enable custom edit validation WASM")
-
-			validation_handler_opts := &www.CustomValidationWasmHandlerOptions{
-				CustomValidationWasm: settings.CustomEditValidationWasm,
+				return fmt.Errorf("Failed to append wasm validate asset handlers, %w", err)
 			}
 
-			validation_handler, err := www.CustomValidationWasmHandler(validation_handler_opts)
+			// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
+			// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
+			// way to specify the wasm path (yet) this is what we're going to do in conjunction with writing
+			// our own 'whosonfirst.browser.validate' package that fetches the custom URI from 'whosonfirst.browser.uris'.
+			// I suppose it would be easy enough to add a 'setWasmURI' or a 'setWasmPrefix' method to 'whosonfirst.validate.feature.js'
+			// but today that hasn't happened.
 
-			if err != nil {
-				return fmt.Errorf("Failed to create custom edit validation WASM handler, %w", err)
-			}
-
-			fname := filepath.Base(settings.CustomEditValidationWasm.Path)
-			custom_validate_uri := filepath.Join("/wasm", fname)
+			// This file is served by the http/www/static.go handlers
+			wasm_validate_uri := "/wasm/validate_feature.wasm"
+			wasm_placetypes_uri := "/wasm/whosonfirst_placetypes.wasm"
 
 			if uris_table.URIPrefix != "" {
 
-				uri, err := url.JoinPath(uris_table.URIPrefix, custom_validate_uri)
+				validate_uri, err := url.JoinPath(uris_table.URIPrefix, wasm_validate_uri)
 
 				if err != nil {
-					return fmt.Errorf("Failed to assign URI prefix to custom validate wasm path, %w", err)
+					return fmt.Errorf("Failed to assign URI prefix to validate wasm path, %w", err)
 				}
 
-				custom_validate_uri = uri
+				placetypes_uri, err := url.JoinPath(uris_table.URIPrefix, wasm_placetypes_uri)
+
+				if err != nil {
+					return fmt.Errorf("Failed to assign URI prefix to placetypes wasm path, %w", err)
+				}
+
+				wasm_validate_uri = validate_uri
+				wasm_placetypes_uri = placetypes_uri
 			}
 
-			uris_table.AddCustomURI("custom_validate_wasm", custom_validate_uri)
+			uris_table.AddCustomURI("validate_wasm", wasm_validate_uri)
+			uris_table.AddCustomURI("placetypes_wasm", wasm_placetypes_uri)
 
-			aa_log.Debug(logger, "Handle custom validation WASM endpoint at %s\n", custom_validate_uri)
-			mux.Handle(custom_validate_uri, validation_handler)
-		}
+			// END OF I don't like having	to do this
+
+			route_handlers[uris_table.CreateFeature] = wwwCreateGeometryHandlerFunc
+
+			// TBD
+			if capabilities.RollupAssets {
+				err = www.AppendAssetHandlers(mux, www_opts.WithCreateHandlerAssets())
+
+				if err != nil {
+					return fmt.Errorf("Failed to append asset handler for create handler, %w", err)
+				}
+			}
+
+			// Custom client-side WASM/JS validation (optional)
+
+			if settings.CustomEditValidationWasm != nil {
+
+				aa_log.Debug(logger, "Enable custom edit validation WASM")
+
+				validation_handler_opts := &www.CustomValidationWasmHandlerOptions{
+					CustomValidationWasm: settings.CustomEditValidationWasm,
+				}
+
+				validation_handler, err := www.CustomValidationWasmHandler(validation_handler_opts)
+
+				if err != nil {
+					return fmt.Errorf("Failed to create custom edit validation WASM handler, %w", err)
+				}
+
+				fname := filepath.Base(settings.CustomEditValidationWasm.Path)
+				custom_validate_uri := filepath.Join("/wasm", fname)
+
+				if uris_table.URIPrefix != "" {
+
+					uri, err := url.JoinPath(uris_table.URIPrefix, custom_validate_uri)
+
+					if err != nil {
+						return fmt.Errorf("Failed to assign URI prefix to custom validate wasm path, %w", err)
+					}
+
+					custom_validate_uri = uri
+				}
+
+				uris_table.AddCustomURI("custom_validate_wasm", custom_validate_uri)
+
+				aa_log.Debug(logger, "Handle custom validation WASM endpoint at %s\n", custom_validate_uri)
+				mux.Handle(custom_validate_uri, validation_handler)
+			}
+
+		*/
 	}
 
 	if capabilities.EditAPI {
 
-		handler_routes[uris_table.DeprecateFeatureAPI] = apiDeprecateHandlerFunc
-		handler_routes[uris_table.CessateFeatureAPI] = apiCessateHandlerFunc
-		handler_routes[uris_table.EditGeometryAPI] = apiEditGeometryHandlerFunc
-		handler_routes[uris_table.CreateFeatureAPI] = apiCreateFeatureHandlerFunc
+		route_handlers[uris_table.DeprecateFeatureAPI] = apiDeprecateHandlerFunc
+		route_handlers[uris_table.CessateFeatureAPI] = apiCessateHandlerFunc
+		route_handlers[uris_table.EditGeometryAPI] = apiEditGeometryHandlerFunc
+		route_handlers[uris_table.CreateFeatureAPI] = apiCreateFeatureHandlerFunc
 	}
 
 	// START OF TBD...
@@ -639,10 +638,6 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 	// START OF uris.js
 	// Publish uris_table as a JS file so that other JS knows where to find things
 
-	if err != nil {
-		return fmt.Errorf("Failed to create URIs handler, %w", err)
-	}
-
 	uris_path := "/javascript/whosonfirst.browser.uris.js"
 
 	if uris_table.URIPrefix != "" {
@@ -668,7 +663,6 @@ func RunWithConfig(ctx context.Context, run_cfg *Config, run_logger *log.Logger)
 		return fmt.Errorf("Failed to create route handler, %w", err)
 	}
 
-	mux := http.NewServeMux()
 	mux.Handle("/", route_handler)
 
 	// Finally, start the server

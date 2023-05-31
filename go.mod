@@ -4,11 +4,10 @@ go 1.18
 
 require (
 	github.com/aaronland/go-http-bootstrap v0.4.0
-	github.com/aaronland/go-http-leaflet v0.4.0
 	github.com/aaronland/go-http-maps v0.3.0
 	github.com/aaronland/go-http-ping/v2 v2.0.0
 	github.com/aaronland/go-http-sanitize v0.0.6
-	github.com/aaronland/go-http-server v1.0.1
+	github.com/aaronland/go-http-server v1.1.0
 	github.com/aaronland/go-http-server-tsnet v0.9.3
 	github.com/aaronland/go-http-static v0.0.3
 	github.com/aaronland/go-log v1.0.0
@@ -29,7 +28,6 @@ require (
 	github.com/whosonfirst/go-reader v1.0.2
 	github.com/whosonfirst/go-reader-cachereader v1.1.0
 	github.com/whosonfirst/go-reader-findingaid v0.14.2
-	github.com/whosonfirst/go-reader-github v0.6.6
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-export/v2 v2.7.0
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.26
@@ -60,6 +58,7 @@ require (
 	github.com/aaronland/go-aws-dynamodb v0.0.5 // indirect
 	github.com/aaronland/go-aws-session v0.1.0 // indirect
 	github.com/aaronland/go-brooklynintegers-api v1.2.6 // indirect
+	github.com/aaronland/go-http-leaflet v0.4.0 // indirect
 	github.com/aaronland/go-http-rewrite v1.1.0 // indirect
 	github.com/aaronland/go-http-tangramjs v0.3.0 // indirect
 	github.com/aaronland/go-json-query v0.1.3 // indirect

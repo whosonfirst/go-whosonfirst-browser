@@ -8,8 +8,9 @@ import (
 	aa_log "github.com/aaronland/go-log/v2"
 	"github.com/sfomuseum/go-http-auth"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
 	browser_properties "github.com/whosonfirst/go-whosonfirst-browser/v7/properties"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 )
 
 type CreateFeatureHandlerOptions struct {
@@ -18,15 +19,15 @@ type CreateFeatureHandlerOptions struct {
 	Logger           *log.Logger
 	Template         *template.Template
 	MapProvider      string
-	URIs             *browser.URIs
-	Capabilities     *browser.Capabilities
+	URIs             *uris.URIs
+	Capabilities     *capabilities.Capabilities
 	CustomProperties []browser_properties.CustomProperty
 }
 
 type CreateFeatureVars struct {
 	MapProvider      string
-	Paths            *browser.URIs
-	Capabilities     *browser.Capabilities
+	Paths            *uris.URIs
+	Capabilities     *capabilities.Capabilities
 	CustomProperties []browser_properties.CustomProperty
 	URIPrefix        string
 	Account          *auth.Account

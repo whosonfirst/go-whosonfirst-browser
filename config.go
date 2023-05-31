@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/fs"
 	"strings"
 
 	"github.com/aaronland/go-http-maps/provider"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/sfomuseum/go-flags/lookup"
 	"github.com/sfomuseum/runtimevar"
+	// "github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
 )
 
 type Config struct {
@@ -114,6 +116,7 @@ type Config struct {
 	WebFingerHostname string `json:"webfinger_hostname,omitempty"`
 	// One or more valid whosonfirst/go-writer/v3 URIs
 	WriterURIs []string `json:"writer_uris,omitempty"`
+	Templates  []fs.FS  `json:"templates,omitempty"`
 }
 
 func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
@@ -244,6 +247,12 @@ func ConfigFromFlagSet(ctx context.Context, fs *flag.FlagSet) (*Config, error) {
 		Verbose:                           verbose,
 		WebFingerHostname:                 webfinger_hostname,
 	}
+
+	/*
+		cfg.Templates = []fs.FS{
+			html.FS,
+		}
+	*/
 
 	return cfg, nil
 }

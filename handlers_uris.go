@@ -2,9 +2,9 @@ package browser
 
 import (
 	"context"
-	"net/http"
 	"fmt"
-	
+	"net/http"
+
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 )
 
@@ -13,7 +13,7 @@ func urisHandlerFunc(ctx context.Context) (http.Handler, error) {
 	uris_t := js_t.Lookup("uris")
 
 	if uris_t == nil {
-		return fmt.Errorf("Failed to load 'uris' javascript template")
+		return nil, fmt.Errorf("Failed to load 'uris' javascript template")
 	}
 
 	uris_opts := &www.URIsHandlerOptions{

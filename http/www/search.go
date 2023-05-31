@@ -7,7 +7,8 @@ import (
 	"net/http"
 
 	"github.com/aaronland/go-http-sanitize"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
 )
@@ -16,13 +17,13 @@ type SearchHandlerOptions struct {
 	Templates    *template.Template
 	Database     fulltext.FullTextDatabase
 	MapProvider  string
-	URIs         *browser.URIs
-	Capabilities *browser.Capabilities
+	URIs         *uris.URIs
+	Capabilities *capabilities.Capabilities
 }
 
 type SearchVars struct {
-	Paths        *browser.URIs
-	Capabilities *browser.Capabilities
+	Paths        *uris.URIs
+	Capabilities *capabilities.Capabilities
 	Query        string
 	Results      []spr.StandardPlacesResult
 }
