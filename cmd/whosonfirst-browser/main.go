@@ -17,7 +17,7 @@ import (
 	"log"
 
 	aa_log "github.com/aaronland/go-log"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7"
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/app/browser"
 )
 
 func main() {

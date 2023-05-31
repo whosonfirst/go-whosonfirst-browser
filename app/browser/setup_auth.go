@@ -21,4 +21,5 @@ func setupAuthenticator() {
 		setupAuthenticatorError = err
 		return
 	}
+
 }

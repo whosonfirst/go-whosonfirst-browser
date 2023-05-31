@@ -11,6 +11,8 @@ debug:
 		-javascript-at-eof \
 		-rollup-assets \
 		-reader-uri $(READER) \
+		-authenticator-uri null:// \
+		-enable-edit \
 		-verbose
 
 debug-docker:

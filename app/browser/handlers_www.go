@@ -37,7 +37,8 @@ func wwwIndexHandlerFunc(ctx context.Context) (http.Handler, error) {
 	// FIX ME
 	// index_handler = settings.CustomChrome.WrapHandler(index_handler, "whosonfirst.browser.index")
 
-	index_handler = authenticator.WrapHandler(index_handler)
+	// FIX ME - make me a flag
+	// index_handler = authenticator.WrapHandler(index_handler)
 	return index_handler, nil
 }
 

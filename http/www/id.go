@@ -103,16 +103,23 @@ func IDHandler(opts IDHandlerOptions) (http.Handler, error) {
 
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
-		acct, err := opts.Authenticator.GetAccountForRequest(req)
+		var acct *auth.Account
 
-		if err != nil {
-			switch err.(type) {
-			case auth.NotLoggedIn:
-				// pass
-			default:
-				aa_log.Error(opts.Logger, "Failed to determine account for request, %v", err)
-				http.Error(rsp, "Internal server error", http.StatusInternalServerError)
-				return
+		if opts.Authenticator != nil {
+
+			var err error
+
+			acct, err = opts.Authenticator.GetAccountForRequest(req)
+
+			if err != nil {
+				switch err.(type) {
+				case auth.NotLoggedIn:
+					// pass
+				default:
+					aa_log.Error(opts.Logger, "Failed to determine account for request, %v", err)
+					http.Error(rsp, "Internal server error", http.StatusInternalServerError)
+					return
+				}
 			}
 		}
 

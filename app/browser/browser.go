@@ -28,14 +28,8 @@ import (
 	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	// wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"
 	// wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
-	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"	
+	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
 )
-
-type RunOptions struct {
-	Logger *log.Logger
-	Config *Config
-	Templates []io_fs.FS
-}
 
 func Run(ctx context.Context, run_logger *log.Logger) error {
 
@@ -63,7 +57,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			html.FS,
 		},
 	}
-	
+
 	return RunWithOptions(ctx, opts)
 }
 
@@ -74,7 +68,7 @@ func RunWithOptions(ctx context.Context, opts *RunOptions) error {
 	templates_fs = opts.Templates
 
 	//
-	
+
 	if cfg.Verbose {
 		aa_log.SetMinLevelWithPrefix(aa_log.DEBUG_PREFIX)
 	} else {

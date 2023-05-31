@@ -2,8 +2,8 @@ package browser
 
 import (
 	html_template "html/template"
-	"log"
 	"io/fs"
+	"log"
 	text_template "text/template"
 
 	"github.com/aaronland/go-http-bootstrap"
@@ -49,6 +49,7 @@ var search_database fulltext.FullTextDatabase
 
 // setup_auth.go
 
+var null_authenticator auth.Authenticator
 var authenticator auth.Authenticator
 
 // setup_www.go

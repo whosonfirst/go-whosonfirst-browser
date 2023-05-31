@@ -53,5 +53,5 @@ func setupJS() {
 	if err != nil {
 		setupJSError = fmt.Errorf("Failed to load JS templates, %w", err)
 		return
-	}	
+	}
 }
