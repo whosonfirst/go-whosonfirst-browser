@@ -26,9 +26,10 @@ import (
 	browser_capabilities "github.com/whosonfirst/go-whosonfirst-browser/v7/capabilities"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
 	browser_uris "github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
-	// wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"
-	// wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
+	wasm_placetypes "github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http"
+	wasm_validate "github.com/whosonfirst/go-whosonfirst-validate-wasm/http"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/templates/html"
+	wasm_exec "github.com/sfomuseum/go-http-wasm/v2"	
 )
 
 func Run(ctx context.Context, run_logger *log.Logger) error {
@@ -477,70 +478,51 @@ func RunWithOptions(ctx context.Context, opts *RunOptions) error {
 
 		// START OF wasm stuff
 
+		err := wasm_exec.AppendAssetHandlers(mux, wasm_exec_opts)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append wasm asset handlers, %w", err)
+		}
+		
+		err = wasm_placetypes.AppendAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
+
+		if err != nil {
+			return fmt.Errorf("Failed to append wasm placetypes asset handlers, %w", err)
+		}
+		
+		err = wasm_validate.AppendAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
+		
+		if err != nil {
+			return fmt.Errorf("Failed to append wasm validate asset handlers, %w", err)
+		}
+		
+		// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
+		// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
+		// way to specify the wasm path (yet) this is what we're going to do in conjunction with writing
+		// our own 'whosonfirst.browser.validate' package that fetches the custom URI from 'whosonfirst.browser.uris'.
+		// I suppose it would be easy enough to add a 'setWasmURI' or a 'setWasmPrefix' method to 'whosonfirst.validate.feature.js'
+		// but today that hasn't happened.
+		
+		// This file is served by the http/www/static.go handlers
+		wasm_validate_uri := "/wasm/validate_feature.wasm"
+		wasm_placetypes_uri := "/wasm/whosonfirst_placetypes.wasm"
+
+		// FIX ME: account for prefix...
+		uris_table.AddCustomURI("validate_wasm", wasm_validate_uri)
+		uris_table.AddCustomURI("placetypes_wasm", wasm_placetypes_uri)
+		
+		// END OF I don't like having	to do this
+		
+		log.Println("CREATE", uris_table.CreateFeature)
+		route_handlers[uris_table.CreateFeature] = wwwCreateFeatureHandlerFunc
+
 		/*
-			wasm_exec_opts := wasm_exec.DefaultWASMOptions()
-			wasm_exec_opts.AppendJavaScriptAtEOF = settings.JavaScriptAtEOF
-			wasm_exec_opts.RollupAssets = capabilities.RollupAssets
-			wasm_exec_opts.Prefix = uris_table.URIPrefix
-			wasm_exec_opts.Logger = logger
 
-			err = wasm_exec.AppendAssetHandlers(mux, wasm_exec_opts)
-
-			if err != nil {
-				return fmt.Errorf("Failed to append wasm asset handlers, %w", err)
-			}
-
-			err = wasm_placetypes.AppendAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
-
-			if err != nil {
-				return fmt.Errorf("Failed to append wasm placetypes asset handlers, %w", err)
-			}
-
-			err = wasm_validate.AppendAssetHandlersWithPrefix(mux, uris_table.URIPrefix)
-
-			if err != nil {
-				return fmt.Errorf("Failed to append wasm validate asset handlers, %w", err)
-			}
-
-			// START OF I don't like having to do this but since the default 'whosonfirst.validate.feature.js'
-			// package (in go-whosonfirst-validate-wasm) has a relative path and, importantly, no well-defined
-			// way to specify the wasm path (yet) this is what we're going to do in conjunction with writing
-			// our own 'whosonfirst.browser.validate' package that fetches the custom URI from 'whosonfirst.browser.uris'.
-			// I suppose it would be easy enough to add a 'setWasmURI' or a 'setWasmPrefix' method to 'whosonfirst.validate.feature.js'
-			// but today that hasn't happened.
-
-			// This file is served by the http/www/static.go handlers
-			wasm_validate_uri := "/wasm/validate_feature.wasm"
-			wasm_placetypes_uri := "/wasm/whosonfirst_placetypes.wasm"
-
-			if uris_table.URIPrefix != "" {
-
-				validate_uri, err := url.JoinPath(uris_table.URIPrefix, wasm_validate_uri)
-
-				if err != nil {
-					return fmt.Errorf("Failed to assign URI prefix to validate wasm path, %w", err)
-				}
-
-				placetypes_uri, err := url.JoinPath(uris_table.URIPrefix, wasm_placetypes_uri)
-
-				if err != nil {
-					return fmt.Errorf("Failed to assign URI prefix to placetypes wasm path, %w", err)
-				}
-
-				wasm_validate_uri = validate_uri
-				wasm_placetypes_uri = placetypes_uri
-			}
-
-			uris_table.AddCustomURI("validate_wasm", wasm_validate_uri)
-			uris_table.AddCustomURI("placetypes_wasm", wasm_placetypes_uri)
-
-			// END OF I don't like having	to do this
-
-			route_handlers[uris_table.CreateFeature] = wwwCreateGeometryHandlerFunc
-
-			// TBD
-			if capabilities.RollupAssets {
-				err = www.AppendAssetHandlers(mux, www_opts.WithCreateHandlerAssets())
+		// TBD
+		
+		if capabilities.RollupAssets {
+			
+			err = www.AppendAssetHandlers(mux, www_opts.WithCreateHandlerAssets())
 
 				if err != nil {
 					return fmt.Errorf("Failed to append asset handler for create handler, %w", err)

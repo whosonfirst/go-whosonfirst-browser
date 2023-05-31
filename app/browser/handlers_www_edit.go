@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	wasm_exec "github.com/sfomuseum/go-http-wasm/v2"
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
+	wasm_exec "github.com/sfomuseum/go-http-wasm/v2"		
 )
 
 func wwwEditGeometryHandlerFunc(ctx context.Context) (http.Handler, error) {
@@ -64,7 +64,7 @@ func wwwEditGeometryHandlerFunc(ctx context.Context) (http.Handler, error) {
 	return geom_handler, nil
 }
 
-func wwwCreateGeometryHandlerFunc(ctx context.Context) (http.Handler, error) {
+func wwwCreateFeatureHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	setupWWWOnce.Do(setupWWW)
 
@@ -110,12 +110,6 @@ func wwwCreateGeometryHandlerFunc(ctx context.Context) (http.Handler, error) {
 
 	create_handler = maps.AppendResourcesHandlerWithProvider(create_handler, map_provider, maps_opts)
 
-	wasm_exec_opts := wasm_exec.DefaultWASMOptions()
-	wasm_exec_opts.AppendJavaScriptAtEOF = cfg.JavaScriptAtEOF
-	wasm_exec_opts.RollupAssets = cfg.RollupAssets
-	wasm_exec_opts.Prefix = uris_table.URIPrefix
-	wasm_exec_opts.Logger = logger
-	
 	create_handler = wasm_exec.AppendResourcesHandler(create_handler, wasm_exec_opts)
 
 	// FIX ME

@@ -728,6 +728,10 @@ github.com/whosonfirst/go-whosonfirst-names/tags
 # github.com/whosonfirst/go-whosonfirst-placetypes v0.7.0
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-placetypes
+# github.com/whosonfirst/go-whosonfirst-placetypes-wasm v0.2.0
+## explicit; go 1.18
+github.com/whosonfirst/go-whosonfirst-placetypes-wasm/http
+github.com/whosonfirst/go-whosonfirst-placetypes-wasm/static
 # github.com/whosonfirst/go-whosonfirst-reader v1.0.1
 ## explicit; go 1.16
 github.com/whosonfirst/go-whosonfirst-reader
@@ -779,6 +783,10 @@ github.com/whosonfirst/go-whosonfirst-uri
 # github.com/whosonfirst/go-whosonfirst-validate v0.3.6
 ## explicit; go 1.18
 github.com/whosonfirst/go-whosonfirst-validate
+# github.com/whosonfirst/go-whosonfirst-validate-wasm v0.0.6
+## explicit; go 1.18
+github.com/whosonfirst/go-whosonfirst-validate-wasm/http
+github.com/whosonfirst/go-whosonfirst-validate-wasm/static
 # github.com/whosonfirst/go-writer-featurecollection/v3 v3.0.0-20220916180959-42588e308a3e
 ## explicit; go 1.12
 github.com/whosonfirst/go-writer-featurecollection/v3

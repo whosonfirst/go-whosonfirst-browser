@@ -6,6 +6,7 @@ import (
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/http/www"
+	wasm_exec "github.com/sfomuseum/go-http-wasm/v2"	
 )
 
 var setupStaticOnce sync.Once
@@ -31,5 +32,11 @@ func setupStatic() {
 	maps_opts.RollupAssets = capabilities.RollupAssets
 	maps_opts.Prefix = uris_table.URIPrefix
 	maps_opts.Logger = logger
-
+	
+	wasm_exec_opts = wasm_exec.DefaultWASMOptions()
+	wasm_exec_opts.AppendJavaScriptAtEOF = cfg.JavaScriptAtEOF
+	wasm_exec_opts.RollupAssets = cfg.RollupAssets
+	wasm_exec_opts.Prefix = uris_table.URIPrefix
+	wasm_exec_opts.Logger = logger
+	
 }

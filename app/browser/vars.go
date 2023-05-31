@@ -19,6 +19,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-browser/v7/uris"
 	"github.com/whosonfirst/go-whosonfirst-export/v2"
 	"github.com/whosonfirst/go-whosonfirst-search/fulltext"
+	wasm_exec "github.com/sfomuseum/go-http-wasm/v2"	
 )
 
 // Cloned from corresponding RunOptions variables
@@ -69,4 +70,5 @@ var cors_wrapper *cors.Cors
 
 var www_opts *www.BrowserOptions
 var bootstrap_opts *bootstrap.BootstrapOptions
-var maps_opts *maps.MapsOptions
+var maps_opts *maps.MapsOptions			
+var wasm_exec_opts *wasm_exec.WASMOptions	
