@@ -30,7 +30,6 @@ github.com/aaronland/go-http-leaflet/static
 # github.com/aaronland/go-http-maps v0.3.2
 ## explicit; go 1.21
 github.com/aaronland/go-http-maps
-github.com/aaronland/go-http-maps/http/www
 github.com/aaronland/go-http-maps/provider
 github.com/aaronland/go-http-maps/static
 github.com/aaronland/go-http-maps/templates/javascript
@@ -935,7 +934,7 @@ google.golang.org/appengine/urlfetch
 google.golang.org/genproto/googleapis/rpc/code
 google.golang.org/genproto/googleapis/rpc/errdetails
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.58.2
+# google.golang.org/grpc v1.58.3
 ## explicit; go 1.19
 google.golang.org/grpc
 google.golang.org/grpc/attributes
