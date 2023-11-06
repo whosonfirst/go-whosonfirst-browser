@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package winutil
 
@@ -15,6 +14,7 @@ import (
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
 	"tailscale.com/types/logger"
+	"tailscale.com/util/set"
 )
 
 // LogSvcState obtains the state of the Windows service named rootSvcName and
@@ -79,7 +79,7 @@ func walkServices(rootSvcName string, callback walkSvcFunc) error {
 		}
 	}()
 
-	seen := make(map[string]struct{})
+	seen := set.Set[string]{}
 
 	for err == nil && len(deps) > 0 {
 		err = func() error {
@@ -88,7 +88,7 @@ func walkServices(rootSvcName string, callback walkSvcFunc) error {
 
 			deps = deps[:len(deps)-1]
 
-			seen[curSvc.Name] = struct{}{}
+			seen.Add(curSvc.Name)
 
 			curCfg, err := curSvc.Config()
 			if err != nil {
@@ -98,7 +98,7 @@ func walkServices(rootSvcName string, callback walkSvcFunc) error {
 			callback(curSvc, curCfg)
 
 			for _, depName := range curCfg.Dependencies {
-				if _, ok := seen[depName]; ok {
+				if seen.Contains(depName) {
 					continue
 				}
 

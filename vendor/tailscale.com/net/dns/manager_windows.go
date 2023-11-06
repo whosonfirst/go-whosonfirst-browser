@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package dns
 
@@ -52,12 +51,14 @@ func NewOSConfigurator(logf logger.Logf, interfaceName string) (OSConfigurator, 
 		ret.nrptDB = newNRPTRuleDatabase(logf)
 	}
 
-	// Log WSL status once at startup.
-	if distros, err := wslDistros(); err != nil {
-		logf("WSL: could not list distributions: %v", err)
-	} else {
-		logf("WSL: found %d distributions", len(distros))
-	}
+	go func() {
+		// Log WSL status once at startup.
+		if distros, err := wslDistros(); err != nil {
+			logf("WSL: could not list distributions: %v", err)
+		} else {
+			logf("WSL: found %d distributions", len(distros))
+		}
+	}()
 
 	return ret, nil
 }

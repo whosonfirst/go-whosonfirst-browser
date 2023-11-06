@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Common code for FreeBSD and Darwin. This might also work on other
 // BSD systems (e.g. OpenBSD) but has not been tested.
@@ -36,6 +35,13 @@ func defaultRoute() (d DefaultRouteDetails, err error) {
 	return d, nil
 }
 
+// ErrNoGatewayIndexFound is returned by DefaultRouteInterfaceIndex when no
+// default route is found.
+var ErrNoGatewayIndexFound = errors.New("no gateway index found")
+
+// DefaultRouteInterfaceIndex returns the index of the network interface that
+// owns the default route. It returns the first IPv4 or IPv6 default route it
+// finds (it does not prefer one or the other).
 func DefaultRouteInterfaceIndex() (int, error) {
 	// $ netstat -nr
 	// Routing tables
@@ -65,10 +71,15 @@ func DefaultRouteInterfaceIndex() (int, error) {
 			continue
 		}
 		if isDefaultGateway(rm) {
+			if delegatedIndex, err := getDelegatedInterface(rm.Index); err == nil && delegatedIndex != 0 {
+				return delegatedIndex, nil
+			} else if err != nil {
+				log.Printf("interfaces_bsd: could not get delegated interface: %v", err)
+			}
 			return rm.Index, nil
 		}
 	}
-	return 0, errors.New("no gateway index found")
+	return 0, ErrNoGatewayIndexFound
 }
 
 func init() {

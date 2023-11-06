@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package netutil contains misc shared networking code & types.
 package netutil
@@ -10,7 +9,6 @@ import (
 	"fmt"
 	"net/netip"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -53,7 +51,7 @@ func protocolsRequiredForForwarding(routes []netip.Prefix, state *interfaces.Sta
 
 // CheckIPForwarding reports whether IP forwarding is enabled correctly
 // for subnet routing and exit node functionality on any interface.
-// The state param can be nil, in which case interfaces.GetState is used.
+// The state param must not be nil.
 // The routes should only be advertised routes, and should not contain the
 // nodes Tailscale IPs.
 // It returns an error if it is unable to determine if IP forwarding is enabled.
@@ -67,14 +65,10 @@ func CheckIPForwarding(routes []netip.Prefix, state *interfaces.State) (warn, er
 		}
 		return nil, nil
 	}
-	const kbLink = "\nSee https://tailscale.com/kb/1104/enable-ip-forwarding/"
 	if state == nil {
-		var err error
-		state, err = interfaces.GetState()
-		if err != nil {
-			return nil, err
-		}
+		return nil, fmt.Errorf("Couldn't check system's IP forwarding configuration; no link state")
 	}
+	const kbLink = "\nSee https://tailscale.com/s/ip-forwarding"
 	wantV4, wantV6 := protocolsRequiredForForwarding(routes, state)
 	if !wantV4 && !wantV6 {
 		return nil, nil
@@ -195,27 +189,35 @@ const (
 // given interface.
 // The iface param determines which interface to check against, "" means to check
 // global config.
-// It tries to lookup the value directly from `/proc/sys`, and falls back to
-// using `sysctl` on failure.
+// This is Linux-specific: it only reads from /proc/sys and doesn't shell out to
+// sysctl (which on Linux just reads from /proc/sys anyway).
 func ipForwardingEnabledLinux(p protocol, iface string) (bool, error) {
 	k := ipForwardSysctlKey(slashFormat, p, iface)
 	bs, err := os.ReadFile(filepath.Join("/proc/sys", k))
 	if err != nil {
-		// Fallback to using sysctl.
-		// Sysctl accepts `/` as separator.
-		bs, err = exec.Command("sysctl", "-n", k).Output()
-		if err != nil {
-			// But in case it doesn't.
-			k := ipForwardSysctlKey(dotFormat, p, iface)
-			bs, err = exec.Command("sysctl", "-n", k).Output()
-			if err != nil {
-				return false, fmt.Errorf("couldn't check %s (%v)", k, err)
+		if os.IsNotExist(err) {
+			// If IPv6 is disabled, sysctl keys like "net.ipv6.conf.all.forwarding" just don't
+			// exist on disk. But first diagnose whether procfs is even mounted before assuming
+			// absence means false.
+			if fi, err := os.Stat("/proc/sys"); err != nil {
+				return false, fmt.Errorf("failed to check sysctl %v; no procfs? %w", k, err)
+			} else if !fi.IsDir() {
+				return false, fmt.Errorf("failed to check sysctl %v; /proc/sys isn't a directory, is %v", k, fi.Mode())
 			}
+			return false, nil
 		}
+		return false, err
 	}
-	on, err := strconv.ParseBool(string(bytes.TrimSpace(bs)))
+
+	val, err := strconv.ParseInt(string(bytes.TrimSpace(bs)), 10, 32)
 	if err != nil {
-		return false, fmt.Errorf("couldn't parse %s (%v)", k, err)
+		return false, fmt.Errorf("couldn't parse %s: %w", k, err)
 	}
+	// 0 = disabled, 1 = enabled, 2 = enabled (but uncommon)
+	// https://github.com/tailscale/tailscale/issues/8375
+	if val < 0 || val > 2 {
+		return false, fmt.Errorf("unexpected value %d for %s", val, k)
+	}
+	on := val == 1 || val == 2
 	return on, nil
 }

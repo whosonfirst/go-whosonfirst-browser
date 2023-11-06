@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build !linux
 
@@ -21,3 +20,17 @@ func (c *Conn) listenRawDisco(family string) (io.Closer, error) {
 func trySetSocketBuffer(pconn nettype.PacketConn, logf logger.Logf) {
 	portableTrySetSocketBuffer(pconn, logf)
 }
+
+func tryEnableUDPOffload(pconn nettype.PacketConn) (hasTX bool, hasRX bool) {
+	return false, false
+}
+
+func getGSOSizeFromControl(control []byte) (int, error) {
+	return 0, nil
+}
+
+func setGSOSizeInControl(control *[]byte, gso uint16) {}
+
+const (
+	controlMessageSize = 0
+)

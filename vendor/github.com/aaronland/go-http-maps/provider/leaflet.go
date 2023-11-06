@@ -3,12 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-http-leaflet"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/aaronland/go-http-leaflet"
 )
 
 const LEAFLET_SCHEME string = "leaflet"
@@ -30,6 +31,42 @@ func LeafletOptionsFromURL(u *url.URL) (*leaflet.LeafletOptions, error) {
 	opts := leaflet.DefaultLeafletOptions()
 
 	q := u.Query()
+
+	q_javascript_at_eof := q.Get(JavaScriptAtEOFFlag)
+
+	if q_javascript_at_eof != "" {
+
+		v, err := strconv.ParseBool(q_javascript_at_eof)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse ?%s= parameter, %w", JavaScriptAtEOFFlag, err)
+		}
+
+		if v == true {
+			opts.AppendJavaScriptAtEOF = true
+		}
+	}
+
+	q_rollup_assets := q.Get(RollupAssetsFlag)
+
+	if q_rollup_assets != "" {
+
+		v, err := strconv.ParseBool(q_rollup_assets)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse ?%s= parameter, %w", RollupAssetsFlag, err)
+		}
+
+		if v == true {
+			opts.RollupAssets = true
+		}
+	}
+
+	q_map_prefix := q.Get(MapPrefixFlag)
+
+	if q_map_prefix != "" {
+		opts.Prefix = q_map_prefix
+	}
 
 	q_enable_hash := q.Get("leaflet-enable-hash")
 
@@ -101,6 +138,8 @@ func NewLeafletProvider(ctx context.Context, uri string) (Provider, error) {
 
 	logger := log.New(io.Discard, "", 0)
 
+	leaflet_opts.Logger = logger
+
 	p := &LeafletProvider{
 		leafletOptions: leaflet_opts,
 		logger:         logger,
@@ -114,21 +153,13 @@ func (p *LeafletProvider) Scheme() string {
 }
 
 func (p *LeafletProvider) AppendResourcesHandler(handler http.Handler) http.Handler {
-	return p.AppendResourcesHandlerWithPrefix(handler, "")
-}
-
-func (p *LeafletProvider) AppendResourcesHandlerWithPrefix(handler http.Handler, prefix string) http.Handler {
-	handler = leaflet.AppendResourcesHandlerWithPrefix(handler, p.leafletOptions, prefix)
+	handler = leaflet.AppendResourcesHandler(handler, p.leafletOptions)
 	return handler
 }
 
 func (p *LeafletProvider) AppendAssetHandlers(mux *http.ServeMux) error {
-	return p.AppendAssetHandlersWithPrefix(mux, "")
-}
 
-func (p *LeafletProvider) AppendAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
-
-	err := leaflet.AppendAssetHandlersWithPrefix(mux, prefix)
+	err := leaflet.AppendAssetHandlers(mux, p.leafletOptions)
 
 	if err != nil {
 		return fmt.Errorf("Failed to append leaflet asset handler, %w", err)
@@ -139,5 +170,6 @@ func (p *LeafletProvider) AppendAssetHandlersWithPrefix(mux *http.ServeMux, pref
 
 func (p *LeafletProvider) SetLogger(logger *log.Logger) error {
 	p.logger = logger
+	p.leafletOptions.Logger = logger
 	return nil
 }

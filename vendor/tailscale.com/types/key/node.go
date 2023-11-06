@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package key
 
@@ -104,9 +103,14 @@ func (k NodePrivate) Public() NodePublic {
 	return ret
 }
 
+// AppendText implements encoding.TextAppender.
+func (k NodePrivate) AppendText(b []byte) ([]byte, error) {
+	return appendHexKey(b, nodePrivateHexPrefix, k.k[:]), nil
+}
+
 // MarshalText implements encoding.TextMarshaler.
 func (k NodePrivate) MarshalText() ([]byte, error) {
-	return toHex(k.k[:], nodePrivateHexPrefix), nil
+	return k.AppendText(nil)
 }
 
 // MarshalText implements encoding.TextUnmarshaler.
@@ -164,6 +168,12 @@ func (p NodePublic) Shard() uint8 {
 	return s ^ uint8(p.k[2]+p.k[12])
 }
 
+// Compare returns -1, 0, or 1, depending on whether p orders before p2,
+// using bytes.Compare on the bytes of the public key.
+func (p NodePublic) Compare(p2 NodePublic) int {
+	return bytes.Compare(p.k[:], p2.k[:])
+}
+
 // ParseNodePublicUntyped parses an untyped 64-character hex value
 // as a NodePublic.
 //
@@ -191,6 +201,23 @@ func NodePublicFromRaw32(raw mem.RO) NodePublic {
 	var ret NodePublic
 	raw.Copy(ret.k[:])
 	return ret
+}
+
+// badOldPrefix is a nodekey/discokey prefix that, when base64'd, serializes
+// with a "bad01" ("bad ol'", ~"bad old") prefix. It's used for expired node
+// keys so when we debug a customer issue, the "bad01" can jump out to us. See:
+//
+//	https://github.com/tailscale/tailscale/issues/6932
+var badOldPrefix = []byte{109, 167, 116, 213, 215, 116}
+
+// NodePublicWithBadOldPrefix returns a copy of k with its leading public key
+// bytes mutated such that it base64's to a ShortString of [bad01] ("bad ol'"
+// [expired node key]).
+func NodePublicWithBadOldPrefix(k NodePublic) NodePublic {
+	var buf [32]byte
+	k.AppendTo(buf[:0])
+	copy(buf[:], badOldPrefix)
+	return NodePublicFromRaw32(mem.B(buf[:]))
 }
 
 // IsZero reports whether k is the zero value.
@@ -283,7 +310,7 @@ func (k NodePublic) UntypedHexString() string {
 	return hex.EncodeToString(k.k[:])
 }
 
-// String returns the output of MarshalText as a string.
+// String returns k as a hex-encoded string with a type prefix.
 func (k NodePublic) String() string {
 	bs, err := k.MarshalText()
 	if err != nil {
@@ -292,12 +319,20 @@ func (k NodePublic) String() string {
 	return string(bs)
 }
 
-// MarshalText implements encoding.TextMarshaler.
-func (k NodePublic) MarshalText() ([]byte, error) {
-	return toHex(k.k[:], nodePublicHexPrefix), nil
+// AppendText implements encoding.TextAppender. It appends a typed prefix
+// followed by hex encoded represtation of k to b.
+func (k NodePublic) AppendText(b []byte) ([]byte, error) {
+	return appendHexKey(b, nodePublicHexPrefix, k.k[:]), nil
 }
 
-// MarshalText implements encoding.TextUnmarshaler.
+// MarshalText implements encoding.TextMarshaler. It returns a typed prefix
+// followed by a hex encoded representation of k.
+func (k NodePublic) MarshalText() ([]byte, error) {
+	return k.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler. It expects a typed prefix
+// followed by a hex encoded representation of k.
 func (k *NodePublic) UnmarshalText(b []byte) error {
 	return parseHex(k.k[:], mem.B(b), mem.S(nodePublicHexPrefix))
 }

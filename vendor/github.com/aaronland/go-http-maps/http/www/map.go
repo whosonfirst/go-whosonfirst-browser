@@ -2,9 +2,10 @@ package www
 
 import (
 	"errors"
-	"github.com/aaronland/go-http-maps/provider"
 	"html/template"
 	"net/http"
+
+	"github.com/aaronland/go-http-maps/provider"
 )
 
 type MapHandlerOptions struct {

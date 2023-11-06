@@ -25,7 +25,6 @@ import (
 
 	"github.com/aaronland/go-http-bootstrap"
 	"github.com/aaronland/go-http-maps"
-	map_www "github.com/aaronland/go-http-maps/http/www"
 	"github.com/aaronland/go-http-maps/provider"
 	"github.com/aaronland/go-http-ping/v2"
 	"github.com/aaronland/go-http-server"
@@ -486,8 +485,9 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		bootstrap_opts := bootstrap.DefaultBootstrapOptions()
-
-		err = bootstrap.AppendAssetHandlersWithPrefix(mux, static_prefix)
+		bootstrap_opts.Prefix = static_prefix
+		
+		err = bootstrap.AppendAssetHandlers(mux, bootstrap_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append Bootstrap asset handlers, %w", err)
@@ -538,7 +538,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			}
 
 			index_handler = index_h
-			index_handler = bootstrap.AppendResourcesHandlerWithPrefix(index_handler, bootstrap_opts, static_prefix)
+			index_handler = bootstrap.AppendResourcesHandler(index_handler, bootstrap_opts)
 		}
 
 		id_opts := www.IDHandlerOptions{
@@ -556,7 +556,7 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 		}
 
 		id_handler = id_h
-		id_handler = bootstrap.AppendResourcesHandlerWithPrefix(id_handler, bootstrap_opts, static_prefix)
+		id_handler = bootstrap.AppendResourcesHandler(id_handler, bootstrap_opts)
 
 		if enable_search_html {
 
@@ -580,25 +580,26 @@ func RunWithFlagSet(ctx context.Context, fs *flag.FlagSet, logger *log.Logger) e
 			}
 
 			search_handler = search_h
-			search_handler = bootstrap.AppendResourcesHandlerWithPrefix(search_handler, bootstrap_opts, static_prefix)
+			search_handler = bootstrap.AppendResourcesHandler(search_handler, bootstrap_opts)
 		}
 
 		maps_opts := maps.DefaultMapsOptions()
-
-		err = map_www.AppendStaticAssetHandlersWithPrefix(mux, static_prefix)
+		maps_opts.Prefix = static_prefix
+		
+		err = maps.AppendAssetHandlers(mux, maps_opts)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append static asset handlers, %v")
 		}
 
-		err = map_provider.AppendAssetHandlersWithPrefix(mux, static_prefix)
+		err = map_provider.AppendAssetHandlers(mux)
 
 		if err != nil {
 			return fmt.Errorf("Failed to append provider asset handlers, %v", err)
 		}
 
-		id_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(id_handler, map_provider, maps_opts, static_prefix)
-		search_handler = maps.AppendResourcesHandlerWithPrefixAndProvider(search_handler, map_provider, maps_opts, static_prefix)
+		id_handler = maps.AppendResourcesHandlerWithProvider(id_handler, map_provider, maps_opts)
+		search_handler = maps.AppendResourcesHandlerWithProvider(search_handler, map_provider, maps_opts)
 
 		mux.Handle("/", index_handler)
 		mux.Handle(path_id, id_handler)

@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package persist contains the Persist type.
 package persist
@@ -36,7 +35,6 @@ type Persist struct {
 	PrivateNodeKey    key.NodePrivate
 	OldPrivateNodeKey key.NodePrivate // needed to request key rotation
 	Provider          string
-	LoginName         string
 	UserProfile       tailcfg.UserProfile
 	NetworkLockKey    key.NLPrivate
 	NodeID            tailcfg.StableNodeID
@@ -81,8 +79,7 @@ func (p *Persist) Equals(p2 *Persist) bool {
 		p.PrivateNodeKey.Equal(p2.PrivateNodeKey) &&
 		p.OldPrivateNodeKey.Equal(p2.OldPrivateNodeKey) &&
 		p.Provider == p2.Provider &&
-		p.LoginName == p2.LoginName &&
-		p.UserProfile == p2.UserProfile &&
+		p.UserProfile.Equal(&p2.UserProfile) &&
 		p.NetworkLockKey.Equal(p2.NetworkLockKey) &&
 		p.NodeID == p2.NodeID &&
 		reflect.DeepEqual(nilIfEmpty(p.DisallowedTKAStateIDs), nilIfEmpty(p2.DisallowedTKAStateIDs))
@@ -103,5 +100,5 @@ func (p *Persist) Pretty() string {
 		nk = p.PublicNodeKey()
 	}
 	return fmt.Sprintf("Persist{lm=%v, o=%v, n=%v u=%#v}",
-		mk.ShortString(), ok.ShortString(), nk.ShortString(), p.LoginName)
+		mk.ShortString(), ok.ShortString(), nk.ShortString(), p.UserProfile.LoginName)
 }

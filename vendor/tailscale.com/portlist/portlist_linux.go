@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package portlist
 
@@ -36,25 +35,28 @@ type linuxImpl struct {
 	procNetFiles    []*os.File // seeked to start & reused between calls
 	readlinkPathBuf []byte
 
-	known map[string]*portMeta // inode string => metadata
-	br    *bufio.Reader
+	known            map[string]*portMeta // inode string => metadata
+	br               *bufio.Reader
+	includeLocalhost bool
 }
 
 type portMeta struct {
 	port          Port
+	pid           int
 	keep          bool
 	needsProcName bool
 }
 
-func newLinuxImplBase() *linuxImpl {
+func newLinuxImplBase(includeLocalhost bool) *linuxImpl {
 	return &linuxImpl{
-		br:    bufio.NewReader(eofReader),
-		known: map[string]*portMeta{},
+		br:               bufio.NewReader(eofReader),
+		known:            map[string]*portMeta{},
+		includeLocalhost: includeLocalhost,
 	}
 }
 
-func newLinuxImpl() osImpl {
-	li := newLinuxImplBase()
+func newLinuxImpl(includeLocalhost bool) osImpl {
+	li := newLinuxImplBase(includeLocalhost)
 	for _, name := range []string{
 		"/proc/net/tcp",
 		"/proc/net/tcp6",
@@ -221,7 +223,7 @@ func (li *linuxImpl) parseProcNetFile(r *bufio.Reader, fileBase string) error {
 		// If a port is bound to localhost, ignore it.
 		// TODO: localhost is bigger than 1 IP, we need to ignore
 		// more things.
-		if mem.HasPrefix(local, mem.S(v4Localhost)) || mem.HasPrefix(local, mem.S(v6Localhost)) {
+		if !li.includeLocalhost && (mem.HasPrefix(local, mem.S(v4Localhost)) || mem.HasPrefix(local, mem.S(v6Localhost))) {
 			continue
 		}
 
@@ -316,7 +318,12 @@ func (li *linuxImpl) findProcessNames(need map[string]*portMeta) error {
 			}
 
 			argv := strings.Split(strings.TrimSuffix(string(bs), "\x00"), "\x00")
+			if p, err := mem.ParseInt(pid, 10, 0); err == nil {
+				pe.pid = int(p)
+			}
 			pe.port.Process = argvSubject(argv...)
+			pid64, _ := mem.ParseInt(pid, 10, 0)
+			pe.port.Pid = int(pid64)
 			pe.needsProcName = false
 			delete(need, string(targetBuf[:n]))
 			if len(need) == 0 {

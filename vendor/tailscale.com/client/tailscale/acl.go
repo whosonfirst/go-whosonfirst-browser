@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build go1.19
 
@@ -104,7 +103,7 @@ func (c *Client) ACL(ctx context.Context) (acl *ACL, err error) {
 // it as a string.
 // HuJSON is JSON with a few modifications to make it more human-friendly. The primary
 // changes are allowing comments and trailing comments. See the following links for more info:
-// https://tailscale.com/kb/1018/acls?q=acl#tailscale-acl-policy-format
+// https://tailscale.com/s/acl-format
 // https://github.com/tailscale/hujson
 func (c *Client) ACLHuJSON(ctx context.Context) (acl *ACLHuJSON, err error) {
 	// Format return errors to be descriptive.
@@ -151,8 +150,9 @@ func (c *Client) ACLHuJSON(ctx context.Context) (acl *ACLHuJSON, err error) {
 // ACLTestFailureSummary specifies the JSON format sent to the
 // JavaScript client to be rendered in the HTML.
 type ACLTestFailureSummary struct {
-	User   string   `json:"user"`
-	Errors []string `json:"errors"`
+	User     string   `json:"user,omitempty"`
+	Errors   []string `json:"errors,omitempty"`
+	Warnings []string `json:"warnings,omitempty"`
 }
 
 // ACLTestError is ErrResponse but with an extra field to account for ACLTestFailureSummary.
@@ -437,7 +437,7 @@ func (c *Client) ValidateACLJSON(ctx context.Context, source, dest string) (test
 		}
 	}()
 
-	tests := []ACLTest{ACLTest{User: source, Allow: []string{dest}}}
+	tests := []ACLTest{{User: source, Allow: []string{dest}}}
 	postData, err := json.Marshal(tests)
 	if err != nil {
 		return nil, err

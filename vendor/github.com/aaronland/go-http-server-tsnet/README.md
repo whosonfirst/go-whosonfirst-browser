@@ -30,10 +30,11 @@ package main
 import (
 	"context"
 	"flag"
+	"net/http"
+
 	"github.com/aaronland/go-http-server"
 	_ "github.com/aaronland/go-http-server-tsnet"
 	"github.com/aaronland/go-http-server-tsnet/http/www"
-	"net/http"
 )
 
 func main() {
@@ -61,8 +62,9 @@ package www
 
 import (
 	"fmt"
-	"github.com/aaronland/go-http-server-tsnet"
 	"net/http"
+
+	"github.com/aaronland/go-http-server-tsnet"
 )
 
 func ExampleHandler() http.Handler {

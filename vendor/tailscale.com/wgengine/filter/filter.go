@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package filter is a stateful packet filter.
 package filter
@@ -8,6 +7,7 @@ package filter
 import (
 	"fmt"
 	"net/netip"
+	"slices"
 	"sync"
 	"time"
 
@@ -16,9 +16,11 @@ import (
 	"tailscale.com/net/flowtrack"
 	"tailscale.com/net/netaddr"
 	"tailscale.com/net/packet"
+	"tailscale.com/tailcfg"
 	"tailscale.com/tstime/rate"
 	"tailscale.com/types/ipproto"
 	"tailscale.com/types/logger"
+	"tailscale.com/util/mak"
 )
 
 // Filter is a stateful packet filter.
@@ -59,7 +61,7 @@ type Filter struct {
 // filterState is a state cache of past seen packets.
 type filterState struct {
 	mu  sync.Mutex
-	lru *flowtrack.Cache // from flowtrack.Tuple -> nil
+	lru *flowtrack.Cache[struct{}] // from flowtrack.Tuple -> struct{}
 }
 
 // lruMax is the size of the LRU cache in filterState.
@@ -176,7 +178,7 @@ func New(matches []Match, localNets *netipx.IPSet, logIPs *netipx.IPSet, shareSt
 		state = shareStateWith.state
 	} else {
 		state = &filterState{
-			lru: &flowtrack.Cache{MaxEntries: lruMax},
+			lru: &flowtrack.Cache[struct{}]{MaxEntries: lruMax},
 		}
 	}
 	f := &Filter{
@@ -323,10 +325,9 @@ func (f *Filter) CheckTCP(srcIP, dstIP netip.Addr, dstPort uint16) Response {
 	return f.RunIn(pkt, 0)
 }
 
-// AppendCaps appends to base the capabilities that srcIP has talking
+// CapsWithValues appends to base the capabilities that srcIP has talking
 // to dstIP.
-func (f *Filter) AppendCaps(base []string, srcIP, dstIP netip.Addr) []string {
-	ret := base
+func (f *Filter) CapsWithValues(srcIP, dstIP netip.Addr) tailcfg.PeerCapMap {
 	var mm matches
 	switch {
 	case srcIP.Is4():
@@ -334,17 +335,23 @@ func (f *Filter) AppendCaps(base []string, srcIP, dstIP netip.Addr) []string {
 	case srcIP.Is6():
 		mm = f.cap6
 	}
+	var out tailcfg.PeerCapMap
 	for _, m := range mm {
 		if !ipInList(srcIP, m.Srcs) {
 			continue
 		}
 		for _, cm := range m.Caps {
 			if cm.Cap != "" && cm.Dst.Contains(dstIP) {
-				ret = append(ret, cm.Cap)
+				prev, ok := out[cm.Cap]
+				if !ok {
+					mak.Set(&out, cm.Cap, slices.Clone(cm.Values))
+					continue
+				}
+				out[cm.Cap] = append(prev, cm.Values...)
 			}
 		}
 	}
-	return ret
+	return out
 }
 
 // ShieldsUp reports whether this is a "shields up" (block everything
@@ -379,13 +386,24 @@ func (f *Filter) RunIn(q *packet.Parsed, rf RunFlags) Response {
 func (f *Filter) RunOut(q *packet.Parsed, rf RunFlags) Response {
 	dir := out
 	r := f.pre(q, rf, dir)
-	if r == Drop || r == Accept {
+	if r == Accept || r == Drop {
 		// already logged
 		return r
 	}
 	r, why := f.runOut(q)
 	f.logRateLimit(rf, q, dir, r, why)
 	return r
+}
+
+var unknownProtoStringCache sync.Map // ipproto.Proto -> string
+
+func unknownProtoString(proto ipproto.Proto) string {
+	if v, ok := unknownProtoStringCache.Load(proto); ok {
+		return v.(string)
+	}
+	s := fmt.Sprintf("unknown-protocol-%d", proto)
+	unknownProtoStringCache.Store(proto, s)
+	return s
 }
 
 func (f *Filter) runIn4(q *packet.Parsed) (r Response, why string) {
@@ -441,9 +459,9 @@ func (f *Filter) runIn4(q *packet.Parsed) (r Response, why string) {
 		return Accept, "tsmp ok"
 	default:
 		if f.matches4.matchProtoAndIPsOnlyIfAllPorts(q) {
-			return Accept, "otherproto ok"
+			return Accept, "other-portless ok"
 		}
-		return Drop, "Unknown proto"
+		return Drop, unknownProtoString(q.IPProto)
 	}
 	return Drop, "no rules matched"
 }
@@ -501,9 +519,9 @@ func (f *Filter) runIn6(q *packet.Parsed) (r Response, why string) {
 		return Accept, "tsmp ok"
 	default:
 		if f.matches6.matchProtoAndIPsOnlyIfAllPorts(q) {
-			return Accept, "otherproto ok"
+			return Accept, "other-portless ok"
 		}
-		return Drop, "Unknown proto"
+		return Drop, unknownProtoString(q.IPProto)
 	}
 	return Drop, "no rules matched"
 }
@@ -517,7 +535,7 @@ func (f *Filter) runOut(q *packet.Parsed) (r Response, why string) {
 			Src:   q.Dst, Dst: q.Src, // src/dst reversed
 		}
 		f.state.mu.Lock()
-		f.state.lru.Add(tuple, nil)
+		f.state.lru.Add(tuple, struct{}{})
 		f.state.mu.Unlock()
 	}
 	return Accept, "ok out"
@@ -566,12 +584,7 @@ func (f *Filter) pre(q *packet.Parsed, rf RunFlags, dir direction) Response {
 		return Drop
 	}
 
-	switch q.IPProto {
-	case ipproto.Unknown:
-		// Unknown packets are dangerous; always drop them.
-		f.logRateLimit(rf, q, dir, Drop, "unknown")
-		return Drop
-	case ipproto.Fragment:
+	if q.IPProto == ipproto.Fragment {
 		// Fragments after the first always need to be passed through.
 		// Very small fragments are considered Junk by Parsed.
 		f.logRateLimit(rf, q, dir, Accept, "fragment")

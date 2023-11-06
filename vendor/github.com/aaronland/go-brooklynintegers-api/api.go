@@ -3,19 +3,63 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-artisanal-integers/client"
-	"github.com/cenkalti/backoff/v4"
-	"github.com/tidwall/gjson"
-	"go.uber.org/ratelimit"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"sync"
+
+	"github.com/aaronland/go-artisanal-integers/client"
+	"github.com/cenkalti/backoff/v4"
+	"github.com/tidwall/gjson"
+	"go.uber.org/ratelimit"
 )
 
+// In principle this could also be done with a sync.OnceFunc call but that will
+// require that everyone uses Go 1.21 (whose package import changes broke everything)
+// which is literally days old as I write this. So maybe a few releases after 1.21.
+
+var register_mu = new(sync.RWMutex)
+var register_map = map[string]bool{}
+
 func init() {
+
 	ctx := context.Background()
-	client.RegisterClient(ctx, "brooklynintegers", NewAPIClient)
+	err := RegisterClientSchemes(ctx)
+
+	if err != nil {
+		panic(err)
+	}
+}
+
+// RegisterClientSchemes will explicitly register all the schemes associated with the `client.Client` interface.
+func RegisterClientSchemes(ctx context.Context) error {
+
+	roster := map[string]client.ClientInitializeFunc{
+		"brooklynintegers": NewAPIClient,
+	}
+
+	register_mu.Lock()
+	defer register_mu.Unlock()
+
+	for scheme, fn := range roster {
+
+		_, exists := register_map[scheme]
+
+		if exists {
+			continue
+		}
+
+		err := client.RegisterClient(ctx, scheme, fn)
+
+		if err != nil {
+			return fmt.Errorf("Failed to register client for '%s', %w", scheme, err)
+		}
+
+		register_map[scheme] = true
+	}
+
+	return nil
 }
 
 type APIClient struct {

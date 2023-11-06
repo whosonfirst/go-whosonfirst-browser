@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package magicsock
 
@@ -259,7 +258,7 @@ func (c *Conn) receiveDisco(pc net.PacketConn, isIPV6 bool) {
 			metricRecvDiscoPacketIPv6.Add(1)
 		}
 
-		c.handleDiscoMessage(buf[udpHeaderSize:n], netip.AddrPortFrom(srcIP, srcPort), key.NodePublic{})
+		c.handleDiscoMessage(buf[udpHeaderSize:n], netip.AddrPortFrom(srcIP, srcPort), key.NodePublic{}, discoRXPathRawSocket)
 	}
 }
 
@@ -304,11 +303,11 @@ func trySetSocketBuffer(pconn nettype.PacketConn, logf logger.Logf) {
 			rc.Control(func(fd uintptr) {
 				errRcv = syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_RCVBUFFORCE, socketBufferSize)
 				if errRcv != nil {
-					logf("magicsock: failed to force-set UDP read buffer size to %d: %v", socketBufferSize, errRcv)
+					logf("magicsock: [warning] failed to force-set UDP read buffer size to %d: %v; using kernel default values (impacts throughput only)", socketBufferSize, errRcv)
 				}
 				errSnd = syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_SNDBUFFORCE, socketBufferSize)
 				if errSnd != nil {
-					logf("magicsock: failed to force-set UDP write buffer size to %d: %v", socketBufferSize, errSnd)
+					logf("magicsock: [warning] failed to force-set UDP write buffer size to %d: %v; using kernel default values (impacts throughput only)", socketBufferSize, errSnd)
 				}
 			})
 		}
@@ -317,4 +316,76 @@ func trySetSocketBuffer(pconn nettype.PacketConn, logf logger.Logf) {
 			portableTrySetSocketBuffer(pconn, logf)
 		}
 	}
+}
+
+// tryEnableUDPOffload attempts to enable the UDP_GRO socket option on pconn,
+// and returns two booleans indicating TX and RX UDP offload support.
+func tryEnableUDPOffload(pconn nettype.PacketConn) (hasTX bool, hasRX bool) {
+	if c, ok := pconn.(*net.UDPConn); ok {
+		rc, err := c.SyscallConn()
+		if err != nil {
+			return
+		}
+		err = rc.Control(func(fd uintptr) {
+			_, errSyscall := syscall.GetsockoptInt(int(fd), unix.IPPROTO_UDP, unix.UDP_SEGMENT)
+			hasTX = errSyscall == nil
+			errSyscall = syscall.SetsockoptInt(int(fd), unix.IPPROTO_UDP, unix.UDP_GRO, 1)
+			hasRX = errSyscall == nil
+		})
+		if err != nil {
+			return false, false
+		}
+	}
+	return hasTX, hasRX
+}
+
+// getGSOSizeFromControl returns the GSO size found in control. If no GSO size
+// is found or the len(control) < unix.SizeofCmsghdr, this function returns 0.
+// A non-nil error will be returned if len(control) > unix.SizeofCmsghdr but
+// its contents cannot be parsed as a socket control message.
+func getGSOSizeFromControl(control []byte) (int, error) {
+	var (
+		hdr  unix.Cmsghdr
+		data []byte
+		rem  = control
+		err  error
+	)
+
+	for len(rem) > unix.SizeofCmsghdr {
+		hdr, data, rem, err = unix.ParseOneSocketControlMessage(control)
+		if err != nil {
+			return 0, fmt.Errorf("error parsing socket control message: %w", err)
+		}
+		if hdr.Level == unix.SOL_UDP && hdr.Type == unix.UDP_GRO && len(data) >= 2 {
+			return int(binary.NativeEndian.Uint16(data[:2])), nil
+		}
+	}
+	return 0, nil
+}
+
+// setGSOSizeInControl sets a socket control message in control containing
+// gsoSize. If len(control) < controlMessageSize control's len will be set to 0.
+func setGSOSizeInControl(control *[]byte, gsoSize uint16) {
+	*control = (*control)[:0]
+	if cap(*control) < int(unsafe.Sizeof(unix.Cmsghdr{})) {
+		return
+	}
+	if cap(*control) < controlMessageSize {
+		return
+	}
+	*control = (*control)[:cap(*control)]
+	hdr := (*unix.Cmsghdr)(unsafe.Pointer(&(*control)[0]))
+	hdr.Level = unix.SOL_UDP
+	hdr.Type = unix.UDP_SEGMENT
+	hdr.SetLen(unix.CmsgLen(2))
+	binary.NativeEndian.PutUint16((*control)[unix.SizeofCmsghdr:], gsoSize)
+	*control = (*control)[:unix.CmsgSpace(2)]
+}
+
+var controlMessageSize = -1 // bomb if used for allocation before init
+
+func init() {
+	// controlMessageSize is set to hold a UDP_GRO or UDP_SEGMENT control
+	// message. These contain a single uint16 of data.
+	controlMessageSize = unix.CmsgSpace(2)
 }

@@ -1,27 +1,31 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
-// Package tlsdial originally existed to set up a tls.Config for x509
-// validation, using a memory-optimized path for iOS, but then we
-// moved that to the tailscale/go tree instead, so now this package
-// does very little. But for now we keep it as a unified point where
-// we might want to add shared policy on outgoing TLS connections from
-// the 3 places in the client that connect to Tailscale (logs,
-// control, DERP).
+// Package tlsdial generates tls.Config values and does x509 validation of
+// certs. It bakes in the LetsEncrypt roots so even if the user's machine
+// doesn't have TLS roots, we can at least connect to Tailscale's LetsEncrypt
+// services.  It's the unified point where we can add shared policy on outgoing
+// TLS connections from the three places in the client that connect to Tailscale
+// (logs, control, DERP).
 package tlsdial
 
 import (
+	"bytes"
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"log"
+	"net"
+	"net/http"
 	"os"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"tailscale.com/envknob"
+	"tailscale.com/health"
 )
 
 var counterFallbackOK int32 // atomic
@@ -33,6 +37,11 @@ var counterFallbackOK int32 // atomic
 var sslKeyLogFile = os.Getenv("SSLKEYLOGFILE")
 
 var debug = envknob.RegisterBool("TS_DEBUG_TLS_DIAL")
+
+// tlsdialWarningPrinted tracks whether we've printed a warning about a given
+// hostname already, to avoid log spam for users with custom DERP servers,
+// Headscale, etc.
+var tlsdialWarningPrinted sync.Map // map[string]bool
 
 // Config returns a tls.Config for connecting to a server.
 // If base is non-nil, it's cloned as the base config before
@@ -67,6 +76,16 @@ func Config(host string, base *tls.Config) *tls.Config {
 	// (with the baked-in fallback root) in the VerifyConnection hook.
 	conf.InsecureSkipVerify = true
 	conf.VerifyConnection = func(cs tls.ConnectionState) error {
+		// Perform some health checks on this certificate before we do
+		// any verification.
+		if certIsSelfSigned(cs.PeerCertificates[0]) {
+			// Self-signed certs are never valid.
+			health.SetTLSConnectionError(cs.ServerName, fmt.Errorf("certificate is self-signed"))
+		} else {
+			// Ensure we clear any error state for this ServerName.
+			health.SetTLSConnectionError(cs.ServerName, nil)
+		}
+
 		// First try doing x509 verification with the system's
 		// root CA pool.
 		opts := x509.VerifyOptions{
@@ -80,24 +99,39 @@ func Config(host string, base *tls.Config) *tls.Config {
 		if debug() {
 			log.Printf("tlsdial(sys %q): %v", host, errSys)
 		}
-		if errSys == nil {
-			return nil
+
+		// Always verify with our baked-in Let's Encrypt certificate,
+		// so we can log an informational message. This is useful for
+		// detecting SSL MiTM.
+		opts.Roots = bakedInRoots()
+		_, bakedErr := cs.PeerCertificates[0].Verify(opts)
+		if debug() {
+			log.Printf("tlsdial(bake %q): %v", host, bakedErr)
+		} else if bakedErr != nil {
+			if _, loaded := tlsdialWarningPrinted.LoadOrStore(host, true); !loaded {
+				if errSys == nil {
+					log.Printf("tlsdial: warning: server cert for %q is not a Let's Encrypt cert", host)
+				} else {
+					log.Printf("tlsdial: error: server cert for %q failed to verify and is not a Let's Encrypt cert", host)
+				}
+			}
 		}
 
-		// If that failed, because the system's CA roots are old
-		// or broken, fall back to trying LetsEncrypt at least.
-		opts.Roots = bakedInRoots()
-		_, err := cs.PeerCertificates[0].Verify(opts)
-		if debug() {
-			log.Printf("tlsdial(bake %q): %v", host, err)
-		}
-		if err == nil {
+		if errSys == nil {
+			return nil
+		} else if bakedErr == nil {
 			atomic.AddInt32(&counterFallbackOK, 1)
 			return nil
 		}
 		return errSys
 	}
 	return conf
+}
+
+func certIsSelfSigned(cert *x509.Certificate) bool {
+	// A certificate is determined to be self-signed if the certificate's
+	// subject is the same as its issuer.
+	return bytes.Equal(cert.RawSubject, cert.RawIssuer)
 }
 
 // SetConfigExpectedCert modifies c to expect and verify that the server returns
@@ -157,6 +191,22 @@ func SetConfigExpectedCert(c *tls.Config, certDNSName string) {
 			return nil
 		}
 		return errSys
+	}
+}
+
+// NewTransport returns a new HTTP transport that verifies TLS certs using this
+// package, including its baked-in LetsEncrypt fallback roots.
+func NewTransport() *http.Transport {
+	return &http.Transport{
+		DialTLSContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			host, _, err := net.SplitHostPort(addr)
+			if err != nil {
+				return nil, err
+			}
+			var d tls.Dialer
+			d.Config = Config(host, nil)
+			return d.DialContext(ctx, network, addr)
+		},
 	}
 }
 

@@ -76,7 +76,6 @@ func SessionBus() (conn *Conn, err error) {
 func getSessionBusAddress(autolaunch bool) (string, error) {
 	if address := os.Getenv("DBUS_SESSION_BUS_ADDRESS"); address != "" && address != "autolaunch:" {
 		return address, nil
-
 	} else if address := tryDiscoverDbusSessionBusAddress(); address != "" {
 		os.Setenv("DBUS_SESSION_BUS_ADDRESS", address)
 		return address, nil
@@ -169,7 +168,7 @@ func Connect(address string, opts ...ConnOption) (*Conn, error) {
 
 // SystemBusPrivate returns a new private connection to the system bus.
 // Note: this connection is not ready to use. One must perform Auth and Hello
-// on the connection before it is useable.
+// on the connection before it is usable.
 func SystemBusPrivate(opts ...ConnOption) (*Conn, error) {
 	return Dial(getSystemBusPlatformAddress(), opts...)
 }
@@ -284,10 +283,6 @@ func newConn(tr transport, opts ...ConnOption) (*Conn, error) {
 		conn.ctx = context.Background()
 	}
 	conn.ctx, conn.cancelCtx = context.WithCancel(conn.ctx)
-	go func() {
-		<-conn.ctx.Done()
-		conn.Close()
-	}()
 
 	conn.calls = newCallTracker()
 	if conn.handler == nil {
@@ -302,6 +297,11 @@ func newConn(tr transport, opts ...ConnOption) (*Conn, error) {
 	conn.outHandler = &outputHandler{conn: conn}
 	conn.names = newNameTracker()
 	conn.busObj = conn.Object("org.freedesktop.DBus", "/org/freedesktop/DBus")
+
+	go func() {
+		<-conn.ctx.Done()
+		conn.Close()
+	}()
 	return conn, nil
 }
 
@@ -484,7 +484,7 @@ func (conn *Conn) Object(dest string, path ObjectPath) BusObject {
 	return &Object{conn, dest, path}
 }
 
-func (conn *Conn) sendMessageAndIfClosed(msg *Message, ifClosed func()) {
+func (conn *Conn) sendMessageAndIfClosed(msg *Message, ifClosed func()) error {
 	if msg.serial == 0 {
 		msg.serial = conn.getSerial()
 	}
@@ -497,6 +497,7 @@ func (conn *Conn) sendMessageAndIfClosed(msg *Message, ifClosed func()) {
 	} else if msg.Type != TypeMethodCall {
 		conn.serialGen.RetireSerial(msg.serial)
 	}
+	return err
 }
 
 func (conn *Conn) handleSendError(msg *Message, err error) {
@@ -504,6 +505,9 @@ func (conn *Conn) handleSendError(msg *Message, err error) {
 		conn.calls.handleSendError(msg, err)
 	} else if msg.Type == TypeMethodReply {
 		if _, ok := err.(FormatError); ok {
+			// Make sure that the caller gets some kind of error response if
+			// the application code tried to respond, but the resulting message
+			// was malformed in the end
 			conn.sendError(err, msg.Headers[FieldDestination].value.(string), msg.Headers[FieldReplySerial].value.(uint32))
 		}
 	}
@@ -550,11 +554,17 @@ func (conn *Conn) send(ctx context.Context, msg *Message, ch chan *Call) *Call {
 		call.ctx = ctx
 		call.ctxCanceler = canceler
 		conn.calls.track(msg.serial, call)
+		if ctx.Err() != nil {
+			// short path: don't even send the message if context already cancelled
+			conn.calls.handleSendError(msg, ctx.Err())
+			return call
+		}
 		go func() {
 			<-ctx.Done()
 			conn.calls.handleSendError(msg, ctx.Err())
 		}()
-		conn.sendMessageAndIfClosed(msg, func() {
+		// error is handled in handleSendError
+		_ = conn.sendMessageAndIfClosed(msg, func() {
 			conn.calls.handleSendError(msg, ErrClosed)
 			canceler()
 		})
@@ -562,7 +572,8 @@ func (conn *Conn) send(ctx context.Context, msg *Message, ch chan *Call) *Call {
 		canceler()
 		call = &Call{Err: nil, Done: ch}
 		ch <- call
-		conn.sendMessageAndIfClosed(msg, func() {
+		// error is handled in handleSendError
+		_ = conn.sendMessageAndIfClosed(msg, func() {
 			call = &Call{Err: ErrClosed}
 		})
 	}
@@ -596,7 +607,8 @@ func (conn *Conn) sendError(err error, dest string, serial uint32) {
 	if len(e.Body) > 0 {
 		msg.Headers[FieldSignature] = MakeVariant(SignatureOf(e.Body...))
 	}
-	conn.sendMessageAndIfClosed(msg, nil)
+	// not much we can do to handle a possible error here
+	_ = conn.sendMessageAndIfClosed(msg, nil)
 }
 
 // sendReply creates a method reply message corresponding to the parameters and
@@ -613,7 +625,8 @@ func (conn *Conn) sendReply(dest string, serial uint32, values ...interface{}) {
 	if len(values) > 0 {
 		msg.Headers[FieldSignature] = MakeVariant(SignatureOf(values...))
 	}
-	conn.sendMessageAndIfClosed(msg, nil)
+	// not much we can do to handle a possible error here
+	_ = conn.sendMessageAndIfClosed(msg, nil)
 }
 
 // AddMatchSignal registers the given match rule to receive broadcast
@@ -624,7 +637,7 @@ func (conn *Conn) AddMatchSignal(options ...MatchOption) error {
 
 // AddMatchSignalContext acts like AddMatchSignal but takes a context.
 func (conn *Conn) AddMatchSignalContext(ctx context.Context, options ...MatchOption) error {
-	options = append([]MatchOption{withMatchType("signal")}, options...)
+	options = append([]MatchOption{withMatchTypeSignal()}, options...)
 	return conn.busObj.CallWithContext(
 		ctx,
 		"org.freedesktop.DBus.AddMatch", 0,
@@ -639,7 +652,7 @@ func (conn *Conn) RemoveMatchSignal(options ...MatchOption) error {
 
 // RemoveMatchSignalContext acts like RemoveMatchSignal but takes a context.
 func (conn *Conn) RemoveMatchSignalContext(ctx context.Context, options ...MatchOption) error {
-	options = append([]MatchOption{withMatchType("signal")}, options...)
+	options = append([]MatchOption{withMatchTypeSignal()}, options...)
 	return conn.busObj.CallWithContext(
 		ctx,
 		"org.freedesktop.DBus.RemoveMatch", 0,
@@ -649,7 +662,9 @@ func (conn *Conn) RemoveMatchSignalContext(ctx context.Context, options ...Match
 
 // Signal registers the given channel to be passed all received signal messages.
 //
-// Multiple of these channels can be registered at the same time.
+// Multiple of these channels can be registered at the same time. The channel is
+// closed if the Conn is closed; it should not be closed by the caller before
+// RemoveSignal was called on it.
 //
 // These channels are "overwritten" by Eavesdrop; i.e., if there currently is a
 // channel for eavesdropped messages, this channel receives all signals, and
@@ -732,9 +747,7 @@ type transport interface {
 	SendMessage(*Message) error
 }
 
-var (
-	transports = make(map[string]func(string) (transport, error))
-)
+var transports = make(map[string]func(string) (transport, error))
 
 func getTransport(address string) (transport, error) {
 	var err error
@@ -765,7 +778,12 @@ func getKey(s, key string) string {
 	for _, keyEqualsValue := range strings.Split(s, ",") {
 		keyValue := strings.SplitN(keyEqualsValue, "=", 2)
 		if len(keyValue) == 2 && keyValue[0] == key {
-			return keyValue[1]
+			val, err := UnescapeBusAddressValue(keyValue[1])
+			if err != nil {
+				// No way to return an error.
+				return ""
+			}
+			return val
 		}
 	}
 	return ""
@@ -840,16 +858,19 @@ type nameTracker struct {
 func newNameTracker() *nameTracker {
 	return &nameTracker{names: map[string]struct{}{}}
 }
+
 func (tracker *nameTracker) acquireUniqueConnectionName(name string) {
 	tracker.lck.Lock()
 	defer tracker.lck.Unlock()
 	tracker.unique = name
 }
+
 func (tracker *nameTracker) acquireName(name string) {
 	tracker.lck.Lock()
 	defer tracker.lck.Unlock()
 	tracker.names[name] = struct{}{}
 }
+
 func (tracker *nameTracker) loseName(name string) {
 	tracker.lck.Lock()
 	defer tracker.lck.Unlock()
@@ -861,12 +882,14 @@ func (tracker *nameTracker) uniqueNameIsKnown() bool {
 	defer tracker.lck.RUnlock()
 	return tracker.unique != ""
 }
+
 func (tracker *nameTracker) isKnownName(name string) bool {
 	tracker.lck.RLock()
 	defer tracker.lck.RUnlock()
 	_, ok := tracker.names[name]
 	return ok || name == tracker.unique
 }
+
 func (tracker *nameTracker) listKnownNames() []string {
 	tracker.lck.RLock()
 	defer tracker.lck.RUnlock()
@@ -925,17 +948,6 @@ func (tracker *callTracker) handleSendError(msg *Message, err error) {
 	tracker.lck.RUnlock()
 	if ok {
 		tracker.finalizeWithError(msg.serial, NoSequence, err)
-	}
-}
-
-// finalize was the only func that did not strobe Done
-func (tracker *callTracker) finalize(sn uint32) {
-	tracker.lck.Lock()
-	defer tracker.lck.Unlock()
-	c, ok := tracker.calls[sn]
-	if ok {
-		delete(tracker.calls, sn)
-		c.ContextCancel()
 	}
 }
 

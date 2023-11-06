@@ -4,7 +4,7 @@ Go package implementing the `whosonfirst/go-reader` interface for use with a cac
 
 ## Documentation
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/whosonfirst/go-reader-cachereader.svg)](https://pkg.go.dev/github.com/whosonfirst/go-reader-cacheread)
+[![Go Reference](https://pkg.go.dev/badge/github.com/whosonfirst/go-reader-cachereader.svg)](https://pkg.go.dev/github.com/whosonfirst/go-reader-cachereader)
 
 ## Example
 

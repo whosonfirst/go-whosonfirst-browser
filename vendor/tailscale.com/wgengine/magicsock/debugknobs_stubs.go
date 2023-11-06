@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build ios || js
 
@@ -12,13 +11,20 @@ import "tailscale.com/types/opt"
 //
 // They're inlinable and the linker can deadcode that's guarded by them to make
 // smaller binaries.
-func debugDisco() bool              { return false }
-func debugOmitLocalAddresses() bool { return false }
-func logDerpVerbose() bool          { return false }
-func debugReSTUNStopOnIdle() bool   { return false }
-func debugAlwaysDERP() bool         { return false }
-func debugEnableSilentDisco() bool  { return false }
-func debugUseDerpRouteEnv() string  { return "" }
-func debugUseDerpRoute() opt.Bool   { return "" }
-
-func inTest() bool { return false }
+func debugBindSocket() bool            { return false }
+func debugDisco() bool                 { return false }
+func debugOmitLocalAddresses() bool    { return false }
+func logDerpVerbose() bool             { return false }
+func debugReSTUNStopOnIdle() bool      { return false }
+func debugAlwaysDERP() bool            { return false }
+func debugUseDERPHTTP() bool           { return false }
+func debugEnableSilentDisco() bool     { return false }
+func debugSendCallMeUnknownPeer() bool { return false }
+func debugPMTUD() bool                 { return false }
+func debugUseDERPAddr() string         { return "" }
+func debugUseDerpRouteEnv() string     { return "" }
+func debugUseDerpRoute() opt.Bool      { return "" }
+func debugEnablePMTUD() opt.Bool       { return "" }
+func debugRingBufferMaxSizeBytes() int { return 0 }
+func inTest() bool                     { return false }
+func debugPeerMap() bool               { return false }

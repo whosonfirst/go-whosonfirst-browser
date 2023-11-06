@@ -3,13 +3,16 @@ package proxy
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-pool/v2"
-	"github.com/aaronland/go-uid"
 	"io"
 	"log"
 	"net/url"
+	"strconv"
 	"sync"
 	"time"
+
+	aa_log "github.com/aaronland/go-log/v2"
+	"github.com/aaronland/go-pool/v2"
+	"github.com/aaronland/go-uid"
 )
 
 const PROXY_SCHEME string = "proxy"
@@ -31,6 +34,9 @@ type ProxyProvider struct {
 
 func NewProxyProvider(ctx context.Context, uri string) (uid.Provider, error) {
 
+	workers := 10
+	minimum := 0
+
 	u, err := url.Parse(uri)
 
 	if err != nil {
@@ -51,6 +57,32 @@ func NewProxyProvider(ctx context.Context, uri string) (uid.Provider, error) {
 		pool_uri = "memory://"
 	}
 
+	str_workers := q.Get("workers")
+
+	if str_workers != "" {
+
+		v, err := strconv.Atoi(str_workers)
+
+		if err != nil {
+			return nil, fmt.Errorf("Invalid ?workers parameter")
+		}
+
+		workers = v
+	}
+
+	str_minimum := q.Get("minimum")
+
+	if str_minimum != "" {
+
+		v, err := strconv.Atoi(str_minimum)
+
+		if err != nil {
+			return nil, fmt.Errorf("Invalid ?minimum parameter")
+		}
+
+		minimum = v
+	}
+
 	source_pr, err := uid.NewProvider(ctx, source_uri)
 
 	if err != nil {
@@ -64,9 +96,6 @@ func NewProxyProvider(ctx context.Context, uri string) (uid.Provider, error) {
 	}
 
 	logger := log.New(io.Discard, "", 0)
-
-	workers := 10
-	minimum := 0
 
 	refill := make(chan bool)
 
@@ -94,7 +123,7 @@ func (pr *ProxyProvider) UID(ctx context.Context, args ...interface{}) (uid.UID,
 
 	if pr.pool.Length(ctx) == 0 {
 
-		pr.logger.Printf("pool length is 0 so fetching integer from source")
+		aa_log.Warning(pr.logger, "pool length is 0 so fetching integer from source")
 
 		go pr.refillPool(ctx)
 		return pr.provider.UID(ctx, args...)
@@ -104,7 +133,7 @@ func (pr *ProxyProvider) UID(ctx context.Context, args ...interface{}) (uid.UID,
 
 	if !ok {
 
-		pr.logger.Printf("failed to pop UID!")
+		aa_log.Info(pr.logger, "failed to pop UID!")
 
 		go pr.refillPool(ctx)
 		return pr.provider.UID(ctx, args...)
@@ -125,7 +154,7 @@ func (pr *ProxyProvider) status(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-time.After(5 * time.Second):
-			pr.logger.Printf("pool length: %d", pr.pool.Length(ctx))
+			aa_log.Debug(pr.logger, "Pool length: %d", pr.pool.Length(ctx))
 		}
 	}
 }
@@ -156,7 +185,11 @@ func (pr *ProxyProvider) refillPool(ctx context.Context) {
 	// and refill the pool simultaneously. First, we block until a slot opens
 	// up.
 
+	aa_log.Debug(pr.logger, "Refill pool. Waiting for work queue.")
+
 	<-pr.refill
+
+	aa_log.Debug(pr.logger, "Refill pool. Starting.")
 
 	t1 := time.Now()
 
@@ -191,7 +224,7 @@ func (pr *ProxyProvider) refillPool(ctx context.Context) {
 
 	wg := new(sync.WaitGroup)
 
-	pr.logger.Printf("refill poll w/ %d integers and %d workers", todo, workers)
+	aa_log.Info(pr.logger, "refill poll w/ %d integers and %d workers", todo, workers)
 
 	success := 0
 	failed := 0
@@ -212,7 +245,7 @@ func (pr *ProxyProvider) refillPool(ctx context.Context) {
 		// First check that we still actually need to keep fetching integers
 
 		if pr.pool.Length(ctx) >= int64(pr.minimum) {
-			pr.logger.Printf("pool is full (%d) stopping after %d iterations", pr.pool.Length(ctx), j)
+			aa_log.Info(pr.logger, "pool is full (%d) stopping after %d iterations", pr.pool.Length(ctx), j)
 			break
 		}
 
@@ -239,7 +272,7 @@ func (pr *ProxyProvider) refillPool(ctx context.Context) {
 	pr.refill <- true
 
 	t2 := time.Since(t1)
-	pr.logger.Printf("time to refill the pool with %d integers (success: %d failed: %d): %v (pool length is now %d)", todo, success, failed, t2, pr.pool.Length(ctx))
+	aa_log.Debug(pr.logger, "Time to refill the pool with %d integers (success: %d failed: %d): %v (pool length is now %d)", todo, success, failed, t2, pr.pool.Length(ctx))
 
 }
 
@@ -248,7 +281,7 @@ func (pr *ProxyProvider) addToPool(ctx context.Context) bool {
 	i, err := pr.provider.UID(ctx)
 
 	if err != nil {
-		pr.logger.Printf("Failed to create new UID to add to pool, %v", err)
+		aa_log.Error(pr.logger, "Failed to create new UID to add to pool, %v", err)
 		return false
 	}
 

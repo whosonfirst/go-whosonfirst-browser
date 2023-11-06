@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package tsaddr handles Tailscale-specific IPs and ranges.
 package tsaddr
@@ -9,10 +8,12 @@ import (
 	"encoding/binary"
 	"errors"
 	"net/netip"
+	"slices"
 	"sync"
 
-	"golang.org/x/exp/slices"
+	"go4.org/netipx"
 	"tailscale.com/net/netaddr"
+	"tailscale.com/types/views"
 )
 
 // ChromeOSVMRange returns the subset of the CGNAT IPv4 range used by
@@ -27,7 +28,7 @@ var chromeOSRange oncePrefix
 
 // CGNATRange returns the Carrier Grade NAT address range that
 // is the superset range that Tailscale assigns out of.
-// See https://tailscale.com/kb/1015/100.x-addresses.
+// See https://tailscale.com/s/cgnat
 // Note that Tailscale does not assign out of the ChromeOSVMRange.
 func CGNATRange() netip.Prefix {
 	cgnatRange.Do(func() { mustPrefix(&cgnatRange.v, "100.64.0.0/10") })
@@ -160,6 +161,11 @@ type oncePrefix struct {
 	v netip.Prefix
 }
 
+// FalseContainsIPFunc is shorthand for NewContainsIPFunc(views.Slice[netip.Prefix]{}).
+func FalseContainsIPFunc() func(ip netip.Addr) bool {
+	return func(ip netip.Addr) bool { return false }
+}
+
 // NewContainsIPFunc returns a func that reports whether ip is in addrs.
 //
 // It's optimized for the cases of addrs being empty and addrs
@@ -167,20 +173,17 @@ type oncePrefix struct {
 // one IPv6 address).
 //
 // Otherwise the implementation is somewhat slow.
-func NewContainsIPFunc(addrs []netip.Prefix) func(ip netip.Addr) bool {
+func NewContainsIPFunc(addrs views.Slice[netip.Prefix]) func(ip netip.Addr) bool {
 	// Specialize the three common cases: no address, just IPv4
 	// (or just IPv6), and both IPv4 and IPv6.
-	if len(addrs) == 0 {
+	if addrs.Len() == 0 {
 		return func(netip.Addr) bool { return false }
 	}
 	// If any addr is more than a single IP, then just do the slow
 	// linear thing until
 	// https://github.com/inetaf/netaddr/issues/139 is done.
-	for _, a := range addrs {
-		if a.IsSingleIP() {
-			continue
-		}
-		acopy := append([]netip.Prefix(nil), addrs...)
+	if views.SliceContainsFunc(addrs, func(p netip.Prefix) bool { return !p.IsSingleIP() }) {
+		acopy := addrs.AsSlice()
 		return func(ip netip.Addr) bool {
 			for _, a := range acopy {
 				if a.Contains(ip) {
@@ -191,47 +194,26 @@ func NewContainsIPFunc(addrs []netip.Prefix) func(ip netip.Addr) bool {
 		}
 	}
 	// Fast paths for 1 and 2 IPs:
-	if len(addrs) == 1 {
-		a := addrs[0]
+	if addrs.Len() == 1 {
+		a := addrs.At(0)
 		return func(ip netip.Addr) bool { return ip == a.Addr() }
 	}
-	if len(addrs) == 2 {
-		a, b := addrs[0], addrs[1]
+	if addrs.Len() == 2 {
+		a, b := addrs.At(0), addrs.At(1)
 		return func(ip netip.Addr) bool { return ip == a.Addr() || ip == b.Addr() }
 	}
 	// General case:
 	m := map[netip.Addr]bool{}
-	for _, a := range addrs {
-		m[a.Addr()] = true
+	for i := range addrs.LenIter() {
+		m[addrs.At(i).Addr()] = true
 	}
 	return func(ip netip.Addr) bool { return m[ip] }
-}
-
-// PrefixesContainsFunc reports whether f is true for any IPPrefix in
-// ipp.
-func PrefixesContainsFunc(ipp []netip.Prefix, f func(netip.Prefix) bool) bool {
-	for _, v := range ipp {
-		if f(v) {
-			return true
-		}
-	}
-	return false
 }
 
 // PrefixesContainsIP reports whether any prefix in ipp contains ip.
 func PrefixesContainsIP(ipp []netip.Prefix, ip netip.Addr) bool {
 	for _, r := range ipp {
 		if r.Contains(ip) {
-			return true
-		}
-	}
-	return false
-}
-
-// IPsContainsFunc reports whether f is true for any IP in ips.
-func IPsContainsFunc(ips []netip.Addr, f func(netip.Addr) bool) bool {
-	for _, v := range ips {
-		if f(v) {
 			return true
 		}
 	}
@@ -246,9 +228,10 @@ func PrefixIs6(p netip.Prefix) bool { return p.Addr().Is6() }
 
 // ContainsExitRoutes reports whether rr contains both the IPv4 and
 // IPv6 /0 route.
-func ContainsExitRoutes(rr []netip.Prefix) bool {
+func ContainsExitRoutes(rr views.Slice[netip.Prefix]) bool {
 	var v4, v6 bool
-	for _, r := range rr {
+	for i := range rr.LenIter() {
+		r := rr.At(i)
 		if r == allIPv4 {
 			v4 = true
 		} else if r == allIPv6 {
@@ -256,6 +239,17 @@ func ContainsExitRoutes(rr []netip.Prefix) bool {
 		}
 	}
 	return v4 && v6
+}
+
+// ContainsNonExitSubnetRoutes reports whether v contains Subnet
+// Routes other than ExitNode Routes.
+func ContainsNonExitSubnetRoutes(rr views.Slice[netip.Prefix]) bool {
+	for i := range rr.LenIter() {
+		if rr.At(i).Bits() != 0 {
+			return true
+		}
+	}
+	return false
 }
 
 var (
@@ -274,20 +268,15 @@ func ExitRoutes() []netip.Prefix { return []netip.Prefix{allIPv4, allIPv6} }
 
 // SortPrefixes sorts the prefixes in place.
 func SortPrefixes(p []netip.Prefix) {
-	slices.SortFunc(p, func(ri, rj netip.Prefix) bool {
-		if ri.Addr() == rj.Addr() {
-			return ri.Bits() < rj.Bits()
-		}
-		return ri.Addr().Less(rj.Addr())
-	})
+	slices.SortFunc(p, netipx.ComparePrefix)
 }
 
 // FilterPrefixes returns a new slice, not aliasing in, containing elements of
 // in that match f.
-func FilterPrefixesCopy(in []netip.Prefix, f func(netip.Prefix) bool) []netip.Prefix {
+func FilterPrefixesCopy(in views.Slice[netip.Prefix], f func(netip.Prefix) bool) []netip.Prefix {
 	var out []netip.Prefix
-	for _, v := range in {
-		if f(v) {
+	for i := range in.LenIter() {
+		if v := in.At(i); f(v) {
 			out = append(out, v)
 		}
 	}

@@ -11,6 +11,12 @@ import (
 	"sync"
 )
 
+// type CacheReaderOptions is a struct for use with the `NewCacheReaderWithOptions` method.
+type CacheReaderOptions struct {
+	Reader reader.Reader
+	Cache  cache.Cache
+}
+
 // type CacheReader implements the `whosonfirst/go-reader` interface for use with a caching layer for reading documents.
 type CacheReader struct {
 	reader.Reader
@@ -109,9 +115,20 @@ func NewCacheReader(ctx context.Context, uri string) (reader.Reader, error) {
 		return nil, fmt.Errorf("Failed to create new cache, %w", err)
 	}
 
+	opts := &CacheReaderOptions{
+		Reader: r,
+		Cache:  c,
+	}
+
+	return NewCacheReaderWithOptions(ctx, opts)
+}
+
+// NewCacheReader will return a new `CacheReader` instance configured by 'opts'.
+func NewCacheReaderWithOptions(ctx context.Context, opts *CacheReaderOptions) (reader.Reader, error) {
+
 	cr := &CacheReader{
-		reader: r,
-		cache:  c,
+		reader: opts.Reader,
+		cache:  opts.Cache,
 	}
 
 	return cr, nil

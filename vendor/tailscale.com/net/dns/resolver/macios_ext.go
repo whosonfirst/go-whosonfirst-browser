@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build ts_macext && (darwin || ios)
 
@@ -10,16 +9,16 @@ import (
 	"errors"
 	"net"
 
+	"tailscale.com/net/netmon"
 	"tailscale.com/net/netns"
-	"tailscale.com/wgengine/monitor"
 )
 
 func init() {
 	initListenConfig = initListenConfigNetworkExtension
 }
 
-func initListenConfigNetworkExtension(nc *net.ListenConfig, mon *monitor.Mon, tunName string) error {
-	nif, ok := mon.InterfaceState().Interface[tunName]
+func initListenConfigNetworkExtension(nc *net.ListenConfig, netMon *netmon.Monitor, tunName string) error {
+	nif, ok := netMon.InterfaceState().Interface[tunName]
 	if !ok {
 		return errors.New("utun not found")
 	}

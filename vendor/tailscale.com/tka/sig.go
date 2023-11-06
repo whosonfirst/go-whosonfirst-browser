@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package tka
 
@@ -97,6 +96,18 @@ type NodeKeySignature struct {
 	WrappingPubkey []byte `cbor:"6,keyasint,omitempty"`
 }
 
+// UnverifiedWrappingPublic returns the public key which must sign a
+// signature which embeds this one, if any.
+//
+// See docs on NodeKeySignature.WrappingPubkey & SigRotation for documentation
+// about wrapping public keys.
+//
+// SAFETY: The caller MUST verify the signature using
+// Authority.NodeKeyAuthorized if treating this as authentic information.
+func (s NodeKeySignature) UnverifiedWrappingPublic() (pub ed25519.PublicKey, ok bool) {
+	return s.wrappingPublic()
+}
+
 // wrappingPublic returns the public key which must sign a signature which
 // embeds this one, if any.
 func (s NodeKeySignature) wrappingPublic() (pub ed25519.PublicKey, ok bool) {
@@ -114,6 +125,15 @@ func (s NodeKeySignature) wrappingPublic() (pub ed25519.PublicKey, ok bool) {
 	default:
 		return nil, false
 	}
+}
+
+// UnverifiedAuthorizingKeyID returns the KeyID of the key which authorizes
+// this signature.
+//
+// SAFETY: The caller MUST verify the signature using
+// Authority.NodeKeyAuthorized if treating this as authentic information.
+func (s NodeKeySignature) UnverifiedAuthorizingKeyID() (tkatype.KeyID, error) {
+	return s.authorizingKeyID()
 }
 
 // authorizingKeyID returns the KeyID of the key trusted by network-lock which authorizes
@@ -205,6 +225,9 @@ func (s *NodeKeySignature) verifySignature(nodeKey key.NodePublic, verificationK
 		if !ok {
 			return errors.New("missing rotation key")
 		}
+		if len(verifyPub) != ed25519.PublicKeySize {
+			return fmt.Errorf("bad rotation key length: %d", len(verifyPub))
+		}
 		if !ed25519.Verify(ed25519.PublicKey(verifyPub[:]), sigHash[:], s.Signature) {
 			return errors.New("invalid signature")
 		}
@@ -229,6 +252,9 @@ func (s *NodeKeySignature) verifySignature(nodeKey key.NodePublic, verificationK
 		}
 		switch verificationKey.Kind {
 		case Key25519:
+			if len(verificationKey.Public) != ed25519.PublicKeySize {
+				return fmt.Errorf("ed25519 key has wrong length: %d", len(verificationKey.Public))
+			}
 			if ed25519consensus.Verify(ed25519.PublicKey(verificationKey.Public), sigHash[:], s.Signature) {
 				return nil
 			}

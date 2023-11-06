@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package dns
 
@@ -9,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/netip"
+	"strings"
 
 	"tailscale.com/types/logger"
 	"tailscale.com/util/dnsname"
@@ -64,6 +64,42 @@ type OSConfig struct {
 	// from the OS, which will only work with OSConfigurators that
 	// report SupportsSplitDNS()=true.
 	MatchDomains []dnsname.FQDN
+}
+
+func (o *OSConfig) WriteToBufioWriter(w *bufio.Writer) {
+	if o == nil {
+		w.WriteString("<nil>")
+		return
+	}
+	w.WriteString("{")
+	if len(o.Hosts) > 0 {
+		fmt.Fprintf(w, "Hosts:%v ", o.Hosts)
+	}
+	if len(o.Nameservers) > 0 {
+		fmt.Fprintf(w, "Nameservers:%v ", o.Nameservers)
+	}
+	if len(o.SearchDomains) > 0 {
+		fmt.Fprintf(w, "SearchDomains:%v ", o.SearchDomains)
+	}
+	if len(o.MatchDomains) > 0 {
+		w.WriteString("SearchDomains:[")
+		sp := ""
+		var numARPA int
+		for _, s := range o.MatchDomains {
+			if strings.HasSuffix(string(s), ".arpa.") {
+				numARPA++
+				continue
+			}
+			w.WriteString(sp)
+			w.WriteString(string(s))
+			sp = " "
+		}
+		w.WriteString("]")
+		if numARPA > 0 {
+			fmt.Fprintf(w, "+%darpa", numARPA)
+		}
+	}
+	w.WriteString("}")
 }
 
 func (o OSConfig) IsZero() bool {

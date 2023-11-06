@@ -1,0 +1,9 @@
+      {{ if IsAvailable .Name .SPR }}
+      <meta property="og:type" content="article" />
+      <meta property="og:site_name" content="Who's On First" />
+      <meta property="og:title" content="{{ .SPR.Name }} is a {{ .SPR.Placetype }} in {{ .SPR.Country}}" />
+      <meta property="og:description" content="Its Who's On First ID is {{ .SPR.Id }}" />
+      <meta property="og:image" content="{{ .Paths.PNG }}{{ .SPR.Id }}?size=xsm" />
+      {{ end }}
+
+      {{ if IsAvailable .LastModified . }}<meta property="html:lastmodified" content="{{ .LastModified }}" />{{ end }}

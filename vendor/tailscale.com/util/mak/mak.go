@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package mak helps make maps. It contains generic helpers to make/assign
 // things, notably to maps, but also slices.
@@ -27,7 +26,7 @@ func Set[K comparable, V any, T ~map[K]V](m *T, k K, v V) {
 // the field to be defined after they decode the JSON.)
 //
 // Deprecated: use NonNilSliceForJSON or NonNilMapForJSON instead.
-func NonNil(ptr interface{}) {
+func NonNil(ptr any) {
 	if ptr == nil {
 		panic("nil interface")
 	}
