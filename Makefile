@@ -1,5 +1,7 @@
+GOMOD=$(shell test -f "go.work" && echo "readonly" || echo "vendor")
+
 cli:
-	go build -mod vendor -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
+	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 
 debug:
 	# @make cli
@@ -21,7 +23,7 @@ lambda:
 lambda-browser:
 	if test -f bootstrap; then rm -f bootstrap; fi
 	if test -f browser.zip; then rm -f browser.zip; fi
-	GOOS=linux go build -mod vendor -o bootstrap cmd/whosonfirst-browser/main.go
+	GOARCH=arm64 GOOS=linux go build -mod $(GOMOD) -ldflags="-s -w" -tags lambda.norpc -o bootstrap cmd/whosonfirst-browser/main.go
 	zip browser.zip bootstrap
 	rm -f bootstrap
 
