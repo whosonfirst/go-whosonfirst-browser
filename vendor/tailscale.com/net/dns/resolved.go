@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build linux
 
@@ -118,8 +117,10 @@ func newResolvedManager(logf logger.Logf, interfaceName string) (*resolvedManage
 }
 
 func (m *resolvedManager) SetDNS(config OSConfig) error {
+	// NOTE: don't close this channel, since it's possible that the SetDNS
+	// call will time out and return before the run loop answers, at which
+	// point it will send on the now-closed channel.
 	errc := make(chan error, 1)
-	defer close(errc)
 
 	select {
 	case <-m.ctx.Done():

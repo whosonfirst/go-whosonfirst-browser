@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package syncs contains additional sync types and functionality.
 package syncs
@@ -165,19 +164,33 @@ type Map[K comparable, V any] struct {
 	m  map[K]V
 }
 
-func (m *Map[K, V]) Load(key K) (value V, ok bool) {
+// Load loads the value for the provided key and whether it was found.
+func (m *Map[K, V]) Load(key K) (value V, loaded bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	value, ok = m.m[key]
-	return value, ok
+	value, loaded = m.m[key]
+	return value, loaded
 }
 
+// LoadFunc calls f with the value for the provided key
+// regardless of whether the entry exists or not.
+// The lock is held for the duration of the call to f.
+func (m *Map[K, V]) LoadFunc(key K, f func(value V, loaded bool)) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	value, loaded := m.m[key]
+	f(value, loaded)
+}
+
+// Store stores the value for the provided key.
 func (m *Map[K, V]) Store(key K, value V) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	mak.Set(&m.m, key, value)
 }
 
+// LoadOrStore returns the value for the given key if it exists
+// otherwise it stores value.
 func (m *Map[K, V]) LoadOrStore(key K, value V) (actual V, loaded bool) {
 	if actual, loaded = m.Load(key); loaded {
 		return actual, loaded
@@ -193,6 +206,28 @@ func (m *Map[K, V]) LoadOrStore(key K, value V) (actual V, loaded bool) {
 	return actual, loaded
 }
 
+// LoadOrInit returns the value for the given key if it exists
+// otherwise f is called to construct the value to be set.
+// The lock is held for the duration to prevent duplicate initialization.
+func (m *Map[K, V]) LoadOrInit(key K, f func() V) (actual V, loaded bool) {
+	if actual, loaded := m.Load(key); loaded {
+		return actual, loaded
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if actual, loaded = m.m[key]; loaded {
+		return actual, loaded
+	}
+
+	loaded = false
+	actual = f()
+	mak.Set(&m.m, key, actual)
+	return actual, loaded
+}
+
+// LoadAndDelete returns the value for the given key if it exists.
+// It ensures that the map is cleared of any entry for the key.
 func (m *Map[K, V]) LoadAndDelete(key K) (value V, loaded bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -203,12 +238,15 @@ func (m *Map[K, V]) LoadAndDelete(key K) (value V, loaded bool) {
 	return value, loaded
 }
 
+// Delete deletes the entry identified by key.
 func (m *Map[K, V]) Delete(key K) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	delete(m.m, key)
 }
 
+// Range iterates over the map in undefined order calling f for each entry.
+// Iteration stops if f returns false. Map changes are blocked during iteration.
 func (m *Map[K, V]) Range(f func(key K, value V) bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -217,4 +255,34 @@ func (m *Map[K, V]) Range(f func(key K, value V) bool) {
 			return
 		}
 	}
+}
+
+// Len returns the length of the map.
+func (m *Map[K, V]) Len() int {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return len(m.m)
+}
+
+// Clear removes all entries from the map.
+func (m *Map[K, V]) Clear() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	clear(m.m)
+}
+
+// WaitGroup is identical to [sync.WaitGroup],
+// but provides a Go method to start a goroutine.
+type WaitGroup struct{ sync.WaitGroup }
+
+// Go calls the given function in a new goroutine.
+// It automatically increments the counter before execution and
+// automatically decrements the counter after execution.
+// It must not be called concurrently with Wait.
+func (wg *WaitGroup) Go(f func()) {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		f()
+	}()
 }

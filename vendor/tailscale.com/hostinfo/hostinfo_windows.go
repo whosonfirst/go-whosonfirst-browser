@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package hostinfo
 
@@ -8,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
@@ -62,12 +62,17 @@ func packageTypeWindows() string {
 	if _, err := os.Stat(`C:\ProgramData\chocolatey\lib\tailscale`); err == nil {
 		return "choco"
 	}
-	if msiSentinel := winutil.GetRegInteger("MSI", 0); msiSentinel == 1 {
+	msiSentinel, _ := winutil.GetRegInteger("MSI")
+	if msiSentinel == 1 {
 		return "msi"
 	}
 	exe, err := os.Executable()
 	if err != nil {
 		return ""
+	}
+	home, _ := os.UserHomeDir()
+	if strings.HasPrefix(exe, filepath.Join(home, "scoop", "apps", "tailscale")) {
+		return "scoop"
 	}
 	dir := filepath.Dir(exe)
 	nsisUninstaller := filepath.Join(dir, "Uninstall-Tailscale.exe")

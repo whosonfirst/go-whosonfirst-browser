@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package health is a registry for other packages to report & check
 // overall health status of the node.
@@ -28,7 +27,7 @@ var (
 
 	sysErr    = map[Subsystem]error{}                   // error key => err (or nil for no error)
 	watchers  = set.HandleSet[func(Subsystem, error)]{} // opt func to run if error state changes
-	warnables = map[*Warnable]struct{}{}                // set of warnables
+	warnables = set.Set[*Warnable]{}
 	timer     *time.Timer
 
 	debugHandler = map[string]http.Handler{}
@@ -49,6 +48,7 @@ var (
 	controlHealth           []string
 	lastLoginErr            error
 	localLogConfigErr       error
+	tlsConnectionErrors     = map[string]error{} // map[ServerName]error
 )
 
 // Subsystem is the name of a subsystem whose health can be monitored.
@@ -70,6 +70,9 @@ const (
 
 	// SysDNSManager is the name of the net/dns manager subsystem.
 	SysDNSManager = Subsystem("dns-manager")
+
+	// SysTKA is the name of the tailnet key authority subsystem.
+	SysTKA = Subsystem("tailnet-lock")
 )
 
 // NewWarnable returns a new warnable item that the caller can mark
@@ -81,7 +84,7 @@ func NewWarnable(opts ...WarnableOpt) *Warnable {
 	}
 	mu.Lock()
 	defer mu.Unlock()
-	warnables[w] = struct{}{}
+	warnables.Add(w)
 	return w
 }
 
@@ -194,11 +197,29 @@ func SetDNSManagerHealth(err error) { setErr(SysDNSManager, err) }
 // DNSOSHealth returns the net/dns.OSConfigurator error state.
 func DNSOSHealth() error { return get(SysDNSOS) }
 
+// SetTKAHealth sets the health of the tailnet key authority.
+func SetTKAHealth(err error) { setErr(SysTKA, err) }
+
+// TKAHealth returns the tailnet key authority error state.
+func TKAHealth() error { return get(SysTKA) }
+
 // SetLocalLogConfigHealth sets the error state of this client's local log configuration.
 func SetLocalLogConfigHealth(err error) {
 	mu.Lock()
 	defer mu.Unlock()
 	localLogConfigErr = err
+}
+
+// SetTLSConnectionError sets the error state for connections to a specific
+// host. Setting the error to nil will clear any previously-set error.
+func SetTLSConnectionError(host string, err error) {
+	mu.Lock()
+	defer mu.Unlock()
+	if err == nil {
+		delete(tlsConnectionErrors, host)
+	} else {
+		tlsConnectionErrors[host] = err
+	}
 }
 
 func RegisterDebugHandler(typ string, h http.Handler) {
@@ -258,27 +279,31 @@ func SetControlHealth(problems []string) {
 
 // GotStreamedMapResponse notes that we got a tailcfg.MapResponse
 // message in streaming mode, even if it's just a keep-alive message.
+//
+// This also notes that a map poll is in progress. To unset that, call
+// SetOutOfPollNetMap().
 func GotStreamedMapResponse() {
 	mu.Lock()
 	defer mu.Unlock()
 	lastStreamedMapResponse = time.Now()
+	if !inMapPoll {
+		inMapPoll = true
+		inMapPollSince = time.Now()
+	}
 	selfCheckLocked()
 }
 
-// SetInPollNetMap records whether the client has an open
-// HTTP long poll open to the control plane.
-func SetInPollNetMap(v bool) {
+// SetOutOfPollNetMap records that the client is no longer in
+// an HTTP map request long poll to the control plane.
+func SetOutOfPollNetMap() {
 	mu.Lock()
 	defer mu.Unlock()
-	if v == inMapPoll {
+	if !inMapPoll {
 		return
 	}
-	inMapPoll = v
-	if v {
-		inMapPollSince = time.Now()
-	} else {
-		lastMapPollEndedAt = time.Now()
-	}
+	inMapPoll = false
+	lastMapPollEndedAt = time.Now()
+	selfCheckLocked()
 }
 
 // GetInPollNetMap reports whether the client has an open
@@ -467,6 +492,9 @@ func overallErrorLocked() error {
 	}
 	if err := envknob.ApplyDiskConfigError(); err != nil {
 		errs = append(errs, err)
+	}
+	for serverName, err := range tlsConnectionErrors {
+		errs = append(errs, fmt.Errorf("TLS connection error for %q: %w", serverName, err))
 	}
 	if e := fakeErrForTesting(); len(errs) == 0 && e != "" {
 		return errors.New(e)

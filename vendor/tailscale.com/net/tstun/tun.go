@@ -1,8 +1,7 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
-//go:build !js
+//go:build !wasm && !plan9 && !tamago
 
 // Package tun creates a tuntap device, working around OS-specific
 // quirks if necessary.
@@ -14,8 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"golang.zx2c4.com/wireguard/tun"
-	"tailscale.com/envknob"
+	"github.com/tailscale/wireguard-go/tun"
 	"tailscale.com/types/logger"
 )
 
@@ -46,11 +44,7 @@ func New(logf logger.Logf, tunName string) (tun.Device, string, error) {
 		}
 		dev, err = createTAP(tapName, bridgeName)
 	} else {
-		tunMTU := DefaultMTU
-		if mtu, ok := envknob.LookupInt("TS_DEBUG_MTU"); ok {
-			tunMTU = mtu
-		}
-		dev, err = tun.CreateTUN(tunName, tunMTU)
+		dev, err = tun.CreateTUN(tunName, int(DefaultTUNMTU()))
 	}
 	if err != nil {
 		return nil, "", err

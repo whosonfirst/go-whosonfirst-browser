@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build go1.19
 
@@ -64,7 +63,7 @@ func (c *Client) dnsGETRequest(ctx context.Context, endpoint string) ([]byte, er
 	return b, nil
 }
 
-func (c *Client) dnsPOSTRequest(ctx context.Context, endpoint string, postData interface{}) ([]byte, error) {
+func (c *Client) dnsPOSTRequest(ctx context.Context, endpoint string, postData any) ([]byte, error) {
 	path := fmt.Sprintf("%s/api/v2/tailnet/%s/dns/%s", c.baseURL(), c.tailnet, endpoint)
 	data, err := json.Marshal(&postData)
 	if err != nil {

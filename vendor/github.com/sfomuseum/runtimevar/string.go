@@ -6,8 +6,8 @@ import (
 	"github.com/aaronland/go-aws-session"
 	gc "gocloud.dev/runtimevar"
 	"gocloud.dev/runtimevar/awsparamstore"
-        _ "gocloud.dev/runtimevar/constantvar"
-        _ "gocloud.dev/runtimevar/filevar"
+	_ "gocloud.dev/runtimevar/constantvar"
+	_ "gocloud.dev/runtimevar/filevar"
 	_ "log"
 	"net/url"
 )

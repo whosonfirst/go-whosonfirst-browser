@@ -1,13 +1,12 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package router
 
 import (
-	"golang.zx2c4.com/wireguard/tun"
+	"github.com/tailscale/wireguard-go/tun"
+	"tailscale.com/net/netmon"
 	"tailscale.com/types/logger"
-	"tailscale.com/wgengine/monitor"
 )
 
 // For now this router only supports the userspace WireGuard implementations.
@@ -15,8 +14,8 @@ import (
 // Work is currently underway for an in-kernel FreeBSD implementation of wireguard
 // https://svnweb.freebsd.org/base?view=revision&revision=357986
 
-func newUserspaceRouter(logf logger.Logf, tundev tun.Device, linkMon *monitor.Mon) (Router, error) {
-	return newUserspaceBSDRouter(logf, tundev, linkMon)
+func newUserspaceRouter(logf logger.Logf, tundev tun.Device, netMon *netmon.Monitor) (Router, error) {
+	return newUserspaceBSDRouter(logf, tundev, netMon)
 }
 
 func cleanup(logf logger.Logf, interfaceName string) {

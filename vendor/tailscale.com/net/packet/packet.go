@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package packet
 
@@ -35,6 +34,14 @@ const (
 	TCPECNBits TCPFlag = TCPECNEcho | TCPCWR
 )
 
+// CaptureMeta contains metadata that is used when debugging.
+type CaptureMeta struct {
+	DidSNAT     bool           // SNAT was performed & the address was updated.
+	OriginalSrc netip.AddrPort // The source address before SNAT was performed.
+	DidDNAT     bool           // DNAT was performed & the address was updated.
+	OriginalDst netip.AddrPort // The destination address before DNAT was performed.
+}
+
 // Parsed is a minimal decoding of a packet suitable for use in filters.
 type Parsed struct {
 	// b is the byte buffer that this decodes.
@@ -59,6 +66,9 @@ type Parsed struct {
 	Dst netip.AddrPort
 	// TCPFlags is the packet's TCP flag bits. Valid iff IPProto == TCP.
 	TCPFlags TCPFlag
+
+	// CaptureMeta contains metadata that is used when debugging.
+	CaptureMeta CaptureMeta
 }
 
 func (p *Parsed) String() string {
@@ -85,6 +95,7 @@ func (p *Parsed) String() string {
 // and shouldn't need any memory allocation.
 func (q *Parsed) Decode(b []byte) {
 	q.b = b
+	q.CaptureMeta = CaptureMeta{} // Clear any capture metadata if it exists.
 
 	if len(b) < 1 {
 		q.IPVersion = 0
@@ -211,9 +222,11 @@ func (q *Parsed) decode4(b []byte) {
 			// Inter-tailscale messages.
 			q.dataofs = q.subofs
 			return
-		default:
+		case ipproto.Fragment:
+			// An IPProto value of 0xff (our Fragment constant for internal use)
+			// should never actually be used in the wild; if we see it,
+			// something's suspicious and we map it back to zero (unknown).
 			q.IPProto = unknown
-			return
 		}
 	} else {
 		// This is a fragment other than the first one.
@@ -312,7 +325,10 @@ func (q *Parsed) decode6(b []byte) {
 		// Inter-tailscale messages.
 		q.dataofs = q.subofs
 		return
-	default:
+	case ipproto.Fragment:
+		// An IPProto value of 0xff (our Fragment constant for internal use)
+		// should never actually be used in the wild; if we see it,
+		// something's suspicious and we map it back to zero (unknown).
 		q.IPProto = unknown
 		return
 	}

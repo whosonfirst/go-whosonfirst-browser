@@ -2416,24 +2416,30 @@ var protomaps = (() => {
     }
   }
   function zxyToTileId(z2, x2, y) {
+    if (z2 > 26) {
+      throw Error("Tile zoom level exceeds max safe number limit (26)");
+    }
+    if (x2 > Math.pow(2, z2) - 1 || y > Math.pow(2, z2) - 1) {
+      throw Error("tile x/y outside zoom level bounds");
+    }
     let acc = 0;
     let tz = 0;
     while (tz < z2) {
-      acc += (1 << tz) * (1 << tz);
+      acc += Math.pow(2, tz) * Math.pow(2, tz);
       tz++;
     }
-    const n2 = 1 << z2;
+    const n2 = Math.pow(2, z2);
     let rx = 0;
     let ry = 0;
     let d = 0;
     const xy = [x2, y];
-    let s2 = n2 / 2 >> 0;
+    let s2 = n2 / 2;
     while (s2 > 0) {
       rx = (xy[0] & s2) > 0 ? 1 : 0;
       ry = (xy[1] & s2) > 0 ? 1 : 0;
       d += s2 * s2 * (3 * rx ^ ry);
       rotate(s2, xy, rx, ry);
-      s2 = s2 / 2 >> 0;
+      s2 = s2 / 2;
     }
     return acc + d;
   }
@@ -6144,6 +6150,8 @@ var protomaps = (() => {
       var base = 1.4;
       if (text_size.base)
         base = text_size.base;
+      else
+        text_size.base = base;
       let t2 = numberFn(text_size);
       return (z2, f2) => {
         return `${style}${weight}${t2(z2, f2)}px ${fontfaces.map((f3) => f3.face).join(", ")}`;

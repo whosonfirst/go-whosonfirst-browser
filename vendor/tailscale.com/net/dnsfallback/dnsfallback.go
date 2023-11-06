@@ -1,11 +1,13 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-//go:generate go run update-dns-fallbacks.go
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package dnsfallback contains a DNS fallback mechanism
 // for starting up Tailscale when the system DNS is broken or otherwise unavailable.
+//
+// The data is backed by a JSON file `dns-fallback-servers.json` that is updated
+// by `update-dns-fallbacks.go`:
+//
+//	(cd net/dnsfallback; go run update-dns-fallbacks.go)
 package dnsfallback
 
 import (
@@ -14,27 +16,108 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
-	"math/rand"
 	"net"
 	"net/http"
 	"net/netip"
 	"net/url"
 	"os"
 	"reflect"
+	"slices"
 	"sync/atomic"
 	"time"
 
 	"tailscale.com/atomicfile"
+	"tailscale.com/envknob"
+	"tailscale.com/net/dns/recursive"
+	"tailscale.com/net/netmon"
 	"tailscale.com/net/netns"
 	"tailscale.com/net/tlsdial"
 	"tailscale.com/net/tshttpproxy"
-	"tailscale.com/syncs"
 	"tailscale.com/tailcfg"
 	"tailscale.com/types/logger"
+	"tailscale.com/util/clientmetric"
+	"tailscale.com/util/slicesx"
 )
 
-func Lookup(ctx context.Context, host string) ([]netip.Addr, error) {
+var (
+	optRecursiveResolver     = envknob.RegisterOptBool("TS_DNSFALLBACK_RECURSIVE_RESOLVER")
+	disableRecursiveResolver = envknob.RegisterBool("TS_DNSFALLBACK_DISABLE_RECURSIVE_RESOLVER") // legacy pre-1.52 env knob name
+)
+
+// MakeLookupFunc creates a function that can be used to resolve hostnames
+// (e.g. as a LookupIPFallback from dnscache.Resolver).
+// The netMon parameter is optional; if non-nil it's used to do faster interface lookups.
+func MakeLookupFunc(logf logger.Logf, netMon *netmon.Monitor) func(ctx context.Context, host string) ([]netip.Addr, error) {
+	return func(ctx context.Context, host string) ([]netip.Addr, error) {
+		// If they've explicitly disabled the recursive resolver with the legacy
+		// TS_DNSFALLBACK_DISABLE_RECURSIVE_RESOLVER envknob or not set the
+		// newer TS_DNSFALLBACK_RECURSIVE_RESOLVER to true, then don't use the
+		// recursive resolver. (tailscale/corp#15261) In the future, we might
+		// change the default (the opt.Bool being unset) to mean enabled.
+		if disableRecursiveResolver() || !optRecursiveResolver().EqualBool(true) {
+			return lookup(ctx, host, logf, netMon)
+		}
+
+		addrsCh := make(chan []netip.Addr, 1)
+
+		// Run the recursive resolver in the background so we can
+		// compare the results.
+		go func() {
+			logf := logger.WithPrefix(logf, "recursive: ")
+
+			// Ensure that we catch panics while we're testing this
+			// code path; this should never panic, but we don't
+			// want to take down the process by having the panic
+			// propagate to the top of the goroutine's stack and
+			// then terminate.
+			defer func() {
+				if r := recover(); r != nil {
+					logf("bootstrap DNS: recovered panic: %v", r)
+					metricRecursiveErrors.Add(1)
+				}
+			}()
+
+			resolver := recursive.Resolver{
+				Dialer: netns.NewDialer(logf, netMon),
+				Logf:   logf,
+			}
+			addrs, minTTL, err := resolver.Resolve(ctx, host)
+			if err != nil {
+				logf("error using recursive resolver: %v", err)
+				metricRecursiveErrors.Add(1)
+				return
+			}
+
+			compareAddr := func(a, b netip.Addr) int { return a.Compare(b) }
+			slices.SortFunc(addrs, compareAddr)
+
+			// Wait for a response from the main function
+			oldAddrs := <-addrsCh
+			slices.SortFunc(oldAddrs, compareAddr)
+
+			matches := slices.Equal(addrs, oldAddrs)
+
+			logf("bootstrap DNS comparison: matches=%v oldAddrs=%v addrs=%v minTTL=%v", matches, oldAddrs, addrs, minTTL)
+
+			if matches {
+				metricRecursiveMatches.Add(1)
+			} else {
+				metricRecursiveMismatches.Add(1)
+			}
+		}()
+
+		addrs, err := lookup(ctx, host, logf, netMon)
+		if err != nil {
+			addrsCh <- nil
+			return nil, err
+		}
+
+		addrsCh <- slices.Clone(addrs)
+		return addrs, nil
+	}
+}
+
+func lookup(ctx context.Context, host string, logf logger.Logf, netMon *netmon.Monitor) ([]netip.Addr, error) {
 	if ip, err := netip.ParseAddr(host); err == nil && ip.IsValid() {
 		return []netip.Addr{ip}, nil
 	}
@@ -57,8 +140,8 @@ func Lookup(ctx context.Context, host string) ([]netip.Addr, error) {
 			}
 		}
 	}
-	rand.Shuffle(len(cands4), func(i, j int) { cands4[i], cands4[j] = cands4[j], cands4[i] })
-	rand.Shuffle(len(cands6), func(i, j int) { cands6[i], cands6[j] = cands6[j], cands6[i] })
+	slicesx.Shuffle(cands4)
+	slicesx.Shuffle(cands6)
 
 	const maxCands = 6
 	var cands []nameIP // up to maxCands alternating v4/v6 as long as we have both
@@ -82,12 +165,13 @@ func Lookup(ctx context.Context, host string) ([]netip.Addr, error) {
 		logf("trying bootstrapDNS(%q, %q) for %q ...", cand.dnsName, cand.ip, host)
 		ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 		defer cancel()
-		dm, err := bootstrapDNSMap(ctx, cand.dnsName, cand.ip, host)
+		dm, err := bootstrapDNSMap(ctx, cand.dnsName, cand.ip, host, logf, netMon)
 		if err != nil {
 			logf("bootstrapDNS(%q, %q) for %q error: %v", cand.dnsName, cand.ip, host, err)
 			continue
 		}
 		if ips := dm[host]; len(ips) > 0 {
+			slicesx.Shuffle(ips)
 			logf("bootstrapDNS(%q, %q) for %q = %v", cand.dnsName, cand.ip, host, ips)
 			return ips, nil
 		}
@@ -100,8 +184,8 @@ func Lookup(ctx context.Context, host string) ([]netip.Addr, error) {
 
 // serverName and serverIP of are, say, "derpN.tailscale.com".
 // queryName is the name being sought (e.g. "controlplane.tailscale.com"), passed as hint.
-func bootstrapDNSMap(ctx context.Context, serverName string, serverIP netip.Addr, queryName string) (dnsMap, error) {
-	dialer := netns.NewDialer(logf)
+func bootstrapDNSMap(ctx context.Context, serverName string, serverIP netip.Addr, queryName string, logf logger.Logf, netMon *netmon.Monitor) (dnsMap, error) {
+	dialer := netns.NewDialer(logf, netMon)
 	tr := http.DefaultTransport.(*http.Transport).Clone()
 	tr.Proxy = tshttpproxy.ProxyFromEnvironment
 	tr.DialContext = func(ctx context.Context, netw, addr string) (net.Conn, error) {
@@ -194,7 +278,7 @@ var cachePath string
 // UpdateCache stores the DERP map cache back to disk.
 //
 // The caller must not mutate 'c' after calling this function.
-func UpdateCache(c *tailcfg.DERPMap) {
+func UpdateCache(c *tailcfg.DERPMap, logf logger.Logf) {
 	// Don't do anything if nothing changed.
 	curr := cachedDERPMap.Load()
 	if reflect.DeepEqual(curr, c) {
@@ -227,7 +311,7 @@ func UpdateCache(c *tailcfg.DERPMap) {
 //
 // This function should be called before any calls to UpdateCache, as it is not
 // concurrency-safe.
-func SetCachePath(path string) {
+func SetCachePath(path string, logf logger.Logf) {
 	cachePath = path
 
 	f, err := os.Open(path)
@@ -247,19 +331,8 @@ func SetCachePath(path string) {
 	logf("[v2] dnsfallback: SetCachePath loaded cached DERP map")
 }
 
-// logfunc stores the logging function to use for this package.
-var logfunc syncs.AtomicValue[logger.Logf]
-
-// SetLogger sets the logging function that this package will use. The default
-// logger if this function is not called is 'log.Printf'.
-func SetLogger(log logger.Logf) {
-	logfunc.Store(log)
-}
-
-func logf(format string, args ...any) {
-	if lf := logfunc.Load(); lf != nil {
-		lf(format, args...)
-	} else {
-		log.Printf(format, args...)
-	}
-}
+var (
+	metricRecursiveMatches    = clientmetric.NewCounter("dnsfallback_recursive_matches")
+	metricRecursiveMismatches = clientmetric.NewCounter("dnsfallback_recursive_mismatches")
+	metricRecursiveErrors     = clientmetric.NewCounter("dnsfallback_recursive_errors")
+)

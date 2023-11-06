@@ -3,6 +3,7 @@ package dbus
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 )
@@ -204,33 +205,26 @@ func (conn *Conn) handleCall(msg *Message) {
 		}
 		reply.Headers[FieldReplySerial] = MakeVariant(msg.serial)
 		reply.Body = make([]interface{}, len(ret))
-		for i := 0; i < len(ret); i++ {
-			reply.Body[i] = ret[i]
-		}
+		copy(reply.Body, ret)
 		reply.Headers[FieldSignature] = MakeVariant(SignatureOf(reply.Body...))
 
-		conn.sendMessageAndIfClosed(reply, nil)
+		if err := conn.sendMessageAndIfClosed(reply, nil); err != nil {
+			if _, ok := err.(FormatError); ok {
+				fmt.Fprintf(os.Stderr, "dbus: replacing invalid reply to %s.%s on obj %s: %s\n", ifaceName, name, path, err)
+			}
+		}
 	}
 }
 
 // Emit emits the given signal on the message bus. The name parameter must be
 // formatted as "interface.member", e.g., "org.freedesktop.DBus.NameLost".
 func (conn *Conn) Emit(path ObjectPath, name string, values ...interface{}) error {
-	if !path.IsValid() {
-		return errors.New("dbus: invalid object path")
-	}
 	i := strings.LastIndex(name, ".")
 	if i == -1 {
 		return errors.New("dbus: invalid method name")
 	}
 	iface := name[:i]
 	member := name[i+1:]
-	if !isValidMember(member) {
-		return errors.New("dbus: invalid method name")
-	}
-	if !isValidInterface(iface) {
-		return errors.New("dbus: invalid interface name")
-	}
 	msg := new(Message)
 	msg.Type = TypeSignal
 	msg.Headers = make(map[HeaderField]Variant)
@@ -243,13 +237,13 @@ func (conn *Conn) Emit(path ObjectPath, name string, values ...interface{}) erro
 	}
 
 	var closed bool
-	conn.sendMessageAndIfClosed(msg, func() {
+	err := conn.sendMessageAndIfClosed(msg, func() {
 		closed = true
 	})
 	if closed {
 		return ErrClosed
 	}
-	return nil
+	return err
 }
 
 // Export registers the given value to be exported as an object on the

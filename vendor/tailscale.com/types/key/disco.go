@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package key
 
@@ -128,9 +127,14 @@ func (k DiscoPublic) String() string {
 	return string(bs)
 }
 
+// AppendText implements encoding.TextAppender.
+func (k DiscoPublic) AppendText(b []byte) ([]byte, error) {
+	return appendHexKey(b, discoPublicHexPrefix, k.k[:]), nil
+}
+
 // MarshalText implements encoding.TextMarshaler.
 func (k DiscoPublic) MarshalText() ([]byte, error) {
-	return toHex(k.k[:], discoPublicHexPrefix), nil
+	return k.AppendText(nil)
 }
 
 // MarshalText implements encoding.TextUnmarshaler.

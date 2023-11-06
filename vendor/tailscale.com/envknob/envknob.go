@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package envknob provides access to environment-variable tweakable
 // debug settings.
@@ -29,6 +28,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"tailscale.com/types/opt"
 	"tailscale.com/version"
@@ -36,11 +36,13 @@ import (
 )
 
 var (
-	mu         sync.Mutex
-	set        = map[string]string{}
-	regStr     = map[string]*string{}
-	regBool    = map[string]*bool{}
-	regOptBool = map[string]*opt.Bool{}
+	mu          sync.Mutex
+	set         = map[string]string{}
+	regStr      = map[string]*string{}
+	regBool     = map[string]*bool{}
+	regOptBool  = map[string]*opt.Bool{}
+	regDuration = map[string]*time.Duration{}
+	regInt      = map[string]*int{}
 )
 
 func noteEnv(k, v string) {
@@ -96,6 +98,9 @@ func Setenv(envVar, val string) {
 	}
 	if p := regOptBool[envVar]; p != nil {
 		setOptBoolLocked(p, envVar, val)
+	}
+	if p := regDuration[envVar]; p != nil {
+		setDurationLocked(p, envVar, val)
 	}
 }
 
@@ -159,6 +164,44 @@ func RegisterOptBool(envVar string) func() opt.Bool {
 	return func() opt.Bool { return *p }
 }
 
+// RegisterDuration returns a func that gets the named environment variable as a
+// duration, without a map lookup per call. It assumes that any mutations happen
+// via envknob.Setenv.
+func RegisterDuration(envVar string) func() time.Duration {
+	mu.Lock()
+	defer mu.Unlock()
+	p, ok := regDuration[envVar]
+	if !ok {
+		val := os.Getenv(envVar)
+		if val != "" {
+			noteEnvLocked(envVar, val)
+		}
+		p = new(time.Duration)
+		setDurationLocked(p, envVar, val)
+		regDuration[envVar] = p
+	}
+	return func() time.Duration { return *p }
+}
+
+// RegisterInt returns a func that gets the named environment variable as an
+// integer, without a map lookup per call. It assumes that any mutations happen
+// via envknob.Setenv.
+func RegisterInt(envVar string) func() int {
+	mu.Lock()
+	defer mu.Unlock()
+	p, ok := regInt[envVar]
+	if !ok {
+		val := os.Getenv(envVar)
+		if val != "" {
+			noteEnvLocked(envVar, val)
+		}
+		p = new(int)
+		setIntLocked(p, envVar, val)
+		regInt[envVar] = p
+	}
+	return func() int { return *p }
+}
+
 func setBoolLocked(p *bool, envVar, val string) {
 	noteEnvLocked(envVar, val)
 	if val == "" {
@@ -183,6 +226,32 @@ func setOptBoolLocked(p *opt.Bool, envVar, val string) {
 		log.Fatalf("invalid boolean environment variable %s value %q", envVar, val)
 	}
 	p.Set(b)
+}
+
+func setDurationLocked(p *time.Duration, envVar, val string) {
+	noteEnvLocked(envVar, val)
+	if val == "" {
+		*p = 0
+		return
+	}
+	var err error
+	*p, err = time.ParseDuration(val)
+	if err != nil {
+		log.Fatalf("invalid duration environment variable %s value %q", envVar, val)
+	}
+}
+
+func setIntLocked(p *int, envVar, val string) {
+	noteEnvLocked(envVar, val)
+	if val == "" {
+		*p = 0
+		return
+	}
+	var err error
+	*p, err = strconv.Atoi(val)
+	if err != nil {
+		log.Fatalf("invalid int environment variable %s value %q", envVar, val)
+	}
 }
 
 // Bool returns the boolean value of the named environment variable.
@@ -261,6 +330,46 @@ func LookupInt(envVar string) (v int, ok bool) {
 	panic("unreachable")
 }
 
+// LookupIntSized returns the integer value of the named environment value
+// parsed in base and with a maximum bit size bitSize.
+// The ok result is whether a value was set.
+// If the value isn't a valid int, it exits the program with a failure.
+func LookupIntSized(envVar string, base, bitSize int) (v int, ok bool) {
+	assertNotInInit()
+	val := os.Getenv(envVar)
+	if val == "" {
+		return 0, false
+	}
+	i, err := strconv.ParseInt(val, base, bitSize)
+	if err == nil {
+		v = int(i)
+		noteEnv(envVar, val)
+		return v, true
+	}
+	log.Fatalf("invalid integer environment variable %s: %v", envVar, val)
+	panic("unreachable")
+}
+
+// LookupUintSized returns the unsigned integer value of the named environment
+// value parsed in base and with a maximum bit size bitSize.
+// The ok result is whether a value was set.
+// If the value isn't a valid int, it exits the program with a failure.
+func LookupUintSized(envVar string, base, bitSize int) (v uint, ok bool) {
+	assertNotInInit()
+	val := os.Getenv(envVar)
+	if val == "" {
+		return 0, false
+	}
+	i, err := strconv.ParseUint(val, base, bitSize)
+	if err == nil {
+		v = uint(i)
+		noteEnv(envVar, val)
+		return v, true
+	}
+	log.Fatalf("invalid unsigned integer environment variable %s: %v", envVar, val)
+	panic("unreachable")
+}
+
 // UseWIPCode is whether TAILSCALE_USE_WIP_CODE is set to permit use
 // of Work-In-Progress code.
 func UseWIPCode() bool { return Bool("TAILSCALE_USE_WIP_CODE") }
@@ -280,17 +389,36 @@ func CanTaildrop() bool { return !Bool("TS_DISABLE_TAILDROP") }
 // SSHPolicyFile returns the path, if any, to the SSHPolicy JSON file for development.
 func SSHPolicyFile() string { return String("TS_DEBUG_SSH_POLICY_FILE") }
 
-// SSHIgnoreTailnetPolicy is whether to ignore the Tailnet SSH policy for development.
+// SSHIgnoreTailnetPolicy reports whether to ignore the Tailnet SSH policy for development.
 func SSHIgnoreTailnetPolicy() bool { return Bool("TS_DEBUG_SSH_IGNORE_TAILNET_POLICY") }
 
-// TKASkipSignatureCheck is whether to skip node-key signature checking for development.
+// TKASkipSignatureCheck reports whether to skip node-key signature checking for development.
 func TKASkipSignatureCheck() bool { return Bool("TS_UNSAFE_SKIP_NKS_VERIFICATION") }
+
+// CrashOnUnexpected reports whether the Tailscale client should panic
+// on unexpected conditions. If TS_DEBUG_CRASH_ON_UNEXPECTED is set, that's
+// used. Otherwise the default value is true for unstable builds.
+func CrashOnUnexpected() bool {
+	if v, ok := crashOnUnexpected().Get(); ok {
+		return v
+	}
+	return version.IsUnstableBuild()
+}
+
+var crashOnUnexpected = RegisterOptBool("TS_DEBUG_CRASH_ON_UNEXPECTED")
 
 // NoLogsNoSupport reports whether the client's opted out of log uploads and
 // technical support.
 func NoLogsNoSupport() bool {
 	return Bool("TS_NO_LOGS_NO_SUPPORT")
 }
+
+var allowRemoteUpdate = RegisterBool("TS_ALLOW_ADMIN_CONSOLE_REMOTE_UPDATE")
+
+// AllowsRemoteUpdate reports whether this node has opted-in to letting the
+// Tailscale control plane initiate a Tailscale update (e.g. on behalf of an
+// admin on the admin console).
+func AllowsRemoteUpdate() bool { return allowRemoteUpdate() }
 
 // SetNoLogsNoSupport enables no-logs-no-support mode.
 func SetNoLogsNoSupport() {
@@ -341,13 +469,24 @@ var applyDiskConfigErr error
 // ApplyDiskConfigError returns the most recent result of ApplyDiskConfig.
 func ApplyDiskConfigError() error { return applyDiskConfigErr }
 
-// ApplyDiskConfig returns a platform-specific config file of environment keys/values and
-// applies them. On Linux and Unix operating systems, it's a no-op and always returns nil.
-// If no platform-specific config file is found, it also returns nil.
+// ApplyDiskConfig returns a platform-specific config file of environment
+// keys/values and applies them. On Linux and Unix operating systems, it's a
+// no-op and always returns nil. If no platform-specific config file is found,
+// it also returns nil.
 //
-// It exists primarily for Windows to make it easy to apply environment variables to
-// a running service in a way similar to modifying /etc/default/tailscaled on Linux.
+// It exists primarily for Windows and macOS to make it easy to apply
+// environment variables to a running service in a way similar to modifying
+// /etc/default/tailscaled on Linux.
+//
 // On Windows, you use %ProgramData%\Tailscale\tailscaled-env.txt instead.
+//
+// On macOS, use one of:
+//
+//   - ~/Library/Containers/io.tailscale.ipn.macsys/Data/tailscaled-env.txt
+//     for standalone macOS GUI builds
+//   - ~/Library/Containers/io.tailscale.ipn.macos.network-extension/Data/tailscaled-env.txt
+//     for App Store builds
+//   - /etc/tailscale/tailscaled-env.txt for tailscaled-on-macOS (homebrew, etc)
 func ApplyDiskConfig() (err error) {
 	var f *os.File
 	defer func() {
@@ -396,9 +535,15 @@ func getPlatformEnvFile() string {
 			return "/etc/tailscale/tailscaled-env.txt"
 		}
 	case "darwin":
-		// TODO(bradfitz): figure this out. There are three ways to run
-		// Tailscale on macOS (tailscaled, GUI App Store, GUI System Extension)
-		// and we should deal with all three.
+		if version.IsSandboxedMacOS() { // the two GUI variants (App Store or separate download)
+			// This will be user-visible as ~/Library/Containers/$VARIANT/Data/tailscaled-env.txt
+			// where $VARIANT is "io.tailscale.ipn.macsys" for macsys (downloadable mac GUI builds)
+			// or "io.tailscale.ipn.macos.network-extension" for App Store builds.
+			return filepath.Join(os.Getenv("HOME"), "tailscaled-env.txt")
+		} else {
+			// Open source / homebrew variable, running tailscaled-on-macOS.
+			return "/etc/tailscale/tailscaled-env.txt"
+		}
 	}
 	return ""
 }
@@ -442,5 +587,5 @@ func IPCVersion() string {
 	if v := String("TS_DEBUG_FAKE_IPC_VERSION"); v != "" {
 		return v
 	}
-	return version.Long
+	return version.Long()
 }

@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package dns
 
@@ -14,6 +13,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 	"tailscale.com/types/logger"
 	"tailscale.com/util/dnsname"
+	"tailscale.com/util/set"
 	"tailscale.com/util/winutil"
 )
 
@@ -159,14 +159,14 @@ func (db *nrptRuleDatabase) detectWriteAsGP() {
 	}
 
 	// Add *all* rules from the GP subkey into a set.
-	gpSubkeyMap := make(map[string]struct{}, len(gpSubkeyNames))
+	gpSubkeyMap := make(set.Set[string], len(gpSubkeyNames))
 	for _, gpSubkey := range gpSubkeyNames {
-		gpSubkeyMap[strings.ToUpper(gpSubkey)] = struct{}{}
+		gpSubkeyMap.Add(strings.ToUpper(gpSubkey))
 	}
 
 	// Remove *our* rules from the set.
 	for _, ourRuleID := range db.ruleIDs {
-		delete(gpSubkeyMap, strings.ToUpper(ourRuleID))
+		gpSubkeyMap.Delete(strings.ToUpper(ourRuleID))
 	}
 
 	// Any leftover rules do not belong to us. When group policy is being used

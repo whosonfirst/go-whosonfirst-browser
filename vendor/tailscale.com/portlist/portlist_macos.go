@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build darwin && !ios
 
@@ -30,8 +29,9 @@ type macOSImpl struct {
 	known       map[protoPort]*portMeta // inode string => metadata
 	netstatPath string                  // lazily populated
 
-	br       *bufio.Reader // reused
-	portsBuf []Port
+	br               *bufio.Reader // reused
+	portsBuf         []Port
+	includeLocalhost bool
 }
 
 type protoPort struct {
@@ -44,10 +44,11 @@ type portMeta struct {
 	keep bool
 }
 
-func newMacOSImpl() osImpl {
+func newMacOSImpl(includeLocalhost bool) osImpl {
 	return &macOSImpl{
-		known: map[protoPort]*portMeta{},
-		br:    bufio.NewReader(bytes.NewReader(nil)),
+		known:            map[protoPort]*portMeta{},
+		br:               bufio.NewReader(bytes.NewReader(nil)),
+		includeLocalhost: includeLocalhost,
 	}
 }
 
@@ -120,7 +121,7 @@ func (im *macOSImpl) appendListeningPortsNetstat(base []Port) ([]Port, error) {
 	defer cmd.Process.Wait()
 	defer cmd.Process.Kill()
 
-	return appendParsePortsNetstat(base, im.br)
+	return appendParsePortsNetstat(base, im.br, im.includeLocalhost)
 }
 
 var lsofFailed atomic.Bool
@@ -171,6 +172,7 @@ func (im *macOSImpl) addProcesses() error {
 	im.br.Reset(outPipe)
 
 	var cmd, proto string
+	var pid int
 	for {
 		line, err := im.br.ReadBytes('\n')
 		if err != nil {
@@ -185,6 +187,10 @@ func (im *macOSImpl) addProcesses() error {
 			// starting a new process
 			cmd = ""
 			proto = ""
+			pid = 0
+			if p, err := mem.ParseInt(mem.B(val), 10, 0); err == nil {
+				pid = int(p)
+			}
 		case 'c':
 			cmd = string(val) // TODO(bradfitz): avoid garbage; cache process names between runs?
 		case 'P':
@@ -203,6 +209,7 @@ func (im *macOSImpl) addProcesses() error {
 			switch {
 			case m != nil:
 				m.port.Process = cmd
+				m.port.Pid = pid
 			default:
 				// ignore: processes and ports come and go
 			}

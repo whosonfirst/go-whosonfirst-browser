@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package nmcfg converts a controlclient.NetMap into a wgcfg config.
 package nmcfg
@@ -11,39 +10,39 @@ import (
 	"net/netip"
 	"strings"
 
-	"golang.org/x/exp/slices"
-	"tailscale.com/logtail"
 	"tailscale.com/net/tsaddr"
 	"tailscale.com/tailcfg"
 	"tailscale.com/types/logger"
+	"tailscale.com/types/logid"
 	"tailscale.com/types/netmap"
 	"tailscale.com/wgengine/wgcfg"
 )
 
-func nodeDebugName(n *tailcfg.Node) string {
-	name := n.Name
+func nodeDebugName(n tailcfg.NodeView) string {
+	name := n.Name()
 	if name == "" {
-		name = n.Hostinfo.Hostname()
+		name = n.Hostinfo().Hostname()
 	}
 	if i := strings.Index(name, "."); i != -1 {
 		name = name[:i]
 	}
-	if name == "" && len(n.Addresses) != 0 {
-		return n.Addresses[0].String()
+	if name == "" && n.Addresses().Len() != 0 {
+		return n.Addresses().At(0).String()
 	}
 	return name
 }
 
 // cidrIsSubnet reports whether cidr is a non-default-route subnet
 // exported by node that is not one of its own self addresses.
-func cidrIsSubnet(node *tailcfg.Node, cidr netip.Prefix) bool {
+func cidrIsSubnet(node tailcfg.NodeView, cidr netip.Prefix) bool {
 	if cidr.Bits() == 0 {
 		return false
 	}
 	if !cidr.IsSingleIP() {
 		return true
 	}
-	for _, selfCIDR := range node.Addresses {
+	for i := range node.Addresses().LenIter() {
+		selfCIDR := node.Addresses().At(i)
 		if cidr == selfCIDR {
 			return false
 		}
@@ -56,20 +55,20 @@ func WGCfg(nm *netmap.NetworkMap, logf logger.Logf, flags netmap.WGConfigFlags, 
 	cfg := &wgcfg.Config{
 		Name:       "tailscale",
 		PrivateKey: nm.PrivateKey,
-		Addresses:  nm.Addresses,
+		Addresses:  nm.GetAddresses().AsSlice(),
 		Peers:      make([]wgcfg.Peer, 0, len(nm.Peers)),
 	}
 
 	// Setup log IDs for data plane audit logging.
-	if nm.SelfNode != nil {
-		cfg.NodeID = nm.SelfNode.StableID
-		canNetworkLog := slices.Contains(nm.SelfNode.Capabilities, tailcfg.CapabilityDataPlaneAuditLogs)
-		if canNetworkLog && nm.SelfNode.DataPlaneAuditLogID != "" && nm.DomainAuditLogID != "" {
-			nodeID, errNode := logtail.ParsePrivateID(nm.SelfNode.DataPlaneAuditLogID)
+	if nm.SelfNode.Valid() {
+		cfg.NodeID = nm.SelfNode.StableID()
+		canNetworkLog := nm.SelfNode.HasCap(tailcfg.CapabilityDataPlaneAuditLogs)
+		if canNetworkLog && nm.SelfNode.DataPlaneAuditLogID() != "" && nm.DomainAuditLogID != "" {
+			nodeID, errNode := logid.ParsePrivateID(nm.SelfNode.DataPlaneAuditLogID())
 			if errNode != nil {
 				logf("[v1] wgcfg: unable to parse node audit log ID: %v", errNode)
 			}
-			domainID, errDomain := logtail.ParsePrivateID(nm.DomainAuditLogID)
+			domainID, errDomain := logid.ParsePrivateID(nm.DomainAuditLogID)
 			if errDomain != nil {
 				logf("[v1] wgcfg: unable to parse domain audit log ID: %v", errDomain)
 			}
@@ -86,24 +85,24 @@ func WGCfg(nm *netmap.NetworkMap, logf logger.Logf, flags netmap.WGConfigFlags, 
 	skippedSubnets := new(bytes.Buffer)
 
 	for _, peer := range nm.Peers {
-		if peer.DiscoKey.IsZero() && peer.DERP == "" {
+		if peer.DiscoKey().IsZero() && peer.DERP() == "" && !peer.IsWireGuardOnly() {
 			// Peer predates both DERP and active discovery, we cannot
 			// communicate with it.
-			logf("[v1] wgcfg: skipped peer %s, doesn't offer DERP or disco", peer.Key.ShortString())
+			logf("[v1] wgcfg: skipped peer %s, doesn't offer DERP or disco", peer.Key().ShortString())
 			continue
 		}
 		cfg.Peers = append(cfg.Peers, wgcfg.Peer{
-			PublicKey: peer.Key,
-			DiscoKey:  peer.DiscoKey,
+			PublicKey: peer.Key(),
+			DiscoKey:  peer.DiscoKey(),
 		})
 		cpeer := &cfg.Peers[len(cfg.Peers)-1]
-		if peer.KeepAlive {
-			cpeer.PersistentKeepalive = 25 // seconds
-		}
 
 		didExitNodeWarn := false
-		for _, allowedIP := range peer.AllowedIPs {
-			if allowedIP.Bits() == 0 && peer.StableID != exitNode {
+		cpeer.V4MasqAddr = peer.SelfNodeV4MasqAddrForThisPeer()
+		cpeer.V6MasqAddr = peer.SelfNodeV6MasqAddrForThisPeer()
+		for i := range peer.AllowedIPs().LenIter() {
+			allowedIP := peer.AllowedIPs().At(i)
+			if allowedIP.Bits() == 0 && peer.StableID() != exitNode {
 				if didExitNodeWarn {
 					// Don't log about both the IPv4 /0 and IPv6 /0.
 					continue
@@ -112,20 +111,20 @@ func WGCfg(nm *netmap.NetworkMap, logf logger.Logf, flags netmap.WGConfigFlags, 
 				if skippedUnselected.Len() > 0 {
 					skippedUnselected.WriteString(", ")
 				}
-				fmt.Fprintf(skippedUnselected, "%q (%v)", nodeDebugName(peer), peer.Key.ShortString())
+				fmt.Fprintf(skippedUnselected, "%q (%v)", nodeDebugName(peer), peer.Key().ShortString())
 				continue
 			} else if allowedIP.IsSingleIP() && tsaddr.IsTailscaleIP(allowedIP.Addr()) && (flags&netmap.AllowSingleHosts) == 0 {
 				if skippedIPs.Len() > 0 {
 					skippedIPs.WriteString(", ")
 				}
-				fmt.Fprintf(skippedIPs, "%v from %q (%v)", allowedIP.Addr(), nodeDebugName(peer), peer.Key.ShortString())
+				fmt.Fprintf(skippedIPs, "%v from %q (%v)", allowedIP.Addr(), nodeDebugName(peer), peer.Key().ShortString())
 				continue
 			} else if cidrIsSubnet(peer, allowedIP) {
 				if (flags & netmap.AllowSubnetRoutes) == 0 {
 					if skippedSubnets.Len() > 0 {
 						skippedSubnets.WriteString(", ")
 					}
-					fmt.Fprintf(skippedSubnets, "%v from %q (%v)", allowedIP, nodeDebugName(peer), peer.Key.ShortString())
+					fmt.Fprintf(skippedSubnets, "%v from %q (%v)", allowedIP, nodeDebugName(peer), peer.Key().ShortString())
 					continue
 				}
 			}

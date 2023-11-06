@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package wgengine
 
@@ -147,19 +146,22 @@ func (e *userspaceEngine) onOpenTimeout(flow flowtrack.Tuple) {
 		return
 	}
 	n := pip.Node
-	if n.DiscoKey.IsZero() {
-		e.logf("open-conn-track: timeout opening %v; peer node %v running pre-0.100", flow, n.Key.ShortString())
-		return
-	}
-	if n.DERP == "" {
-		e.logf("open-conn-track: timeout opening %v; peer node %v not connected to any DERP relay", flow, n.Key.ShortString())
-		return
+	if !n.IsWireGuardOnly() {
+		if n.DiscoKey().IsZero() {
+			e.logf("open-conn-track: timeout opening %v; peer node %v running pre-0.100", flow, n.Key().ShortString())
+			return
+		}
+		if n.DERP() == "" {
+			e.logf("open-conn-track: timeout opening %v; peer node %v not connected to any DERP relay", flow, n.Key().ShortString())
+			return
+		}
 	}
 
-	ps, found := e.getPeerStatusLite(n.Key)
+	ps, found := e.getPeerStatusLite(n.Key())
 	if !found {
 		onlyZeroRoute := true // whether peerForIP returned n only because its /0 route matched
-		for _, r := range n.AllowedIPs {
+		for i := range n.AllowedIPs().LenIter() {
+			r := n.AllowedIPs().At(i)
 			if r.Bits() != 0 && r.Contains(flow.Dst.Addr()) {
 				onlyZeroRoute = false
 				break
@@ -177,7 +179,7 @@ func (e *userspaceEngine) onOpenTimeout(flow flowtrack.Tuple) {
 			// node.
 			return
 		}
-		e.logf("open-conn-track: timeout opening %v; target node %v in netmap but unknown to WireGuard", flow, n.Key.ShortString())
+		e.logf("open-conn-track: timeout opening %v; target node %v in netmap but unknown to WireGuard", flow, n.Key().ShortString())
 		return
 	}
 
@@ -188,20 +190,24 @@ func (e *userspaceEngine) onOpenTimeout(flow flowtrack.Tuple) {
 	_ = ps.LastHandshake
 
 	online := "?"
-	if n.Online != nil {
-		if *n.Online {
-			online = "yes"
-		} else {
-			online = "no"
+	if n.IsWireGuardOnly() {
+		online = "wg"
+	} else {
+		if v := n.Online(); v != nil {
+			if *v {
+				online = "yes"
+			} else {
+				online = "no"
+			}
+		}
+		if n.LastSeen() != nil && online != "yes" {
+			online += fmt.Sprintf(", lastseen=%v", durFmt(*n.LastSeen()))
 		}
 	}
-	if n.LastSeen != nil && online != "yes" {
-		online += fmt.Sprintf(", lastseen=%v", durFmt(*n.LastSeen))
-	}
 	e.logf("open-conn-track: timeout opening %v to node %v; online=%v, lastRecv=%v",
-		flow, n.Key.ShortString(),
+		flow, n.Key().ShortString(),
 		online,
-		e.magicConn.LastRecvActivityOfNodeKey(n.Key))
+		e.magicConn.LastRecvActivityOfNodeKey(n.Key()))
 }
 
 func durFmt(t time.Time) string {

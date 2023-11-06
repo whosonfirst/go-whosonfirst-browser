@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package netcheck checks the network conditions from the current host.
 package netcheck
@@ -26,19 +25,23 @@ import (
 	"github.com/tcnksm/go-httpstat"
 	"tailscale.com/derp/derphttp"
 	"tailscale.com/envknob"
+	"tailscale.com/net/dnscache"
 	"tailscale.com/net/interfaces"
-	"tailscale.com/net/netaddr"
 	"tailscale.com/net/neterror"
+	"tailscale.com/net/netmon"
 	"tailscale.com/net/netns"
 	"tailscale.com/net/ping"
 	"tailscale.com/net/portmapper"
+	"tailscale.com/net/sockstats"
 	"tailscale.com/net/stun"
 	"tailscale.com/syncs"
 	"tailscale.com/tailcfg"
 	"tailscale.com/types/logger"
 	"tailscale.com/types/nettype"
 	"tailscale.com/types/opt"
+	"tailscale.com/types/views"
 	"tailscale.com/util/clientmetric"
+	"tailscale.com/util/cmpx"
 	"tailscale.com/util/mak"
 )
 
@@ -78,6 +81,7 @@ const (
 	defaultInitialRetransmitTime = 100 * time.Millisecond
 )
 
+// Report contains the result of a single netcheck.
 type Report struct {
 	UDP         bool // a UDP STUN round trip completed
 	IPv6        bool // an IPv6 STUN round trip completed
@@ -148,7 +152,12 @@ func cloneDurationMap(m map[int]time.Duration) map[int]time.Duration {
 	return m2
 }
 
-// Client generates a netcheck Report.
+// Client generates Reports describing the result of both passive and active
+// network configuration probing. It provides two different modes of report, a
+// full report (see MakeNextReportFull) and a more lightweight incremental
+// report. The client must be provided with SendPacket in order to perform
+// active probes, and must receive STUN packet replies via ReceiveSTUNPacket.
+// Client can be used in a standalone fashion via the Standalone method.
 type Client struct {
 	// Verbose enables verbose logging.
 	Verbose bool
@@ -157,29 +166,37 @@ type Client struct {
 	// If nil, log.Printf is used.
 	Logf logger.Logf
 
+	// NetMon optionally provides a netmon.Monitor to use to get the current
+	// (cached) network interface.
+	// If nil, the interface will be looked up dynamically.
+	// TODO(bradfitz): make NetMon required. As of 2023-08-01, it basically always is
+	// present anyway.
+	NetMon *netmon.Monitor
+
 	// TimeNow, if non-nil, is used instead of time.Now.
 	TimeNow func() time.Time
 
-	// GetSTUNConn4 optionally provides a func to return the
-	// connection to use for sending & receiving IPv4 packets. If
-	// nil, an ephemeral one is created as needed.
-	GetSTUNConn4 func() STUNConn
-
-	// GetSTUNConn6 is like GetSTUNConn4, but for IPv6.
-	GetSTUNConn6 func() STUNConn
+	// SendPacket is required to send a packet to the specified address. For
+	// convenience it shares a signature with WriteToUDPAddrPort.
+	SendPacket func([]byte, netip.AddrPort) (int, error)
 
 	// SkipExternalNetwork controls whether the client should not try
 	// to reach things other than localhost. This is set to true
 	// in tests to avoid probing the local LAN's router, etc.
 	SkipExternalNetwork bool
 
-	// UDPBindAddr, if non-empty, is the address to listen on for UDP.
-	// It defaults to ":0".
-	UDPBindAddr string
-
 	// PortMapper, if non-nil, is used for portmap queries.
 	// If nil, portmap discovery is not done.
 	PortMapper *portmapper.Client // lazily initialized on first use
+
+	// UseDNSCache controls whether this client should use a
+	// *dnscache.Resolver to resolve DERP hostnames, when no IP address is
+	// provided in the DERP map. Note that Tailscale-provided DERP servers
+	// all specify explicit IPv4 and IPv6 addresses, so this is mostly
+	// helpful for users with custom DERP servers.
+	//
+	// If false, the default net.Resolver will be used, with no caching.
+	UseDNSCache bool
 
 	// For tests
 	testEnoughRegions      int
@@ -190,15 +207,8 @@ type Client struct {
 	prev     map[time.Time]*Report // some previous reports
 	last     *Report               // most recent report
 	lastFull time.Time             // time of last full (non-incremental) report
-	curState *reportState          // non-nil if we're in a call to GetReportn
-}
-
-// STUNConn is the interface required by the netcheck Client when
-// reusing an existing UDP connection.
-type STUNConn interface {
-	WriteToUDPAddrPort([]byte, netip.AddrPort) (int, error)
-	WriteTo([]byte, net.Addr) (int, error)
-	ReadFrom([]byte) (int, net.Addr, error)
+	curState *reportState          // non-nil if we're in a call to GetReport
+	resolver *dnscache.Resolver    // only set if UseDNSCache is true
 }
 
 func (c *Client) enoughRegions() int {
@@ -260,6 +270,10 @@ func (c *Client) MakeNextReportFull() {
 	c.nextFull = true
 }
 
+// ReceiveSTUNPacket must be called when a STUN packet is received as a reply to
+// packet the client sent using SendPacket. In Standalone this is performed by
+// the loop started by Standalone, in normal operation in tailscaled incoming
+// STUN replies are routed to this method.
 func (c *Client) ReceiveSTUNPacket(pkt []byte, src netip.AddrPort) {
 	c.vlogf("received STUN packet from %s", src)
 
@@ -433,10 +447,9 @@ func makeProbePlan(dm *tailcfg.DERPMap, ifState *interfaces.State, last *Report)
 				do6 = false
 			}
 			n := reg.Nodes[try%len(reg.Nodes)]
-			prevLatency := last.RegionLatency[reg.RegionID] * 120 / 100
-			if prevLatency == 0 {
-				prevLatency = defaultActiveRetransmitTime
-			}
+			prevLatency := cmpx.Or(
+				last.RegionLatency[reg.RegionID]*120/100,
+				defaultActiveRetransmitTime)
 			delay := time.Duration(try) * prevLatency
 			if try > 1 {
 				delay += time.Duration(try) * 50 * time.Millisecond
@@ -507,53 +520,12 @@ func nodeMight4(n *tailcfg.DERPNode) bool {
 	return ip.Is4()
 }
 
-// readPackets reads STUN packets from pc until there's an error or ctx is done.
-// In either case, it closes pc.
-func (c *Client) readPackets(ctx context.Context, pc net.PacketConn) {
-	done := make(chan struct{})
-	defer close(done)
-
-	go func() {
-		select {
-		case <-ctx.Done():
-		case <-done:
-		}
-		pc.Close()
-	}()
-
-	var buf [64 << 10]byte
-	for {
-		n, addr, err := pc.ReadFrom(buf[:])
-		if err != nil {
-			if ctx.Err() != nil {
-				return
-			}
-			c.logf("ReadFrom: %v", err)
-			return
-		}
-		ua, ok := addr.(*net.UDPAddr)
-		if !ok {
-			c.logf("ReadFrom: unexpected addr %T", addr)
-			continue
-		}
-		pkt := buf[:n]
-		if !stun.Is(pkt) {
-			continue
-		}
-		if ap := netaddr.Unmap(ua.AddrPort()); ap.IsValid() {
-			c.ReceiveSTUNPacket(pkt, ap)
-		}
-	}
-}
-
 // reportState holds the state for a single invocation of Client.GetReport.
 type reportState struct {
 	c           *Client
 	hairTX      stun.TxID
 	gotHairSTUN chan netip.AddrPort
 	hairTimeout chan struct{} // closed on timeout
-	pc4         STUNConn
-	pc6         STUNConn
 	pc4Hair     nettype.PacketConn
 	incremental bool // doing a lite, follow-up netcheck
 	stopProbeCh chan struct{}
@@ -638,20 +610,23 @@ func (rs *reportState) waitHairCheck(ctx context.Context) {
 		return
 	}
 
+	// First, check whether we have a value before we check for timeouts.
+	select {
+	case <-rs.gotHairSTUN:
+		ret.HairPinning.Set(true)
+		return
+	default:
+	}
+
+	// Now, wait for a response or a timeout.
 	select {
 	case <-rs.gotHairSTUN:
 		ret.HairPinning.Set(true)
 	case <-rs.hairTimeout:
 		rs.c.vlogf("hairCheck timeout")
 		ret.HairPinning.Set(false)
-	default:
-		select {
-		case <-rs.gotHairSTUN:
-			ret.HairPinning.Set(true)
-		case <-rs.hairTimeout:
-			ret.HairPinning.Set(false)
-		case <-ctx.Done():
-		}
+	case <-ctx.Done():
+		rs.c.vlogf("hairCheck context timeout")
 	}
 }
 
@@ -761,13 +736,6 @@ func newReport() *Report {
 	}
 }
 
-func (c *Client) udpBindAddr() string {
-	if v := c.UDPBindAddr; v != "" {
-		return v
-	}
-	return ":0"
-}
-
 // GetReport gets a report.
 //
 // It may not be called concurrently with itself.
@@ -783,6 +751,8 @@ func (c *Client) GetReport(ctx context.Context, dm *tailcfg.DERPMap) (_ *Report,
 	// (User ctx might be context.Background, etc)
 	ctx, cancel := context.WithTimeout(ctx, overallProbeTimeout)
 	defer cancel()
+
+	ctx = sockstats.WithSockStats(ctx, sockstats.LabelNetcheckClient, c.logf)
 
 	if dm == nil {
 		return nil, errors.New("netcheck: GetReport: DERP map is nil")
@@ -849,22 +819,29 @@ func (c *Client) GetReport(ctx context.Context, dm *tailcfg.DERPMap) (_ *Report,
 		return c.finishAndStoreReport(rs, dm), nil
 	}
 
-	ifState, err := interfaces.GetState()
-	if err != nil {
-		c.logf("[v1] interfaces: %v", err)
-		return nil, err
+	var ifState *interfaces.State
+	if c.NetMon == nil {
+		directState, err := interfaces.GetState()
+		if err != nil {
+			c.logf("[v1] interfaces: %v", err)
+			return nil, err
+		} else {
+			ifState = directState
+		}
+	} else {
+		ifState = c.NetMon.InterfaceState()
 	}
 
 	// See if IPv6 works at all, or if it's been hard disabled at the
 	// OS level.
-	v6udp, err := nettype.MakePacketListenerWithNetIP(netns.Listener(c.logf)).ListenPacket(ctx, "udp6", "[::1]:0")
+	v6udp, err := nettype.MakePacketListenerWithNetIP(netns.Listener(c.logf, c.NetMon)).ListenPacket(ctx, "udp6", "[::1]:0")
 	if err == nil {
 		rs.report.OSHasIPv6 = true
 		v6udp.Close()
 	}
 
 	// Create a UDP4 socket used for sending to our discovered IPv4 address.
-	rs.pc4Hair, err = nettype.MakePacketListenerWithNetIP(netns.Listener(c.logf)).ListenPacket(ctx, "udp4", ":0")
+	rs.pc4Hair, err = nettype.MakePacketListenerWithNetIP(netns.Listener(c.logf, c.NetMon)).ListenPacket(ctx, "udp4", ":0")
 	if err != nil {
 		c.logf("udp4: %v", err)
 		return nil, err
@@ -887,33 +864,9 @@ func (c *Client) GetReport(ctx context.Context, dm *tailcfg.DERPMap) (_ *Report,
 	// So do that for now. In the future we might want to classify networks
 	// that do and don't require this separately. But for now help it.
 	const documentationIP = "203.0.113.1"
-	rs.pc4Hair.WriteTo([]byte("tailscale netcheck; see https://github.com/tailscale/tailscale/issues/188"), &net.UDPAddr{IP: net.ParseIP(documentationIP), Port: 12345})
-
-	if f := c.GetSTUNConn4; f != nil {
-		rs.pc4 = f()
-	} else {
-		u4, err := nettype.MakePacketListenerWithNetIP(netns.Listener(c.logf)).ListenPacket(ctx, "udp4", c.udpBindAddr())
-		if err != nil {
-			c.logf("udp4: %v", err)
-			return nil, err
-		}
-		rs.pc4 = u4
-		go c.readPackets(ctx, u4)
-	}
-
-	if ifState.HaveV6 {
-		if f := c.GetSTUNConn6; f != nil {
-			rs.pc6 = f()
-		} else {
-			u6, err := nettype.MakePacketListenerWithNetIP(netns.Listener(c.logf)).ListenPacket(ctx, "udp6", c.udpBindAddr())
-			if err != nil {
-				c.logf("udp6: %v", err)
-			} else {
-				rs.pc6 = u6
-				go c.readPackets(ctx, u6)
-			}
-		}
-	}
+	rs.pc4Hair.WriteToUDPAddrPort(
+		[]byte("tailscale netcheck; see https://github.com/tailscale/tailscale/issues/188"),
+		netip.AddrPortFrom(netip.MustParseAddr(documentationIP), 12345))
 
 	plan := makeProbePlan(dm, ifState, last)
 
@@ -1069,7 +1022,7 @@ func (c *Client) finishAndStoreReport(rs *reportState, dm *tailcfg.DERPMap) *Rep
 	report := rs.report.Clone()
 	rs.mu.Unlock()
 
-	c.addReportHistoryAndSetPreferredDERP(report)
+	c.addReportHistoryAndSetPreferredDERP(report, dm.View())
 	c.logConciseReport(report, dm)
 
 	return report
@@ -1280,10 +1233,7 @@ func (c *Client) measureAllICMPLatency(ctx context.Context, rs *reportState, nee
 	ctx, done := context.WithTimeout(ctx, icmpProbeTimeout)
 	defer done()
 
-	p, err := ping.New(ctx, c.logf)
-	if err != nil {
-		return err
-	}
+	p := ping.New(ctx, c.logf, netns.Listener(c.logf, c.NetMon))
 	defer p.Close()
 
 	c.logf("UDP is blocked, trying ICMP")
@@ -1404,9 +1354,20 @@ func (c *Client) timeNow() time.Time {
 	return time.Now()
 }
 
+const (
+	// preferredDERPAbsoluteDiff specifies the minimum absolute difference
+	// in latencies between two DERP regions that would cause a node to
+	// switch its PreferredDERP ("home DERP"). This ensures that if a node
+	// is 5ms from two different DERP regions, it doesn't flip-flop back
+	// and forth between them if one region gets slightly slower (e.g. if a
+	// node is near region 1 @ 4ms and region 2 @ 5ms, region 1 getting
+	// 5ms slower would cause a flap).
+	preferredDERPAbsoluteDiff = 10 * time.Millisecond
+)
+
 // addReportHistoryAndSetPreferredDERP adds r to the set of recent Reports
 // and mutates r.PreferredDERP to contain the best recent one.
-func (c *Client) addReportHistoryAndSetPreferredDERP(r *Report) {
+func (c *Client) addReportHistoryAndSetPreferredDERP(r *Report, dm tailcfg.DERPMapView) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -1438,11 +1399,33 @@ func (c *Client) addReportHistoryAndSetPreferredDERP(r *Report) {
 		}
 	}
 
+	// Scale each region's best latency by any provided scores from the
+	// DERPMap, for use in comparison below.
+	var scores views.Map[int, float64]
+	if hp := dm.HomeParams(); hp.Valid() {
+		scores = hp.RegionScore()
+	}
+	for regionID, d := range bestRecent {
+		if score := scores.Get(regionID); score > 0 {
+			bestRecent[regionID] = time.Duration(float64(d) * score)
+		}
+	}
+
 	// Then, pick which currently-alive DERP server from the
 	// current report has the best latency over the past maxAge.
-	var bestAny time.Duration
-	var oldRegionCurLatency time.Duration
+	var (
+		bestAny             time.Duration // global minimum
+		oldRegionCurLatency time.Duration // latency of old PreferredDERP
+	)
 	for regionID, d := range r.RegionLatency {
+		// Scale this report's latency by any scores provided by the
+		// server; we did this for the bestRecent map above, but we
+		// don't mutate the actual reports in-place (in case scores
+		// change), so we need to do it here as well.
+		if score := scores.Get(regionID); score > 0 {
+			d = time.Duration(float64(d) * score)
+		}
+
 		if regionID == prevDERP {
 			oldRegionCurLatency = d
 		}
@@ -1453,13 +1436,27 @@ func (c *Client) addReportHistoryAndSetPreferredDERP(r *Report) {
 		}
 	}
 
-	// If we're changing our preferred DERP but the old one's still
-	// accessible and the new one's not much better, just stick with
-	// where we are.
-	if prevDERP != 0 &&
-		r.PreferredDERP != prevDERP &&
-		oldRegionCurLatency != 0 &&
-		bestAny > oldRegionCurLatency/3*2 {
+	// If we're changing our preferred DERP, we want to add some stickiness
+	// to the current DERP region. We avoid changing if the old region is
+	// still accessible and one of the conditions below is true.
+	keepOld := false
+	changingPreferred := prevDERP != 0 && r.PreferredDERP != prevDERP
+	oldRegionIsAccessible := oldRegionCurLatency != 0
+	if changingPreferred && oldRegionIsAccessible {
+		// bestAny < any other value, so oldRegionCurLatency - bestAny >= 0
+		if oldRegionCurLatency-bestAny < preferredDERPAbsoluteDiff {
+			// The absolute value of latency difference is below
+			// our minimum threshold.
+			keepOld = true
+		}
+		if bestAny > oldRegionCurLatency/3*2 {
+			// Old region is about the same on a percentage basis
+			keepOld = true
+		}
+	}
+	if keepOld {
+		// Reset the report's PreferredDERP to be the previous value,
+		// which undoes any region change we made above.
 		r.PreferredDERP = prevDERP
 	}
 }
@@ -1509,6 +1506,7 @@ func (rs *reportState) runProbe(ctx context.Context, dm *tailcfg.DERPMap, probe 
 
 	addr := c.nodeAddr(ctx, node, probe.proto)
 	if !addr.IsValid() {
+		c.logf("netcheck.runProbe: named node %q has no address", probe.node)
 		return
 	}
 
@@ -1524,36 +1522,42 @@ func (rs *reportState) runProbe(ctx context.Context, dm *tailcfg.DERPMap, probe 
 	}
 	rs.mu.Unlock()
 
+	if rs.c.SendPacket == nil {
+		rs.mu.Lock()
+		rs.report.IPv4CanSend = false
+		rs.report.IPv6CanSend = false
+		rs.mu.Unlock()
+		return
+	}
+
 	switch probe.proto {
 	case probeIPv4:
 		metricSTUNSend4.Add(1)
-		n, err := rs.pc4.WriteToUDPAddrPort(req, addr)
-		if n == len(req) && err == nil || neterror.TreatAsLostUDP(err) {
-			rs.mu.Lock()
-			rs.report.IPv4CanSend = true
-			rs.mu.Unlock()
-		}
 	case probeIPv6:
 		metricSTUNSend6.Add(1)
-		n, err := rs.pc6.WriteToUDPAddrPort(req, addr)
-		if n == len(req) && err == nil || neterror.TreatAsLostUDP(err) {
-			rs.mu.Lock()
-			rs.report.IPv6CanSend = true
-			rs.mu.Unlock()
-		}
 	default:
 		panic("bad probe proto " + fmt.Sprint(probe.proto))
 	}
+
+	n, err := rs.c.SendPacket(req, addr)
+	if n == len(req) && err == nil || neterror.TreatAsLostUDP(err) {
+		rs.mu.Lock()
+		switch probe.proto {
+		case probeIPv4:
+			rs.report.IPv4CanSend = true
+		case probeIPv6:
+			rs.report.IPv6CanSend = true
+		}
+		rs.mu.Unlock()
+	}
+
 	c.vlogf("sent to %v", addr)
 }
 
 // proto is 4 or 6
 // If it returns nil, the node is skipped.
 func (c *Client) nodeAddr(ctx context.Context, n *tailcfg.DERPNode, proto probeProto) (ap netip.AddrPort) {
-	port := n.STUNPort
-	if port == 0 {
-		port = 3478
-	}
+	port := cmpx.Or(n.STUNPort, 3478)
 	if port < 0 || port > 1<<16-1 {
 		return
 	}
@@ -1592,12 +1596,47 @@ func (c *Client) nodeAddr(ctx context.Context, n *tailcfg.DERPNode, proto probeP
 		return
 	}
 
-	// TODO(bradfitz): add singleflight+dnscache here.
-	addrs, _ := net.DefaultResolver.LookupIPAddr(ctx, n.HostName)
+	// The default lookup function if we don't set UseDNSCache is to use net.DefaultResolver.
+	lookupIPAddr := func(ctx context.Context, host string) ([]netip.Addr, error) {
+		addrs, err := net.DefaultResolver.LookupIPAddr(ctx, host)
+		if err != nil {
+			return nil, err
+		}
+
+		var naddrs []netip.Addr
+		for _, addr := range addrs {
+			na, ok := netip.AddrFromSlice(addr.IP)
+			if !ok {
+				continue
+			}
+			naddrs = append(naddrs, na.Unmap())
+		}
+		return naddrs, nil
+	}
+
+	c.mu.Lock()
+	if c.UseDNSCache {
+		if c.resolver == nil {
+			c.resolver = &dnscache.Resolver{
+				Forward:     net.DefaultResolver,
+				UseLastGood: true,
+				Logf:        c.logf,
+				NetMon:      c.NetMon,
+			}
+		}
+		resolver := c.resolver
+		lookupIPAddr = func(ctx context.Context, host string) ([]netip.Addr, error) {
+			_, _, allIPs, err := resolver.LookupIP(ctx, host)
+			return allIPs, err
+		}
+	}
+	c.mu.Unlock()
+
+	probeIsV4 := proto == probeIPv4
+	addrs, _ := lookupIPAddr(ctx, n.HostName)
 	for _, a := range addrs {
-		if (a.IP.To4() != nil) == (proto == probeIPv4) {
-			na, _ := netip.AddrFromSlice(a.IP.To4())
-			return netip.AddrPortFrom(na.Unmap(), uint16(port))
+		if (a.Is4() && probeIsV4) || (a.Is6() && !probeIsV4) {
+			return netip.AddrPortFrom(a, uint16(port))
 		}
 	}
 	return

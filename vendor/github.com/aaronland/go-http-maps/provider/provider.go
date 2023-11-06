@@ -3,20 +3,19 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-roster"
 	"log"
 	"net/http"
 	"net/url"
 	"sort"
 	"strings"
+
+	"github.com/aaronland/go-roster"
 )
 
 type Provider interface {
 	Scheme() string
 	AppendResourcesHandler(handler http.Handler) http.Handler
-	AppendResourcesHandlerWithPrefix(http.Handler, string) http.Handler
 	AppendAssetHandlers(mux *http.ServeMux) error
-	AppendAssetHandlersWithPrefix(*http.ServeMux, string) error
 	SetLogger(*log.Logger) error
 }
 

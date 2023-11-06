@@ -1,12 +1,12 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build !windows
 
 package winutil
 
 import (
+	"errors"
 	"fmt"
 	"os/user"
 	"runtime"
@@ -14,16 +14,22 @@ import (
 
 const regBase = ``
 
-func getPolicyString(name, defval string) string { return defval }
+var ErrNoValue = errors.New("no value because registry is unavailable on this OS")
 
-func getPolicyInteger(name string, defval uint64) uint64 { return defval }
+func getPolicyString(name string) (string, error) { return "", ErrNoValue }
 
-func getRegString(name, defval string) string { return defval }
+func getPolicyInteger(name string) (uint64, error) { return 0, ErrNoValue }
 
-func getRegInteger(name string, defval uint64) uint64 { return defval }
+func getRegString(name string) (string, error) { return "", ErrNoValue }
+
+func getRegInteger(name string) (uint64, error) { return 0, ErrNoValue }
 
 func isSIDValidPrincipal(uid string) bool { return false }
 
 func lookupPseudoUser(uid string) (*user.User, error) {
 	return nil, fmt.Errorf("unimplemented on %v", runtime.GOOS)
 }
+
+func IsCurrentProcessElevated() bool { return false }
+
+func registerForRestart(opts RegisterForRestartOpts) error { return nil }

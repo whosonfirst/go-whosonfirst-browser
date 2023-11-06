@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package tka
 
@@ -74,14 +73,25 @@ func (k Key) Clone() Key {
 	return out
 }
 
-func (k Key) ID() tkatype.KeyID {
+// MustID returns the KeyID of the key, panicking if an error is
+// encountered. This must only be used for tests.
+func (k Key) MustID() tkatype.KeyID {
+	id, err := k.ID()
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
+// ID returns the KeyID of the key.
+func (k Key) ID() (tkatype.KeyID, error) {
 	switch k.Kind {
 	// Because 25519 public keys are so short, we just use the 32-byte
 	// public as their 'key ID'.
 	case Key25519:
-		return tkatype.KeyID(k.Public)
+		return tkatype.KeyID(k.Public), nil
 	default:
-		panic("unsupported key kind")
+		return nil, fmt.Errorf("unknown key kind: %v", k.Kind)
 	}
 }
 
@@ -135,6 +145,9 @@ func signatureVerify(s *tkatype.Signature, aumDigest tkatype.AUMSigHash, key Key
 	//            so we should use the public contained in the state machine.
 	switch key.Kind {
 	case Key25519:
+		if len(key.Public) != ed25519.PublicKeySize {
+			return fmt.Errorf("ed25519 key has wrong length: %d", len(key.Public))
+		}
 		if ed25519consensus.Verify(ed25519.PublicKey(key.Public), aumDigest[:], s.Signature) {
 			return nil
 		}

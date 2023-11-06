@@ -56,10 +56,10 @@ aaronland.maps = (function(){
 	    return self.getMap(map_el, args);
 	},
 	
-	'getMap': function(map_el, args){
+	'getMap': function(map_el, map_args){
 
-	    if (! args){
-		args = {};
+	    if (! map_args){
+		map_args = {};
 	    }
 	    
 	    var map_id = map_el.getAttribute("id");
@@ -72,8 +72,6 @@ aaronland.maps = (function(){
 		return maps[map_id];
 	    }
 
-	    var map_args = {};
-	    
 	    var map = L.map(map_id, map_args);
 
 	    var map_provider = map_el.getAttribute("data-map-provider");
@@ -119,6 +117,9 @@ aaronland.maps = (function(){
 		    var tangramLayer = Tangram.leafletLayer(tangram_opts);
 		    
 		    tangramLayer.addTo(map);
+		case "null":
+		    break
+
 		default:
 		    console.log("Unsupported map provider ", map_provider);
 	    }

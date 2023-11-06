@@ -1,19 +1,11 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package netstack
 
 import (
-	"reflect"
-
-	"tailscale.com/wgengine"
 	"tailscale.com/wgengine/router"
 )
-
-func init() {
-	wgengine.NetstackRouterType = reflect.TypeOf(&subnetRouter{})
-}
 
 type subnetRouter struct {
 	router.Router

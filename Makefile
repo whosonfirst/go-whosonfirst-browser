@@ -3,7 +3,11 @@ cli:
 
 debug:
 	# @make cli
-	./bin/whosonfirst-browser -enable-all -map-provider tangram -nextzen-apikey $(APIKEY) -reader-uri $(READER)
+	./bin/whosonfirst-browser \
+		-enable-all \
+		-map-provider tangram \
+		-nextzen-apikey $(APIKEY) \
+		-reader-uri $(READER)
 
 debug-tilepack:
 	make cli && bin/whosonfirst-browser -enable-all -nextzen-tilepack-database $(TILEPACK) -reader-uri $(READER)
@@ -15,11 +19,11 @@ lambda:
 	@make lambda-browser
 
 lambda-browser:
-	if test -f main; then rm -f main; fi
+	if test -f bootstrap; then rm -f bootstrap; fi
 	if test -f browser.zip; then rm -f browser.zip; fi
-	GOOS=linux go build -mod vendor -o main cmd/whosonfirst-browser/main.go
-	zip browser.zip main
-	rm -f main
+	GOOS=linux go build -mod vendor -o bootstrap cmd/whosonfirst-browser/main.go
+	zip browser.zip bootstrap
+	rm -f bootstrap
 
 docker:
 	docker build -t whosonfirst-browser .

@@ -6,12 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/RoaringBitmap/roaring/roaring64"
-	"github.com/schollz/progressbar/v3"
 	"hash"
 	"hash/fnv"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
 	"os"
@@ -19,6 +16,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/RoaringBitmap/roaring/roaring64"
+	"github.com/schollz/progressbar/v3"
 	"zombiezen.com/go/sqlite"
 )
 
@@ -103,25 +103,25 @@ func NewResolver(deduplicate bool, compress bool) *Resolver {
 	return &r
 }
 
-func Convert(logger *log.Logger, input string, output string, deduplicate bool) error {
+func Convert(logger *log.Logger, input string, output string, deduplicate bool, tmpfile *os.File) error {
 	if strings.HasSuffix(input, ".pmtiles") {
-		return ConvertPmtilesV2(logger, input, output, deduplicate)
+		return ConvertPmtilesV2(logger, input, output, deduplicate, tmpfile)
 	} else {
-		return ConvertMbtiles(logger, input, output, deduplicate)
+		return ConvertMbtiles(logger, input, output, deduplicate, tmpfile)
 	}
 }
 
 func add_directoryv2_entries(dir DirectoryV2, entries *[]EntryV3, f *os.File) {
 	for zxy, rng := range dir.Entries {
 		tile_id := ZxyToId(zxy.Z, zxy.X, zxy.Y)
-		*entries = append(*entries, EntryV3{tile_id, rng.Offset, rng.Length, 1})
+		*entries = append(*entries, EntryV3{tile_id, rng.Offset, uint32(rng.Length), 1})
 	}
 
 	var unique = map[uint64]uint32{}
 
 	// uniqify the offset/length pairs
 	for _, rng := range dir.Leaves {
-		unique[rng.Offset] = rng.Length
+		unique[rng.Offset] = uint32(rng.Length)
 	}
 
 	for offset, length := range unique {
@@ -146,7 +146,7 @@ func set_zoom_center_defaults(header *HeaderV3, entries []EntryV3) {
 	}
 }
 
-func ConvertPmtilesV2(logger *log.Logger, input string, output string, deduplicate bool) error {
+func ConvertPmtilesV2(logger *log.Logger, input string, output string, deduplicate bool, tmpfile *os.File) error {
 	start := time.Now()
 	f, err := os.Open(input)
 	if err != nil {
@@ -187,12 +187,6 @@ func ConvertPmtilesV2(logger *log.Logger, input string, output string, deduplica
 		return entries[i].TileId < entries[j].TileId
 	})
 
-	tmpfile, err := ioutil.TempFile("", "")
-	if err != nil {
-		return fmt.Errorf("Failed to create temp file, %w", err)
-	}
-	defer os.Remove(tmpfile.Name())
-
 	// re-use resolver, because even if archives are de-duplicated we may need to recompress.
 	resolver := NewResolver(deduplicate, header.TileType == Mvt)
 
@@ -214,18 +208,24 @@ func ConvertPmtilesV2(logger *log.Logger, input string, output string, deduplica
 		}
 		// TODO: enforce sorted order
 		if is_new, new_data := resolver.AddTileIsNew(entry.TileId, buf); is_new {
-			tmpfile.Write(new_data)
+			_, err = tmpfile.Write(new_data)
+			if err != nil {
+				return fmt.Errorf("Failed to write to tempfile, %w", err)
+			}
 		}
 		bar.Add(1)
 	}
 
-	finalize(logger, resolver, header, tmpfile, output, json_metadata)
-	logger.Println("Finished in ", time.Since(start))
+	err = finalize(logger, resolver, header, tmpfile, output, json_metadata)
+	if err != nil {
+		return err
+	}
 
+	logger.Println("Finished in ", time.Since(start))
 	return nil
 }
 
-func ConvertMbtiles(logger *log.Logger, input string, output string, deduplicate bool) error {
+func ConvertMbtiles(logger *log.Logger, input string, output string, deduplicate bool, tmpfile *os.File) error {
 	start := time.Now()
 	conn, err := sqlite.OpenConn(input, sqlite.OpenReadOnly)
 	if err != nil {
@@ -305,11 +305,9 @@ func ConvertMbtiles(logger *log.Logger, input string, output string, deduplicate
 		}
 	}
 
-	tmpfile, err := ioutil.TempFile("", "")
-	if err != nil {
-		return fmt.Errorf("Failed to create temporary file, %w", err)
+	if tileset.GetCardinality() == 0 {
+		return fmt.Errorf("No tiles in MBTiles archive.")
 	}
-	defer os.Remove(tmpfile.Name())
 
 	logger.Println("Pass 2: writing tiles")
 	resolver := NewResolver(deduplicate, header.TileType == Mvt)
@@ -344,7 +342,10 @@ func ConvertMbtiles(logger *log.Logger, input string, output string, deduplicate
 
 			if len(data) > 0 {
 				if is_new, new_data := resolver.AddTileIsNew(id, data); is_new {
-					tmpfile.Write(new_data)
+					_, err := tmpfile.Write(new_data)
+					if err != nil {
+						return fmt.Errorf("Failed to write to tempfile: %s", err)
+					}
 				}
 			}
 
@@ -353,7 +354,10 @@ func ConvertMbtiles(logger *log.Logger, input string, output string, deduplicate
 			bar.Add(1)
 		}
 	}
-	finalize(logger, resolver, header, tmpfile, output, json_metadata)
+	err = finalize(logger, resolver, header, tmpfile, output, json_metadata)
+	if err != nil {
+		return err
+	}
 	logger.Println("Finished in ", time.Since(start))
 	return nil
 }
@@ -419,11 +423,26 @@ func finalize(logger *log.Logger, resolver *Resolver, header HeaderV3, tmpfile *
 
 	header_bytes := serialize_header(header)
 
-	outfile.Write(header_bytes)
-	outfile.Write(root_bytes)
-	outfile.Write(metadata_bytes)
-	outfile.Write(leaves_bytes)
-	tmpfile.Seek(0, 0)
+	_, err = outfile.Write(header_bytes)
+	if err != nil {
+		return fmt.Errorf("Failed to write header to outfile, %w", err)
+	}
+	_, err = outfile.Write(root_bytes)
+	if err != nil {
+		return fmt.Errorf("Failed to write header to outfile, %w", err)
+	}
+	_, err = outfile.Write(metadata_bytes)
+	if err != nil {
+		return fmt.Errorf("Failed to write header to outfile, %w", err)
+	}
+	_, err = outfile.Write(leaves_bytes)
+	if err != nil {
+		return fmt.Errorf("Failed to write header to outfile, %w", err)
+	}
+	_, err = tmpfile.Seek(0, 0)
+	if err != nil {
+		return fmt.Errorf("Failed to seek to start of tempfile, %w", err)
+	}
 	_, err = io.Copy(outfile, tmpfile)
 	if err != nil {
 		return fmt.Errorf("Failed to copy data to outfile, %w", err)
@@ -485,6 +504,9 @@ func v2_to_header_json(v2_json_metadata map[string]interface{}, first4 []byte) (
 			header.TileCompression = NoCompression
 		case "webp":
 			header.TileType = Webp
+			header.TileCompression = NoCompression
+		case "avif":
+			header.TileType = Avif
 			header.TileCompression = NoCompression
 		default:
 			return header, v2_json_metadata, errors.New("Unknown tile type")
@@ -560,6 +582,7 @@ func parse_center(center string) (int32, int32, uint8, error) {
 func mbtiles_to_header_json(mbtiles_metadata []string) (HeaderV3, map[string]interface{}, error) {
 	header := HeaderV3{}
 	json_result := make(map[string]interface{})
+	boundsSet := false
 	for i := 0; i < len(mbtiles_metadata); i += 2 {
 		value := mbtiles_metadata[i+1]
 		switch key := mbtiles_metadata[i]; key {
@@ -576,6 +599,9 @@ func mbtiles_to_header_json(mbtiles_metadata []string) (HeaderV3, map[string]int
 			case "webp":
 				header.TileType = Webp
 				header.TileCompression = NoCompression
+			case "avif":
+				header.TileType = Avif
+				header.TileCompression = NoCompression
 			}
 			json_result["format"] = value
 		case "bounds":
@@ -583,10 +609,15 @@ func mbtiles_to_header_json(mbtiles_metadata []string) (HeaderV3, map[string]int
 			if err != nil {
 				return header, json_result, err
 			}
+
+			if min_lon >= max_lon || min_lat >= max_lat {
+				return header, json_result, fmt.Errorf("Error: zero-area bounds in mbtiles metadata.")
+			}
 			header.MinLonE7 = min_lon
 			header.MinLatE7 = min_lat
 			header.MaxLonE7 = max_lon
 			header.MaxLatE7 = max_lat
+			boundsSet = true
 		case "center":
 			center_lon, center_lat, center_zoom, err := parse_center(value)
 			if err != nil {
@@ -616,5 +647,14 @@ func mbtiles_to_header_json(mbtiles_metadata []string) (HeaderV3, map[string]int
 			json_result[key] = value
 		}
 	}
+
+	E7 := 10000000.0
+	if !boundsSet {
+		header.MinLonE7 = int32(-180 * E7)
+		header.MinLatE7 = int32(-85 * E7)
+		header.MaxLonE7 = int32(180 * E7)
+		header.MaxLatE7 = int32(85 * E7)
+	}
+
 	return header, json_result, nil
 }

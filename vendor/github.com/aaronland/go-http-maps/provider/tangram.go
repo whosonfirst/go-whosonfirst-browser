@@ -3,14 +3,16 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-http-leaflet"
-	"github.com/aaronland/go-http-tangramjs"
-	tilepack_http "github.com/tilezen/go-tilepacks/http"
-	"github.com/tilezen/go-tilepacks/tilepack"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
+
+	"github.com/aaronland/go-http-leaflet"
+	"github.com/aaronland/go-http-tangramjs"
+	tilepack_http "github.com/tilezen/go-tilepacks/http"
+	"github.com/tilezen/go-tilepacks/tilepack"
 )
 
 const TANGRAM_SCHEME string = "tangram"
@@ -24,9 +26,6 @@ type TangramProvider struct {
 }
 
 func init() {
-
-	tangramjs.APPEND_LEAFLET_RESOURCES = false
-	tangramjs.APPEND_LEAFLET_ASSETS = false
 
 	ctx := context.Background()
 	RegisterProvider(ctx, TANGRAM_SCHEME, NewTangramProvider)
@@ -52,6 +51,42 @@ func TangramJSOptionsFromURL(u *url.URL) (*tangramjs.TangramJSOptions, error) {
 		opts.NextzenOptions.TileURL = q_tile_url
 	}
 
+	q_javascript_at_eof := q.Get(JavaScriptAtEOFFlag)
+
+	if q_javascript_at_eof != "" {
+
+		v, err := strconv.ParseBool(q_javascript_at_eof)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse ?%s= parameter, %w", JavaScriptAtEOFFlag, err)
+		}
+
+		if v == true {
+			opts.AppendJavaScriptAtEOF = true
+		}
+	}
+
+	q_rollup_assets := q.Get(RollupAssetsFlag)
+
+	if q_rollup_assets != "" {
+
+		v, err := strconv.ParseBool(q_rollup_assets)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse ?%s= parameter, %w", RollupAssetsFlag, err)
+		}
+
+		if v == true {
+			opts.RollupAssets = true
+		}
+	}
+
+	q_map_prefix := q.Get(MapPrefixFlag)
+
+	if q_map_prefix != "" {
+		opts.Prefix = q_map_prefix
+	}
+
 	return opts, nil
 }
 
@@ -75,6 +110,9 @@ func NewTangramProvider(ctx context.Context, uri string) (Provider, error) {
 		return nil, fmt.Errorf("Failed to create tilezen options, %w", err)
 	}
 
+	tangram_opts.AppendLeafletResources = false
+	tangram_opts.AppendLeafletAssets = false
+
 	tilezen_opts, err := TilezenOptionsFromURL(u)
 
 	if err != nil {
@@ -82,6 +120,9 @@ func NewTangramProvider(ctx context.Context, uri string) (Provider, error) {
 	}
 
 	logger := log.New(io.Discard, "", 0)
+
+	tangram_opts.Logger = logger
+	leaflet_opts.Logger = logger
 
 	p := &TangramProvider{
 		leafletOptions: leaflet_opts,
@@ -98,28 +139,20 @@ func (p *TangramProvider) Scheme() string {
 }
 
 func (p *TangramProvider) AppendResourcesHandler(handler http.Handler) http.Handler {
-	return p.AppendResourcesHandlerWithPrefix(handler, "")
-}
-
-func (p *TangramProvider) AppendResourcesHandlerWithPrefix(handler http.Handler, prefix string) http.Handler {
-	handler = leaflet.AppendResourcesHandlerWithPrefix(handler, p.leafletOptions, prefix)
-	handler = tangramjs.AppendResourcesHandlerWithPrefix(handler, p.tangramOptions, prefix)
+	handler = leaflet.AppendResourcesHandler(handler, p.leafletOptions)
+	handler = tangramjs.AppendResourcesHandler(handler, p.tangramOptions)
 	return handler
 }
 
 func (p *TangramProvider) AppendAssetHandlers(mux *http.ServeMux) error {
-	return p.AppendAssetHandlersWithPrefix(mux, "")
-}
 
-func (p *TangramProvider) AppendAssetHandlersWithPrefix(mux *http.ServeMux, prefix string) error {
-
-	err := leaflet.AppendAssetHandlersWithPrefix(mux, prefix)
+	err := leaflet.AppendAssetHandlers(mux, p.leafletOptions)
 
 	if err != nil {
 		return fmt.Errorf("Failed to append leaflet asset handler, %w", err)
 	}
 
-	err = tangramjs.AppendAssetHandlersWithPrefix(mux, prefix)
+	err = tangramjs.AppendAssetHandlers(mux, p.tangramOptions)
 
 	if err != nil {
 		return fmt.Errorf("Failed to append tangram asset handler, %w", err)
@@ -135,12 +168,12 @@ func (p *TangramProvider) AppendAssetHandlersWithPrefix(mux *http.ServeMux, pref
 
 		tilepack_url := p.tilezenOptions.TilepackURL
 
-		if prefix != "" {
+		if p.tangramOptions.Prefix != "" {
 
-			tilepack_url, err = url.JoinPath(prefix, tilepack_url)
+			tilepack_url, err = url.JoinPath(p.tangramOptions.Prefix, tilepack_url)
 
 			if err != nil {
-				return fmt.Errorf("Failed to join path with %s and %s", prefix, tilepack_url)
+				return fmt.Errorf("Failed to join path with %s and %s", p.tangramOptions.Prefix, tilepack_url)
 			}
 		}
 
@@ -153,5 +186,7 @@ func (p *TangramProvider) AppendAssetHandlersWithPrefix(mux *http.ServeMux, pref
 
 func (p *TangramProvider) SetLogger(logger *log.Logger) error {
 	p.logger = logger
+	p.tangramOptions.Logger = logger
+	p.leafletOptions.Logger = logger
 	return nil
 }

@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package logger defines a type for writing to logs. It's just a
 // convenience type so that we don't have to pass verbose func(...)
@@ -229,6 +228,53 @@ func RateLimitedFnWithClock(logf Logf, f time.Duration, burst int, maxCache int,
 	}
 }
 
+// SlowLoggerWithClock is a logger that applies rate limits similar to
+// RateLimitedFnWithClock, but instead of dropping logs will sleep until they
+// can be written. This should only be used for debug logs, and not in a hot path.
+//
+// The provided context, if canceled, will cause all logs to be dropped and
+// prevent any sleeps.
+func SlowLoggerWithClock(ctx context.Context, logf Logf, f time.Duration, burst int, timeNow func() time.Time) Logf {
+	var (
+		mu sync.Mutex
+		tb = newTokenBucket(f, burst, timeNow())
+	)
+	return func(format string, args ...any) {
+		if ctx.Err() != nil {
+			return
+		}
+
+		// Hold the mutex for the entire length of the check + log
+		// since our token bucket isn't concurrency-safe.
+		mu.Lock()
+		defer mu.Unlock()
+
+		tb.AdvanceTo(timeNow())
+
+		// If we can get a token, then do that and return.
+		if tb.Get() {
+			logf(format, args...)
+			return
+		}
+
+		// Otherwise, sleep for 2x the duration so that we don't
+		// immediately sleep again on the next call.
+		tmr := time.NewTimer(2 * f)
+		defer tmr.Stop()
+		select {
+		case curr := <-tmr.C:
+			tb.AdvanceTo(curr)
+		case <-ctx.Done():
+			return
+		}
+		if !tb.Get() {
+			log.Printf("[unexpected] error rate-limiting in SlowLoggerWithClock")
+			return
+		}
+		logf(format, args...)
+	}
+}
+
 // LogOnChange logs a given line only if line != lastLine, or if maxInterval has passed
 // since the last time this identical line was logged.
 func LogOnChange(logf Logf, maxInterval time.Duration, timeNow func() time.Time) Logf {
@@ -306,4 +352,40 @@ func LogfCloser(logf Logf) (newLogf Logf, close func()) {
 		logf(msg, args...)
 	}
 	return newLogf, close
+}
+
+// AsJSON returns a formatter that formats v as JSON. The value is suitable to
+// passing to a regular %v printf argument. (%s is not required)
+//
+// If json.Marshal returns an error, the output is "%%!JSON-ERROR:" followed by
+// the error string.
+func AsJSON(v any) fmt.Formatter {
+	return asJSONResult{v}
+}
+
+type asJSONResult struct{ v any }
+
+func (a asJSONResult) Format(s fmt.State, verb rune) {
+	v, err := json.Marshal(a.v)
+	if err != nil {
+		fmt.Fprintf(s, "%%!JSON-ERROR:%v", err)
+		return
+	}
+	s.Write(v)
+}
+
+// TBLogger is the testing.TB subset needed by TestLogger.
+type TBLogger interface {
+	Helper()
+	Logf(format string, args ...any)
+}
+
+// TestLogger returns a logger that logs to tb.Logf
+// with a prefix to make it easier to distinguish spam
+// from explicit test failures.
+func TestLogger(tb TBLogger) Logf {
+	return func(format string, args ...any) {
+		tb.Helper()
+		tb.Logf("    ... "+format, args...)
+	}
 }

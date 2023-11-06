@@ -1,13 +1,14 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package ipnlocal
 
 import (
 	"bytes"
 	"context"
+	"crypto/ed25519"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -19,7 +20,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"tailscale.com/envknob"
+	"tailscale.com/health"
+	"tailscale.com/health/healthmsg"
 	"tailscale.com/ipn"
 	"tailscale.com/ipn/ipnstate"
 	"tailscale.com/net/tsaddr"
@@ -37,6 +39,11 @@ import (
 var (
 	errMissingNetmap        = errors.New("missing netmap: verify that you are logged in")
 	errNetworkLockNotActive = errors.New("network-lock is not active")
+
+	tkaCompactionDefaults = tka.CompactionOptions{
+		MinChain: 24,                  // Keep at minimum 24 AUMs since head.
+		MinAge:   14 * 24 * time.Hour, // Keep 2 weeks of AUMs.
+	}
 )
 
 type tkaState struct {
@@ -46,38 +53,32 @@ type tkaState struct {
 	filtered  []ipnstate.TKAFilteredPeer
 }
 
-// permitTKAInitLocked returns true if tailnet lock initialization may
-// occur.
-// b.mu must be held.
-func (b *LocalBackend) permitTKAInitLocked() bool {
-	return envknob.UseWIPCode() || b.capTailnetLock
-}
-
 // tkaFilterNetmapLocked checks the signatures on each node key, dropping
 // nodes from the netmap whose signature does not verify.
 //
 // b.mu must be held.
 func (b *LocalBackend) tkaFilterNetmapLocked(nm *netmap.NetworkMap) {
-	// TODO(tom): Remove this guard for 1.35 and later.
-	if b.tka == nil && !b.permitTKAInitLocked() {
+	if b.tka == nil && !b.capTailnetLock {
+		health.SetTKAHealth(nil)
 		return
 	}
 	if b.tka == nil {
+		health.SetTKAHealth(nil)
 		return // TKA not enabled.
 	}
 
 	var toDelete map[int]bool // peer index => true
 	for i, p := range nm.Peers {
-		if p.UnsignedPeerAPIOnly {
+		if p.UnsignedPeerAPIOnly() {
 			// Not subject to tailnet lock.
 			continue
 		}
-		if len(p.KeySignature) == 0 {
-			b.logf("Network lock is dropping peer %v(%v) due to missing signature", p.ID, p.StableID)
+		if p.KeySignature().Len() == 0 {
+			b.logf("Network lock is dropping peer %v(%v) due to missing signature", p.ID(), p.StableID())
 			mak.Set(&toDelete, i, true)
 		} else {
-			if err := b.tka.authority.NodeKeyAuthorized(p.Key, p.KeySignature); err != nil {
-				b.logf("Network lock is dropping peer %v(%v) due to failed signature check: %v", p.ID, p.StableID, err)
+			if err := b.tka.authority.NodeKeyAuthorized(p.Key(), p.KeySignature().AsSlice()); err != nil {
+				b.logf("Network lock is dropping peer %v(%v) due to failed signature check: %v", p.ID(), p.StableID(), err)
 				mak.Set(&toDelete, i, true)
 			}
 		}
@@ -85,7 +86,7 @@ func (b *LocalBackend) tkaFilterNetmapLocked(nm *netmap.NetworkMap) {
 
 	// nm.Peers is ordered, so deletion must be order-preserving.
 	if len(toDelete) > 0 {
-		peers := make([]*tailcfg.Node, 0, len(nm.Peers))
+		peers := make([]tailcfg.NodeView, 0, len(nm.Peers))
 		filtered := make([]ipnstate.TKAFilteredPeer, 0, len(toDelete))
 		for i, p := range nm.Peers {
 			if !toDelete[i] {
@@ -93,12 +94,14 @@ func (b *LocalBackend) tkaFilterNetmapLocked(nm *netmap.NetworkMap) {
 			} else {
 				// Record information about the node we filtered out.
 				fp := ipnstate.TKAFilteredPeer{
-					Name:         p.Name,
-					ID:           p.ID,
-					StableID:     p.StableID,
-					TailscaleIPs: make([]netip.Addr, len(p.Addresses)),
+					Name:         p.Name(),
+					ID:           p.ID(),
+					StableID:     p.StableID(),
+					TailscaleIPs: make([]netip.Addr, p.Addresses().Len()),
+					NodeKey:      p.Key(),
 				}
-				for i, addr := range p.Addresses {
+				for i := range p.Addresses().LenIter() {
+					addr := p.Addresses().At(i)
 					if addr.IsSingleIP() && tsaddr.IsTailscaleIP(addr.Addr()) {
 						fp.TailscaleIPs[i] = addr.Addr()
 					}
@@ -110,6 +113,13 @@ func (b *LocalBackend) tkaFilterNetmapLocked(nm *netmap.NetworkMap) {
 		b.tka.filtered = filtered
 	} else {
 		b.tka.filtered = nil
+	}
+
+	// Check that we ourselves are not locked out, report a health issue if so.
+	if nm.SelfNode.Valid() && b.tka.authority.NodeKeyAuthorized(nm.SelfNode.Key(), nm.SelfNode.KeySignature().AsSlice()) != nil {
+		health.SetTKAHealth(errors.New(healthmsg.LockedOut))
+	} else {
+		health.SetTKAHealth(nil)
 	}
 }
 
@@ -136,12 +146,13 @@ func (b *LocalBackend) tkaSyncIfNeeded(nm *netmap.NetworkMap, prefs ipn.PrefsVie
 	b.mu.Lock() // take mu to protect access to synchronized fields.
 	defer b.mu.Unlock()
 
-	// TODO(tom): Remove this guard for 1.35 and later.
-	if b.tka == nil && !b.permitTKAInitLocked() {
+	if b.tka == nil && !b.capTailnetLock {
 		return nil
 	}
 
-	b.logf("tkaSyncIfNeeded: enabled=%v, head=%v", nm.TKAEnabled, nm.TKAHead)
+	if b.tka != nil || nm.TKAEnabled {
+		b.logf("tkaSyncIfNeeded: enabled=%v, head=%v", nm.TKAEnabled, nm.TKAHead)
+	}
 
 	ourNodeKey := prefs.Persist().PublicNodeKey()
 
@@ -177,9 +188,10 @@ func (b *LocalBackend) tkaSyncIfNeeded(nm *netmap.NetworkMap, prefs ipn.PrefsVie
 				b.logf("Disablement failed, leaving TKA enabled. Error: %v", err)
 			} else {
 				isEnabled = false
+				health.SetTKAHealth(nil)
 			}
 		} else {
-			return fmt.Errorf("[bug] unreachable invariant of wantEnabled /w isEnabled")
+			return fmt.Errorf("[bug] unreachable invariant of wantEnabled w/ isEnabled")
 		}
 	}
 
@@ -300,6 +312,8 @@ func (b *LocalBackend) tkaApplyDisablementLocked(secret []byte) error {
 
 // chonkPathLocked returns the absolute path to the directory in which TKA
 // state (the 'tailchonk') is stored.
+//
+// b.mu must be held.
 func (b *LocalBackend) chonkPathLocked() string {
 	return filepath.Join(b.TailscaleVarRoot(), "tka-profiles", string(b.pm.CurrentProfile().ID))
 }
@@ -411,7 +425,7 @@ func (b *LocalBackend) NetworkLockStatus() *ipnstate.NetworkLockStatus {
 
 	var selfAuthorized bool
 	if b.netMap != nil {
-		selfAuthorized = b.tka.authority.NodeKeyAuthorized(b.netMap.SelfNode.Key, b.netMap.SelfNode.KeySignature) == nil
+		selfAuthorized = b.tka.authority.NodeKeyAuthorized(b.netMap.SelfNode.Key(), b.netMap.SelfNode.KeySignature().AsSlice()) == nil
 	}
 
 	keys := b.tka.authority.Keys()
@@ -429,6 +443,8 @@ func (b *LocalBackend) NetworkLockStatus() *ipnstate.NetworkLockStatus {
 		filtered[i] = b.tka.filtered[i].Clone()
 	}
 
+	stateID1, _ := b.tka.authority.StateIDs()
+
 	return &ipnstate.NetworkLockStatus{
 		Enabled:       true,
 		Head:          &head,
@@ -437,6 +453,7 @@ func (b *LocalBackend) NetworkLockStatus() *ipnstate.NetworkLockStatus {
 		NodeKeySigned: selfAuthorized,
 		TrustedKeys:   outKeys,
 		FilteredPeers: filtered,
+		StateID:       stateID1,
 	}
 }
 
@@ -458,10 +475,9 @@ func (b *LocalBackend) NetworkLockInit(keys []tka.Key, disablementValues [][]byt
 	var nlPriv key.NLPrivate
 	b.mu.Lock()
 
-	// TODO(tom): Remove this guard for 1.35 and later.
-	if !b.permitTKAInitLocked() {
+	if !b.capTailnetLock {
 		b.mu.Unlock()
-		return errors.New("this feature is not yet complete, a later release may support this functionality")
+		return errors.New("not permitted to enable tailnet lock")
 	}
 
 	if p := b.pm.CurrentPrefs(); p.Valid() && p.Persist().Valid() && !p.Persist().PrivateNodeKey().IsZero() {
@@ -562,7 +578,7 @@ func (b *LocalBackend) NetworkLockForceLocalDisable() error {
 
 	newPrefs := b.pm.CurrentPrefs().AsStruct().Clone() // .Persist should always be initialized here.
 	newPrefs.Persist.DisallowedTKAStateIDs = append(newPrefs.Persist.DisallowedTKAStateIDs, stateID)
-	if err := b.pm.SetPrefs(newPrefs.View()); err != nil {
+	if err := b.pm.SetPrefs(newPrefs.View(), b.netMap.MagicDNSSuffix()); err != nil {
 		return fmt.Errorf("saving prefs: %w", err)
 	}
 
@@ -652,6 +668,9 @@ func (b *LocalBackend) NetworkLockModify(addKeys, removeKeys []tka.Key) (err err
 	if b.tka == nil {
 		return errNetworkLockNotActive
 	}
+	if !b.tka.authority.KeyTrusted(nlPriv.KeyID()) {
+		return errors.New("this node does not have a trusted tailnet lock key")
+	}
 
 	updater := b.tka.authority.NewUpdater(nlPriv)
 
@@ -661,7 +680,11 @@ func (b *LocalBackend) NetworkLockModify(addKeys, removeKeys []tka.Key) (err err
 		}
 	}
 	for _, removeKey := range removeKeys {
-		if err := updater.RemoveKey(removeKey.ID()); err != nil {
+		keyID, err := removeKey.ID()
+		if err != nil {
+			return err
+		}
+		if err := updater.RemoveKey(keyID); err != nil {
 			return err
 		}
 	}
@@ -763,6 +786,197 @@ func (b *LocalBackend) NetworkLockLog(maxEntries int) ([]ipnstate.NetworkLockUpd
 	}
 
 	return out, nil
+}
+
+// NetworkLockAffectedSigs returns the signatures which would be invalidated
+// by removing trust in the specified KeyID.
+func (b *LocalBackend) NetworkLockAffectedSigs(keyID tkatype.KeyID) ([]tkatype.MarshaledSignature, error) {
+	var (
+		ourNodeKey key.NodePublic
+		err        error
+	)
+	b.mu.Lock()
+	if p := b.pm.CurrentPrefs(); p.Valid() && p.Persist().Valid() && !p.Persist().PrivateNodeKey().IsZero() {
+		ourNodeKey = p.Persist().PublicNodeKey()
+	}
+	if b.tka == nil {
+		err = errNetworkLockNotActive
+	}
+	b.mu.Unlock()
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := b.tkaReadAffectedSigs(ourNodeKey, keyID)
+	if err != nil {
+		return nil, err
+	}
+
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.tka == nil {
+		return nil, errNetworkLockNotActive
+	}
+
+	// Confirm for ourselves tha the signatures would actually be invalidated
+	// by removal of trusted in the specified key.
+	for i, sigBytes := range resp.Signatures {
+		var sig tka.NodeKeySignature
+		if err := sig.Unserialize(sigBytes); err != nil {
+			return nil, fmt.Errorf("failed decoding signature %d: %w", i, err)
+		}
+
+		sigKeyID, err := sig.UnverifiedAuthorizingKeyID()
+		if err != nil {
+			return nil, fmt.Errorf("extracting SigID from signature %d: %w", i, err)
+		}
+		if !bytes.Equal(keyID, sigKeyID) {
+			return nil, fmt.Errorf("got signature with keyID %X from request for %X", sigKeyID, keyID)
+		}
+
+		var nodeKey key.NodePublic
+		if err := nodeKey.UnmarshalBinary(sig.Pubkey); err != nil {
+			return nil, fmt.Errorf("failed decoding pubkey for signature %d: %w", i, err)
+		}
+		if err := b.tka.authority.NodeKeyAuthorized(nodeKey, sigBytes); err != nil {
+			return nil, fmt.Errorf("signature %d is not valid: %w", i, err)
+		}
+	}
+
+	return resp.Signatures, nil
+}
+
+// NetworkLockGenerateRecoveryAUM generates an AUM which retroactively removes trust in the
+// specified keys. This AUM is signed by the current node and returned.
+//
+// If forkFrom is specified, it is used as the parent AUM to fork from. If the zero value,
+// the parent AUM is determined automatically.
+func (b *LocalBackend) NetworkLockGenerateRecoveryAUM(removeKeys []tkatype.KeyID, forkFrom tka.AUMHash) (*tka.AUM, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.tka == nil {
+		return nil, errNetworkLockNotActive
+	}
+	var nlPriv key.NLPrivate
+	if p := b.pm.CurrentPrefs(); p.Valid() && p.Persist().Valid() {
+		nlPriv = p.Persist().NetworkLockKey()
+	}
+	if nlPriv.IsZero() {
+		return nil, errMissingNetmap
+	}
+
+	aum, err := b.tka.authority.MakeRetroactiveRevocation(b.tka.storage, removeKeys, nlPriv.KeyID(), forkFrom)
+	if err != nil {
+		return nil, err
+	}
+
+	// Sign it ourselves.
+	aum.Signatures, err = nlPriv.SignAUM(aum.SigHash())
+	if err != nil {
+		return nil, fmt.Errorf("signing failed: %w", err)
+	}
+
+	return aum, nil
+}
+
+// NetworkLockCosignRecoveryAUM co-signs the provided recovery AUM and returns
+// the updated structure.
+//
+// The recovery AUM provided should be the output from a previous call to
+// NetworkLockGenerateRecoveryAUM or NetworkLockCosignRecoveryAUM.
+func (b *LocalBackend) NetworkLockCosignRecoveryAUM(aum *tka.AUM) (*tka.AUM, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.tka == nil {
+		return nil, errNetworkLockNotActive
+	}
+	var nlPriv key.NLPrivate
+	if p := b.pm.CurrentPrefs(); p.Valid() && p.Persist().Valid() {
+		nlPriv = p.Persist().NetworkLockKey()
+	}
+	if nlPriv.IsZero() {
+		return nil, errMissingNetmap
+	}
+	for _, sig := range aum.Signatures {
+		if bytes.Equal(sig.KeyID, nlPriv.KeyID()) {
+			return nil, errors.New("this node has already signed this recovery AUM")
+		}
+	}
+
+	// Sign it ourselves.
+	sigs, err := nlPriv.SignAUM(aum.SigHash())
+	if err != nil {
+		return nil, fmt.Errorf("signing failed: %w", err)
+	}
+	aum.Signatures = append(aum.Signatures, sigs...)
+
+	return aum, nil
+}
+
+func (b *LocalBackend) NetworkLockSubmitRecoveryAUM(aum *tka.AUM) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.tka == nil {
+		return errNetworkLockNotActive
+	}
+	var ourNodeKey key.NodePublic
+	if p := b.pm.CurrentPrefs(); p.Valid() && p.Persist().Valid() && !p.Persist().PrivateNodeKey().IsZero() {
+		ourNodeKey = p.Persist().PublicNodeKey()
+	}
+	if ourNodeKey.IsZero() {
+		return errors.New("no node-key: is tailscale logged in?")
+	}
+
+	b.mu.Unlock()
+	_, err := b.tkaDoSyncSend(ourNodeKey, aum.Hash(), []tka.AUM{*aum}, false)
+	b.mu.Lock()
+	return err
+}
+
+var tkaSuffixEncoder = base64.RawStdEncoding
+
+// NetworkLockWrapPreauthKey wraps a pre-auth key with information to
+// enable unattended bringup in the locked tailnet.
+//
+// The provided trusted tailnet-lock key is used to sign
+// a SigCredential structure, which is encoded along with the
+// private key and appended to the pre-auth key.
+func (b *LocalBackend) NetworkLockWrapPreauthKey(preauthKey string, tkaKey key.NLPrivate) (string, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.tka == nil {
+		return "", errNetworkLockNotActive
+	}
+
+	pub, priv, err := ed25519.GenerateKey(nil) // nil == crypto/rand
+	if err != nil {
+		return "", err
+	}
+
+	sig := tka.NodeKeySignature{
+		SigKind:        tka.SigCredential,
+		KeyID:          tkaKey.KeyID(),
+		WrappingPubkey: pub,
+	}
+	sig.Signature, err = tkaKey.SignNKS(sig.SigHash())
+	if err != nil {
+		return "", fmt.Errorf("signing failed: %w", err)
+	}
+
+	b.logf("Generated network-lock credential signature using %s", tkaKey.Public().CLIString())
+	return fmt.Sprintf("%s--TL%s-%s", preauthKey, tkaSuffixEncoder.EncodeToString(sig.Serialize()), tkaSuffixEncoder.EncodeToString(priv)), nil
+}
+
+// NetworkLockVerifySigningDeeplink asks the authority to verify the given deeplink
+// URL. See the comment for ValidateDeeplink for details.
+func (b *LocalBackend) NetworkLockVerifySigningDeeplink(url string) tka.DeeplinkValidationResult {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.tka == nil {
+		return tka.DeeplinkValidationResult{IsValid: false, Error: errNetworkLockNotActive.Error()}
+	}
+
+	return b.tka.authority.ValidateDeeplink(url)
 }
 
 func signNodeKey(nodeInfo tailcfg.TKASignInfo, signer key.NLPrivate) (*tka.NodeKeySignature, error) {
@@ -1085,6 +1299,42 @@ func (b *LocalBackend) tkaSubmitSignature(ourNodeKey key.NodePublic, sig tkatype
 	a := new(tailcfg.TKASubmitSignatureResponse)
 	err = json.NewDecoder(&io.LimitedReader{R: res.Body, N: 1024 * 1024}).Decode(a)
 	res.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("decoding JSON: %w", err)
+	}
+
+	return a, nil
+}
+
+func (b *LocalBackend) tkaReadAffectedSigs(ourNodeKey key.NodePublic, key tkatype.KeyID) (*tailcfg.TKASignaturesUsingKeyResponse, error) {
+	var encodedReq bytes.Buffer
+	if err := json.NewEncoder(&encodedReq).Encode(tailcfg.TKASignaturesUsingKeyRequest{
+		Version: tailcfg.CurrentCapabilityVersion,
+		NodeKey: ourNodeKey,
+		KeyID:   key,
+	}); err != nil {
+		return nil, fmt.Errorf("encoding request: %v", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", "https://unused/machine/tka/affected-sigs", &encodedReq)
+	if err != nil {
+		return nil, fmt.Errorf("req: %w", err)
+	}
+	resp, err := b.DoNoiseRequest(req)
+	if err != nil {
+		return nil, fmt.Errorf("resp: %w", err)
+	}
+	if resp.StatusCode != 200 {
+		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		return nil, fmt.Errorf("request returned (%d): %s", resp.StatusCode, string(body))
+	}
+	a := new(tailcfg.TKASignaturesUsingKeyResponse)
+	err = json.NewDecoder(&io.LimitedReader{R: resp.Body, N: 1024 * 1024}).Decode(a)
+	resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("decoding JSON: %w", err)
 	}
