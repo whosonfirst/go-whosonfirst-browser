@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 GOMOD=vendor
+=======
+GOMOD=$(shell test -f "go.work" && echo "readonly" || echo "vendor")
+>>>>>>> 5568e949963f7fa63367b68cd79afd8528f9dccb
 
 cli:
 	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/whosonfirst-browser cmd/whosonfirst-browser/main.go
 
 debug:
+<<<<<<< HEAD
 	go run -mod $(GOMOD) cmd/whosonfirst-browser/main.go \
 		-enable-all \
 		-map-provider leaflet \
@@ -14,6 +19,17 @@ debug:
 		-authenticator-uri null:// \
 		-enable-edit \
 		-verbose
+=======
+	# @make cli
+	./bin/whosonfirst-browser \
+		-enable-all \
+		-map-provider tangram \
+		-nextzen-apikey $(APIKEY) \
+		-reader-uri $(READER)
+
+debug-tilepack:
+	make cli && bin/whosonfirst-browser -enable-all -nextzen-tilepack-database $(TILEPACK) -reader-uri $(READER)
+>>>>>>> 5568e949963f7fa63367b68cd79afd8528f9dccb
 
 debug-docker:
 	docker run -it -p 8080:8080 whosonfirst-browser /usr/local/bin/whosonfirst-browser -server-uri 'http://0.0.0.0:8080' -enable-all -nextzen-api-key $(APIKEY)

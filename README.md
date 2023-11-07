@@ -343,6 +343,8 @@ $> bin/whosonfirst-browser/main.go \
 
 Please consult the documentation for [aaronland/go-http-tsnet](https://github.com/aaronland/go-http-server-tsnet) for details on running `whosonfirst-browser` as a virtual private service.
 
+See also: [Updating the Who's On First Browser to support Tailscale and Protomaps](https://whosonfirst.org/blog/2022/11/14/browser/)
+
 ## Output formats
 
 The following output formats are available.
