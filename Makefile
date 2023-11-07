@@ -22,11 +22,11 @@ lambda:
 	@make lambda-browser
 
 lambda-browser:
-	if test -f main; then rm -f main; fi
+	if test -f bootstrap; then rm -f bootstrap; fi
 	if test -f browser.zip; then rm -f browser.zip; fi
-	GOOS=linux go build -mod $(GOMOD) -ldflags="-s -w" -o main cmd/whosonfirst-browser/main.go
-	zip browser.zip main
-	rm -f main
+	GOARCH=arm64 GOOS=linux go build -mod $(GOMOD) -ldflags="-s -w" -tags lambda.norpc -o bootstrap cmd/whosonfirst-browser/main.go
+	zip browser.zip bootstrap
+	rm -f bootstrap
 
 docker:
 	docker build -t whosonfirst-browser .

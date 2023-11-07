@@ -723,7 +723,7 @@ github.com/whosonfirst/go-reader-cachereader
 # github.com/whosonfirst/go-reader-findingaid v0.14.2
 ## explicit; go 1.18
 github.com/whosonfirst/go-reader-findingaid
-# github.com/whosonfirst/go-reader-github v0.6.7
+# github.com/whosonfirst/go-reader-github v0.6.9
 ## explicit; go 1.18
 github.com/whosonfirst/go-reader-github
 # github.com/whosonfirst/go-reader-http v0.3.1

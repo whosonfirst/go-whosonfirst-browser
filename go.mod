@@ -30,7 +30,7 @@ require (
 	github.com/whosonfirst/go-reader v1.0.2
 	github.com/whosonfirst/go-reader-cachereader v1.1.0
 	github.com/whosonfirst/go-reader-findingaid v0.14.2
-	github.com/whosonfirst/go-reader-github v0.6.7
+	github.com/whosonfirst/go-reader-github v0.6.9
 	github.com/whosonfirst/go-sanitize v0.1.0
 	github.com/whosonfirst/go-whosonfirst-export/v2 v2.7.1
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.26
