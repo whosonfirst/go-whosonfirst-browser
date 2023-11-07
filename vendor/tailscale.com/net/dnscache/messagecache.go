@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package dnscache
 
@@ -14,6 +13,7 @@ import (
 
 	"github.com/golang/groupcache/lru"
 	"golang.org/x/net/dns/dnsmessage"
+	"tailscale.com/util/cmpx"
 )
 
 // MessageCache is a cache that works at the DNS message layer,
@@ -60,10 +60,7 @@ func (c *MessageCache) Flush() {
 // pruneLocked prunes down the cache size to the configured (or
 // default) max size.
 func (c *MessageCache) pruneLocked() {
-	max := c.cacheSizeSet
-	if max == 0 {
-		max = 500
-	}
+	max := cmpx.Or(c.cacheSizeSet, 500)
 	for c.cache.Len() > max {
 		c.cache.RemoveOldest()
 	}

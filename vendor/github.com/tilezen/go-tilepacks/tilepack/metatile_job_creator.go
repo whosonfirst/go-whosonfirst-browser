@@ -16,6 +16,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/maptile"
 )
 
 const (
@@ -26,7 +28,7 @@ func log2Uint(size uint) uint {
 	return uint(math.Log2(float64(size)))
 }
 
-func NewMetatileJobGenerator(bucket string, pathTemplate string, layerName string, format string, metatileSize uint, maxDetailZoom uint, zooms []uint, bounds *LngLatBbox) (JobGenerator, error) {
+func NewMetatileJobGenerator(bucket string, requesterPays bool, pathTemplate string, layerName string, format string, metatileSize uint, maxDetailZoom maptile.Zoom, zooms []maptile.Zoom, bounds orb.Bound) (JobGenerator, error) {
 	sess, err := session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	})
@@ -34,11 +36,18 @@ func NewMetatileJobGenerator(bucket string, pathTemplate string, layerName strin
 		return nil, err
 	}
 
-	downloader := s3manager.NewDownloader(sess)
+	downloader := s3manager.NewDownloader(
+		sess,
+		func(downloader *s3manager.Downloader) {
+			// See https://levyeran.medium.com/high-memory-allocations-and-gc-cycles-while-downloading-large-s3-objects-using-the-aws-sdk-for-go-e776a136c5d0
+			downloader.BufferProvider = s3manager.NewPooledBufferedWriterReadFromProvider(15 * 1024 * 1024)
+		},
+	)
 
 	return &metatileJobGenerator{
 		s3Client:      downloader,
 		bucket:        bucket,
+		requesterPays: requesterPays,
 		pathTemplate:  pathTemplate,
 		layerName:     layerName,
 		metatileSize:  metatileSize,
@@ -52,12 +61,13 @@ func NewMetatileJobGenerator(bucket string, pathTemplate string, layerName strin
 type metatileJobGenerator struct {
 	s3Client      *s3manager.Downloader
 	bucket        string
+	requesterPays bool
 	pathTemplate  string
 	layerName     string
 	metatileSize  uint
-	maxDetailZoom uint
-	bounds        *LngLatBbox
-	zooms         []uint
+	maxDetailZoom maptile.Zoom
+	bounds        orb.Bound
+	zooms         []maptile.Zoom
 	format        string
 }
 
@@ -70,10 +80,16 @@ func (x *metatileJobGenerator) CreateWorker() (func(id int, jobs chan *TileReque
 		for metaTileRequest := range jobs {
 			// Download the metatile archive zip to a byte buffer
 			compressedBytes := &aws.WriteAtBuffer{}
-			numBytes, err := x.s3Client.Download(compressedBytes, &s3.GetObjectInput{
+			input := &s3.GetObjectInput{
 				Bucket: aws.String(x.bucket),
 				Key:    aws.String(metaTileRequest.URL),
-			})
+			}
+
+			if x.requesterPays {
+				input.RequestPayer = aws.String("requester")
+			}
+
+			numBytes, err := x.s3Client.Download(compressedBytes, input)
 			if err != nil {
 				log.Printf("Unable to download item s3://%s/%s: %+v", x.bucket, metaTileRequest.URL, err)
 				continue
@@ -90,7 +106,7 @@ func (x *metatileJobGenerator) CreateWorker() (func(id int, jobs chan *TileReque
 
 			// Iterate over the contents of the zip and add them as TileResponses
 			for _, zf := range zippedReader.File {
-				var offsetZ, offsetX, offsetY uint
+				var offsetZ, offsetX, offsetY uint32
 				var format string
 				if n, err := fmt.Sscanf(zf.Name, "%d/%d/%d.%s", &offsetZ, &offsetX, &offsetY, &format); err != nil || n != 4 {
 					log.Fatalf("Couldn't scan metatile name")
@@ -102,17 +118,17 @@ func (x *metatileJobGenerator) CreateWorker() (func(id int, jobs chan *TileReque
 				}
 
 				// Add the offset to metatile to get the actual tile
-				t := &Tile{
-					Z: metaTileRequest.Tile.Z + offsetZ,
-					X: (metaTileRequest.Tile.X << offsetZ) + offsetX,
-					Y: (metaTileRequest.Tile.Y << offsetZ) + offsetY,
-				}
+				t := maptile.New(
+					(metaTileRequest.Tile.X<<offsetZ)+offsetX,
+					(metaTileRequest.Tile.Y<<offsetZ)+offsetY,
+					metaTileRequest.Tile.Z+maptile.Zoom(offsetZ),
+				)
 
 				if !arrayContains(t.Z, x.zooms) {
 					continue
 				}
 
-				if !x.bounds.Intersects(t.Bounds()) {
+				if !x.bounds.Intersects(t.Bound()) {
 					continue
 				}
 
@@ -137,7 +153,7 @@ func (x *metatileJobGenerator) CreateWorker() (func(id int, jobs chan *TileReque
 					continue
 				}
 
-				err = bodyGzipper.Flush()
+				err = bodyGzipper.Close()
 				if err != nil {
 					log.Printf("Couldn't flush gzipper: %+v", err)
 					continue
@@ -162,18 +178,18 @@ func (x *metatileJobGenerator) CreateWorker() (func(id int, jobs chan *TileReque
 
 func (x *metatileJobGenerator) CreateJobs(jobs chan *TileRequest) error {
 	// Convert the list of requested zooms into a list of zooms where metatiles are
-	metatileZooms := []uint{}
+	metatileZooms := []maptile.Zoom{}
 
-	metaZoom := log2Uint(x.metatileSize)
-	tileZoom := log2Uint(tileScale)
-	deltaZoom := uint(metaZoom) - uint(tileZoom)
+	metaZoom := maptile.Zoom(log2Uint(x.metatileSize))
+	tileZoom := maptile.Zoom(log2Uint(tileScale))
+	deltaZoom := metaZoom - tileZoom
 
 	for _, z := range x.zooms {
-		var metatileZoom uint
+		var metatileZoom maptile.Zoom
 		if z < deltaZoom {
 			metatileZoom = 0
 		} else {
-			metatileZoom = z - uint(deltaZoom)
+			metatileZoom = z - deltaZoom
 		}
 
 		// Beyond the "max detail zoom", all tiles are in the metatile
@@ -191,7 +207,7 @@ func (x *metatileJobGenerator) CreateJobs(jobs chan *TileRequest) error {
 		Bounds:    x.bounds,
 		InvertedY: false,
 		Zooms:     metatileZooms,
-		ConsumerFunc: func(t *Tile) {
+		ConsumerFunc: func(t maptile.Tile) {
 			hash := md5.Sum([]byte(fmt.Sprintf("%d/%d/%d.zip", t.Z, t.X, t.Y)))
 			hashHex := hex.EncodeToString(hash[:])
 

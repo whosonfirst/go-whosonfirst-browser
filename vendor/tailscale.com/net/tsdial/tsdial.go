@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package tsdial provides a Dialer type that can dial out of tailscaled.
 package tsdial
@@ -19,13 +18,13 @@ import (
 	"time"
 
 	"tailscale.com/net/dnscache"
-	"tailscale.com/net/interfaces"
 	"tailscale.com/net/netknob"
+	"tailscale.com/net/netmon"
 	"tailscale.com/net/netns"
 	"tailscale.com/types/logger"
 	"tailscale.com/types/netmap"
+	"tailscale.com/util/clientmetric"
 	"tailscale.com/util/mak"
-	"tailscale.com/wgengine/monitor"
 )
 
 // Dialer dials out of tailscaled, while taking care of details while
@@ -51,16 +50,16 @@ type Dialer struct {
 	netnsDialerOnce sync.Once
 	netnsDialer     netns.Dialer
 
-	mu                sync.Mutex
-	closed            bool
-	dns               dnsMap
-	tunName           string // tun device name
-	linkMon           *monitor.Mon
-	linkMonUnregister func()
-	exitDNSDoHBase    string                 // non-empty if DoH-proxying exit node in use; base URL+path (without '?')
-	dnsCache          *dnscache.MessageCache // nil until first non-empty SetExitDNSDoH
-	nextSysConnID     int
-	activeSysConns    map[int]net.Conn // active connections not yet closed
+	mu               sync.Mutex
+	closed           bool
+	dns              dnsMap
+	tunName          string // tun device name
+	netMon           *netmon.Monitor
+	netMonUnregister func()
+	exitDNSDoHBase   string                 // non-empty if DoH-proxying exit node in use; base URL+path (without '?')
+	dnsCache         *dnscache.MessageCache // nil until first non-empty SetExitDNSDoH
+	nextSysConnID    int
+	activeSysConns   map[int]net.Conn // active connections not yet closed
 }
 
 // sysConn wraps a net.Conn that was created using d.SystemDial.
@@ -118,9 +117,9 @@ func (d *Dialer) Close() error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.closed = true
-	if d.linkMonUnregister != nil {
-		d.linkMonUnregister()
-		d.linkMonUnregister = nil
+	if d.netMonUnregister != nil {
+		d.netMonUnregister()
+		d.netMonUnregister = nil
 	}
 	for _, c := range d.activeSysConns {
 		c.Close()
@@ -129,27 +128,61 @@ func (d *Dialer) Close() error {
 	return nil
 }
 
-func (d *Dialer) SetLinkMonitor(mon *monitor.Mon) {
+func (d *Dialer) SetNetMon(netMon *netmon.Monitor) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	if d.linkMonUnregister != nil {
-		go d.linkMonUnregister()
-		d.linkMonUnregister = nil
+	if d.netMonUnregister != nil {
+		go d.netMonUnregister()
+		d.netMonUnregister = nil
 	}
-	d.linkMon = mon
-	d.linkMonUnregister = d.linkMon.RegisterChangeCallback(d.linkChanged)
+	d.netMon = netMon
+	d.netMonUnregister = d.netMon.RegisterChangeCallback(d.linkChanged)
 }
 
-func (d *Dialer) linkChanged(major bool, state *interfaces.State) {
-	if !major {
-		return
-	}
+var (
+	metricLinkChangeConnClosed = clientmetric.NewCounter("tsdial_linkchange_closes")
+)
+
+func (d *Dialer) linkChanged(delta *netmon.ChangeDelta) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
+	var anyClosed bool
 	for id, c := range d.activeSysConns {
-		go c.Close()
-		delete(d.activeSysConns, id)
+		if changeAffectsConn(delta, c) {
+			anyClosed = true
+			d.logf("tsdial: closing system connection %v->%v due to link change", c.LocalAddr(), c.RemoteAddr())
+			go c.Close()
+			delete(d.activeSysConns, id)
+		}
 	}
+	if anyClosed {
+		metricLinkChangeConnClosed.Add(1)
+	}
+}
+
+// changeAffectsConn reports whether the network change delta affects
+// the provided connection.
+func changeAffectsConn(delta *netmon.ChangeDelta, conn net.Conn) bool {
+	la, _ := conn.LocalAddr().(*net.TCPAddr)
+	ra, _ := conn.RemoteAddr().(*net.TCPAddr)
+	if la == nil || ra == nil {
+		return false // not TCP
+	}
+	lip, rip := la.AddrPort().Addr(), ra.AddrPort().Addr()
+
+	if delta.Old == nil {
+		return false
+	}
+	if delta.Old.DefaultRouteInterface != delta.New.DefaultRouteInterface ||
+		delta.Old.HTTPProxy != delta.New.HTTPProxy {
+		return true
+	}
+	if !delta.New.HasIP(lip) && delta.Old.HasIP(lip) {
+		// Our interface with this source IP went away.
+		return true
+	}
+	_ = rip // TODO(bradfitz): use the remote IP?
+	return false
 }
 
 func (d *Dialer) closeSysConn(id int) {
@@ -164,10 +197,10 @@ func (d *Dialer) closeSysConn(id int) {
 }
 
 func (d *Dialer) interfaceIndexLocked(ifName string) (index int, ok bool) {
-	if d.linkMon == nil {
+	if d.netMon == nil {
 		return 0, false
 	}
-	st := d.linkMon.InterfaceState()
+	st := d.netMon.InterfaceState()
 	iface, ok := st.Interface[ifName]
 	if !ok {
 		return 0, false
@@ -204,6 +237,8 @@ func (d *Dialer) SetNetMap(nm *netmap.NetworkMap) {
 	d.dns = m
 }
 
+// userDialResolve resolves addr as if a user initiating the dial. (e.g. from a
+// SOCKS or HTTP outbound proxy)
 func (d *Dialer) userDialResolve(ctx context.Context, network, addr string) (netip.AddrPort, error) {
 	d.mu.Lock()
 	dns := d.dns
@@ -263,6 +298,12 @@ func ipNetOfNetwork(n string) string {
 	return "ip"
 }
 
+func (d *Dialer) logf(format string, args ...any) {
+	if d.Logf != nil {
+		d.Logf(format, args...)
+	}
+}
+
 // SystemDial connects to the provided network address without going over
 // Tailscale. It prefers going over the default interface and closes existing
 // connections if the default interface changes. It is used to connect to
@@ -276,11 +317,7 @@ func (d *Dialer) SystemDial(ctx context.Context, network, addr string) (net.Conn
 	}
 
 	d.netnsDialerOnce.Do(func() {
-		logf := d.Logf
-		if logf == nil {
-			logf = logger.Discard
-		}
-		d.netnsDialer = netns.NewDialer(logf)
+		d.netnsDialer = netns.NewDialer(d.logf, d.netMon)
 	})
 	c, err := d.netnsDialer.DialContext(ctx, network, addr)
 	if err != nil {
@@ -299,8 +336,8 @@ func (d *Dialer) SystemDial(ctx context.Context, network, addr string) (net.Conn
 	}, nil
 }
 
-// UserDial connects to the provided network address as if a user were initiating the dial.
-// (e.g. from a SOCKS or HTTP outbound proxy)
+// UserDial connects to the provided network address as if a user were
+// initiating the dial. (e.g. from a SOCKS or HTTP outbound proxy)
 func (d *Dialer) UserDial(ctx context.Context, network, addr string) (net.Conn, error) {
 	ipp, err := d.userDialResolve(ctx, network, addr)
 	if err != nil {
@@ -347,7 +384,7 @@ func (d *Dialer) dialPeerAPI(ctx context.Context, network, addr string) (net.Con
 //
 // The primary function of this is to work on macOS & iOS's in the
 // Network/System Extension so it can mark the dialer as staying
-// withing the network namespace/sandbox.
+// within the network namespace/sandbox.
 func (d *Dialer) getPeerDialer() *net.Dialer {
 	d.peerDialerOnce.Do(func() {
 		d.peerDialer = &net.Dialer{
@@ -368,6 +405,8 @@ func (d *Dialer) PeerAPIHTTPClient() *http.Client {
 		t := http.DefaultTransport.(*http.Transport).Clone()
 		t.Dial = nil
 		t.DialContext = d.dialPeerAPI
+		// Do not use the environment proxy for PeerAPI.
+		t.Proxy = nil
 		d.peerClient = &http.Client{Transport: t}
 	})
 	return d.peerClient

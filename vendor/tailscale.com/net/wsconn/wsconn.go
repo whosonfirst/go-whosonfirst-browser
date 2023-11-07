@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package wsconn contains an adapter type that turns
 // a websocket connection into a net.Conn. It a temporary fork of the
@@ -49,10 +48,18 @@ import (
 //
 // A received StatusNormalClosure or StatusGoingAway close frame will be translated to
 // io.EOF when reading.
-func NetConn(ctx context.Context, c *websocket.Conn, msgType websocket.MessageType) net.Conn {
+//
+// The given remoteAddr will be the value of the returned conn's
+// RemoteAddr().String(). For best compatibility with consumers of
+// conns, the string should be an ip:port if available, but in the
+// absence of that it can be any string that describes the remote
+// endpoint, or the empty string to makes RemoteAddr() return a place
+// holder value.
+func NetConn(ctx context.Context, c *websocket.Conn, msgType websocket.MessageType, remoteAddr string) net.Conn {
 	nc := &netConn{
-		c:       c,
-		msgType: msgType,
+		c:          c,
+		msgType:    msgType,
+		remoteAddr: remoteAddr,
 	}
 
 	var writeCancel context.CancelFunc
@@ -83,8 +90,9 @@ func NetConn(ctx context.Context, c *websocket.Conn, msgType websocket.MessageTy
 }
 
 type netConn struct {
-	c       *websocket.Conn
-	msgType websocket.MessageType
+	c          *websocket.Conn
+	msgType    websocket.MessageType
+	remoteAddr string
 
 	writeTimer         *time.Timer
 	writeContext       context.Context
@@ -168,6 +176,7 @@ func (c *netConn) Read(p []byte) (int, error) {
 }
 
 type websocketAddr struct {
+	addr string
 }
 
 func (a websocketAddr) Network() string {
@@ -175,15 +184,18 @@ func (a websocketAddr) Network() string {
 }
 
 func (a websocketAddr) String() string {
+	if a.addr != "" {
+		return a.addr
+	}
 	return "websocket/unknown-addr"
 }
 
 func (c *netConn) RemoteAddr() net.Addr {
-	return websocketAddr{}
+	return websocketAddr{c.remoteAddr}
 }
 
 func (c *netConn) LocalAddr() net.Addr {
-	return websocketAddr{}
+	return websocketAddr{""}
 }
 
 func (c *netConn) SetDeadline(t time.Time) error {

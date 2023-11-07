@@ -4,9 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/google/go-github/v48/github"
-	wof_writer "github.com/whosonfirst/go-writer/v3"
-	"golang.org/x/oauth2"
 	"io"
 	"log"
 	"net/url"
@@ -15,6 +12,10 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/google/go-github/v48/github"
+	wof_writer "github.com/whosonfirst/go-writer/v3"
+	"golang.org/x/oauth2"
 )
 
 const GITHUBAPI_SCHEME string = "githubapi"

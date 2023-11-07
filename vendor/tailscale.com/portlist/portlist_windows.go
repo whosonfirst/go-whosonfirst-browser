@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package portlist
 
@@ -26,7 +25,8 @@ type famPort struct {
 }
 
 type windowsImpl struct {
-	known map[famPort]*portMeta // inode string => metadata
+	known            map[famPort]*portMeta // inode string => metadata
+	includeLocalhost bool
 }
 
 type portMeta struct {
@@ -34,9 +34,10 @@ type portMeta struct {
 	keep bool
 }
 
-func newWindowsImpl() osImpl {
+func newWindowsImpl(includeLocalhost bool) osImpl {
 	return &windowsImpl{
-		known: map[famPort]*portMeta{},
+		known:            map[famPort]*portMeta{},
+		includeLocalhost: includeLocalhost,
 	}
 }
 
@@ -59,7 +60,7 @@ func (im *windowsImpl) AppendListeningPorts(base []Port) ([]Port, error) {
 		if e.State != "LISTEN" {
 			continue
 		}
-		if !e.Local.Addr().IsUnspecified() {
+		if !im.includeLocalhost && !e.Local.Addr().IsUnspecified() {
 			continue
 		}
 		fp := famPort{
@@ -84,6 +85,7 @@ func (im *windowsImpl) AppendListeningPorts(base []Port) ([]Port, error) {
 				Proto:   "tcp",
 				Port:    e.Local.Port(),
 				Process: process,
+				Pid:     e.Pid,
 			},
 		}
 		im.known[fp] = pm

@@ -1,15 +1,15 @@
-// package auth provides a simple interface for enforcing authentication in HTTP handlers.
 package auth
 
 import (
 	"context"
 	"fmt"
-	"github.com/aaronland/go-roster"
 	"log"
 	"net/http"
 	"net/url"
 	"sort"
 	"strings"
+
+	"github.com/aaronland/go-roster"	
 )
 
 // type Authenticator is a simple interface for	enforcing authentication in HTTP handlers.

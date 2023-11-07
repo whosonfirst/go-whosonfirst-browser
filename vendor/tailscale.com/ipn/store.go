@@ -1,12 +1,14 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package ipn
 
 import (
+	"bytes"
+	"context"
 	"errors"
 	"fmt"
+	"net"
 	"strconv"
 )
 
@@ -44,10 +46,6 @@ const (
 	// StateKey "user-1234".
 	ServerModeStartKey = StateKey("server-mode-start-key")
 
-	// NLKeyStateKey is the key under which we store the node's
-	// network-lock node key, in its key.NLPrivate.MarshalText representation.
-	NLKeyStateKey = StateKey("_nl-node-key")
-
 	// KnownProfilesStateKey is the key under which we store the list of
 	// known profiles. The value is a JSON-encoded []LoginProfile.
 	KnownProfilesStateKey = StateKey("_profiles")
@@ -74,7 +72,26 @@ type StateStore interface {
 	// ErrStateNotExist) if the ID doesn't have associated state.
 	ReadState(id StateKey) ([]byte, error)
 	// WriteState saves bs as the state associated with ID.
+	//
+	// Callers should generally use the ipn.WriteState wrapper func
+	// instead, which only writes if the value is different from what's
+	// already in the store.
 	WriteState(id StateKey, bs []byte) error
+}
+
+// WriteState is a wrapper around store.WriteState that only writes if
+// the value is different from what's already in the store.
+func WriteState(store StateStore, id StateKey, v []byte) error {
+	if was, err := store.ReadState(id); err == nil && bytes.Equal(was, v) {
+		return nil
+	}
+	return store.WriteState(id, v)
+}
+
+// StateStoreDialerSetter is an optional interface that StateStores
+// can implement to allow the caller to set a custom dialer.
+type StateStoreDialerSetter interface {
+	SetDialer(d func(ctx context.Context, network, address string) (net.Conn, error))
 }
 
 // ReadStoreInt reads an integer from a StateStore.
@@ -88,5 +105,5 @@ func ReadStoreInt(store StateStore, id StateKey) (int64, error) {
 
 // PutStoreInt puts an integer into a StateStore.
 func PutStoreInt(store StateStore, id StateKey, val int64) error {
-	return store.WriteState(id, fmt.Appendf(nil, "%d", val))
+	return WriteState(store, id, fmt.Appendf(nil, "%d", val))
 }

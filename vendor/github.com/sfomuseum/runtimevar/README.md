@@ -15,6 +15,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	
 	"github.com/sfomuseum/runtimevar"
 	_ "gocloud.dev/runtimevar/awsparamstore"
 	_ "gocloud.dev/runtimevar/constantvar"
@@ -36,7 +37,19 @@ func main() {
 
 ## Tools
 
+```
+$> make cli
+go build -mod vendor -ldflags="-s -w" -o bin/runtimevar cmd/runtimevar/main.go
+```
+
 ### runtimevar
+
+```
+$> ./bin/runtimevar -h
+Usage of ./bin/runtimevar:
+  -timeout int
+    	The maximum number of second in which a variable can be resolved. If 0 no timeout is applied.
+```
 
 ```
 $> go run cmd/runtimevar/main.go 'constant://?val=hello+world'

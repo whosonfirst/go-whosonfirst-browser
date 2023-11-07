@@ -3,12 +3,14 @@ package filter
 import (
 	"errors"
 	"fmt"
+	"log"
+	"runtime"
+
 	"github.com/whosonfirst/go-whosonfirst-flags/date"
 	"github.com/whosonfirst/go-whosonfirst-flags/geometry"
 	"github.com/whosonfirst/go-whosonfirst-flags/placetypes"
 	"github.com/whosonfirst/go-whosonfirst-spatial"
 	"github.com/whosonfirst/go-whosonfirst-spr/v2"
-	"log"
 )
 
 func FilterSPR(filters spatial.Filter, s spr.StandardPlacesResult) error {
@@ -85,25 +87,31 @@ func FilterSPR(filters spatial.Filter, s spr.StandardPlacesResult) error {
 		return errors.New("Failed 'is superseding' test")
 	}
 
-	af, err := geometry.NewAlternateGeometryFlag(s.Path())
+	switch runtime.GOOS {
+	case "js":
+		// This will always fail under JS (WASM)
+	default:
 
-	if err != nil {
+		af, err := geometry.NewAlternateGeometryFlag(s.Path())
 
-		msg := fmt.Sprintf("Unable to parse alternate geometry (%s) for ID %s, because '%s' - skipping alternate geometry filters", s.Path(), s.Id(), err)
-		log.Println(msg)
+		if err != nil {
 
-	} else {
+			msg := fmt.Sprintf("Unable to parse alternate geometry (%s) for ID %s, because '%s' - skipping alternate geometry filters", s.Path(), s.Id(), err)
+			log.Println(msg)
 
-		ok = filters.IsAlternateGeometry(af)
+		} else {
 
-		if !ok {
-			return errors.New("Failed 'is alternate geometry' test")
-		}
+			ok = filters.IsAlternateGeometry(af)
 
-		ok = filters.HasAlternateGeometry(af)
+			if !ok {
+				return errors.New("Failed 'is alternate geometry' test")
+			}
 
-		if !ok {
-			return errors.New("Failed 'has alternate geometry' test")
+			ok = filters.HasAlternateGeometry(af)
+
+			if !ok {
+				return errors.New("Failed 'has alternate geometry' test")
+			}
 		}
 	}
 

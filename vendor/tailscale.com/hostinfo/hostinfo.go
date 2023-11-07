@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package hostinfo answers questions about the host environment that Tailscale is
 // running on.
@@ -8,8 +7,10 @@ package hostinfo
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"os"
+	"os/exec"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -35,8 +36,9 @@ func New() *tailcfg.Hostinfo {
 	hostname, _ := os.Hostname()
 	hostname = dnsname.FirstLabel(hostname)
 	return &tailcfg.Hostinfo{
-		IPNVersion:      version.Long,
+		IPNVersion:      version.Long(),
 		Hostname:        hostname,
+		App:             appTypeCached(),
 		OS:              version.OS(),
 		OSVersion:       GetOSVersion(),
 		Container:       lazyInContainer.Get(),
@@ -54,6 +56,7 @@ func New() *tailcfg.Hostinfo {
 		Cloud:           string(cloudenv.Get()),
 		NoLogsNoSupport: envknob.NoLogsNoSupport(),
 		AllowsUpdate:    envknob.AllowsRemoteUpdate(),
+		WoLMACs:         getWoLMACs(),
 	}
 }
 
@@ -112,6 +115,13 @@ func GetOSVersion() string {
 	return ""
 }
 
+func appTypeCached() string {
+	if v, ok := appType.Load().(string); ok {
+		return v
+	}
+	return ""
+}
+
 func packageTypeCached() string {
 	if v, _ := packagingType.Load().(string); v != "" {
 		return v
@@ -131,15 +141,16 @@ func packageTypeCached() string {
 type EnvType string
 
 const (
-	KNative         = EnvType("kn")
-	AWSLambda       = EnvType("lm")
-	Heroku          = EnvType("hr")
-	AzureAppService = EnvType("az")
-	AWSFargate      = EnvType("fg")
-	FlyDotIo        = EnvType("fly")
-	Kubernetes      = EnvType("k8s")
-	DockerDesktop   = EnvType("dde")
-	Replit          = EnvType("repl")
+	KNative            = EnvType("kn")
+	AWSLambda          = EnvType("lm")
+	Heroku             = EnvType("hr")
+	AzureAppService    = EnvType("az")
+	AWSFargate         = EnvType("fg")
+	FlyDotIo           = EnvType("fly")
+	Kubernetes         = EnvType("k8s")
+	DockerDesktop      = EnvType("dde")
+	Replit             = EnvType("repl")
+	HomeAssistantAddOn = EnvType("haao")
 )
 
 var envType atomic.Value // of EnvType
@@ -158,6 +169,8 @@ var (
 	osVersionAtomic   atomic.Value // of string
 	desktopAtomic     atomic.Value // of opt.Bool
 	packagingType     atomic.Value // of string
+	appType           atomic.Value // of string
+	firewallMode      atomic.Value // of string
 )
 
 // SetDeviceModel sets the device model for use in Hostinfo updates.
@@ -166,14 +179,29 @@ func SetDeviceModel(model string) { deviceModelAtomic.Store(model) }
 // SetOSVersion sets the OS version.
 func SetOSVersion(v string) { osVersionAtomic.Store(v) }
 
+// SetFirewallMode sets the firewall mode for the app.
+func SetFirewallMode(v string) { firewallMode.Store(v) }
+
 // SetPackage sets the packaging type for the app.
 //
 // As of 2022-03-25, this is used by Android ("nogoogle" for the
 // F-Droid build) and tsnet (set to "tsnet").
 func SetPackage(v string) { packagingType.Store(v) }
 
+// SetApp sets the app type for the app.
+// It is used by tsnet to specify what app is using it such as "golinks"
+// and "k8s-operator".
+func SetApp(v string) { appType.Store(v) }
+
 func deviceModel() string {
 	s, _ := deviceModelAtomic.Load().(string)
+	return s
+}
+
+// FirewallMode returns the firewall mode for the app.
+// It is empty if unset.
+func FirewallMode() string {
+	s, _ := firewallMode.Load().(string)
 	return s
 }
 
@@ -230,6 +258,9 @@ func getEnvType() EnvType {
 	if inReplit() {
 		return Replit
 	}
+	if inHomeAssistantAddOn() {
+		return HomeAssistantAddOn
+	}
 	return ""
 }
 
@@ -258,7 +289,7 @@ func inContainer() opt.Bool {
 		return nil
 	})
 	lineread.File("/proc/mounts", func(line []byte) error {
-		if mem.Contains(mem.B(line), mem.S("fuse.lxcfs")) {
+		if mem.Contains(mem.B(line), mem.S("lxcfs /proc/cpuinfo fuse.lxcfs")) {
 			ret.Set(true)
 			return io.EOF
 		}
@@ -339,6 +370,13 @@ func inDockerDesktop() bool {
 	return false
 }
 
+func inHomeAssistantAddOn() bool {
+	if os.Getenv("SUPERVISOR_TOKEN") != "" || os.Getenv("HASSIO_TOKEN") != "" {
+		return true
+	}
+	return false
+}
+
 // goArchVar returns the GOARM or GOAMD64 etc value that the binary was built
 // with.
 func goArchVar() string {
@@ -382,7 +420,7 @@ func DisabledEtcAptSource() bool {
 		return false
 	}
 	mod := fi.ModTime()
-	if c, ok := etcAptSrcCache.Load().(etcAptSrcResult); ok && c.mod == mod {
+	if c, ok := etcAptSrcCache.Load().(etcAptSrcResult); ok && c.mod.Equal(mod) {
 		return c.disabled
 	}
 	f, err := os.Open(path)
@@ -410,4 +448,13 @@ func etcAptSourceFileIsDisabled(r io.Reader) bool {
 		return false
 	}
 	return disabled
+}
+
+// IsSELinuxEnforcing reports whether SELinux is in "Enforcing" mode.
+func IsSELinuxEnforcing() bool {
+	if runtime.GOOS != "linux" {
+		return false
+	}
+	out, _ := exec.Command("getenforce").Output()
+	return string(bytes.TrimSpace(out)) == "Enforcing"
 }

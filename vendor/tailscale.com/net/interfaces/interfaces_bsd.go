@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Common code for FreeBSD and Darwin. This might also work on other
 // BSD systems (e.g. OpenBSD) but has not been tested.
@@ -20,7 +19,6 @@ import (
 	"golang.org/x/net/route"
 	"golang.org/x/sys/unix"
 	"tailscale.com/net/netaddr"
-	"tailscale.com/syncs"
 )
 
 func defaultRoute() (d DefaultRouteDetails, err error) {
@@ -37,23 +35,14 @@ func defaultRoute() (d DefaultRouteDetails, err error) {
 	return d, nil
 }
 
+// ErrNoGatewayIndexFound is returned by DefaultRouteInterfaceIndex when no
+// default route is found.
+var ErrNoGatewayIndexFound = errors.New("no gateway index found")
+
 // DefaultRouteInterfaceIndex returns the index of the network interface that
 // owns the default route. It returns the first IPv4 or IPv6 default route it
 // finds (it does not prefer one or the other).
 func DefaultRouteInterfaceIndex() (int, error) {
-	disabledAlternateDefaultRouteInterface := false
-	if f := defaultRouteInterfaceIndexFunc.Load(); f != nil {
-		if ifIndex := f(); ifIndex != 0 {
-			if !disableAlternateDefaultRouteInterface.Load() {
-				return ifIndex, nil
-			} else {
-				disabledAlternateDefaultRouteInterface = true
-				log.Printf("interfaces_bsd: alternate default route interface function disabled, would have returned interface %d", ifIndex)
-			}
-		}
-		// Fallthrough if we can't use the alternate implementation.
-	}
-
 	// $ netstat -nr
 	// Routing tables
 	// Internet:
@@ -82,23 +71,15 @@ func DefaultRouteInterfaceIndex() (int, error) {
 			continue
 		}
 		if isDefaultGateway(rm) {
-			if disabledAlternateDefaultRouteInterface {
-				log.Printf("interfaces_bsd: alternate default route interface function disabled, default implementation returned %d", rm.Index)
+			if delegatedIndex, err := getDelegatedInterface(rm.Index); err == nil && delegatedIndex != 0 {
+				return delegatedIndex, nil
+			} else if err != nil {
+				log.Printf("interfaces_bsd: could not get delegated interface: %v", err)
 			}
 			return rm.Index, nil
 		}
 	}
-	return 0, errors.New("no gateway index found")
-}
-
-var defaultRouteInterfaceIndexFunc syncs.AtomicValue[func() int]
-
-// SetDefaultRouteInterfaceIndexFunc allows an alternate implementation of
-// DefaultRouteInterfaceIndex to be provided. If none is set, or if f() returns a 0
-// (indicating an unknown interface index), then the default implementation (that parses
-// the routing table) will be used.
-func SetDefaultRouteInterfaceIndexFunc(f func() int) {
-	defaultRouteInterfaceIndexFunc.Store(f)
+	return 0, ErrNoGatewayIndexFound
 }
 
 func init() {

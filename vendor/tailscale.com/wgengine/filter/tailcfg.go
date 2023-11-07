@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package filter
 
@@ -85,6 +84,13 @@ func MatchesFromFilterRules(pf []tailcfg.FilterRule) ([]Match, error) {
 					m.Caps = append(m.Caps, CapMatch{
 						Dst: dstNet,
 						Cap: cap,
+					})
+				}
+				for cap, val := range cm.CapMap {
+					m.Caps = append(m.Caps, CapMatch{
+						Dst:    dstNet,
+						Cap:    tailcfg.PeerCapability(cap),
+						Values: val,
 					})
 				}
 			}

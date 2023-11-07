@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build go1.19
 
@@ -13,7 +12,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"tailscale.com/types/opt"
 )
@@ -45,17 +43,18 @@ type Device struct {
 	Name      string   `json:"name"`
 	Hostname  string   `json:"hostname"`
 
-	ClientVersion     string `json:"clientVersion"`   // Empty for external devices.
-	UpdateAvailable   bool   `json:"updateAvailable"` // Empty for external devices.
-	OS                string `json:"os"`
-	Created           string `json:"created"` // Empty for external devices.
-	LastSeen          string `json:"lastSeen"`
-	KeyExpiryDisabled bool   `json:"keyExpiryDisabled"`
-	Expires           string `json:"expires"`
-	Authorized        bool   `json:"authorized"`
-	IsExternal        bool   `json:"isExternal"`
-	MachineKey        string `json:"machineKey"` // Empty for external devices.
-	NodeKey           string `json:"nodeKey"`
+	ClientVersion     string   `json:"clientVersion"`   // Empty for external devices.
+	UpdateAvailable   bool     `json:"updateAvailable"` // Empty for external devices.
+	OS                string   `json:"os"`
+	Tags              []string `json:"tags"`
+	Created           string   `json:"created"` // Empty for external devices.
+	LastSeen          string   `json:"lastSeen"`
+	KeyExpiryDisabled bool     `json:"keyExpiryDisabled"`
+	Expires           string   `json:"expires"`
+	Authorized        bool     `json:"authorized"`
+	IsExternal        bool     `json:"isExternal"`
+	MachineKey        string   `json:"machineKey"` // Empty for external devices.
+	NodeKey           string   `json:"nodeKey"`
 
 	// BlocksIncomingConnections is configured via the device's
 	// Tailscale client preferences. This field is only reported
@@ -213,8 +212,20 @@ func (c *Client) DeleteDevice(ctx context.Context, deviceID string) (err error) 
 
 // AuthorizeDevice marks a device as authorized.
 func (c *Client) AuthorizeDevice(ctx context.Context, deviceID string) error {
+	return c.SetAuthorized(ctx, deviceID, true)
+}
+
+// SetAuthorized marks a device as authorized or not.
+func (c *Client) SetAuthorized(ctx context.Context, deviceID string, authorized bool) error {
+	params := &struct {
+		Authorized bool `json:"authorized"`
+	}{Authorized: authorized}
+	data, err := json.Marshal(params)
+	if err != nil {
+		return err
+	}
 	path := fmt.Sprintf("%s/api/v2/device/%s/authorized", c.baseURL(), url.PathEscape(deviceID))
-	req, err := http.NewRequestWithContext(ctx, "POST", path, strings.NewReader(`{"authorized":true}`))
+	req, err := http.NewRequestWithContext(ctx, "POST", path, bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}

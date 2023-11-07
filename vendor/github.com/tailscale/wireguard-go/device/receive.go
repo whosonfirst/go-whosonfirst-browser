@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package device
@@ -27,12 +27,16 @@ type QueueHandshakeElement struct {
 }
 
 type QueueInboundElement struct {
-	sync.Mutex
 	buffer   *[MaxMessageSize]byte
 	packet   []byte
 	counter  uint64
 	keypair  *Keypair
 	endpoint conn.Endpoint
+}
+
+type QueueInboundElementsContainer struct {
+	sync.Mutex
+	elems []*QueueInboundElement
 }
 
 // clearPointers clears elem fields that contain pointers.
@@ -80,32 +84,31 @@ func (device *Device) RoutineReceiveIncoming(maxBatchSize int, recv conn.Receive
 	// receive datagrams until conn is closed
 
 	var (
-		buffsArrs   = make([]*[MaxMessageSize]byte, maxBatchSize)
-		buffs       = make([][]byte, maxBatchSize)
+		bufsArrs    = make([]*[MaxMessageSize]byte, maxBatchSize)
+		bufs        = make([][]byte, maxBatchSize)
 		err         error
 		sizes       = make([]int, maxBatchSize)
 		count       int
 		endpoints   = make([]conn.Endpoint, maxBatchSize)
 		deathSpiral int
-		elemsByPeer = make(map[*Peer]*[]*QueueInboundElement, maxBatchSize)
+		elemsByPeer = make(map[*Peer]*QueueInboundElementsContainer, maxBatchSize)
 	)
+
+	for i := range bufsArrs {
+		bufsArrs[i] = device.GetMessageBuffer()
+		bufs[i] = bufsArrs[i][:]
+	}
 
 	defer func() {
 		for i := 0; i < maxBatchSize; i++ {
-			if buffsArrs[i] != nil {
-				device.PutMessageBuffer(buffsArrs[i])
+			if bufsArrs[i] != nil {
+				device.PutMessageBuffer(bufsArrs[i])
 			}
 		}
 	}()
 
 	for {
-		for i := range buffsArrs {
-			if buffsArrs[i] == nil {
-				buffsArrs[i] = device.GetMessageBuffer()
-				buffs[i] = buffsArrs[i][:]
-			}
-		}
-		count, err = recv(buffs, sizes, endpoints)
+		count, err = recv(bufs, sizes, endpoints)
 		if err != nil {
 			if errors.Is(err, net.ErrClosed) {
 				return
@@ -126,16 +129,13 @@ func (device *Device) RoutineReceiveIncoming(maxBatchSize int, recv conn.Receive
 		// handle each packet in the batch
 		for i, size := range sizes[:count] {
 			if size < MinMessageSize {
-				// this is also deliberately skipping len 0
 				continue
 			}
 
 			// check size of packet
 
-			packet := buffsArrs[i][:size]
+			packet := bufsArrs[i][:size]
 			msgType := binary.LittleEndian.Uint32(packet[:4])
-
-			var okay bool
 
 			switch msgType {
 
@@ -170,62 +170,66 @@ func (device *Device) RoutineReceiveIncoming(maxBatchSize int, recv conn.Receive
 				peer := value.peer
 				elem := device.GetInboundElement()
 				elem.packet = packet
-				elem.buffer = buffsArrs[i]
+				elem.buffer = bufsArrs[i]
 				elem.keypair = keypair
 				elem.endpoint = endpoints[i]
 				elem.counter = 0
-				elem.Mutex = sync.Mutex{}
-				elem.Lock()
 
 				elemsForPeer, ok := elemsByPeer[peer]
 				if !ok {
-					elemsForPeer = device.GetInboundElementsSlice()
+					elemsForPeer = device.GetInboundElementsContainer()
+					elemsForPeer.Lock()
 					elemsByPeer[peer] = elemsForPeer
 				}
-				*elemsForPeer = append(*elemsForPeer, elem)
-				buffsArrs[i] = nil
+				elemsForPeer.elems = append(elemsForPeer.elems, elem)
+				bufsArrs[i] = device.GetMessageBuffer()
+				bufs[i] = bufsArrs[i][:]
 				continue
 
 			// otherwise it is a fixed size & handshake related packet
 
 			case MessageInitiationType:
-				okay = len(packet) == MessageInitiationSize
+				if len(packet) != MessageInitiationSize {
+					continue
+				}
 
 			case MessageResponseType:
-				okay = len(packet) == MessageResponseSize
+				if len(packet) != MessageResponseSize {
+					continue
+				}
 
 			case MessageCookieReplyType:
-				okay = len(packet) == MessageCookieReplySize
+				if len(packet) != MessageCookieReplySize {
+					continue
+				}
 
 			default:
 				device.log.Verbosef("Received message with unknown type")
+				continue
 			}
 
-			if okay {
-				select {
-				case device.queue.handshake.c <- QueueHandshakeElement{
-					msgType:  msgType,
-					buffer:   buffsArrs[i],
-					packet:   packet,
-					endpoint: endpoints[i],
-				}:
-					buffsArrs[i] = nil
-				default:
-				}
+			select {
+			case device.queue.handshake.c <- QueueHandshakeElement{
+				msgType:  msgType,
+				buffer:   bufsArrs[i],
+				packet:   packet,
+				endpoint: endpoints[i],
+			}:
+				bufsArrs[i] = device.GetMessageBuffer()
+				bufs[i] = bufsArrs[i][:]
+			default:
 			}
 		}
-		for peer, elems := range elemsByPeer {
+		for peer, elemsContainer := range elemsByPeer {
 			if peer.isRunning.Load() {
-				peer.queue.inbound.c <- elems
-				for _, elem := range *elems {
-					device.queue.decryption.c <- elem
-				}
+				peer.queue.inbound.c <- elemsContainer
+				device.queue.decryption.c <- elemsContainer
 			} else {
-				for _, elem := range *elems {
+				for _, elem := range elemsContainer.elems {
 					device.PutMessageBuffer(elem.buffer)
 					device.PutInboundElement(elem)
 				}
-				device.PutInboundElementsSlice(elems)
+				device.PutInboundElementsContainer(elemsContainer)
 			}
 			delete(elemsByPeer, peer)
 		}
@@ -238,26 +242,28 @@ func (device *Device) RoutineDecryption(id int) {
 	defer device.log.Verbosef("Routine: decryption worker %d - stopped", id)
 	device.log.Verbosef("Routine: decryption worker %d - started", id)
 
-	for elem := range device.queue.decryption.c {
-		// split message into fields
-		counter := elem.packet[MessageTransportOffsetCounter:MessageTransportOffsetContent]
-		content := elem.packet[MessageTransportOffsetContent:]
+	for elemsContainer := range device.queue.decryption.c {
+		for _, elem := range elemsContainer.elems {
+			// split message into fields
+			counter := elem.packet[MessageTransportOffsetCounter:MessageTransportOffsetContent]
+			content := elem.packet[MessageTransportOffsetContent:]
 
-		// decrypt and release to consumer
-		var err error
-		elem.counter = binary.LittleEndian.Uint64(counter)
-		// copy counter to nonce
-		binary.LittleEndian.PutUint64(nonce[0x4:0xc], elem.counter)
-		elem.packet, err = elem.keypair.receive.Open(
-			content[:0],
-			nonce[:],
-			content,
-			nil,
-		)
-		if err != nil {
-			elem.packet = nil
+			// decrypt and release to consumer
+			var err error
+			elem.counter = binary.LittleEndian.Uint64(counter)
+			// copy counter to nonce
+			binary.LittleEndian.PutUint64(nonce[0x4:0xc], elem.counter)
+			elem.packet, err = elem.keypair.receive.Open(
+				content[:0],
+				nonce[:],
+				content,
+				nil,
+			)
+			if err != nil {
+				elem.packet = nil
+			}
 		}
-		elem.Unlock()
+		elemsContainer.Unlock()
 	}
 }
 
@@ -432,14 +438,14 @@ func (peer *Peer) RoutineSequentialReceiver(maxBatchSize int) {
 	}()
 	device.log.Verbosef("%v - Routine: sequential receiver - started", peer)
 
-	buffs := make([][]byte, 0, maxBatchSize)
+	bufs := make([][]byte, 0, maxBatchSize)
 
-	for elems := range peer.queue.inbound.c {
-		if elems == nil {
+	for elemsContainer := range peer.queue.inbound.c {
+		if elemsContainer == nil {
 			return
 		}
-		for _, elem := range *elems {
-			elem.Lock()
+		elemsContainer.Lock()
+		for _, elem := range elemsContainer.elems {
 			if elem.packet == nil {
 				// decryption failed
 				continue
@@ -466,7 +472,7 @@ func (peer *Peer) RoutineSequentialReceiver(maxBatchSize int) {
 			peer.timersDataReceived()
 
 			switch elem.packet[0] >> 4 {
-			case ipv4.Version:
+			case 4:
 				if len(elem.packet) < ipv4.HeaderLen {
 					continue
 				}
@@ -482,7 +488,7 @@ func (peer *Peer) RoutineSequentialReceiver(maxBatchSize int) {
 					continue
 				}
 
-			case ipv6.Version:
+			case 6:
 				if len(elem.packet) < ipv6.HeaderLen {
 					continue
 				}
@@ -504,19 +510,19 @@ func (peer *Peer) RoutineSequentialReceiver(maxBatchSize int) {
 				continue
 			}
 
-			buffs = append(buffs, elem.buffer[:MessageTransportOffsetContent+len(elem.packet)])
+			bufs = append(bufs, elem.buffer[:MessageTransportOffsetContent+len(elem.packet)])
 		}
-		if len(buffs) > 0 {
-			_, err := device.tun.device.Write(buffs, MessageTransportOffsetContent)
+		if len(bufs) > 0 {
+			_, err := device.tun.device.Write(bufs, MessageTransportOffsetContent)
 			if err != nil && !device.isClosed() {
 				device.log.Errorf("Failed to write packets to TUN device: %v", err)
 			}
 		}
-		for _, elem := range *elems {
+		for _, elem := range elemsContainer.elems {
 			device.PutMessageBuffer(elem.buffer)
 			device.PutInboundElement(elem)
 		}
-		buffs = buffs[:0]
-		device.PutInboundElementsSlice(elems)
+		bufs = bufs[:0]
+		device.PutInboundElementsContainer(elemsContainer)
 	}
 }

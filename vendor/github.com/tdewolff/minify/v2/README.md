@@ -8,6 +8,8 @@
 
 **[JavaScript bindings](https://www.npmjs.com/package/@tdewolff/minify)** install with `npm i @tdewolff/minify`
 
+**[.NET bindings](https://github.com/JKamsker/NMinify)** install with `Install-Package NMinify` or `dotnet add package NMinify`, thanks to Jonas Kamsker for the port
+
 ---
 
 *Did you know that the shortest valid piece of HTML5 is `<!doctype html><title>x</title>`? See for yourself at the [W3C Validator](http://validator.w3.org/)!*
@@ -77,7 +79,7 @@ Minifiers or bindings to minifiers exist in almost all programming languages. So
 This minifier proves to be that fast and extensive minifier that can handle HTML and any other filetype it may contain (CSS, JS, ...). It is usually orders of magnitude faster than existing minifiers.
 
 ## Installation
-Make sure you have [Git](https://git-scm.com/) and [Go](https://golang.org/dl/) (1.13 or higher) installed, run
+Make sure you have [Git](https://git-scm.com/) and [Go](https://golang.org/dl/) (1.18 or higher) installed, run
 ```
 mkdir Project
 cd Project
@@ -278,6 +280,7 @@ Options:
 
 - `KeepVarNames` keeps variable names as they are and omits shortening variable names
 - `Precision` number of significant digits to preserve for numbers, `0` means no trimming
+- `Version` ECMAScript version to use for output, `0` is the latest
 
 ### Comparison with other tools
 

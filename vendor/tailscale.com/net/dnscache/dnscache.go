@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // TODO(bradfitz): update this code to use netaddr more
 
@@ -22,9 +21,11 @@ import (
 	"time"
 
 	"tailscale.com/envknob"
+	"tailscale.com/net/netmon"
 	"tailscale.com/types/logger"
 	"tailscale.com/util/cloudenv"
 	"tailscale.com/util/singleflight"
+	"tailscale.com/util/slicesx"
 )
 
 var zaddr netip.Addr
@@ -91,6 +92,11 @@ type Resolver struct {
 	// be added to all log messages printed with this logger.
 	Logf logger.Logf
 
+	// NetMon optionally provides a netmon.Monitor to use to get the current
+	// (cached) network interface.
+	// If nil, the interface will be looked up dynamically.
+	NetMon *netmon.Monitor
+
 	sf singleflight.Group[string, ipRes]
 
 	mu      sync.Mutex
@@ -136,10 +142,6 @@ func (r *Resolver) dlogf(format string, args ...any) {
 func (r *Resolver) cloudHostResolver() (v *net.Resolver, ok bool) {
 	switch runtime.GOOS {
 	case "android", "ios", "darwin":
-		return nil, false
-	case "windows":
-		// TODO(bradfitz): remove this restriction once we're using Go 1.19
-		// which supports net.Resolver.PreferGo on Windows.
 		return nil, false
 	}
 	ip := cloudenv.Get().ResolverIP()
@@ -578,7 +580,7 @@ func (dc *dialCall) raceDial(ctx context.Context, ips []netip.Addr) (net.Conn, e
 			iv4 = append(iv4, ip)
 		}
 	}
-	ips = interleaveSlices(iv6, iv4)
+	ips = slicesx.Interleave(iv6, iv4)
 
 	go func() {
 		for i, ip := range ips {
@@ -635,21 +637,6 @@ func (dc *dialCall) raceDial(ctx context.Context, ips []netip.Addr) (net.Conn, e
 			return nil, ctx.Err()
 		}
 	}
-}
-
-// interleaveSlices combines two slices of the form [a, b, c] and [x, y, z]
-// into a slice with elements interleaved; i.e. [a, x, b, y, c, z].
-func interleaveSlices[T any](a, b []T) []T {
-	var (
-		i   int
-		ret = make([]T, 0, len(a)+len(b))
-	)
-	for i = 0; i < len(a) && i < len(b); i++ {
-		ret = append(ret, a[i], b[i])
-	}
-	ret = append(ret, a[i:]...)
-	ret = append(ret, b[i:]...)
-	return ret
 }
 
 func v4addrs(aa []netip.Addr) (ret []netip.Addr) {

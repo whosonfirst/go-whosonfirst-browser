@@ -3,9 +3,10 @@ package writer
 import (
 	"context"
 	"fmt"
-	"github.com/sfomuseum/runtimevar"
 	"net/url"
 	"strings"
+
+	"github.com/sfomuseum/runtimevar"
 )
 
 // EnsureGitHubAccessToken ensures that 'writer_uri' contains a '?access_token=VALUE' parameter. This only

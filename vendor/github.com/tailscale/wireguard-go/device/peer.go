@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package device
@@ -45,9 +45,9 @@ type Peer struct {
 	}
 
 	queue struct {
-		staged   chan *[]*QueueOutboundElement // staged packets before a handshake is available
-		outbound *autodrainingOutboundQueue    // sequential ordering of udp transmission
-		inbound  *autodrainingInboundQueue     // sequential ordering of tun writing
+		staged   chan *QueueOutboundElementsContainer // staged packets before a handshake is available
+		outbound *autodrainingOutboundQueue           // sequential ordering of udp transmission
+		inbound  *autodrainingInboundQueue            // sequential ordering of tun writing
 	}
 
 	cookieGenerator             CookieGenerator
@@ -81,7 +81,7 @@ func (device *Device) NewPeer(pk NoisePublicKey) (*Peer, error) {
 	peer.device = device
 	peer.queue.outbound = newAutodrainingOutboundQueue(device)
 	peer.queue.inbound = newAutodrainingInboundQueue(device)
-	peer.queue.staged = make(chan *[]*QueueOutboundElement, QueueStagedSize)
+	peer.queue.staged = make(chan *QueueOutboundElementsContainer, QueueStagedSize)
 
 	// map public key
 	_, ok := device.peers.keyMap[pk]
@@ -92,7 +92,7 @@ func (device *Device) NewPeer(pk NoisePublicKey) (*Peer, error) {
 	// pre-compute DH
 	handshake := &peer.handshake
 	handshake.mutex.Lock()
-	handshake.precomputedStaticStatic = device.staticIdentity.privateKey.sharedSecret(pk)
+	handshake.precomputedStaticStatic, _ = device.staticIdentity.privateKey.sharedSecret(pk)
 	handshake.remoteStatic = pk
 	handshake.mutex.Unlock()
 
@@ -125,11 +125,11 @@ func (peer *Peer) SendBuffers(buffers [][]byte) error {
 
 	err := peer.device.net.bind.Send(buffers, peer.endpoint)
 	if err == nil {
-		var totalLen int
+		var totalLen uint64
 		for _, b := range buffers {
-			totalLen += len(b)
+			totalLen += uint64(len(b))
 		}
-		peer.txBytes.Add(uint64(totalLen))
+		peer.txBytes.Add(totalLen)
 	}
 	return err
 }
@@ -210,10 +210,10 @@ func (peer *Peer) ZeroAndFlushAll() {
 	keypairs.Lock()
 	device.DeleteKeypair(keypairs.previous)
 	device.DeleteKeypair(keypairs.current)
-	device.DeleteKeypair(keypairs.next)
+	device.DeleteKeypair(keypairs.next.Load())
 	keypairs.previous = nil
 	keypairs.current = nil
-	keypairs.next = nil
+	keypairs.next.Store(nil)
 	keypairs.Unlock()
 
 	// clear handshake state
@@ -240,8 +240,8 @@ func (peer *Peer) ExpireCurrentKeypairs() {
 	if keypairs.current != nil {
 		keypairs.current.sendNonce.Store(RejectAfterMessages)
 	}
-	if keypairs.next != nil {
-		keypairs.next.sendNonce.Store(RejectAfterMessages)
+	if next := keypairs.next.Load(); next != nil {
+		next.sendNonce.Store(RejectAfterMessages)
 	}
 	keypairs.Unlock()
 }

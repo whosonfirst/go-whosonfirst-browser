@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package tun
@@ -127,6 +127,9 @@ func (tun *NativeTun) MTU() (int, error) {
 
 // TODO: This is a temporary hack. We really need to be monitoring the interface in real time and adapting to MTU changes.
 func (tun *NativeTun) ForceMTU(mtu int) {
+	if tun.close.Load() {
+		return
+	}
 	update := tun.forcedMTU != mtu
 	tun.forcedMTU = mtu
 	if update {
@@ -141,7 +144,7 @@ func (tun *NativeTun) BatchSize() int {
 
 // Note: Read() and Write() assume the caller comes only from a single thread; there's no locking.
 
-func (tun *NativeTun) Read(buffs [][]byte, sizes []int, offset int) (int, error) {
+func (tun *NativeTun) Read(bufs [][]byte, sizes []int, offset int) (int, error) {
 	tun.running.Add(1)
 	defer tun.running.Done()
 retry:
@@ -158,7 +161,7 @@ retry:
 		switch err {
 		case nil:
 			packetSize := len(packet)
-			copy(buffs[0][offset:], packet)
+			copy(bufs[0][offset:], packet)
 			sizes[0] = packetSize
 			tun.session.ReleaseReceivePacket(packet)
 			tun.rate.update(uint64(packetSize))
@@ -179,22 +182,22 @@ retry:
 	}
 }
 
-func (tun *NativeTun) Write(buffs [][]byte, offset int) (int, error) {
+func (tun *NativeTun) Write(bufs [][]byte, offset int) (int, error) {
 	tun.running.Add(1)
 	defer tun.running.Done()
 	if tun.close.Load() {
 		return 0, os.ErrClosed
 	}
 
-	for i, buff := range buffs {
-		packetSize := len(buff) - offset
+	for i, buf := range bufs {
+		packetSize := len(buf) - offset
 		tun.rate.update(uint64(packetSize))
 
 		packet, err := tun.session.AllocateSendPacket(packetSize)
 		switch err {
 		case nil:
 			// TODO: Explore options to eliminate this copy.
-			copy(packet, buff[offset:])
+			copy(packet, buf[offset:])
 			tun.session.SendPacket(packet)
 			continue
 		case windows.ERROR_HANDLE_EOF:
@@ -205,7 +208,7 @@ func (tun *NativeTun) Write(buffs [][]byte, offset int) (int, error) {
 			return i, fmt.Errorf("Write failed: %w", err)
 		}
 	}
-	return len(buffs), nil
+	return len(bufs), nil
 }
 
 // LUID returns Windows interface instance ID.

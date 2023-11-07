@@ -117,6 +117,9 @@ aaronland.maps = (function(){
 		    var tangramLayer = Tangram.leafletLayer(tangram_opts);
 		    
 		    tangramLayer.addTo(map);
+		case "null":
+		    break
+
 		default:
 		    console.log("Unsupported map provider ", map_provider);
 	    }

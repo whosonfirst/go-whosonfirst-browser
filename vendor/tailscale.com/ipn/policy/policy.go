@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package policy contains various policy decisions that need to be
 // shared between the node client & control server.
@@ -27,8 +26,8 @@ func IsInterestingService(s tailcfg.Service, os string) bool {
 		// there.
 		return true
 	}
-	// Windows has tons of TCP listeners. We need to move to a blacklist
-	// model later, but for now we just whitelist some common ones:
+	// Windows has tons of TCP listeners. We need to move to a denylist
+	// model later, but for now we just allow some common ones:
 	switch s.Port {
 	case 22, // ssh
 		80,    // http

@@ -1,10 +1,11 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package preftype is a leaf package containing types for various
 // preferences.
 package preftype
+
+import "fmt"
 
 // NetfilterMode is the firewall management mode to use when
 // programming the Linux network stack.
@@ -17,6 +18,19 @@ const (
 	NetfilterNoDivert NetfilterMode = 1 // manage tailscale chains, but don't call them
 	NetfilterOn       NetfilterMode = 2 // manage tailscale chains and call them from main chains
 )
+
+func ParseNetfilterMode(s string) (NetfilterMode, error) {
+	switch s {
+	case "off":
+		return NetfilterOff, nil
+	case "nodivert":
+		return NetfilterNoDivert, nil
+	case "on":
+		return NetfilterOn, nil
+	default:
+		return NetfilterOff, fmt.Errorf("unknown netfilter mode %q", s)
+	}
+}
 
 func (m NetfilterMode) String() string {
 	switch m {

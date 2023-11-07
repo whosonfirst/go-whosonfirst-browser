@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// NULL_SCHEME is the URI scheme used to identify NullProvider instances.
 const NULL_SCHEME string = "null"
 
 func init() {
@@ -13,14 +14,19 @@ func init() {
 	RegisterProvider(ctx, NULL_SCHEME, NewNullProvider)
 }
 
+// type NullProvider implements the Provider interface to return empty (null) identifiers.
 type NullProvider struct {
 	Provider
 }
 
+// type NullProvider implements the UID interface to return empty (null) identifiers.
 type NullUID struct {
 	UID
 }
 
+// NewNullProvider
+//
+//	null://
 func NewNullProvider(ctx context.Context, uri string) (Provider, error) {
 	pr := &NullProvider{}
 	return pr, nil

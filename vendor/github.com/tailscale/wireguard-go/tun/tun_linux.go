@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package tun
@@ -330,7 +330,7 @@ func (tun *NativeTun) nameSlow() (string, error) {
 	return unix.ByteSliceToString(ifr[:]), nil
 }
 
-func (tun *NativeTun) Write(buffs [][]byte, offset int) (int, error) {
+func (tun *NativeTun) Write(bufs [][]byte, offset int) (int, error) {
 	tun.writeOpMu.Lock()
 	defer func() {
 		tun.tcp4GROTable.reset()
@@ -338,47 +338,47 @@ func (tun *NativeTun) Write(buffs [][]byte, offset int) (int, error) {
 		tun.writeOpMu.Unlock()
 	}()
 	var (
-		errs  []error
+		errs  error
 		total int
 	)
 	tun.toWrite = tun.toWrite[:0]
 	if tun.vnetHdr {
-		err := handleGRO(buffs, offset, tun.tcp4GROTable, tun.tcp6GROTable, &tun.toWrite)
+		err := handleGRO(bufs, offset, tun.tcp4GROTable, tun.tcp6GROTable, &tun.toWrite)
 		if err != nil {
 			return 0, err
 		}
 		offset -= virtioNetHdrLen
 	} else {
-		for i := range buffs {
+		for i := range bufs {
 			tun.toWrite = append(tun.toWrite, i)
 		}
 	}
-	for _, buffsI := range tun.toWrite {
-		n, err := tun.tunFile.Write(buffs[buffsI][offset:])
+	for _, bufsI := range tun.toWrite {
+		n, err := tun.tunFile.Write(bufs[bufsI][offset:])
 		if errors.Is(err, syscall.EBADFD) {
 			return total, os.ErrClosed
 		}
 		if err != nil {
-			errs = append(errs, err)
+			errs = errors.Join(errs, err)
 		} else {
 			total += n
 		}
 	}
-	return total, ErrorBatch(errs)
+	return total, errs
 }
 
-// handleVirtioRead splits in into buffs, leaving offset bytes at the front of
-// each buffer. It mutates sizes to reflect the size of each element of buffs,
+// handleVirtioRead splits in into bufs, leaving offset bytes at the front of
+// each buffer. It mutates sizes to reflect the size of each element of bufs,
 // and returns the number of packets read.
-func handleVirtioRead(in []byte, buffs [][]byte, sizes []int, offset int) (int, error) {
+func handleVirtioRead(in []byte, bufs [][]byte, sizes []int, offset int) (int, error) {
 	var hdr virtioNetHdr
 	err := hdr.decode(in)
 	if err != nil {
 		return 0, err
 	}
 	in = in[virtioNetHdrLen:]
-	if hdr.gsoType == virtioNetHeaderGSOTypeNone {
-		if hdr.flags&virtioNetHeaderFlagsNeedsCSum != 0 {
+	if hdr.gsoType == unix.VIRTIO_NET_HDR_GSO_NONE {
+		if hdr.flags&unix.VIRTIO_NET_HDR_F_NEEDS_CSUM != 0 {
 			// This means CHECKSUM_PARTIAL in skb context. We are responsible
 			// for computing the checksum starting at hdr.csumStart and placing
 			// at hdr.csumOffset.
@@ -387,25 +387,25 @@ func handleVirtioRead(in []byte, buffs [][]byte, sizes []int, offset int) (int, 
 				return 0, err
 			}
 		}
-		if len(in) > len(buffs[0][offset:]) {
-			return 0, fmt.Errorf("read len %d overflows buffs element len %d", len(in), len(buffs[0][offset:]))
+		if len(in) > len(bufs[0][offset:]) {
+			return 0, fmt.Errorf("read len %d overflows bufs element len %d", len(in), len(bufs[0][offset:]))
 		}
-		n := copy(buffs[0][offset:], in)
+		n := copy(bufs[0][offset:], in)
 		sizes[0] = n
 		return 1, nil
 	}
-	if hdr.gsoType != virtioNetHeaderGSOTypeTCPV4 && hdr.gsoType != virtioNetHeaderGSOTypeTCPV6 {
+	if hdr.gsoType != unix.VIRTIO_NET_HDR_GSO_TCPV4 && hdr.gsoType != unix.VIRTIO_NET_HDR_GSO_TCPV6 {
 		return 0, fmt.Errorf("unsupported virtio GSO type: %d", hdr.gsoType)
 	}
 
 	ipVersion := in[0] >> 4
 	switch ipVersion {
 	case 4:
-		if hdr.gsoType != virtioNetHeaderGSOTypeTCPV4 {
+		if hdr.gsoType != unix.VIRTIO_NET_HDR_GSO_TCPV4 {
 			return 0, fmt.Errorf("ip header version: %d, GSO type: %d", ipVersion, hdr.gsoType)
 		}
 	case 6:
-		if hdr.gsoType != virtioNetHeaderGSOTypeTCPV6 {
+		if hdr.gsoType != unix.VIRTIO_NET_HDR_GSO_TCPV6 {
 			return 0, fmt.Errorf("ip header version: %d, GSO type: %d", ipVersion, hdr.gsoType)
 		}
 	default:
@@ -438,17 +438,17 @@ func handleVirtioRead(in []byte, buffs [][]byte, sizes []int, offset int) (int, 
 		return 0, fmt.Errorf("end of checksum offset (%d) exceeds packet length (%d)", cSumAt+1, len(in))
 	}
 
-	return tcpTSO(in, hdr, buffs, sizes, offset)
+	return tcpTSO(in, hdr, bufs, sizes, offset)
 }
 
-func (tun *NativeTun) Read(buffs [][]byte, sizes []int, offset int) (int, error) {
+func (tun *NativeTun) Read(bufs [][]byte, sizes []int, offset int) (int, error) {
 	tun.readOpMu.Lock()
 	defer tun.readOpMu.Unlock()
 	select {
 	case err := <-tun.errors:
 		return 0, err
 	default:
-		readInto := buffs[0][offset:]
+		readInto := bufs[0][offset:]
 		if tun.vnetHdr {
 			readInto = tun.readBuff[:]
 		}
@@ -460,7 +460,7 @@ func (tun *NativeTun) Read(buffs [][]byte, sizes []int, offset int) (int, error)
 			return 0, err
 		}
 		if tun.vnetHdr {
-			return handleVirtioRead(readInto[:n], buffs, sizes, offset)
+			return handleVirtioRead(readInto[:n], bufs, sizes, offset)
 		} else {
 			sizes[0] = n
 			return 1, nil
@@ -495,36 +495,9 @@ func (tun *NativeTun) BatchSize() int {
 	return tun.batchSize
 }
 
-func (tun *NativeTun) DisableOffload() error {
-	sc, err := tun.File().SyscallConn()
-	if err != nil {
-		return err
-	}
-	var ierr error
-	if err := sc.Control(func(fd uintptr) {
-		ierr = unix.IoctlSetInt(int(fd), unix.TUNSETOFFLOAD, ^tunOffloads)
-	}); err != nil {
-		return err
-	}
-
-	if ierr == nil {
-		tun.batchSize = 1
-	}
-	return ierr
-}
-
-// TUN offload features (TUNSETOFFLOAD ioctl) are defined in the kernel in
-// include/uapi/if_tun.h. The kernel symbols begin with TUN_F_.
-const (
-	tunOffloadFeatureChecksum = 0x01
-	tunOffloadFeatureTSO4     = 0x02
-	tunOffloadFeatureTSO6     = 0x04
-	tunOffloadFeatureTSOECN   = 0x08
-)
-
 const (
 	// TODO: support TSO with ECN bits
-	tunOffloads = tunOffloadFeatureChecksum | tunOffloadFeatureTSO4 | tunOffloadFeatureTSO6
+	tunOffloads = unix.TUN_F_CSUM | unix.TUN_F_TSO4 | unix.TUN_F_TSO6
 )
 
 func (tun *NativeTun) initFromFlags(name string) error {
@@ -551,7 +524,7 @@ func (tun *NativeTun) initFromFlags(name string) error {
 				return
 			}
 			tun.vnetHdr = true
-			tun.batchSize = conn.DefaultBatchSize
+			tun.batchSize = conn.IdealBatchSize
 		} else {
 			tun.batchSize = 1
 		}
@@ -604,7 +577,7 @@ func CreateTUNFromFile(file *os.File, mtu int) (Device, error) {
 		statusListenersShutdown: make(chan struct{}),
 		tcp4GROTable:            newTCPGROTable(),
 		tcp6GROTable:            newTCPGROTable(),
-		toWrite:                 make([]int, 0, conn.DefaultBatchSize),
+		toWrite:                 make([]int, 0, conn.IdealBatchSize),
 	}
 
 	name, err := tun.Name()
@@ -660,7 +633,7 @@ func CreateUnmonitoredTUNFromFD(fd int) (Device, string, error) {
 		errors:       make(chan error, 5),
 		tcp4GROTable: newTCPGROTable(),
 		tcp6GROTable: newTCPGROTable(),
-		toWrite:      make([]int, 0, conn.DefaultBatchSize),
+		toWrite:      make([]int, 0, conn.IdealBatchSize),
 	}
 	name, err := tun.Name()
 	if err != nil {

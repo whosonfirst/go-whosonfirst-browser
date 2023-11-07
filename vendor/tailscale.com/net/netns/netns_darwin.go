@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build darwin
 
@@ -20,24 +19,26 @@ import (
 	"golang.org/x/sys/unix"
 	"tailscale.com/envknob"
 	"tailscale.com/net/interfaces"
+	"tailscale.com/net/netmon"
+	"tailscale.com/net/tsaddr"
 	"tailscale.com/types/logger"
 )
 
-func control(logf logger.Logf) func(network, address string, c syscall.RawConn) error {
+func control(logf logger.Logf, netMon *netmon.Monitor) func(network, address string, c syscall.RawConn) error {
 	return func(network, address string, c syscall.RawConn) error {
-		return controlLogf(logf, network, address, c)
+		return controlLogf(logf, netMon, network, address, c)
 	}
 }
 
 var bindToInterfaceByRouteEnv = envknob.RegisterBool("TS_BIND_TO_INTERFACE_BY_ROUTE")
 
-var errInterfaceIndexInvalid = errors.New("interface index invalid")
+var errInterfaceStateInvalid = errors.New("interface state invalid")
 
 // controlLogf marks c as necessary to dial in a separate network namespace.
 //
 // It's intentionally the same signature as net.Dialer.Control
 // and net.ListenConfig.Control.
-func controlLogf(logf logger.Logf, network, address string, c syscall.RawConn) error {
+func controlLogf(logf logger.Logf, netMon *netmon.Monitor, network, address string, c syscall.RawConn) error {
 	if isLocalhost(address) {
 		// Don't bind to an interface for localhost connections.
 		return nil
@@ -48,7 +49,7 @@ func controlLogf(logf logger.Logf, network, address string, c syscall.RawConn) e
 		return nil
 	}
 
-	idx, err := getInterfaceIndex(logf, address)
+	idx, err := getInterfaceIndex(logf, netMon, address)
 	if err != nil {
 		// callee logged
 		return nil
@@ -57,15 +58,31 @@ func controlLogf(logf logger.Logf, network, address string, c syscall.RawConn) e
 	return bindConnToInterface(c, network, address, idx, logf)
 }
 
-func getInterfaceIndex(logf logger.Logf, address string) (int, error) {
+func getInterfaceIndex(logf logger.Logf, netMon *netmon.Monitor, address string) (int, error) {
 	// Helper so we can log errors.
 	defaultIdx := func() (int, error) {
-		idx, err := interfaces.DefaultRouteInterfaceIndex()
-		if err != nil {
-			logf("[unexpected] netns: DefaultRouteInterfaceIndex: %v", err)
-			return -1, err
+		if netMon == nil {
+			idx, err := interfaces.DefaultRouteInterfaceIndex()
+			if err != nil {
+				// It's somewhat common for there to be no default gateway route
+				// (e.g. on a phone with no connectivity), don't log those errors
+				// since they are expected.
+				if !errors.Is(err, interfaces.ErrNoGatewayIndexFound) {
+					logf("[unexpected] netns: DefaultRouteInterfaceIndex: %v", err)
+				}
+				return -1, err
+			}
+			return idx, nil
 		}
-		return idx, nil
+		state := netMon.InterfaceState()
+		if state == nil {
+			return -1, errInterfaceStateInvalid
+		}
+
+		if iface, ok := state.Interface[state.DefaultRouteInterface]; ok {
+			return iface.Index, nil
+		}
+		return -1, errInterfaceStateInvalid
 	}
 
 	useRoute := bindToInterfaceByRoute.Load() || bindToInterfaceByRouteEnv()
@@ -94,13 +111,41 @@ func getInterfaceIndex(logf logger.Logf, address string) (int, error) {
 
 	// Verify that we didn't just choose the Tailscale interface;
 	// if so, we fall back to binding from the default.
-	_, tsif, err2 := interfaces.Tailscale()
-	if err2 == nil && tsif.Index == idx {
+	tsif, err2 := tailscaleInterface()
+	if err2 == nil && tsif != nil && tsif.Index == idx {
 		logf("[unexpected] netns: interfaceIndexFor returned Tailscale interface")
 		return defaultIdx()
 	}
 
 	return idx, err
+}
+
+// tailscaleInterface returns the current machine's Tailscale interface, if any.
+// If none is found, (nil, nil) is returned.
+// A non-nil error is only returned on a problem listing the system interfaces.
+func tailscaleInterface() (*net.Interface, error) {
+	ifs, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
+	for _, iface := range ifs {
+		if !strings.HasPrefix(iface.Name, "utun") {
+			continue
+		}
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, a := range addrs {
+			if ipnet, ok := a.(*net.IPNet); ok {
+				nip, ok := netip.AddrFromSlice(ipnet.IP)
+				if ok && tsaddr.IsTailscaleIP(nip.Unmap()) {
+					return &iface, nil
+				}
+			}
+		}
+	}
+	return nil, nil
 }
 
 // interfaceIndexFor returns the interface index that we should bind to in
@@ -120,7 +165,11 @@ func interfaceIndexFor(addr netip.Addr, canRecurse bool) (int, error) {
 	}
 
 	rm := route.RouteMessage{
-		Version: unix.RTM_VERSION,
+		// NOTE: This is unix.RTM_VERSION, but we want to pin this to a
+		// particular constant so that it doesn't change under us if
+		// the x/sys/unix package changes down the road. Currently this
+		// is 0x5 on both Darwin x86 and ARM64.
+		Version: 0x5,
 		Type:    unix.RTM_GET,
 		Flags:   unix.RTF_UP,
 		ID:      uintptr(os.Getpid()),
@@ -137,6 +186,25 @@ func interfaceIndexFor(addr netip.Addr, canRecurse bool) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("writing message: %w", err)
 	}
+
+	// On macOS, the RTM_GET call should return exactly one route message.
+	// Given the following sizes and constants:
+	//    - sizeof(struct rt_msghdr) = 92
+	//    - RTAX_MAX = 8
+	//    - sizeof(struct sockaddr_in6) = 28
+	//    - sizeof(struct sockaddr_in) = 16
+	//    - sizeof(struct sockaddr_dl) = 20
+	//
+	// The maximum buffer size should be:
+	//    sizeof(struct rt_msghdr) + RTAX_MAX*sizeof(struct sockaddr_in6)
+	//    = 92 + 8*28
+	//    = 316
+	//
+	// During my testing, responses are typically ~120 bytes.
+	//
+	// We provide a much larger buffer just in case we're off by a bit, or
+	// the kernel decides to return more than one message; 2048 bytes
+	// should be plenty here. This also means we can do a single Read.
 	var buf [2048]byte
 	n, err := unix.Read(fd, buf[:])
 	if err != nil {

@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package netstat returns the local machine's network connection table.
 package netstat
@@ -12,7 +11,7 @@ import (
 	"net/netip"
 	"unsafe"
 
-	"github.com/josharian/native"
+	"golang.org/x/sys/cpu"
 	"golang.org/x/sys/windows"
 	"tailscale.com/net/netaddr"
 )
@@ -203,7 +202,7 @@ func state(v uint32) string {
 }
 
 func ipport4(addr uint32, port uint16) netip.AddrPort {
-	if !native.IsBigEndian {
+	if !cpu.IsBigEndian {
 		addr = bits.ReverseBytes32(addr)
 	}
 	return netip.AddrPortFrom(
@@ -221,7 +220,7 @@ func ipport6(addr [16]byte, scope uint32, port uint16) netip.AddrPort {
 }
 
 func port(v *uint32) uint16 {
-	if !native.IsBigEndian {
+	if !cpu.IsBigEndian {
 		return uint16(bits.ReverseBytes32(*v) >> 16)
 	}
 	return uint16(*v >> 16)

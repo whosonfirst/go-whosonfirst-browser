@@ -1,23 +1,35 @@
-//go:build !windows && !linux && !js
+//go:build !windows && !linux && !wasm && !plan9 && !tamago
 
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package conn
 
-import "syscall"
+import (
+	"syscall"
+
+	"golang.org/x/sys/unix"
+)
 
 func init() {
 	controlFns = append(controlFns,
-		// Set SO_RCVBUF/SO_SNDBUF - this could be common with the _unix code except
-		// for the unfortunate type specificity of syscall.Handle.
 		func(network, address string, c syscall.RawConn) error {
 			return c.Control(func(fd uintptr) {
-				_ = syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_RCVBUF, socketBufferSize)
-				_ = syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_SNDBUF, socketBufferSize)
+				_ = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_RCVBUF, socketBufferSize)
+				_ = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_SNDBUF, socketBufferSize)
 			})
+		},
+
+		func(network, address string, c syscall.RawConn) error {
+			var err error
+			if network == "udp6" {
+				c.Control(func(fd uintptr) {
+					err = unix.SetsockoptInt(int(fd), unix.IPPROTO_IPV6, unix.IPV6_V6ONLY, 1)
+				})
+			}
+			return err
 		},
 	)
 }

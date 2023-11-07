@@ -26,7 +26,11 @@ body := []byte(`{"type":"Feature" ...}`)
 
 spatial_db, _ := database.NewSpatialDatabase(ctx, "sqlite://?dsn=/usr/local/data/whosonfirst.db")
 
-resolver, _ := hierarchy.NewPointInPolygonHierarchyResolver(ctx, spatial_db, nil)
+resolver_opts := &hierarchy.PointInPolygonHierarchyResolverOptions{
+	Database: spatial_db,
+}
+
+resolver, _ := hierarchy.NewPointInPolygonHierarchyResolver(ctx, resolver_opts)
 
 inputs := &spatial_filter.SPRInputs{}
 

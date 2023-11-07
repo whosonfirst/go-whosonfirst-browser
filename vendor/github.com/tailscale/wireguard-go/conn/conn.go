@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 // Package conn implements WireGuard's network connections.
@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	DefaultBatchSize = 128 // maximum number of packets handled per read and write
+	IdealBatchSize = 128 // maximum number of packets handled per read and write
 )
 
 // A ReceiveFunc receives at least one packet from the network and writes them
@@ -45,9 +45,9 @@ type Bind interface {
 	// This mark is passed to the kernel as the socket option SO_MARK.
 	SetMark(mark uint32) error
 
-	// Send writes one or more packets in buffs to address ep. The length of
-	// buffs must not exceed BatchSize().
-	Send(buffs [][]byte, ep Endpoint) error
+	// Send writes one or more packets in bufs to address ep. The length of
+	// bufs must not exceed BatchSize().
+	Send(bufs [][]byte, ep Endpoint) error
 
 	// ParseEndpoint creates a new endpoint from a string.
 	ParseEndpoint(s string) (Endpoint, error)
@@ -90,10 +90,6 @@ var (
 )
 
 func (fn ReceiveFunc) PrettyName() string {
-	return prettyName(fn)
-}
-
-func prettyName(fn interface{}) string {
 	name := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
 	// 0. cheese/taco.beansIPv6.func12.func21218-fm
 	name = strings.TrimSuffix(name, "-fm")

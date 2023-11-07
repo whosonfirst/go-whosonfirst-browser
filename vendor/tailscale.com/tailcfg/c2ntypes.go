@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // c2n (control-to-node) API types.
 
@@ -33,4 +32,35 @@ type C2NSSHUsernamesResponse struct {
 	// be too slow or unavailable, this list might be empty. This is effectively
 	// just a best effort set of hints.
 	Usernames []string
+}
+
+// C2NUpdateResponse is the response (from node to control) from the /update
+// handler. It tells control the status of its request for the node to update
+// its Tailscale installation.
+type C2NUpdateResponse struct {
+	// Err is the error message, if any.
+	Err string `json:",omitempty"`
+
+	// Enabled indicates whether the user has opted in to updates triggered from
+	// control.
+	Enabled bool
+
+	// Supported indicates whether remote updates are supported on this
+	// OS/platform.
+	Supported bool
+
+	// Started indicates whether the update has started.
+	Started bool
+}
+
+// C2NPostureIdentityResponse contains either a set of identifying serial number
+// from the client or a boolean indicating that the machine has opted out of
+// posture collection.
+type C2NPostureIdentityResponse struct {
+	// SerialNumbers is a list of serial numbers of the client machine.
+	SerialNumbers []string `json:",omitempty"`
+
+	// PostureDisabled indicates if the machine has opted out of
+	// device posture collection.
+	PostureDisabled bool `json:",omitempty"`
 }

@@ -26,5 +26,19 @@ cmd/tailscaled/tailscaled
 # Ignore personal VS Code settings
 .vscode/
 
+# Support personal project-specific GOPATH
+.gopath/
+
+# Ignore nix build result path
+/result
+
 # Ignore direnv nix-shell environment cache
 .direnv/
+
+# Ignore web client node modules
+.vite/
+client/web/node_modules
+client/web/build/assets
+
+/gocross
+/dist

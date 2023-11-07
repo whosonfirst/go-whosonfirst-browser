@@ -23,7 +23,11 @@ type Minifier struct {
 	Precision           int // number of significant digits
 	KeepVarNames        bool
 	useAlphabetVarNames bool
-	NoNullishOperator   bool
+	Version             int
+}
+
+func (o *Minifier) minVersion(version int) bool {
+	return o.Version == 0 || version <= o.Version
 }
 
 // Minify minifies JS data, it reads from r and writes to w.
@@ -37,18 +41,6 @@ func (o *Minifier) Minify(_ *minify.M, w io.Writer, r io.Reader, _ map[string]st
 	ast, err := js.Parse(z, js.Options{WhileToFor: true})
 	if err != nil {
 		return err
-	}
-
-	// license comments
-	for _, comment := range ast.Comments {
-		if 3 < len(comment) && comment[2] == '!' {
-			w.Write(comment)
-			if comment[1] == '/' {
-				w.Write(newlineBytes)
-			}
-		} else if 2 < len(comment) && comment[0] == '#' && comment[1] == '!' {
-			w.Write(comment)
-		}
 	}
 
 	m := &jsMinifier{
@@ -303,7 +295,7 @@ func (m *jsMinifier) minifyStmt(i js.IStmt) {
 		if stmt.Catch != nil {
 			m.write(catchBytes)
 			stmt.Catch.List = optimizeStmtList(stmt.Catch.List, defaultBlock)
-			if v, ok := stmt.Binding.(*js.Var); ok && v.Uses == 1 {
+			if v, ok := stmt.Binding.(*js.Var); ok && v.Uses == 1 && m.o.minVersion(2019) {
 				stmt.Catch.Scope.Declared = stmt.Catch.Scope.Declared[1:]
 				stmt.Binding = nil
 			}
@@ -405,6 +397,12 @@ func (m *jsMinifier) minifyStmt(i js.IStmt) {
 		stmt.Value[len(stmt.Value)-1] = '"'
 		m.write(stmt.Value)
 		m.requireSemicolon()
+	case *js.Comment:
+		// bang comment
+		m.write(stmt.Value)
+		if stmt.Value[1] == '/' {
+			m.write(newlineBytes)
+		}
 	}
 }
 

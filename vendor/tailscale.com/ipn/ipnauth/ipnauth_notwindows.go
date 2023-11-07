@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build !windows
 
@@ -21,4 +20,10 @@ func GetConnIdentity(_ logger.Logf, c net.Conn) (ci *ConnIdentity, err error) {
 	_, ci.isUnixSock = c.(*net.UnixConn)
 	ci.creds, _ = peercred.Get(c)
 	return ci, nil
+}
+
+// WindowsToken is unsupported when GOOS != windows and always returns
+// ErrNotImplemented.
+func (ci *ConnIdentity) WindowsToken() (WindowsToken, error) {
+	return nil, ErrNotImplemented
 }

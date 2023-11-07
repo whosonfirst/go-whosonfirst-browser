@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // This file is just the types. The bulk of the code is in poller.go.
 
@@ -18,7 +17,8 @@ import (
 type Port struct {
 	Proto   string // "tcp" or "udp"
 	Port    uint16 // port number
-	Process string // optional process name, if found
+	Process string // optional process name, if found (requires suitable permissions)
+	Pid     int    // process ID, if known (requires suitable permissions)
 }
 
 // List is a list of Ports.
@@ -70,12 +70,11 @@ func sortAndDedup(ps List) List {
 	out := ps[:0]
 	var last Port
 	for _, p := range ps {
-		protoPort := Port{Proto: p.Proto, Port: p.Port}
-		if last == protoPort {
+		if last.Proto == p.Proto && last.Port == p.Port {
 			continue
 		}
 		out = append(out, p)
-		last = protoPort
+		last = p
 	}
 	return out
 }

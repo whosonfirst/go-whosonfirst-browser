@@ -26,31 +26,50 @@ import (
 // returned, without the IPv6 wrapper. This is the common form returned by
 // the standard library's ParseIP: https://play.golang.org/p/qdjylUkKWxl.
 // To convert a standard library IP without the implicit unmapping, use
-// FromStdIPRaw.
+// netip.AddrFromSlice.
 func FromStdIP(std net.IP) (ip netip.Addr, ok bool) {
-	ret, ok := FromStdIPRaw(std)
-	if ret.Is4In6() {
-		ret = ret.Unmap()
+	ret, ok := netip.AddrFromSlice(std)
+	return ret.Unmap(), ok
+}
+
+// MustFromStdIP is like FromStdIP, but it panics if std is invalid.
+func MustFromStdIP(std net.IP) netip.Addr {
+	ret, ok := netip.AddrFromSlice(std)
+	if !ok {
+		panic("not a valid IP address")
 	}
-	return ret, ok
+	return ret.Unmap()
 }
 
 // FromStdIPRaw returns an IP from the standard library's IP type.
 // If std is invalid, ok is false.
 // Unlike FromStdIP, FromStdIPRaw does not do an implicit Unmap if
 // len(std) == 16 and contains an IPv6-mapped IPv4 address.
+//
+// Deprecated: use netip.AddrFromSlice instead.
 func FromStdIPRaw(std net.IP) (ip netip.Addr, ok bool) {
-	switch len(std) {
-	case 4:
-		return netip.AddrFrom4(*(*[4]byte)(std)), true
-	case 16:
-		return netip.AddrFrom16(*(*[16]byte)(std)), true
-	}
-	return netip.Addr{}, false
+	return netip.AddrFromSlice(std)
 }
 
-// IPNext returns the IP following ip.
+// ParsePrefixOrAddr parses s as an IP address prefix or IP address. If s parses
+// as an IP address prefix, its [net/netip.Prefix.Addr] is returned. The string
+// s can be an IPv4 address ("192.0.2.1"), IPv6 address ("2001:db8::68"), IPv4
+// prefix ("192.0.2.1/32"), or IPv6 prefix ("2001:db:68/96").
+func ParsePrefixOrAddr(s string) (netip.Addr, error) {
+	// Factored out of netip.ParsePrefix to avoid allocating an empty netip.Prefix in case it's
+	// an address and not a prefix.
+	i := strings.LastIndexByte(s, '/')
+	if i < 0 {
+		return netip.ParseAddr(s)
+	}
+	prefix, err := netip.ParsePrefix(s)
+	return prefix.Addr(), err
+}
+
+// AddrNext returns the IP following ip.
 // If there is none, it returns the IP zero value.
+//
+// Deprecated: use netip.Addr.Next instead.
 func AddrNext(ip netip.Addr) netip.Addr {
 	addr := u128From16(ip.As16()).addOne()
 	if ip.Is4() {
@@ -70,6 +89,8 @@ func AddrNext(ip netip.Addr) netip.Addr {
 
 // AddrPrior returns the IP before ip.
 // If there is none, it returns the IP zero value.
+//
+// Deprecated: use netip.Addr.Prev instead.
 func AddrPrior(ip netip.Addr) netip.Addr {
 	addr := u128From16(ip.As16())
 	if ip.Is4() {
@@ -90,7 +111,7 @@ func AddrPrior(ip netip.Addr) netip.Addr {
 func FromStdAddr(stdIP net.IP, port int, zone string) (_ netip.AddrPort, ok bool) {
 	ip, ok := FromStdIP(stdIP)
 	if !ok || port < 0 || port > math.MaxUint16 {
-		return
+		return netip.AddrPort{}, false
 	}
 	ip = ip.Unmap()
 	if zone != "" {
@@ -125,7 +146,7 @@ func FromStdIPNet(std *net.IPNet) (prefix netip.Prefix, ok bool) {
 	return netip.PrefixFrom(ip, ones), true
 }
 
-// Range returns the inclusive range of IPs that p covers.
+// RangeOfPrefix returns the inclusive range of IPs that p covers.
 //
 // If p is zero or otherwise invalid, Range returns the zero value.
 func RangeOfPrefix(p netip.Prefix) IPRange {
@@ -136,7 +157,7 @@ func RangeOfPrefix(p netip.Prefix) IPRange {
 	return IPRangeFrom(p.Addr(), PrefixLastIP(p))
 }
 
-// IPNet returns the net.IPNet representation of an netip.Prefix.
+// PrefixIPNet returns the net.IPNet representation of an netip.Prefix.
 // The returned value is always non-nil.
 // Any zone identifier is dropped in the conversion.
 func PrefixIPNet(p netip.Prefix) *net.IPNet {
@@ -145,7 +166,21 @@ func PrefixIPNet(p netip.Prefix) *net.IPNet {
 	}
 	return &net.IPNet{
 		IP:   p.Addr().AsSlice(),
-		Mask: net.CIDRMask(int(p.Bits()), int(p.Addr().BitLen())),
+		Mask: net.CIDRMask(p.Bits(), p.Addr().BitLen()),
+	}
+}
+
+// AddrIPNet returns the net.IPNet representation of an netip.Addr
+// with a mask corresponding to the addresses's bit length.
+// The returned value is always non-nil.
+// Any zone identifier is dropped in the conversion.
+func AddrIPNet(addr netip.Addr) *net.IPNet {
+	if !addr.IsValid() {
+		return &net.IPNet{}
+	}
+	return &net.IPNet{
+		IP:   addr.AsSlice(),
+		Mask: net.CIDRMask(addr.BitLen(), addr.BitLen()),
 	}
 }
 
@@ -524,4 +559,26 @@ func appendRangePrefixes(dst []netip.Prefix, makePrefix prefixMaker, a, b uint12
 	dst = appendRangePrefixes(dst, makePrefix, a, a.bitsSetFrom(common+1))
 	dst = appendRangePrefixes(dst, makePrefix, b.bitsClearedFrom(common+1), b)
 	return dst
+}
+
+// ComparePrefix is a compare function (returning -1, 0 or 1)
+// sorting prefixes first by address family (IPv4 before IPv6),
+// then by prefix length (smaller prefixes first), then by
+// address.
+func ComparePrefix(a, b netip.Prefix) int {
+	aa, ba := a.Addr(), b.Addr()
+	if al, bl := aa.BitLen(), ba.BitLen(); al != bl {
+		if al < bl {
+			return -1
+		}
+		return 1
+	}
+	ab, bb := a.Bits(), b.Bits()
+	if ab != bb {
+		if ab < bb {
+			return -1
+		}
+		return 1
+	}
+	return aa.Compare(ba)
 }

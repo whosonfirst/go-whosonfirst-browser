@@ -1,9 +1,8 @@
+GOMOD=$(shell test -f "go.work" && echo "readonly" || echo "vendor")
 CWD=$(shell pwd)
 
-GOMOD=vendor
-
 cli:
-	go build -ldflags="-s -w" -o bin/server cmd/server/main.go
+	go build -mod $(GOMOD) -ldflags="-s -w" -o bin/server cmd/server/main.go
 
 debug-tangram:
 	go run -mod $(GOMOD) cmd/server/main.go \
@@ -37,5 +36,11 @@ debug-leaflet:
 	-map-provider leaflet \
 	-leaflet-tile-url https://tile.openstreetmap.org/{z}/{x}/{y}.png \
 	-leaflet-enable-draw \
+	-javascript-at-eof \
+	-rollup-assets
+
+debug-null:
+	go run -mod $(GOMOD) cmd/server/main.go \
+	-map-provider null \
 	-javascript-at-eof \
 	-rollup-assets

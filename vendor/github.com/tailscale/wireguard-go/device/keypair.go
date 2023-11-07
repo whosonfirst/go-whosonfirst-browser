@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package device
@@ -33,15 +33,15 @@ type Keypair struct {
 }
 
 type Keypairs struct {
-	sync.Mutex
+	sync.RWMutex
 	current  *Keypair
 	previous *Keypair
-	next     *Keypair
+	next     atomic.Pointer[Keypair]
 }
 
 func (kp *Keypairs) Current() *Keypair {
-	kp.Lock()
-	defer kp.Unlock()
+	kp.RLock()
+	defer kp.RUnlock()
 	return kp.current
 }
 

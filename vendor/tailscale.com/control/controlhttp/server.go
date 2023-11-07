@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 package controlhttp
 
@@ -147,7 +146,7 @@ func acceptWebsocket(ctx context.Context, w http.ResponseWriter, r *http.Request
 		return nil, fmt.Errorf("decoding base64 handshake parameter: %v", err)
 	}
 
-	conn := wsconn.NetConn(ctx, c, websocket.MessageBinary)
+	conn := wsconn.NetConn(ctx, c, websocket.MessageBinary, r.RemoteAddr)
 	nc, err := controlbase.Server(ctx, conn, private, init)
 	if err != nil {
 		conn.Close()

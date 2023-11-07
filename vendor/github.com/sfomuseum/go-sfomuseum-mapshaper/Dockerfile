@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine AS builder
+FROM golang:1.20-alpine AS builder
 
 RUN mkdir /build
 
@@ -6,10 +6,10 @@ COPY . /build/go-sfomuseum-mapshaper
 
 RUN apk update && apk upgrade \
     && cd /build/go-sfomuseum-mapshaper \
-    && go build -mod vendor -o /usr/local/bin/mapshaper-server cmd/server/main.go \
+    && go build -mod vendor -ldflags="-s -w" -o /usr/local/bin/mapshaper-server cmd/server/main.go \
     && cd && rm -rf /build
 
-FROM node:15-alpine
+FROM node:18-alpine
 
 COPY --from=builder /usr/local/bin/mapshaper-server /usr/local/bin/mapshaper-server
 
@@ -18,5 +18,3 @@ COPY --from=builder /usr/local/bin/mapshaper-server /usr/local/bin/mapshaper-ser
 
 RUN apk update && apk upgrade
 RUN npm install -g mapshaper
-
-ENTRYPOINT ["/usr/local/bin/mapshaper-server"]

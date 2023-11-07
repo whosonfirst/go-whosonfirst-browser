@@ -1,12 +1,9 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
-//go:build windows && cgo
+//go:build windows
 
-// darwin,cgo is also supported by certstore but machineCertificateSubject will
-// need to be loaded by a different mechanism, so this is not currently enabled
-// on darwin.
+// darwin,cgo is also supported by certstore but untested, so it is not enabled.
 
 package controlclient
 
@@ -22,7 +19,7 @@ import (
 	"github.com/tailscale/certstore"
 	"tailscale.com/tailcfg"
 	"tailscale.com/types/key"
-	"tailscale.com/util/winutil"
+	"tailscale.com/util/syspolicy"
 )
 
 var getMachineCertificateSubjectOnce struct {
@@ -41,7 +38,7 @@ var getMachineCertificateSubjectOnce struct {
 // Example: "CN=Tailscale Inc Test Root CA,OU=Tailscale Inc Test Certificate Authority,O=Tailscale Inc,ST=ON,C=CA"
 func getMachineCertificateSubject() string {
 	getMachineCertificateSubjectOnce.Do(func() {
-		getMachineCertificateSubjectOnce.v = winutil.GetRegString("MachineCertificateSubject", "")
+		getMachineCertificateSubjectOnce.v, _ = syspolicy.GetString("MachineCertificateSubject", "")
 	})
 
 	return getMachineCertificateSubjectOnce.v
@@ -128,7 +125,7 @@ func findIdentity(subject string, st certstore.Store) (certstore.Identity, []*x5
 		return nil, nil, err
 	}
 
-	selected, chain := selectIdentityFromSlice(subject, ids, time.Now())
+	selected, chain := selectIdentityFromSlice(subject, ids, clock.Now())
 
 	for _, id := range ids {
 		if id != selected {

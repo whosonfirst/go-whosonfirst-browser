@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/paulmach/orb"
-	"github.com/paulmach/orb/geojson"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/geojson"	
 )
 
 // As in:

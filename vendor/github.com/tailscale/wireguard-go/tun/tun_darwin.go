@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package tun
@@ -33,7 +33,7 @@ type NativeTun struct {
 func retryInterfaceByIndex(index int) (iface *net.Interface, err error) {
 	for i := 0; i < 20; i++ {
 		iface, err = net.InterfaceByIndex(index)
-		if err != nil && errors.Is(err, syscall.ENOMEM) {
+		if err != nil && errors.Is(err, unix.ENOMEM) {
 			time.Sleep(time.Duration(i) * time.Second / 3)
 			continue
 		}
@@ -55,7 +55,7 @@ func (tun *NativeTun) routineRouteListener(tunIfindex int) {
 	retry:
 		n, err := unix.Read(tun.routeSocket, data)
 		if err != nil {
-			if errno, ok := err.(syscall.Errno); ok && errno == syscall.EINTR {
+			if errno, ok := err.(unix.Errno); ok && errno == unix.EINTR {
 				goto retry
 			}
 			tun.errors <- err
@@ -217,16 +217,16 @@ func (tun *NativeTun) Events() <-chan Event {
 	return tun.events
 }
 
-func (tun *NativeTun) Read(buffs [][]byte, sizes []int, offset int) (int, error) {
+func (tun *NativeTun) Read(bufs [][]byte, sizes []int, offset int) (int, error) {
 	// TODO: the BSDs look very similar in Read() and Write(). They should be
-	//  collapsed, with platform-specific files containing the varying parts of
-	//  their implementations.
+	// collapsed, with platform-specific files containing the varying parts of
+	// their implementations.
 	select {
 	case err := <-tun.errors:
 		return 0, err
 	default:
-		buff := buffs[0][offset-4:]
-		n, err := tun.tunFile.Read(buff[:])
+		buf := bufs[0][offset-4:]
+		n, err := tun.tunFile.Read(buf[:])
 		if n < 4 {
 			return 0, err
 		}
@@ -235,11 +235,11 @@ func (tun *NativeTun) Read(buffs [][]byte, sizes []int, offset int) (int, error)
 	}
 }
 
-func (tun *NativeTun) Write(buffs [][]byte, offset int) (int, error) {
+func (tun *NativeTun) Write(bufs [][]byte, offset int) (int, error) {
 	if offset < 4 {
 		return 0, io.ErrShortBuffer
 	}
-	for i, buf := range buffs {
+	for i, buf := range bufs {
 		buf = buf[offset-4:]
 		buf[0] = 0x00
 		buf[1] = 0x00
@@ -256,7 +256,7 @@ func (tun *NativeTun) Write(buffs [][]byte, offset int) (int, error) {
 			return i, err
 		}
 	}
-	return len(buffs), nil
+	return len(bufs), nil
 }
 
 func (tun *NativeTun) Close() error {

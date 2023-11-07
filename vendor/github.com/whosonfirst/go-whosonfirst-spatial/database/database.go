@@ -3,13 +3,14 @@ package database
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"sort"
+	"strings"
+
 	"github.com/aaronland/go-roster"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-spatial"
 	"github.com/whosonfirst/go-writer/v3"
-	"net/url"
-	"sort"
-	"strings"
 )
 
 type SpatialDatabase interface {

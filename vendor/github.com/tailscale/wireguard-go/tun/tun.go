@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package tun
@@ -23,16 +23,16 @@ type Device interface {
 
 	// Read one or more packets from the Device (without any additional headers).
 	// On a successful read it returns the number of packets read, and sets
-	// packet lengths within the sizes slice. len(sizes) must be >= len(buffs).
+	// packet lengths within the sizes slice. len(sizes) must be >= len(bufs).
 	// A nonzero offset can be used to instruct the Device on where to begin
-	// reading into each element of the buffs slice.
-	Read(buffs [][]byte, sizes []int, offset int) (n int, err error)
+	// reading into each element of the bufs slice.
+	Read(bufs [][]byte, sizes []int, offset int) (n int, err error)
 
 	// Write one or more packets to the device (without any additional headers).
 	// On a successful write it returns the number of packets written. A nonzero
 	// offset can be used to instruct the Device on where to begin writing from
-	// each packet contained within the buffs slice.
-	Write(buffs [][]byte, offset int) (int, error)
+	// each packet contained within the bufs slice.
+	Write(bufs [][]byte, offset int) (int, error)
 
 	// MTU returns the MTU of the Device.
 	MTU() (int, error)
@@ -47,15 +47,7 @@ type Device interface {
 	Close() error
 
 	// BatchSize returns the preferred/max number of packets that can be read or
-	// written in a single read/write call. If offloading is disabled, the batch
-	// size will be 1. BatchSize must not change over the lifetime of a Device,
-	// except to DisableOffload() (if Device is a DisableOffloader) prior to
-	// read/write operations commencing.
+	// written in a single read/write call. BatchSize must not change over the
+	// lifetime of a Device.
 	BatchSize() int
-}
-
-// DisableOffloader is a type that may be supported by Device implementations if
-// they support offloading, and support offloading being disabled.
-type DisableOffloader interface {
-	DisableOffload() error
 }

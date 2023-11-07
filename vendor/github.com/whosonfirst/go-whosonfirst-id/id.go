@@ -1,17 +1,15 @@
 package id
 
-// The two import statements to ensure that packages are loaded
-// in the correct order.
-
 import (
 	_ "github.com/aaronland/go-uid-whosonfirst"
+	_ "github.com/aaronland/go-uid-proxy"	
 )
 
 import (
 	"context"
 	"fmt"
+	
 	"github.com/aaronland/go-uid"
-	_ "github.com/aaronland/go-uid-proxy"
 )
 
 // type Provider is an interface for providing uniquer identifiers.

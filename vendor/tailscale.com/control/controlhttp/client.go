@@ -1,6 +1,5 @@
-// Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build !js
 
@@ -42,9 +41,11 @@ import (
 	"tailscale.com/net/dnscache"
 	"tailscale.com/net/dnsfallback"
 	"tailscale.com/net/netutil"
+	"tailscale.com/net/sockstats"
 	"tailscale.com/net/tlsdial"
 	"tailscale.com/net/tshttpproxy"
 	"tailscale.com/tailcfg"
+	"tailscale.com/tstime"
 	"tailscale.com/util/multierr"
 )
 
@@ -147,13 +148,16 @@ func (a *Dialer) dial(ctx context.Context) (*ClientConn, error) {
 			// before we do anything.
 			if c.DialStartDelaySec > 0 {
 				a.logf("[v2] controlhttp: waiting %.2f seconds before dialing %q @ %v", c.DialStartDelaySec, a.Hostname, c.IP)
-				tmr := time.NewTimer(time.Duration(c.DialStartDelaySec * float64(time.Second)))
+				if a.Clock == nil {
+					a.Clock = tstime.StdClock{}
+				}
+				tmr, tmrChannel := a.Clock.NewTimer(time.Duration(c.DialStartDelaySec * float64(time.Second)))
 				defer tmr.Stop()
 				select {
 				case <-ctx.Done():
 					err = ctx.Err()
 					return
-				case <-tmr.C:
+				case <-tmrChannel:
 				}
 			}
 
@@ -273,6 +277,8 @@ func (a *Dialer) dialHost(ctx context.Context, addr netip.Addr) (*ClientConn, er
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	ctx = sockstats.WithSockStats(ctx, sockstats.LabelControlClientDialer, a.logf)
+
 	// u80 and u443 are the URLs we'll try to hit over HTTP or HTTPS,
 	// respectively, in order to do the HTTP upgrade to a net.Conn over which
 	// we'll speak Noise.
@@ -317,7 +323,10 @@ func (a *Dialer) dialHost(ctx context.Context, addr netip.Addr) (*ClientConn, er
 
 	// In case outbound port 80 blocked or MITM'ed poorly, start a backup timer
 	// to dial port 443 if port 80 doesn't either succeed or fail quickly.
-	try443Timer := time.AfterFunc(a.httpsFallbackDelay(), func() { try(u443) })
+	if a.Clock == nil {
+		a.Clock = tstime.StdClock{}
+	}
+	try443Timer := a.Clock.AfterFunc(a.httpsFallbackDelay(), func() { try(u443) })
 	defer try443Timer.Stop()
 
 	var err80, err443 error
@@ -372,6 +381,22 @@ func (a *Dialer) dialURL(ctx context.Context, u *url.URL, addr netip.Addr) (*Cli
 	}, nil
 }
 
+// resolver returns a.DNSCache if non-nil or a new *dnscache.Resolver
+// otherwise.
+func (a *Dialer) resolver() *dnscache.Resolver {
+	if a.DNSCache != nil {
+		return a.DNSCache
+	}
+
+	return &dnscache.Resolver{
+		Forward:          dnscache.Get().Forward,
+		LookupIPFallback: dnsfallback.MakeLookupFunc(a.logf, a.NetMon),
+		UseLastGood:      true,
+		Logf:             a.Logf, // not a.logf method; we want to propagate nil-ness
+		NetMon:           a.NetMon,
+	}
+}
+
 // tryURLUpgrade connects to u, and tries to upgrade it to a net.Conn. If addr
 // is valid, then no DNS is used and the connection will be made to the
 // provided address.
@@ -386,13 +411,11 @@ func (a *Dialer) tryURLUpgrade(ctx context.Context, u *url.URL, addr netip.Addr,
 		dns = &dnscache.Resolver{
 			SingleHostStaticResult: []netip.Addr{addr},
 			SingleHost:             u.Hostname(),
+			Logf:                   a.Logf, // not a.logf method; we want to propagate nil-ness
+			NetMon:                 a.NetMon,
 		}
 	} else {
-		dns = &dnscache.Resolver{
-			Forward:          dnscache.Get().Forward,
-			LookupIPFallback: dnsfallback.Lookup,
-			UseLastGood:      true,
-		}
+		dns = a.resolver()
 	}
 
 	var dialer dnscache.DialContextFunc
@@ -411,10 +434,24 @@ func (a *Dialer) tryURLUpgrade(ctx context.Context, u *url.URL, addr netip.Addr,
 	tr.TLSClientConfig.NextProtos = []string{}
 	tr.TLSNextProto = map[string]func(string, *tls.Conn) http.RoundTripper{}
 	tr.TLSClientConfig = tlsdial.Config(a.Hostname, tr.TLSClientConfig)
-	if a.insecureTLS {
-		tr.TLSClientConfig.InsecureSkipVerify = true
-		tr.TLSClientConfig.VerifyConnection = nil
+	if !tr.TLSClientConfig.InsecureSkipVerify {
+		panic("unexpected") // should be set by tlsdial.Config
 	}
+	verify := tr.TLSClientConfig.VerifyConnection
+	if verify == nil {
+		panic("unexpected") // should be set by tlsdial.Config
+	}
+	// Demote all cert verification errors to log messages. We don't actually
+	// care about the TLS security (because we just do the Noise crypto atop whatever
+	// connection we get, including HTTP port 80 plaintext) so this permits
+	// middleboxes to MITM their users. All they'll see is some Noise.
+	tr.TLSClientConfig.VerifyConnection = func(cs tls.ConnectionState) error {
+		if err := verify(cs); err != nil && a.Logf != nil && !a.omitCertErrorLogging {
+			a.Logf("warning: TLS cert verificication for %q failed: %v", a.Hostname, err)
+		}
+		return nil // regardless
+	}
+
 	tr.DialTLSContext = dnscache.TLSDialer(dialer, dns, tr.TLSClientConfig)
 	tr.DisableCompression = true
 

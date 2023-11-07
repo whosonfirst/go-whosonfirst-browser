@@ -41,52 +41,6 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, flake-compat }: let
-    # Grab a helper func out of the Nix language libraries. Annoyingly
-    # these are only accessible through legacyPackages right now,
-    # which forces us to indirect through a platform-specific
-    # path. The x86_64-linux in here doesn't really matter, since all
-    # we're grabbing is a pure Nix string manipulation function that
-    # doesn't build any software.
-    fileContents = nixpkgs.legacyPackages.x86_64-linux.lib.fileContents;
-
-    tailscale-go-rev = fileContents ./go.toolchain.rev;
-    tailscale-go-sri = fileContents ./go.toolchain.sri;
-
-    # pkgsWithTailscaleGo takes a nixpkgs package set, and replaces
-    # its Go 1.19 compiler with tailscale's fork.
-    #
-    # We need to do this because the buildGoModule helper function is
-    # constructed with legacy nix imports, so we cannot construct a
-    # buildGoModule variant that uses tailscale's toolchain. Instead,
-    # we have to replace the toolchain in nixpkgs, and let lazy
-    # evaluation propagate it into the nixpkgs instance of
-    # buildGoModule.
-    #
-    # This is a bit roundabout, but there doesn't seem to be a more
-    # elegant way of resolving the impedance mismatch between legacy
-    # nixpkgs style imports and flake semantics, unless upstream
-    # nixpkgs exposes the buildGoModule constructor func explicitly.
-    pkgsWithTailscaleGo = pkgs: pkgs.extend (final: prev: rec {
-      tailscale_go = prev.lib.overrideDerivation prev.go_1_19 (attrs: rec {
-        name = "tailscale-go-${version}";
-        version = tailscale-go-rev;
-        src = pkgs.fetchFromGitHub {
-          owner = "tailscale";
-          repo = "go";
-          rev = tailscale-go-rev;
-          sha256 = tailscale-go-sri;
-        };
-        nativeBuildInputs = attrs.nativeBuildInputs ++ [ pkgs.git ];
-		    # Remove dependency on xcbuild as that causes iOS/macOS builds to fail.
-        propagatedBuildInputs = [];
-        checkPhase = "";
-        TAILSCALE_TOOLCHAIN_REV = tailscale-go-rev;
-      });
-      # Override go_1_19 so that buildGo119Module below uses
-      # tailscale's toolchain as well.
-      go_1_19 = tailscale_go;
-    });
-
     # tailscaleRev is the git commit at which this flake was imported,
     # or the empty string when building from a local checkout of the
     # tailscale repo.
@@ -100,7 +54,7 @@
     # specify vendorSha256, and that sha changes any time we alter
     # go.mod. We don't want to force a nix dependency on everyone
     # hacking on Tailscale, so this flake is likely to have broken
-    # builds periodically until somoene comes through and manually
+    # builds periodically until someone comes through and manually
     # fixes them up. I sure wish there was a way to express "please
     # just trust the local go.mod, vendorSha256 has no benefit here",
     # but alas.
@@ -108,21 +62,33 @@
     # So really, this flake is for tailscale devs to dogfood with, if
     # you're an end user you should be prepared for this flake to not
     # build periodically.
-    tailscale = pkgs: pkgs.buildGo119Module rec {
+    tailscale = pkgs: pkgs.buildGo121Module rec {
       name = "tailscale";
 
       src = ./.;
-      vendorSha256 = fileContents ./go.mod.sri;
-      nativeBuildInputs = pkgs.lib.optionals pkgs.stdenv.isLinux [ pkgs.makeWrapper pkgs.git ];
+      vendorSha256 = pkgs.lib.fileContents ./go.mod.sri;
+      nativeBuildInputs = pkgs.lib.optionals pkgs.stdenv.isLinux [ pkgs.makeWrapper ];
       ldflags = ["-X tailscale.com/version.GitCommit=${tailscaleRev}"];
       CGO_ENABLED = 0;
       subPackages = [ "cmd/tailscale" "cmd/tailscaled" ];
       doCheck = false;
+
+      # NOTE: We strip the ${PORT} and $FLAGS because they are unset in the
+      # environment and cause issues (specifically the unset PORT). At some
+      # point, there should be a NixOS module that allows configuration of these
+      # things, but for now, we hardcode the default of port 41641 (taken from
+      # ./cmd/tailscaled/tailscaled.defaults).
       postInstall = pkgs.lib.optionalString pkgs.stdenv.isLinux ''
         wrapProgram $out/bin/tailscaled --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.iproute2 pkgs.iptables pkgs.getent pkgs.shadow ]}
         wrapProgram $out/bin/tailscale --suffix PATH : ${pkgs.lib.makeBinPath [ pkgs.procps ]}
 
-        sed -i -e "s#/usr/sbin#$out/bin#" -e "/^EnvironmentFile/d" ./cmd/tailscaled/tailscaled.service
+        sed -i \
+          -e "s#/usr/sbin#$out/bin#" \
+          -e "/^EnvironmentFile/d" \
+          -e 's/''${PORT}/41641/' \
+          -e 's/$FLAGS//' \
+          ./cmd/tailscaled/tailscaled.service
+
         install -D -m0444 -t $out/lib/systemd/system ./cmd/tailscaled/tailscaled.service
       '';
     };
@@ -131,27 +97,27 @@
     # OS/CPU combos that nix supports, as well as a dev shell so that
     # "nix develop" and "nix-shell" give you a dev env.
     flakeForSystem = nixpkgs: system: let
-      upstreamPkgs = nixpkgs.legacyPackages.${system};
-      pkgs = pkgsWithTailscaleGo upstreamPkgs;
+      pkgs = nixpkgs.legacyPackages.${system};
       ts = tailscale pkgs;
     in {
       packages = {
-        tailscale-go = pkgs.tailscale-go;
+        default = ts;
         tailscale = ts;
       };
       devShell = pkgs.mkShell {
-        packages = with upstreamPkgs; [
+        packages = with pkgs; [
           curl
           git
           gopls
           gotools
           graphviz
           perl
-          pkgs.tailscale_go
+          go_1_21
+          yarn
         ];
       };
     };
   in
     flake-utils.lib.eachDefaultSystem (system: flakeForSystem nixpkgs system);
 }
-# nix-direnv cache busting line: sha256-imidcDJGVor43PqdTX7Js4/tjQ0JA2E1GdjuyLiPDHI= sha256-zBfANuVhYtDOOiZu6SPVmM0cTEsOHVdycOz5EZDapKk=
+# nix-direnv cache busting line: sha256-WGZkpffwe4I8FewdBHXGaLbKQP/kHr7UF2lCXBTcNb4=

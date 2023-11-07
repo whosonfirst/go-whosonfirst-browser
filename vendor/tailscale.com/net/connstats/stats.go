@@ -1,6 +1,5 @@
-// Copyright (c) 2022 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package connstats maintains statistics about connections
 // flowing through a TUN device (which operate at the IP layer).
@@ -14,6 +13,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 	"tailscale.com/net/packet"
+	"tailscale.com/net/tsaddr"
 	"tailscale.com/types/netlogtype"
 )
 
@@ -55,7 +55,7 @@ func NewStatistics(maxPeriod time.Duration, maxConns int, dump func(start, end t
 		// a time.Timer that is triggered upon network activity.
 		ticker := new(time.Ticker)
 		if maxPeriod > 0 {
-			ticker := time.NewTicker(maxPeriod)
+			ticker = time.NewTicker(maxPeriod)
 			defer ticker.Stop()
 		}
 
@@ -93,12 +93,26 @@ func (s *Statistics) UpdateRxVirtual(b []byte) {
 	s.updateVirtual(b, true)
 }
 
+var (
+	tailscaleServiceIPv4 = tsaddr.TailscaleServiceIP()
+	tailscaleServiceIPv6 = tsaddr.TailscaleServiceIPv6()
+)
+
 func (s *Statistics) updateVirtual(b []byte, receive bool) {
 	var p packet.Parsed
 	p.Decode(b)
 	conn := netlogtype.Connection{Proto: p.IPProto, Src: p.Src, Dst: p.Dst}
 	if receive {
 		conn.Src, conn.Dst = conn.Dst, conn.Src
+	}
+
+	// Network logging is defined as traffic between two Tailscale nodes.
+	// Traffic with the internal Tailscale service is not with another node
+	// and should not be logged. It also happens to be a high volume
+	// amount of discrete traffic flows (e.g., DNS lookups).
+	switch conn.Dst.Addr() {
+	case tailscaleServiceIPv4, tailscaleServiceIPv6:
+		return
 	}
 
 	s.mu.Lock()

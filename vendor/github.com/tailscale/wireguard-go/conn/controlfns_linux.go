@@ -1,13 +1,16 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package conn
 
 import (
 	"fmt"
+	"runtime"
 	"syscall"
+
+	"golang.org/x/sys/unix"
 )
 
 func init() {
@@ -20,11 +23,11 @@ func init() {
 		func(network, address string, c syscall.RawConn) error {
 			return c.Control(func(fd uintptr) {
 				// Set up to *mem_max
-				_ = syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_RCVBUF, socketBufferSize)
-				_ = syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_SNDBUF, socketBufferSize)
+				_ = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_RCVBUF, socketBufferSize)
+				_ = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_SNDBUF, socketBufferSize)
 				// Set beyond *mem_max if CAP_NET_ADMIN
-				_ = syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_RCVBUFFORCE, socketBufferSize)
-				_ = syscall.SetsockoptInt(int(fd), syscall.SOL_SOCKET, syscall.SO_SNDBUFFORCE, socketBufferSize)
+				_ = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_RCVBUFFORCE, socketBufferSize)
+				_ = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_SNDBUFFORCE, socketBufferSize)
 			})
 		},
 
@@ -34,21 +37,33 @@ func init() {
 			var err error
 			switch network {
 			case "udp4":
-				c.Control(func(fd uintptr) {
-					err = syscall.SetsockoptInt(int(fd), syscall.IPPROTO_IP, syscall.IP_PKTINFO, 1)
-				})
+				if runtime.GOOS != "android" {
+					c.Control(func(fd uintptr) {
+						err = unix.SetsockoptInt(int(fd), unix.IPPROTO_IP, unix.IP_PKTINFO, 1)
+					})
+				}
 			case "udp6":
 				c.Control(func(fd uintptr) {
-					err = syscall.SetsockoptInt(int(fd), syscall.IPPROTO_IPV6, syscall.IPV6_RECVPKTINFO, 1)
-					if err != nil {
-						return
+					if runtime.GOOS != "android" {
+						err = unix.SetsockoptInt(int(fd), unix.IPPROTO_IPV6, unix.IPV6_RECVPKTINFO, 1)
+						if err != nil {
+							return
+						}
 					}
-					err = syscall.SetsockoptInt(int(fd), syscall.IPPROTO_IPV6, syscall.IPV6_V6ONLY, 1)
+					err = unix.SetsockoptInt(int(fd), unix.IPPROTO_IPV6, unix.IPV6_V6ONLY, 1)
 				})
 			default:
-				err = fmt.Errorf("unhandled network: %s: %w", network, syscall.EINVAL)
+				err = fmt.Errorf("unhandled network: %s: %w", network, unix.EINVAL)
 			}
 			return err
+		},
+
+		// Attempt to enable UDP_GRO
+		func(network, address string, c syscall.RawConn) error {
+			c.Control(func(fd uintptr) {
+				_ = unix.SetsockoptInt(int(fd), unix.IPPROTO_UDP, socketOptionUDPGRO, 1)
+			})
+			return nil
 		},
 	)
 }

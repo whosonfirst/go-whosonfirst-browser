@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 //go:build darwin || freebsd
 
@@ -15,21 +14,21 @@ import (
 
 	"github.com/tailscale/wireguard-go/tun"
 	"go4.org/netipx"
+	"tailscale.com/net/netmon"
 	"tailscale.com/net/tsaddr"
 	"tailscale.com/types/logger"
 	"tailscale.com/version"
-	"tailscale.com/wgengine/monitor"
 )
 
 type userspaceBSDRouter struct {
 	logf    logger.Logf
-	linkMon *monitor.Mon
+	netMon  *netmon.Monitor
 	tunname string
 	local   []netip.Prefix
 	routes  map[netip.Prefix]bool
 }
 
-func newUserspaceBSDRouter(logf logger.Logf, tundev tun.Device, linkMon *monitor.Mon) (Router, error) {
+func newUserspaceBSDRouter(logf logger.Logf, tundev tun.Device, netMon *netmon.Monitor) (Router, error) {
 	tunname, err := tundev.Name()
 	if err != nil {
 		return nil, err
@@ -37,7 +36,7 @@ func newUserspaceBSDRouter(logf logger.Logf, tundev tun.Device, linkMon *monitor
 
 	return &userspaceBSDRouter{
 		logf:    logf,
-		linkMon: linkMon,
+		netMon:  netMon,
 		tunname: tunname,
 	}, nil
 }

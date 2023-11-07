@@ -36,6 +36,9 @@ type PointInPolygonHierarchyResolverOptions struct {
 	// SkipPlacetypeFilter is an optional boolean flag to signal whether or not point-in-polygon operations should be performed using
 	// the list of known ancestors for a given placetype. Default is false.
 	SkipPlacetypeFilter bool
+	// Roles is an optional list of Who's On First placetype roles used to derive ancestors during point-in-polygon operations.
+	// If missing (or zero length) then all possible roles will be assumed.
+	Roles []string
 }
 
 // PointInPolygonHierarchyResolver provides methods for constructing a hierarchy of ancestors
@@ -55,6 +58,9 @@ type PointInPolygonHierarchyResolver struct {
 	// skip_placetype_filter is an optional boolean flag to signal whether or not point-in-polygon operations should be performed using
 	// the list of known ancestors for a given placetype. Default is false.
 	skip_placetype_filter bool
+	// roles is an optional list of Who's On First placetype roles used to derive ancestors during point-in-polygon operations.
+	// If missing (or zero length) then all possible roles will be assumed.
+	roles []string
 }
 
 // PointInPolygonHierarchyResolverUpdateCallback is a function definition for a custom callback to convert 'spr' in to a dictionary of properties
@@ -119,6 +125,12 @@ func NewPointInPolygonHierarchyResolver(ctx context.Context, opts *PointInPolygo
 		logger = log.New(io.Discard, "", 0)
 	}
 
+	roles := placetypes.AllRoles()
+
+	if len(opts.Roles) > 0 {
+		roles = opts.Roles
+	}
+
 	if opts.PlacetypesDefinition == nil {
 
 		def, err := placetypes.NewDefinition(ctx, "whosonfirst://")
@@ -141,6 +153,7 @@ func NewPointInPolygonHierarchyResolver(ctx context.Context, opts *PointInPolygo
 		Logger:                logger,
 		reader:                opts.Database,
 		skip_placetype_filter: opts.SkipPlacetypeFilter,
+		roles:                 roles,
 	}
 
 	return t, nil
@@ -257,9 +270,7 @@ func (t *PointInPolygonHierarchyResolver) PointInPolygon(ctx context.Context, in
 		return nil, fmt.Errorf("Failed to create new placetype for '%s', %v", pt_str, err)
 	}
 
-	roles := placetypes.AllRoles()
-
-	ancestors := pt_spec.AncestorsForRoles(pt, roles)
+	ancestors := pt_spec.AncestorsForRoles(pt, t.roles)
 
 	for _, a := range ancestors {
 

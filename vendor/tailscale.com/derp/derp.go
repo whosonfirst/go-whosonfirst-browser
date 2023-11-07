@@ -1,6 +1,5 @@
-// Copyright (c) 2020 Tailscale Inc & AUTHORS All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) Tailscale Inc & AUTHORS
+// SPDX-License-Identifier: BSD-3-Clause
 
 // Package derp implements the Designated Encrypted Relay for Packets (DERP)
 // protocol.
@@ -78,12 +77,15 @@ const (
 	// a previous sender is no longer connected. That is, if A
 	// sent to B, and then if A disconnects, the server sends
 	// framePeerGone to B so B can forget that a reverse path
-	// exists on that connection to get back to A.
-	framePeerGone = frameType(0x08) // 32B pub key of peer that's gone
+	// exists on that connection to get back to A. It is also sent
+	// if A tries to send a CallMeMaybe to B and the server has no
+	// record of B (which currently would only happen if there was
+	// a bug).
+	framePeerGone = frameType(0x08) // 32B pub key of peer that's gone + 1 byte reason
 
 	// framePeerPresent is like framePeerGone, but for other
 	// members of the DERP region when they're meshed up together.
-	framePeerPresent = frameType(0x09) // 32B pub key of peer that's connected
+	framePeerPresent = frameType(0x09) // 32B pub key of peer that's connected + optional 18B ip:port (16 byte IP + 2 byte BE uint16 port)
 
 	// frameWatchConns is how one DERP node in a regional mesh
 	// subscribes to the others in the region.
@@ -115,6 +117,15 @@ const (
 	// and how long to try total. See ServerRestartingMessage docs for
 	// more details on how the client should interpret them.
 	frameRestarting = frameType(0x15)
+)
+
+// PeerGoneReasonType is a one byte reason code explaining why a
+// server does not have a path to the requested destination.
+type PeerGoneReasonType byte
+
+const (
+	PeerGoneReasonDisconnected = PeerGoneReasonType(0x00) // peer disconnected from this server
+	PeerGoneReasonNotHere      = PeerGoneReasonType(0x01) // server doesn't know about this peer, unexpected
 )
 
 var bin = binary.BigEndian
@@ -188,7 +199,7 @@ func readFrame(br *bufio.Reader, maxSize uint32, b []byte) (t frameType, frameLe
 		return 0, 0, fmt.Errorf("frame header size %d exceeds reader limit of %d", frameLen, maxSize)
 	}
 
-	n, err := io.ReadFull(br, b[:minUint32(frameLen, uint32(len(b)))])
+	n, err := io.ReadFull(br, b[:min(frameLen, uint32(len(b)))])
 	if err != nil {
 		return 0, 0, err
 	}
@@ -221,11 +232,4 @@ func writeFrame(bw *bufio.Writer, t frameType, b []byte) error {
 		return err
 	}
 	return bw.Flush()
-}
-
-func minUint32(a, b uint32) uint32 {
-	if a < b {
-		return a
-	}
-	return b
 }

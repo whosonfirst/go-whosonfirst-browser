@@ -27,7 +27,7 @@ func (e *AlreadyExistsException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AlreadyExistsException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AlreadyExistsException"
 	}
 	return *e.ErrorCodeOverride
@@ -54,7 +54,7 @@ func (e *AssociatedInstances) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AssociatedInstances) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AssociatedInstances"
 	}
 	return *e.ErrorCodeOverride
@@ -80,7 +80,7 @@ func (e *AssociationAlreadyExists) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AssociationAlreadyExists) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AssociationAlreadyExists"
 	}
 	return *e.ErrorCodeOverride
@@ -106,7 +106,7 @@ func (e *AssociationDoesNotExist) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AssociationDoesNotExist) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AssociationDoesNotExist"
 	}
 	return *e.ErrorCodeOverride
@@ -132,7 +132,7 @@ func (e *AssociationExecutionDoesNotExist) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AssociationExecutionDoesNotExist) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AssociationExecutionDoesNotExist"
 	}
 	return *e.ErrorCodeOverride
@@ -158,7 +158,7 @@ func (e *AssociationLimitExceeded) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AssociationLimitExceeded) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AssociationLimitExceeded"
 	}
 	return *e.ErrorCodeOverride
@@ -185,15 +185,15 @@ func (e *AssociationVersionLimitExceeded) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AssociationVersionLimitExceeded) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AssociationVersionLimitExceeded"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *AssociationVersionLimitExceeded) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// Indicates that the Change Manager change template used in the change request was
-// rejected or is still in a pending state.
+// Indicates that the Change Manager change template used in the change request
+// was rejected or is still in a pending state.
 type AutomationDefinitionNotApprovedException struct {
 	Message *string
 
@@ -212,7 +212,7 @@ func (e *AutomationDefinitionNotApprovedException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AutomationDefinitionNotApprovedException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AutomationDefinitionNotApprovedException"
 	}
 	return *e.ErrorCodeOverride
@@ -240,7 +240,7 @@ func (e *AutomationDefinitionNotFoundException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AutomationDefinitionNotFoundException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AutomationDefinitionNotFoundException"
 	}
 	return *e.ErrorCodeOverride
@@ -268,7 +268,7 @@ func (e *AutomationDefinitionVersionNotFoundException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AutomationDefinitionVersionNotFoundException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AutomationDefinitionVersionNotFoundException"
 	}
 	return *e.ErrorCodeOverride
@@ -297,7 +297,7 @@ func (e *AutomationExecutionLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AutomationExecutionLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AutomationExecutionLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -326,7 +326,7 @@ func (e *AutomationExecutionNotFoundException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AutomationExecutionNotFoundException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AutomationExecutionNotFoundException"
 	}
 	return *e.ErrorCodeOverride
@@ -335,8 +335,8 @@ func (e *AutomationExecutionNotFoundException) ErrorFault() smithy.ErrorFault {
 	return smithy.FaultClient
 }
 
-// The specified step name and execution ID don't exist. Verify the information and
-// try again.
+// The specified step name and execution ID don't exist. Verify the information
+// and try again.
 type AutomationStepNotFoundException struct {
 	Message *string
 
@@ -355,7 +355,7 @@ func (e *AutomationStepNotFoundException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *AutomationStepNotFoundException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "AutomationStepNotFoundException"
 	}
 	return *e.ErrorCodeOverride
@@ -382,7 +382,7 @@ func (e *ComplianceTypeCountLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ComplianceTypeCountLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ComplianceTypeCountLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -411,7 +411,7 @@ func (e *CustomSchemaCountLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *CustomSchemaCountLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "CustomSchemaCountLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -439,7 +439,7 @@ func (e *DocumentAlreadyExists) ErrorMessage() string {
 	return *e.Message
 }
 func (e *DocumentAlreadyExists) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "DocumentAlreadyExists"
 	}
 	return *e.ErrorCodeOverride
@@ -465,19 +465,19 @@ func (e *DocumentLimitExceeded) ErrorMessage() string {
 	return *e.Message
 }
 func (e *DocumentLimitExceeded) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "DocumentLimitExceeded"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *DocumentLimitExceeded) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// The document can't be shared with more Amazon Web Services user accounts. You
-// can specify a maximum of 20 accounts per API operation to share a private
-// document. By default, you can share a private document with a maximum of 1,000
-// accounts and publicly share up to five documents. If you need to increase the
-// quota for privately or publicly shared Systems Manager documents, contact Amazon
-// Web Services Support.
+// The document can't be shared with more Amazon Web Services accounts. You can
+// specify a maximum of 20 accounts per API operation to share a private document.
+// By default, you can share a private document with a maximum of 1,000 accounts
+// and publicly share up to five documents. If you need to increase the quota for
+// privately or publicly shared Systems Manager documents, contact Amazon Web
+// Services Support.
 type DocumentPermissionLimit struct {
 	Message *string
 
@@ -496,15 +496,15 @@ func (e *DocumentPermissionLimit) ErrorMessage() string {
 	return *e.Message
 }
 func (e *DocumentPermissionLimit) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "DocumentPermissionLimit"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *DocumentPermissionLimit) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// The document has too many versions. Delete one or more document versions and try
-// again.
+// The document has too many versions. Delete one or more document versions and
+// try again.
 type DocumentVersionLimitExceeded struct {
 	Message *string
 
@@ -523,7 +523,7 @@ func (e *DocumentVersionLimitExceeded) ErrorMessage() string {
 	return *e.Message
 }
 func (e *DocumentVersionLimitExceeded) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "DocumentVersionLimitExceeded"
 	}
 	return *e.ErrorCodeOverride
@@ -532,9 +532,8 @@ func (e *DocumentVersionLimitExceeded) ErrorFault() smithy.ErrorFault { return s
 
 // Error returned when the ID specified for a resource, such as a maintenance
 // window or patch baseline, doesn't exist. For information about resource quotas
-// in Amazon Web Services Systems Manager, see Systems Manager service quotas
-// (https://docs.aws.amazon.com/general/latest/gr/ssm.html#limits_ssm) in the
-// Amazon Web Services General Reference.
+// in Amazon Web Services Systems Manager, see Systems Manager service quotas (https://docs.aws.amazon.com/general/latest/gr/ssm.html#limits_ssm)
+// in the Amazon Web Services General Reference.
 type DoesNotExistException struct {
 	Message *string
 
@@ -553,7 +552,7 @@ func (e *DoesNotExistException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *DoesNotExistException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "DoesNotExistException"
 	}
 	return *e.ErrorCodeOverride
@@ -580,7 +579,7 @@ func (e *DuplicateDocumentContent) ErrorMessage() string {
 	return *e.Message
 }
 func (e *DuplicateDocumentContent) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "DuplicateDocumentContent"
 	}
 	return *e.ErrorCodeOverride
@@ -607,7 +606,7 @@ func (e *DuplicateDocumentVersionName) ErrorMessage() string {
 	return *e.Message
 }
 func (e *DuplicateDocumentVersionName) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "DuplicateDocumentVersionName"
 	}
 	return *e.ErrorCodeOverride
@@ -633,7 +632,7 @@ func (e *DuplicateInstanceId) ErrorMessage() string {
 	return *e.Message
 }
 func (e *DuplicateInstanceId) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "DuplicateInstanceId"
 	}
 	return *e.ErrorCodeOverride
@@ -660,7 +659,7 @@ func (e *FeatureNotAvailableException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *FeatureNotAvailableException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "FeatureNotAvailableException"
 	}
 	return *e.ErrorCodeOverride
@@ -668,8 +667,7 @@ func (e *FeatureNotAvailableException) ErrorCode() string {
 func (e *FeatureNotAvailableException) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
 // A hierarchy can have a maximum of 15 levels. For more information, see
-// Requirements and constraints for parameter names
-// (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-parameter-name-constraints.html)
+// Requirements and constraints for parameter names (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-parameter-name-constraints.html)
 // in the Amazon Web Services Systems Manager User Guide.
 type HierarchyLevelLimitExceededException struct {
 	Message *string
@@ -689,7 +687,7 @@ func (e *HierarchyLevelLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *HierarchyLevelLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "HierarchyLevelLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -699,8 +697,8 @@ func (e *HierarchyLevelLimitExceededException) ErrorFault() smithy.ErrorFault {
 }
 
 // Parameter Store doesn't support changing a parameter type in a hierarchy. For
-// example, you can't change a parameter from a String type to a SecureString type.
-// You must create a new, unique parameter.
+// example, you can't change a parameter from a String type to a SecureString
+// type. You must create a new, unique parameter.
 type HierarchyTypeMismatchException struct {
 	Message *string
 
@@ -719,7 +717,7 @@ func (e *HierarchyTypeMismatchException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *HierarchyTypeMismatchException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "HierarchyTypeMismatchException"
 	}
 	return *e.ErrorCodeOverride
@@ -746,16 +744,16 @@ func (e *IdempotentParameterMismatch) ErrorMessage() string {
 	return *e.Message
 }
 func (e *IdempotentParameterMismatch) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "IdempotentParameterMismatch"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *IdempotentParameterMismatch) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// There is a conflict in the policies specified for this parameter. You can't, for
-// example, specify two Expiration policies for a parameter. Review your policies,
-// and try again.
+// There is a conflict in the policies specified for this parameter. You can't,
+// for example, specify two Expiration policies for a parameter. Review your
+// policies, and try again.
 type IncompatiblePolicyException struct {
 	Message *string
 
@@ -774,7 +772,7 @@ func (e *IncompatiblePolicyException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *IncompatiblePolicyException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "IncompatiblePolicyException"
 	}
 	return *e.ErrorCodeOverride
@@ -800,7 +798,7 @@ func (e *InternalServerError) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InternalServerError) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InternalServerError"
 	}
 	return *e.ErrorCodeOverride
@@ -827,7 +825,7 @@ func (e *InvalidActivation) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidActivation) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidActivation"
 	}
 	return *e.ErrorCodeOverride
@@ -854,7 +852,7 @@ func (e *InvalidActivationId) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidActivationId) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidActivationId"
 	}
 	return *e.ErrorCodeOverride
@@ -863,7 +861,7 @@ func (e *InvalidActivationId) ErrorFault() smithy.ErrorFault { return smithy.Fau
 
 // The specified aggregator isn't valid for inventory groups. Verify that the
 // aggregator uses a valid inventory type such as AWS:Application or
-// AWS:InstanceInformation.
+// AWS:InstanceInformation .
 type InvalidAggregatorException struct {
 	Message *string
 
@@ -882,7 +880,7 @@ func (e *InvalidAggregatorException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidAggregatorException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidAggregatorException"
 	}
 	return *e.ErrorCodeOverride
@@ -908,7 +906,7 @@ func (e *InvalidAllowedPatternException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidAllowedPatternException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidAllowedPatternException"
 	}
 	return *e.ErrorCodeOverride
@@ -934,7 +932,7 @@ func (e *InvalidAssociation) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidAssociation) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidAssociation"
 	}
 	return *e.ErrorCodeOverride
@@ -962,7 +960,7 @@ func (e *InvalidAssociationVersion) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidAssociationVersion) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidAssociationVersion"
 	}
 	return *e.ErrorCodeOverride
@@ -990,7 +988,7 @@ func (e *InvalidAutomationExecutionParametersException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidAutomationExecutionParametersException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidAutomationExecutionParametersException"
 	}
 	return *e.ErrorCodeOverride
@@ -1018,7 +1016,7 @@ func (e *InvalidAutomationSignalException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidAutomationSignalException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidAutomationSignalException"
 	}
 	return *e.ErrorCodeOverride
@@ -1044,7 +1042,7 @@ func (e *InvalidAutomationStatusUpdateException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidAutomationStatusUpdateException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidAutomationStatusUpdateException"
 	}
 	return *e.ErrorCodeOverride
@@ -1072,7 +1070,7 @@ func (e *InvalidCommandId) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidCommandId) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidCommandId"
 	}
 	return *e.ErrorCodeOverride
@@ -1099,7 +1097,7 @@ func (e *InvalidDeleteInventoryParametersException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidDeleteInventoryParametersException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidDeleteInventoryParametersException"
 	}
 	return *e.ErrorCodeOverride
@@ -1128,7 +1126,7 @@ func (e *InvalidDeletionIdException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidDeletionIdException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidDeletionIdException"
 	}
 	return *e.ErrorCodeOverride
@@ -1154,7 +1152,7 @@ func (e *InvalidDocument) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidDocument) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidDocument"
 	}
 	return *e.ErrorCodeOverride
@@ -1180,7 +1178,7 @@ func (e *InvalidDocumentContent) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidDocumentContent) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidDocumentContent"
 	}
 	return *e.ErrorCodeOverride
@@ -1207,7 +1205,7 @@ func (e *InvalidDocumentOperation) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidDocumentOperation) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidDocumentOperation"
 	}
 	return *e.ErrorCodeOverride
@@ -1233,7 +1231,7 @@ func (e *InvalidDocumentSchemaVersion) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidDocumentSchemaVersion) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidDocumentSchemaVersion"
 	}
 	return *e.ErrorCodeOverride
@@ -1260,7 +1258,7 @@ func (e *InvalidDocumentType) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidDocumentType) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidDocumentType"
 	}
 	return *e.ErrorCodeOverride
@@ -1286,7 +1284,7 @@ func (e *InvalidDocumentVersion) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidDocumentVersion) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidDocumentVersion"
 	}
 	return *e.ErrorCodeOverride
@@ -1313,7 +1311,7 @@ func (e *InvalidFilter) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidFilter) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidFilter"
 	}
 	return *e.ErrorCodeOverride
@@ -1339,7 +1337,7 @@ func (e *InvalidFilterKey) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidFilterKey) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidFilterKey"
 	}
 	return *e.ErrorCodeOverride
@@ -1366,7 +1364,7 @@ func (e *InvalidFilterOption) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidFilterOption) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidFilterOption"
 	}
 	return *e.ErrorCodeOverride
@@ -1392,7 +1390,7 @@ func (e *InvalidFilterValue) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidFilterValue) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidFilterValue"
 	}
 	return *e.ErrorCodeOverride
@@ -1400,19 +1398,13 @@ func (e *InvalidFilterValue) ErrorCode() string {
 func (e *InvalidFilterValue) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
 // The following problems can cause this exception:
-//
-// * You don't have permission to
-// access the managed node.
-//
-// * Amazon Web Services Systems Manager Agent(SSM Agent)
-// isn't running. Verify that SSM Agent is running.
-//
-// * SSM Agent isn't registered
-// with the SSM endpoint. Try reinstalling SSM Agent.
-//
-// * The managed node isn't in
-// valid state. Valid states are: Running, Pending, Stopped, and Stopping. Invalid
-// states are: Shutting-down and Terminated.
+//   - You don't have permission to access the managed node.
+//   - Amazon Web Services Systems Manager Agent(SSM Agent) isn't running. Verify
+//     that SSM Agent is running.
+//   - SSM Agent isn't registered with the SSM endpoint. Try reinstalling SSM
+//     Agent.
+//   - The managed node isn't in valid state. Valid states are: Running , Pending ,
+//     Stopped , and Stopping . Invalid states are: Shutting-down and Terminated .
 type InvalidInstanceId struct {
 	Message *string
 
@@ -1431,7 +1423,7 @@ func (e *InvalidInstanceId) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidInstanceId) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidInstanceId"
 	}
 	return *e.ErrorCodeOverride
@@ -1457,7 +1449,7 @@ func (e *InvalidInstanceInformationFilterValue) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidInstanceInformationFilterValue) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidInstanceInformationFilterValue"
 	}
 	return *e.ErrorCodeOverride
@@ -1485,15 +1477,15 @@ func (e *InvalidInventoryGroupException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidInventoryGroupException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidInventoryGroupException"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *InvalidInventoryGroupException) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// You specified invalid keys or values in the Context attribute for InventoryItem.
-// Verify the keys and values, and try again.
+// You specified invalid keys or values in the Context attribute for InventoryItem
+// . Verify the keys and values, and try again.
 type InvalidInventoryItemContextException struct {
 	Message *string
 
@@ -1512,7 +1504,7 @@ func (e *InvalidInventoryItemContextException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidInventoryItemContextException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidInventoryItemContextException"
 	}
 	return *e.ErrorCodeOverride
@@ -1540,7 +1532,7 @@ func (e *InvalidInventoryRequestException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidInventoryRequestException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidInventoryRequestException"
 	}
 	return *e.ErrorCodeOverride
@@ -1568,7 +1560,7 @@ func (e *InvalidItemContentException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidItemContentException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidItemContentException"
 	}
 	return *e.ErrorCodeOverride
@@ -1594,7 +1586,7 @@ func (e *InvalidKeyId) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidKeyId) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidKeyId"
 	}
 	return *e.ErrorCodeOverride
@@ -1620,15 +1612,16 @@ func (e *InvalidNextToken) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidNextToken) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidNextToken"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *InvalidNextToken) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// One or more configuration items isn't valid. Verify that a valid Amazon Resource
-// Name (ARN) was provided for an Amazon Simple Notification Service topic.
+// One or more configuration items isn't valid. Verify that a valid Amazon
+// Resource Name (ARN) was provided for an Amazon Simple Notification Service
+// topic.
 type InvalidNotificationConfig struct {
 	Message *string
 
@@ -1647,7 +1640,7 @@ func (e *InvalidNotificationConfig) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidNotificationConfig) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidNotificationConfig"
 	}
 	return *e.ErrorCodeOverride
@@ -1674,7 +1667,7 @@ func (e *InvalidOptionException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidOptionException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidOptionException"
 	}
 	return *e.ErrorCodeOverride
@@ -1700,7 +1693,7 @@ func (e *InvalidOutputFolder) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidOutputFolder) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidOutputFolder"
 	}
 	return *e.ErrorCodeOverride
@@ -1726,7 +1719,7 @@ func (e *InvalidOutputLocation) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidOutputLocation) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidOutputLocation"
 	}
 	return *e.ErrorCodeOverride
@@ -1754,7 +1747,7 @@ func (e *InvalidParameters) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidParameters) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidParameters"
 	}
 	return *e.ErrorCodeOverride
@@ -1781,7 +1774,7 @@ func (e *InvalidPermissionType) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidPermissionType) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidPermissionType"
 	}
 	return *e.ErrorCodeOverride
@@ -1807,7 +1800,7 @@ func (e *InvalidPluginName) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidPluginName) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidPluginName"
 	}
 	return *e.ErrorCodeOverride
@@ -1833,7 +1826,7 @@ func (e *InvalidPolicyAttributeException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidPolicyAttributeException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidPolicyAttributeException"
 	}
 	return *e.ErrorCodeOverride
@@ -1860,7 +1853,7 @@ func (e *InvalidPolicyTypeException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidPolicyTypeException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidPolicyTypeException"
 	}
 	return *e.ErrorCodeOverride
@@ -1887,7 +1880,7 @@ func (e *InvalidResourceId) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidResourceId) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidResourceId"
 	}
 	return *e.ErrorCodeOverride
@@ -1914,7 +1907,7 @@ func (e *InvalidResourceType) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidResourceType) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidResourceType"
 	}
 	return *e.ErrorCodeOverride
@@ -1940,7 +1933,7 @@ func (e *InvalidResultAttributeException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidResultAttributeException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidResultAttributeException"
 	}
 	return *e.ErrorCodeOverride
@@ -1950,8 +1943,7 @@ func (e *InvalidResultAttributeException) ErrorFault() smithy.ErrorFault { retur
 // The role name can't contain invalid characters. Also verify that you specified
 // an IAM role for notifications that includes the required trust policy. For
 // information about configuring the IAM role for Run Command notifications, see
-// Configuring Amazon SNS Notifications for Run Command
-// (https://docs.aws.amazon.com/systems-manager/latest/userguide/rc-sns-notifications.html)
+// Configuring Amazon SNS Notifications for Run Command (https://docs.aws.amazon.com/systems-manager/latest/userguide/rc-sns-notifications.html)
 // in the Amazon Web Services Systems Manager User Guide.
 type InvalidRole struct {
 	Message *string
@@ -1971,7 +1963,7 @@ func (e *InvalidRole) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidRole) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidRole"
 	}
 	return *e.ErrorCodeOverride
@@ -1997,7 +1989,7 @@ func (e *InvalidSchedule) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidSchedule) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidSchedule"
 	}
 	return *e.ErrorCodeOverride
@@ -2023,7 +2015,7 @@ func (e *InvalidTag) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidTag) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidTag"
 	}
 	return *e.ErrorCodeOverride
@@ -2050,7 +2042,7 @@ func (e *InvalidTarget) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidTarget) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidTarget"
 	}
 	return *e.ErrorCodeOverride
@@ -2076,7 +2068,7 @@ func (e *InvalidTargetMaps) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidTargetMaps) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidTargetMaps"
 	}
 	return *e.ErrorCodeOverride
@@ -2102,7 +2094,7 @@ func (e *InvalidTypeNameException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidTypeNameException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidTypeNameException"
 	}
 	return *e.ErrorCodeOverride
@@ -2128,7 +2120,7 @@ func (e *InvalidUpdate) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvalidUpdate) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvalidUpdate"
 	}
 	return *e.ErrorCodeOverride
@@ -2155,7 +2147,7 @@ func (e *InvocationDoesNotExist) ErrorMessage() string {
 	return *e.Message
 }
 func (e *InvocationDoesNotExist) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "InvocationDoesNotExist"
 	}
 	return *e.ErrorCodeOverride
@@ -2183,7 +2175,7 @@ func (e *ItemContentMismatchException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ItemContentMismatchException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ItemContentMismatchException"
 	}
 	return *e.ErrorCodeOverride
@@ -2211,7 +2203,7 @@ func (e *ItemSizeLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ItemSizeLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ItemSizeLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -2237,16 +2229,16 @@ func (e *MaxDocumentSizeExceeded) ErrorMessage() string {
 	return *e.Message
 }
 func (e *MaxDocumentSizeExceeded) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "MaxDocumentSizeExceeded"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *MaxDocumentSizeExceeded) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// You don't have permission to view OpsItems in the specified account. Verify that
-// your account is configured either as a Systems Manager delegated administrator
-// or that you are logged into the Organizations management account.
+// You don't have permission to view OpsItems in the specified account. Verify
+// that your account is configured either as a Systems Manager delegated
+// administrator or that you are logged into the Organizations management account.
 type OpsItemAccessDeniedException struct {
 	Message *string
 
@@ -2265,7 +2257,7 @@ func (e *OpsItemAccessDeniedException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsItemAccessDeniedException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsItemAccessDeniedException"
 	}
 	return *e.ErrorCodeOverride
@@ -2293,7 +2285,7 @@ func (e *OpsItemAlreadyExistsException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsItemAlreadyExistsException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsItemAlreadyExistsException"
 	}
 	return *e.ErrorCodeOverride
@@ -2322,16 +2314,14 @@ func (e *OpsItemInvalidParameterException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsItemInvalidParameterException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsItemInvalidParameterException"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *OpsItemInvalidParameterException) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// The request caused OpsItems to exceed one or more quotas. For information about
-// OpsItem quotas, see What are the resource limits for OpsCenter?
-// (https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter-learn-more.html#OpsCenter-learn-more-limits).
+// The request caused OpsItems to exceed one or more quotas.
 type OpsItemLimitExceededException struct {
 	Message *string
 
@@ -2354,7 +2344,7 @@ func (e *OpsItemLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsItemLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsItemLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -2380,7 +2370,7 @@ func (e *OpsItemNotFoundException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsItemNotFoundException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsItemNotFoundException"
 	}
 	return *e.ErrorCodeOverride
@@ -2409,7 +2399,7 @@ func (e *OpsItemRelatedItemAlreadyExistsException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsItemRelatedItemAlreadyExistsException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsItemRelatedItemAlreadyExistsException"
 	}
 	return *e.ErrorCodeOverride
@@ -2438,7 +2428,7 @@ func (e *OpsItemRelatedItemAssociationNotFoundException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsItemRelatedItemAssociationNotFoundException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsItemRelatedItemAssociationNotFoundException"
 	}
 	return *e.ErrorCodeOverride
@@ -2466,7 +2456,7 @@ func (e *OpsMetadataAlreadyExistsException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsMetadataAlreadyExistsException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsMetadataAlreadyExistsException"
 	}
 	return *e.ErrorCodeOverride
@@ -2492,7 +2482,7 @@ func (e *OpsMetadataInvalidArgumentException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsMetadataInvalidArgumentException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsMetadataInvalidArgumentException"
 	}
 	return *e.ErrorCodeOverride
@@ -2521,7 +2511,7 @@ func (e *OpsMetadataKeyLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsMetadataKeyLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsMetadataKeyLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -2551,7 +2541,7 @@ func (e *OpsMetadataLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsMetadataLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsMetadataLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -2577,15 +2567,15 @@ func (e *OpsMetadataNotFoundException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsMetadataNotFoundException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsMetadataNotFoundException"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *OpsMetadataNotFoundException) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// The system is processing too many concurrent updates. Wait a few moments and try
-// again.
+// The system is processing too many concurrent updates. Wait a few moments and
+// try again.
 type OpsMetadataTooManyUpdatesException struct {
 	Message *string
 
@@ -2604,7 +2594,7 @@ func (e *OpsMetadataTooManyUpdatesException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *OpsMetadataTooManyUpdatesException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "OpsMetadataTooManyUpdatesException"
 	}
 	return *e.ErrorCodeOverride
@@ -2632,15 +2622,15 @@ func (e *ParameterAlreadyExists) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ParameterAlreadyExists) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ParameterAlreadyExists"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *ParameterAlreadyExists) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// You have exceeded the number of parameters for this Amazon Web Services account.
-// Delete one or more parameters and try again.
+// You have exceeded the number of parameters for this Amazon Web Services
+// account. Delete one or more parameters and try again.
 type ParameterLimitExceeded struct {
 	Message *string
 
@@ -2659,7 +2649,7 @@ func (e *ParameterLimitExceeded) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ParameterLimitExceeded) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ParameterLimitExceeded"
 	}
 	return *e.ErrorCodeOverride
@@ -2679,10 +2669,8 @@ func (e *ParameterLimitExceeded) ErrorFault() smithy.ErrorFault { return smithy.
 // versions with mission critical labels assigned to them from being deleted. To
 // continue creating new parameters, first move the label from the oldest version
 // of the parameter to a newer one for use in your operations. For information
-// about moving parameter labels, see Move a parameter label (console)
-// (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html#sysman-paramstore-labels-console-move)
-// or Move a parameter label (CLI)
-// (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html#sysman-paramstore-labels-cli-move)
+// about moving parameter labels, see Move a parameter label (console) (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html#sysman-paramstore-labels-console-move)
+// or Move a parameter label (CLI) (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html#sysman-paramstore-labels-cli-move)
 // in the Amazon Web Services Systems Manager User Guide.
 type ParameterMaxVersionLimitExceeded struct {
 	Message *string
@@ -2702,7 +2690,7 @@ func (e *ParameterMaxVersionLimitExceeded) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ParameterMaxVersionLimitExceeded) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ParameterMaxVersionLimitExceeded"
 	}
 	return *e.ErrorCodeOverride
@@ -2728,7 +2716,7 @@ func (e *ParameterNotFound) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ParameterNotFound) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ParameterNotFound"
 	}
 	return *e.ErrorCodeOverride
@@ -2754,7 +2742,7 @@ func (e *ParameterPatternMismatchException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ParameterPatternMismatchException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ParameterPatternMismatchException"
 	}
 	return *e.ErrorCodeOverride
@@ -2780,7 +2768,7 @@ func (e *ParameterVersionLabelLimitExceeded) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ParameterVersionLabelLimitExceeded) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ParameterVersionLabelLimitExceeded"
 	}
 	return *e.ErrorCodeOverride
@@ -2809,7 +2797,7 @@ func (e *ParameterVersionNotFound) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ParameterVersionNotFound) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ParameterVersionNotFound"
 	}
 	return *e.ErrorCodeOverride
@@ -2836,7 +2824,7 @@ func (e *PoliciesLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *PoliciesLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "PoliciesLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -2864,7 +2852,7 @@ func (e *ResourceDataSyncAlreadyExistsException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ResourceDataSyncAlreadyExistsException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ResourceDataSyncAlreadyExistsException"
 	}
 	return *e.ErrorCodeOverride
@@ -2893,7 +2881,7 @@ func (e *ResourceDataSyncConflictException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ResourceDataSyncConflictException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ResourceDataSyncConflictException"
 	}
 	return *e.ErrorCodeOverride
@@ -2919,7 +2907,7 @@ func (e *ResourceDataSyncCountExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ResourceDataSyncCountExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ResourceDataSyncCountExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -2947,7 +2935,7 @@ func (e *ResourceDataSyncInvalidConfigurationException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ResourceDataSyncInvalidConfigurationException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ResourceDataSyncInvalidConfigurationException"
 	}
 	return *e.ErrorCodeOverride
@@ -2978,7 +2966,7 @@ func (e *ResourceDataSyncNotFoundException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ResourceDataSyncNotFoundException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ResourceDataSyncNotFoundException"
 	}
 	return *e.ErrorCodeOverride
@@ -3005,7 +2993,7 @@ func (e *ResourceInUseException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ResourceInUseException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ResourceInUseException"
 	}
 	return *e.ErrorCodeOverride
@@ -3015,9 +3003,8 @@ func (e *ResourceInUseException) ErrorFault() smithy.ErrorFault { return smithy.
 // Error returned when the caller has exceeded the default resource quotas. For
 // example, too many maintenance windows or patch baselines have been created. For
 // information about resource quotas in Systems Manager, see Systems Manager
-// service quotas
-// (https://docs.aws.amazon.com/general/latest/gr/ssm.html#limits_ssm) in the
-// Amazon Web Services General Reference.
+// service quotas (https://docs.aws.amazon.com/general/latest/gr/ssm.html#limits_ssm)
+// in the Amazon Web Services General Reference.
 type ResourceLimitExceededException struct {
 	Message *string
 
@@ -3036,7 +3023,7 @@ func (e *ResourceLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ResourceLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ResourceLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -3064,7 +3051,7 @@ func (e *ResourcePolicyConflictException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ResourcePolicyConflictException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ResourcePolicyConflictException"
 	}
 	return *e.ErrorCodeOverride
@@ -3093,7 +3080,7 @@ func (e *ResourcePolicyInvalidParameterException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ResourcePolicyInvalidParameterException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ResourcePolicyInvalidParameterException"
 	}
 	return *e.ErrorCodeOverride
@@ -3103,7 +3090,7 @@ func (e *ResourcePolicyInvalidParameterException) ErrorFault() smithy.ErrorFault
 }
 
 // The PutResourcePolicy API action enforces two limits. A policy can't be greater
-// than 1024 bytes in size. And only one policy can be attached to OpsItemGroup.
+// than 1024 bytes in size. And only one policy can be attached to OpsItemGroup .
 // Verify these limits and try again.
 type ResourcePolicyLimitExceededException struct {
 	Message *string
@@ -3126,7 +3113,7 @@ func (e *ResourcePolicyLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ResourcePolicyLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ResourcePolicyLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -3155,7 +3142,7 @@ func (e *ServiceSettingNotFound) ErrorMessage() string {
 	return *e.Message
 }
 func (e *ServiceSettingNotFound) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "ServiceSettingNotFound"
 	}
 	return *e.ErrorCodeOverride
@@ -3181,7 +3168,7 @@ func (e *StatusUnchanged) ErrorMessage() string {
 	return *e.Message
 }
 func (e *StatusUnchanged) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "StatusUnchanged"
 	}
 	return *e.ErrorCodeOverride
@@ -3207,7 +3194,7 @@ func (e *SubTypeCountLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *SubTypeCountLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "SubTypeCountLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -3236,17 +3223,16 @@ func (e *TargetInUseException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *TargetInUseException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "TargetInUseException"
 	}
 	return *e.ErrorCodeOverride
 }
 func (e *TargetInUseException) ErrorFault() smithy.ErrorFault { return smithy.FaultClient }
 
-// The specified target managed node for the session isn't fully configured for use
-// with Session Manager. For more information, see Getting started with Session
-// Manager
-// (https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started.html)
+// The specified target managed node for the session isn't fully configured for
+// use with Session Manager. For more information, see Getting started with
+// Session Manager (https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started.html)
 // in the Amazon Web Services Systems Manager User Guide. This error is also
 // returned if you attempt to start a session on a managed node that is located in
 // a different account or Region
@@ -3268,7 +3254,7 @@ func (e *TargetNotConnected) ErrorMessage() string {
 	return *e.Message
 }
 func (e *TargetNotConnected) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "TargetNotConnected"
 	}
 	return *e.ErrorCodeOverride
@@ -3295,7 +3281,7 @@ func (e *TooManyTagsError) ErrorMessage() string {
 	return *e.Message
 }
 func (e *TooManyTagsError) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "TooManyTagsError"
 	}
 	return *e.ErrorCodeOverride
@@ -3321,7 +3307,7 @@ func (e *TooManyUpdates) ErrorMessage() string {
 	return *e.Message
 }
 func (e *TooManyUpdates) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "TooManyUpdates"
 	}
 	return *e.ErrorCodeOverride
@@ -3347,7 +3333,7 @@ func (e *TotalSizeLimitExceededException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *TotalSizeLimitExceededException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "TotalSizeLimitExceededException"
 	}
 	return *e.ErrorCodeOverride
@@ -3373,7 +3359,7 @@ func (e *UnsupportedCalendarException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *UnsupportedCalendarException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "UnsupportedCalendarException"
 	}
 	return *e.ErrorCodeOverride
@@ -3383,8 +3369,7 @@ func (e *UnsupportedCalendarException) ErrorFault() smithy.ErrorFault { return s
 // Patching for applications released by Microsoft is only available on EC2
 // instances and advanced instances. To patch applications released by Microsoft on
 // on-premises servers and VMs, you must enable advanced instances. For more
-// information, see Enabling the advanced-instances tier
-// (https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-managedinstances-advanced.html)
+// information, see Enabling the advanced-instances tier (https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-managedinstances-advanced.html)
 // in the Amazon Web Services Systems Manager User Guide.
 type UnsupportedFeatureRequiredException struct {
 	Message *string
@@ -3404,7 +3389,7 @@ func (e *UnsupportedFeatureRequiredException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *UnsupportedFeatureRequiredException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "UnsupportedFeatureRequiredException"
 	}
 	return *e.ErrorCodeOverride
@@ -3413,9 +3398,9 @@ func (e *UnsupportedFeatureRequiredException) ErrorFault() smithy.ErrorFault {
 	return smithy.FaultClient
 }
 
-// The Context attribute that you specified for the InventoryItem isn't allowed for
-// this inventory type. You can only use the Context attribute with inventory types
-// like AWS:ComplianceItem.
+// The Context attribute that you specified for the InventoryItem isn't allowed
+// for this inventory type. You can only use the Context attribute with inventory
+// types like AWS:ComplianceItem .
 type UnsupportedInventoryItemContextException struct {
 	Message *string
 
@@ -3436,7 +3421,7 @@ func (e *UnsupportedInventoryItemContextException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *UnsupportedInventoryItemContextException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "UnsupportedInventoryItemContextException"
 	}
 	return *e.ErrorCodeOverride
@@ -3466,7 +3451,7 @@ func (e *UnsupportedInventorySchemaVersionException) ErrorMessage() string {
 	return *e.Message
 }
 func (e *UnsupportedInventorySchemaVersionException) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "UnsupportedInventorySchemaVersionException"
 	}
 	return *e.ErrorCodeOverride
@@ -3495,7 +3480,7 @@ func (e *UnsupportedOperatingSystem) ErrorMessage() string {
 	return *e.Message
 }
 func (e *UnsupportedOperatingSystem) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "UnsupportedOperatingSystem"
 	}
 	return *e.ErrorCodeOverride
@@ -3521,7 +3506,7 @@ func (e *UnsupportedParameterType) ErrorMessage() string {
 	return *e.Message
 }
 func (e *UnsupportedParameterType) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "UnsupportedParameterType"
 	}
 	return *e.ErrorCodeOverride
@@ -3548,7 +3533,7 @@ func (e *UnsupportedPlatformType) ErrorMessage() string {
 	return *e.Message
 }
 func (e *UnsupportedPlatformType) ErrorCode() string {
-	if e.ErrorCodeOverride == nil {
+	if e == nil || e.ErrorCodeOverride == nil {
 		return "UnsupportedPlatformType"
 	}
 	return *e.ErrorCodeOverride

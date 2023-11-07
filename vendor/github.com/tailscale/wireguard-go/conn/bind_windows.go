@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package conn
@@ -164,7 +164,7 @@ func (e *WinRingEndpoint) DstToBytes() []byte {
 func (e *WinRingEndpoint) DstToString() string {
 	switch e.family {
 	case windows.AF_INET:
-		netip.AddrPortFrom(netip.AddrFrom4(*(*[4]byte)(e.data[2:6])), binary.BigEndian.Uint16(e.data[0:2])).String()
+		return netip.AddrPortFrom(netip.AddrFrom4(*(*[4]byte)(e.data[2:6])), binary.BigEndian.Uint16(e.data[0:2])).String()
 	case windows.AF_INET6:
 		var zone string
 		if scope := *(*uint32)(unsafe.Pointer(&e.data[22])); scope > 0 {
@@ -321,6 +321,8 @@ func (bind *WinRingBind) Close() error {
 	return nil
 }
 
+// TODO: When all Binds handle IdealBatchSize, remove this dynamic function and
+// rename the IdealBatchSize constant to BatchSize.
 func (bind *WinRingBind) BatchSize() int {
 	// TODO: implement batching in and out of the ring
 	return 1
@@ -414,19 +416,19 @@ retry:
 	return n, &ep, nil
 }
 
-func (bind *WinRingBind) receiveIPv4(buffs [][]byte, sizes []int, eps []Endpoint) (int, error) {
+func (bind *WinRingBind) receiveIPv4(bufs [][]byte, sizes []int, eps []Endpoint) (int, error) {
 	bind.mu.RLock()
 	defer bind.mu.RUnlock()
-	n, ep, err := bind.v4.Receive(buffs[0], &bind.isOpen)
+	n, ep, err := bind.v4.Receive(bufs[0], &bind.isOpen)
 	sizes[0] = n
 	eps[0] = ep
 	return 1, err
 }
 
-func (bind *WinRingBind) receiveIPv6(buffs [][]byte, sizes []int, eps []Endpoint) (int, error) {
+func (bind *WinRingBind) receiveIPv6(bufs [][]byte, sizes []int, eps []Endpoint) (int, error) {
 	bind.mu.RLock()
 	defer bind.mu.RUnlock()
-	n, ep, err := bind.v6.Receive(buffs[0], &bind.isOpen)
+	n, ep, err := bind.v6.Receive(bufs[0], &bind.isOpen)
 	sizes[0] = n
 	eps[0] = ep
 	return 1, err
@@ -484,14 +486,14 @@ func (bind *afWinRingBind) Send(buf []byte, nend *WinRingEndpoint, isOpen *atomi
 	return winrio.SendEx(bind.rq, dataBuffer, 1, nil, addressBuffer, nil, nil, 0, 0)
 }
 
-func (bind *WinRingBind) Send(buffs [][]byte, endpoint Endpoint) error {
+func (bind *WinRingBind) Send(bufs [][]byte, endpoint Endpoint) error {
 	nend, ok := endpoint.(*WinRingEndpoint)
 	if !ok {
 		return ErrWrongEndpointType
 	}
 	bind.mu.RLock()
 	defer bind.mu.RUnlock()
-	for _, buf := range buffs {
+	for _, buf := range bufs {
 		switch nend.family {
 		case windows.AF_INET:
 			if bind.v4.blackhole {

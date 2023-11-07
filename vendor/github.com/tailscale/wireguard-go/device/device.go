@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT
  *
- * Copyright (C) 2017-2022 WireGuard LLC. All Rights Reserved.
+ * Copyright (C) 2017-2023 WireGuard LLC. All Rights Reserved.
  */
 
 package device
@@ -68,11 +68,11 @@ type Device struct {
 	cookieChecker CookieChecker
 
 	pool struct {
-		outboundElementsSlice *WaitPool
-		inboundElementsSlice  *WaitPool
-		messageBuffers        *WaitPool
-		inboundElements       *WaitPool
-		outboundElements      *WaitPool
+		inboundElementsContainer  *WaitPool
+		outboundElementsContainer *WaitPool
+		messageBuffers            *WaitPool
+		inboundElements           *WaitPool
+		outboundElements          *WaitPool
 	}
 
 	queue struct {
@@ -267,7 +267,7 @@ func (device *Device) SetPrivateKey(sk NoisePrivateKey) error {
 	expiredPeers := make([]*Peer, 0, len(device.peers.keyMap))
 	for _, peer := range device.peers.keyMap {
 		handshake := &peer.handshake
-		handshake.precomputedStaticStatic = device.staticIdentity.privateKey.sharedSecret(handshake.remoteStatic)
+		handshake.precomputedStaticStatic, _ = device.staticIdentity.privateKey.sharedSecret(handshake.remoteStatic)
 		expiredPeers = append(expiredPeers, peer)
 	}
 
@@ -330,11 +330,12 @@ func NewDevice(tunDevice tun.Device, bind conn.Bind, logger *Logger) *Device {
 // is the size used to construct memory pools, and is the allowed batch size for
 // the lifetime of the device.
 func (device *Device) BatchSize() int {
-	sz := device.net.bind.BatchSize()
-	if sz < device.tun.device.BatchSize() {
-		sz = device.tun.device.BatchSize()
+	size := device.net.bind.BatchSize()
+	dSize := device.tun.device.BatchSize()
+	if size < dSize {
+		size = dSize
 	}
-	return sz
+	return size
 }
 
 func (device *Device) LookupPeer(pk NoisePublicKey) *Peer {
@@ -367,6 +368,8 @@ func (device *Device) RemoveAllPeers() {
 }
 
 func (device *Device) Close() {
+	device.ipcMutex.Lock()
+	defer device.ipcMutex.Unlock()
 	device.state.Lock()
 	defer device.state.Unlock()
 	if device.isClosed() {
@@ -407,8 +410,10 @@ func (device *Device) SendKeepalivesToPeersWithCurrentKeypair() {
 
 	device.peers.RLock()
 	for _, peer := range device.peers.keyMap {
-		current := peer.keypairs.Current()
-		if current.created.Add(RejectAfterTime).Before(time.Now()) {
+		peer.keypairs.RLock()
+		sendKeepalive := peer.keypairs.current != nil && !peer.keypairs.current.created.Add(RejectAfterTime).Before(time.Now())
+		peer.keypairs.RUnlock()
+		if sendKeepalive {
 			peer.SendKeepalive()
 		}
 	}
@@ -522,8 +527,9 @@ func (device *Device) BindUpdate() error {
 	device.net.stopping.Add(len(recvFns))
 	device.queue.decryption.wg.Add(len(recvFns)) // each RoutineReceiveIncoming goroutine writes to device.queue.decryption
 	device.queue.handshake.wg.Add(len(recvFns))  // each RoutineReceiveIncoming goroutine writes to device.queue.handshake
+	batchSize := netc.bind.BatchSize()
 	for _, fn := range recvFns {
-		go device.RoutineReceiveIncoming(netc.bind.BatchSize(), fn)
+		go device.RoutineReceiveIncoming(batchSize, fn)
 	}
 
 	device.log.Verbosef("UDP bind has been updated")
