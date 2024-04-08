@@ -1,7 +1,6 @@
 package browser
 
 import (
-	_ "github.com/aaronland/go-http-server-tsnet"
 	_ "github.com/aaronland/gocloud-blob-s3"
 	_ "github.com/whosonfirst/go-reader-cachereader"
 	_ "github.com/whosonfirst/go-reader-findingaid"

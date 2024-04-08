@@ -4,10 +4,11 @@ package html
 import (
 	"context"
 	"fmt"
-	"github.com/sfomuseum/go-template/funcs"
 	"html/template"
 	"io"
 	"io/fs"
+
+	"github.com/sfomuseum/go-template/funcs"
 )
 
 // LoadTemplates loads HTML (.html) from 't_fs' with default functions assigned.
@@ -44,7 +45,7 @@ func LoadTemplatesExcluding(ctx context.Context, excluding []string, t_fs ...fs.
 			if err != nil {
 				return fmt.Errorf("Encountered an error walking %s, %w", path, err)
 			}
-			
+
 			r, err := f.Open(path)
 
 			if err != nil {
@@ -105,5 +106,7 @@ func TemplatesFuncMap() template.FuncMap {
 		"IsEven":           funcs.IsEven,
 		"IsOdd":            funcs.IsOdd,
 		"FormatStringTime": funcs.FormatStringTime,
+		"FormatUnixTime":   funcs.FormatUnixTime,
+		"GjsonGet":         funcs.GjsonGet,
 	}
 }

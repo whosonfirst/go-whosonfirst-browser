@@ -8,6 +8,10 @@ It uses [Bootstrap](https://getbootstrap.com/) for HTML layouts and [Leaflet](ht
 
 _This package used to be called `go-whosonfirst-static`. Now it is called `go-whosonfirst-browser.`_
 
+## Deprecation notice (April, 2024)
+
+This package has been deprecated. It will be replaced by the [go-whosonfirst-spelunker](https://github.com/whosonfirst?q=go-whosonfirst-spelunker&type=all&language=&sort=) packages. Once those packages have reached a point where they start to be versioned this package will be archived.
+
 ## Things this package is not
 
 ### This is not a replacement for the [Who's On First Spelunker](https://spelunker.whosonfirst.org/).
