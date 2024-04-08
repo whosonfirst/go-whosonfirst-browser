@@ -611,7 +611,7 @@ golang.org/x/crypto/openpgp/elgamal
 golang.org/x/crypto/openpgp/errors
 golang.org/x/crypto/openpgp/packet
 golang.org/x/crypto/openpgp/s2k
-# golang.org/x/image v0.0.0-20211028202545-6944b10bf410
+# golang.org/x/image v0.10.0
 ## explicit; go 1.12
 golang.org/x/image/colornames
 golang.org/x/image/math/fixed
